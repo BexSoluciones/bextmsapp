@@ -1,0 +1,3 @@
+class EnterpriseConfigRequest {
+  EnterpriseConfigRequest();
+}

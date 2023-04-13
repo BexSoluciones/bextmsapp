@@ -1,0 +1,86 @@
+import 'package:flutter/material.dart';
+
+abstract class AppTheme {
+  static ThemeData get light {
+    return ThemeData(
+      useMaterial3: true,
+      splashColor: Colors.transparent,
+      fontFamily: 'IBM',
+      colorScheme: const ColorScheme(
+        brightness: Brightness.light,
+        primary: Color(0xFFB72200),
+        onPrimary: Color(0xFFFFFFFF),
+        primaryContainer: Color(0xFFFFDAD3),
+        onPrimaryContainer: Color(0xFF3D0500),
+        secondary: Color(0xFF77574F),
+        onSecondary: Color(0xFFFFFFFF),
+        secondaryContainer: Color(0xFFFFDAD3),
+        onSecondaryContainer: Color(0xFF2C1510),
+        tertiary: Color(0xFF6E5D2E),
+        onTertiary: Color(0xFFFFFFFF),
+        tertiaryContainer: Color(0xFFF8E0A6),
+        onTertiaryContainer: Color(0xFF241A00),
+        error: Color(0xFFBA1A1A),
+        errorContainer: Color(0xFFFFDAD6),
+        onError: Color(0xFFFFFFFF),
+        onErrorContainer: Color(0xFF410002),
+        background: Color(0xFFFFFBFF),
+        onBackground: Color(0xFF201A19),
+        surface: Color(0xFFFFFBFF),
+        onSurface: Color(0xFF201A19),
+        surfaceVariant: Color(0xFFF5DDD9),
+        onSurfaceVariant: Color(0xFF534340),
+        outline: Color(0xFF85736F),
+        onInverseSurface: Color(0xFFFBEEEB),
+        inverseSurface: Color(0xFF362F2D),
+        inversePrimary: Color(0xFFFFB4A4),
+        shadow: Color(0xFF000000),
+        surfaceTint: Color(0xFFB72200),
+        outlineVariant: Color(0xFFD8C2BD),
+        scrim: Color(0xFF000000),
+      ),
+      // colorSchemeSeed: Colors.orange[700]
+    );
+  }
+
+  static ThemeData get dark {
+    return ThemeData(
+      useMaterial3: true,
+      splashColor: Colors.transparent,
+      fontFamily: 'IBM',
+      colorScheme: const ColorScheme(
+        brightness: Brightness.dark,
+        primary: Color(0xFFFFB695),
+        onPrimary: Color(0xFF571F00),
+        primaryContainer: Color(0xFF7B2F00),
+        onPrimaryContainer: Color(0xFFFFDBCC),
+        secondary: Color(0xFFE6BEAD),
+        onSecondary: Color(0xFF442A1F),
+        secondaryContainer: Color(0xFF5D4034),
+        onSecondaryContainer: Color(0xFFFFDBCC),
+        tertiary: Color(0xFFD1C88F),
+        onTertiary: Color(0xFF363106),
+        tertiaryContainer: Color(0xFF4E471B),
+        onTertiaryContainer: Color(0xFFEEE4A9),
+        error: Color(0xFFFFB4AB),
+        errorContainer: Color(0xFF93000A),
+        onError: Color(0xFF690005),
+        onErrorContainer: Color(0xFFFFDAD6),
+        background: Color(0xFF201A18),
+        onBackground: Color(0xFFEDE0DB),
+        surface: Color(0xFF201A18),
+        onSurface: Color(0xFFEDE0DB),
+        surfaceVariant: Color(0xFF52443D),
+        onSurfaceVariant: Color(0xFFD8C2BA),
+        outline: Color(0xFFA08D85),
+        onInverseSurface: Color(0xFF201A18),
+        inverseSurface: Color(0xFFEDE0DB),
+        inversePrimary: Color(0xFFA23F00),
+        shadow: Color(0xFF000000),
+        surfaceTint: Color(0xFFFFB695),
+        outlineVariant: Color(0xFF52443D),
+        scrim: Color(0xFF000000),
+      ),
+    );
+  }
+}

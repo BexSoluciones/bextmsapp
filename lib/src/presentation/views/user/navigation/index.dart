@@ -1,0 +1,260 @@
+import 'dart:async';
+import 'package:flutter/material.dart' hide Badge;
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:badges/badges.dart';
+import 'package:provider/provider.dart';
+
+//domain
+import '../../../../domain/models/enterprise_config.dart';
+
+//features
+//TODO:: change
+//provider
+import 'shared/state/download_provider.dart';
+
+//pages
+import 'pages/map/map_view.dart';
+import 'pages/stores/stores.dart';
+import 'pages/downloader/downloader.dart';
+import 'pages/downloading/downloading.dart';
+import 'pages/recovery/recovery.dart';
+import 'pages/settingsAndAbout/settings_and_about.dart';
+
+//services
+import '../../../../locator.dart';
+import '../../../../services/storage.dart';
+
+final LocalStorageService _storageService = locator<LocalStorageService>();
+
+class NavigationView extends StatefulWidget {
+  const NavigationView({Key? key, required this.workcode}) : super(key: key);
+  final String workcode;
+
+  @override
+  State<NavigationView> createState() => _NavigationScreenState();
+}
+
+class _NavigationScreenState extends State<NavigationView> {
+  final GlobalKey one = GlobalKey();
+  final GlobalKey two = GlobalKey();
+
+  late final PageController _pageController;
+  int currentPageIndex = 0;
+  bool extended = false;
+
+  List<Widget> get _pages => [
+        MapPage(
+            one: one,
+            workcode: widget.workcode,
+            enterpriseConfig: _storageService.getObject('config') != null
+                ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
+                : null),
+        const StoresPage(),
+        Consumer<DownloadProvider>(
+          builder: (context, provider, _) => provider.downloadProgress == null
+              ? DownloaderPage(
+                  enterpriseConfig: _storageService.getObject('config') != null
+                      ? EnterpriseConfig.fromMap(
+                          _storageService.getObject('config')!)
+                      : null)
+              : const DownloadingPage(),
+        ),
+        RecoveryPage(moveToDownloadPage: () => _onDestinationSelected(2)),
+        const SettingsAndAboutPage(),
+        // if (Platform.isWindows || Platform.isAndroid) const UpdatePage(),
+      ];
+
+  List<NavigationDestination> get _destinations => [
+        const NavigationDestination(
+          icon: Icon(Icons.map),
+          label: 'Map',
+        ),
+        const NavigationDestination(
+          icon: Icon(Icons.folder),
+          label: 'Stores',
+        ),
+        const NavigationDestination(
+          icon: Icon(Icons.download),
+          label: 'Download',
+        ),
+        NavigationDestination(
+          icon: StreamBuilder(
+            stream: FMTC.instance.rootDirectory.stats
+                .watchChanges()
+                .asBroadcastStream(),
+            builder: (context, _) => FutureBuilder<List<RecoveredRegion>>(
+              future: FMTC.instance.rootDirectory.recovery.failedRegions,
+              builder: (context, snapshot) => Badge(
+                position: BadgePosition.topEnd(top: -5, end: -6),
+                badgeAnimation: const BadgeAnimation.size(
+                  animationDuration: Duration(milliseconds: 100),
+                ),
+                showBadge: currentPageIndex != 3 &&
+                    (snapshot.data?.isNotEmpty ?? false),
+                child: const Icon(Icons.running_with_errors),
+              ),
+            ),
+          ),
+          label: 'Recover',
+        ),
+        const NavigationDestination(
+          icon: Icon(Icons.settings),
+          label: 'Settings',
+        ),
+      ];
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  void _onDestinationSelected(int index) {
+    setState(() => currentPageIndex = index);
+    _pageController.animateToPage(
+      currentPageIndex,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _pageController = PageController(initialPage: currentPageIndex);
+    // if (widget.damagedDatabaseDeleted) {
+    //   WidgetsBinding.instance.addPostFrameCallback(
+    //         (_) => ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(
+    //         content: Text('At least one corrupted database has been deleted.'),
+    //       ),
+    //     ),
+    //   );
+    // }
+
+    startNavigationScreen();
+  }
+
+  void startNavigationScreen() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _isFirstLaunch().then((result) {
+        if (result == null || result == false) {
+          ShowCaseWidget.of(context).startShowCase([one, two]);
+        }
+      });
+
+      // if (_storageService.getBool('${widget.workcode}-routing') == true) {
+      //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      //       backgroundColor: Colors.deepOrange,
+      //       content: Text(
+      //           'La nueva ruta se esta calculando por favor espere a que cargue',
+      //           style: TextStyle(color: Colors.white))));
+      // }
+    });
+  }
+
+  Future<bool?> _isFirstLaunch() async {
+    var isFirstLaunch = _storageService.getBool('navigation-is-init');
+    if (isFirstLaunch == null || isFirstLaunch == false) {
+      _storageService.setBool('navigation-is-init', true);
+    }
+    return isFirstLaunch;
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void onMapEvent(MapEvent mapEvent) {
+    if (mapEvent is! MapEventMove && mapEvent is! MapEventRotate) {
+      debugPrint(mapEvent.toString());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      bottomNavigationBar: size.width > 950
+          ? null
+          : NavigationBar(
+              backgroundColor:
+                  Theme.of(context).navigationBarTheme.backgroundColor,
+              onDestinationSelected: _onDestinationSelected,
+              selectedIndex: currentPageIndex,
+              destinations: _destinations,
+              labelBehavior: MediaQuery.of(context).size.width > 450
+                  ? null
+                  : NavigationDestinationLabelBehavior.alwaysHide,
+              height: 70,
+            ),
+      resizeToAvoidBottomInset: false,
+      body: Row(
+        children: [
+          if (MediaQuery.of(context).size.width > 950)
+            NavigationRail(
+              onDestinationSelected: _onDestinationSelected,
+              selectedIndex: currentPageIndex,
+              groupAlignment: 0,
+              extended: extended,
+              destinations: _destinations
+                  .map(
+                    (d) => NavigationRailDestination(
+                      icon: d.icon,
+                      label: Text(d.label),
+                      padding: const EdgeInsets.all(10),
+                    ),
+                  )
+                  .toList(),
+              leading: Row(
+                children: [
+                  AnimatedContainer(
+                    width: extended ? 205 : 0,
+                    duration: kThemeAnimationDuration,
+                    curve: Curves.easeInOut,
+                  ),
+                  IconButton(
+                    icon: AnimatedSwitcher(
+                      duration: kThemeAnimationDuration,
+                      switchInCurve: Curves.easeInOut,
+                      switchOutCurve: Curves.easeInOut,
+                      child: Icon(
+                        extended ? Icons.menu_open : Icons.menu,
+                        key: UniqueKey(),
+                      ),
+                    ),
+                    onPressed: () => setState(() => extended = !extended),
+                    tooltip: !extended ? 'Extend Menu' : 'Collapse Menu',
+                  ),
+                ],
+              ),
+            ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: MediaQuery.of(context).size.width > 950
+                    ? const Radius.circular(16)
+                    : Radius.zero,
+                bottomLeft: MediaQuery.of(context).size.width > 950
+                    ? const Radius.circular(16)
+                    : Radius.zero,
+              ),
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: _pages,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
