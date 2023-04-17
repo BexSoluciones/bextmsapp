@@ -3,7 +3,6 @@ import 'package:location_repository/src/model/current_location.dart';
 
 /// Failure model that implement error
 class CurrentLocationFailure implements Exception {
-
   /// instance of failure model
   CurrentLocationFailure({
     required this.error,
@@ -22,6 +21,7 @@ class LocationRepository {
     Location? location,
   }) : _location = location ?? Location();
   final Location _location;
+
   /// Function to get current location
   Future<CurrentUserLocationEntity> getCurrentLocation() async {
     final serviceEnabled = await _location.serviceEnabled();

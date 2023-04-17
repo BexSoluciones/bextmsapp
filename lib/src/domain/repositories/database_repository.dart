@@ -4,6 +4,7 @@ import '../models/work.dart';
 import '../models/summary.dart';
 import '../models/transaction.dart';
 import '../models/reason.dart';
+import '../models/history_order.dart';
 
 abstract class DatabaseRepository {
   //WORKS
@@ -53,4 +54,7 @@ abstract class DatabaseRepository {
   Future<int> updateProcessingQueue(ProcessingQueue processingQueue);
   Future<void> insertProcessingQueue(ProcessingQueue processingQueue);
   Future<void> emptyProcessingQueues();
+
+  //HISTORY ORDER
+  Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId);
 }

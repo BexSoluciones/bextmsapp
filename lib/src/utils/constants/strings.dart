@@ -19,6 +19,7 @@ const homeRoute = '/home';
 
 const workRoute = '/work';
 const confirmRoute = '/confirm-work';
+const historyRoute = '/historic';
 const navigationRoute = '/navigation';
 
 const summaryRoute = '/summary';

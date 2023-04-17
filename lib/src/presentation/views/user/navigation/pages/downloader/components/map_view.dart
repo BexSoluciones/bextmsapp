@@ -17,9 +17,8 @@ import '../../../../../../cubits/general/general_cubit.dart';
 //utils
 import '../../../../../../../utils/constants/enums.dart';
 
-import 'crosshairs.dart';
-
 //widgets
+import 'cross-hairs.dart';
 import '../../../../../../widgets/loading_indicator_widget.dart';
 
 class MapView extends StatefulWidget {

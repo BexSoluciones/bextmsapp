@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'work.dart';
+import 'different.dart';
+import 'list_order.dart';
 
-const String tableHistoryOrders = 'history_order';
+const String tableHistoryOrders = 'history_orders';
 
 class HistoryOrderFields {
   static final List<String> values = [
@@ -8,30 +11,35 @@ class HistoryOrderFields {
     workId,
     workcode,
     zoneId,
-    listorder,
-    likehood,
-    used
+    listOrder,
+    likelihood,
+    used,
+    works,
+    different
   ];
 
   static const String id = 'id';
   static const String workId = 'work_id';
   static const String workcode = 'workcode';
   static const String zoneId = 'zone_id';
-  static const String likehood = 'likehood';
+  static const String likelihood = 'likelihood';
   static const String used = 'used';
-  static const String listorder = 'list_order';
+  static const String listOrder = 'list_order';
+  static const String works = 'works';
+  static const String different = 'different';
 }
 
 class HistoryOrder {
   HistoryOrder(
       {this.id,
-        required this.workId,
         this.workcode,
+        required this.workId,
         required this.zoneId,
-        required this.listorder,
-        this.likehood,
-        this.used
-      });
+        required this.listOrder,
+        required this.works,
+        required this.different,
+        this.likelihood,
+        this.used});
 
   HistoryOrder copy({
     int? id,
@@ -41,10 +49,11 @@ class HistoryOrder {
           workId: workId,
           workcode: workcode,
           zoneId: zoneId,
-          listorder: listorder,
-          likehood: likehood,
-          used: used
-      );
+          listOrder: listOrder,
+          works: works,
+          different: different,
+          likelihood: likelihood,
+          used: used);
 
   // ignore: sort_constructors_first
   HistoryOrder.fromJson(Map<String, dynamic> json) {
@@ -52,79 +61,64 @@ class HistoryOrder {
     workId = json['work_id'] ?? 0;
     workcode = json['workcode'];
     zoneId = json['zone_id'] ?? 0;
-    likehood = json['likehood'] is int ? json['likehood'].toDouble() : json['likehood'];
-    used = json['used'] is int ? json['used'] == 1 ? true : false : json['used'];
+    likelihood = json['likelihood'] is int
+        ? json['likelihood'].toDouble()
+        : json['likelihood'];
+    used = json['used'] is int
+        ? json['used'] == 1
+        ? true
+        : false
+        : json['used'];
     if (json['list_order'] != null) {
       var listOrder = jsonDecode(json['list_order']);
-      listorder = [];
+      listOrder = [];
       listOrder.forEach((json) {
-        listorder?.add(WorkOrder.fromJson(json));
+        listOrder.add(ListOrder.fromJson(json));
+      });
+    }
+
+    if (json['works'] != null) {
+      var worksD = jsonDecode(json['works']);
+      works = [];
+      worksD.forEach((json) {
+        works.add(Work.fromJson(json));
+      });
+    }
+
+    if (json['different'] != null) {
+      var differentD = jsonDecode(json['different']);
+      different = [];
+      differentD.forEach((json) {
+        different.add(Different.fromJson(json));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
+    data['id'] = id;
     data['work_id'] = workId;
     data['workcode'] = workcode;
     data['zone_id'] = zoneId;
-    data['likehood'] = likehood;
-    data['used'] = used is bool ? used == true ? 1 : 0 : used;
-    data['list_order'] = jsonEncode(listorder);
+    data['likelihood'] = likelihood;
+    data['used'] = used is bool
+        ? used == true
+        ? 1
+        : 0
+        : used;
+    data['list_order'] = jsonEncode(listOrder);
+    data['works'] = jsonEncode(works);
+    data['different'] = jsonEncode(different);
     return data;
   }
 
   int? id;
-  int? workId;
+  late int workId;
   String? workcode;
   int? zoneId;
-  double? likehood;
+  double? likelihood;
   bool? used;
-  List<WorkOrder>? listorder;
-}
-
-class WorkOrder {
-  WorkOrder({
-    required this.id,
-    required this.customer,
-    this.address,
-    this.latitude,
-    this.longitude,
-    this.geometry,
-    required this.order});
-
-  WorkOrder.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    customer = json['customer'];
-    address = json['address'];
-    latitude = json['latitude'];
-    longitude = json['longitude'];
-    geometry = json['geometry'];
-    distance = json['distance'];
-    duration = json['duration'];
-    order = json['order'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final data = <String, dynamic>{};
-    data['id'] = id;
-    data['customer'] = customer;
-    data['address'] = address;
-    data['latitude'] = latitude;
-    data['longitude'] = longitude;
-    data['geometry'] = geometry;
-    data['distance'] = distance;
-    data['order'] = order;
-    return data;
-  }
-
-  int? id;
-  String? customer;
-  String? address;
-  String? latitude;
-  String? longitude;
-  String? geometry;
-  String? distance;
-  String? duration;
-  int? order;
+  late List<ListOrder> listOrder;
+  late List<Work> works;
+  late List<Different> different;
 }

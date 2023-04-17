@@ -193,19 +193,6 @@ class HelperFunctions {
     dir.deleteSync(recursive: true);
   }
 
-  // Future<void> launchWhatsApp(String numberphone, String message) async {
-  //   final link = WhatsAppUnilink(
-  //     phoneNumber: numberphone,
-  //     text: message,
-  //   );
-  //
-  //   if (await canLaunch(link.toString())) {
-  //     await launch(link.toString());
-  //   } else {
-  //     print('Could not launch WhatsApp');
-  //   }
-  // }
-
   Future<void> saveFirm(
       String folder,
       String fileName,
@@ -218,4 +205,6 @@ class HelperFunctions {
     File('$path/$folder/$fileName.png')
         .writeAsBytesSync(image.buffer.asInt8List());
   }
+
+
 }

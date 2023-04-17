@@ -14,11 +14,16 @@ class HistoryOrderDao {
     return histories;
   }
 
-  Future<List<HistoryOrder>> getAllLocations() async {
+  Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId) async {
     final db = await _appDatabase.streamDatabase;
-    final historyList = await db!.query(tableHistoryOrders);
+    final historyList = await db!.query(tableHistoryOrders,
+        where: 'workcode != ? AND zone_id = ?', whereArgs: [workcode, zoneId]);
     final histories = parseHistories(historyList);
-    return histories;
+    if (histories.isNotEmpty) {
+      return histories.first;
+    } else {
+      return null;
+    }
   }
 
   Future<int> insertHistory(HistoryOrder history) {
@@ -36,14 +41,3 @@ class HistoryOrderDao {
     return Future.value();
   }
 }
-
-
-
-
-
-
-
-
-
-
-

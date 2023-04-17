@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -7,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:provider/provider.dart';
 
 //blocs
 import '../../../../../blocs/location/location_bloc.dart';
@@ -16,6 +16,7 @@ import '../../../../../blocs/processing_queue/processing_queue_bloc.dart';
 
 //cubit
 import '../../../../../cubits/navigation/navigation_cubit.dart';
+import '../../../../../cubits/general/general_cubit.dart';
 
 //domain
 import '../../../../../../domain/models/enterprise_config.dart';
@@ -29,7 +30,6 @@ import '../../features/carousel_card.dart';
 //services
 import '../../../../../../locator.dart';
 import '../../../../../../services/navigation.dart';
-import '../../shared/state/general_provider.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
 
@@ -65,15 +65,14 @@ class _MapPageState extends State<MapPage> {
 
   @override
   void initState() {
-    locationBloc = BlocProvider.of<LocationBloc>(context);
-    locationBloc.add(GetLocation());
-
-    navigationCubit = BlocProvider.of<NavigationCubit>(context);
-    navigationCubit.getAllWorksByWorkcode(widget.workcode);
-
+    print('thrid block');
     networkCubit = BlocProvider.of<NetworkBloc>(context);
     networkCubit.add(NetworkObserve(
         processingQueueBloc: context.read<ProcessingQueueBloc>()));
+
+    print('second block');
+    navigationCubit = BlocProvider.of<NavigationCubit>(context);
+    navigationCubit.getAllWorksByWorkcode(widget.workcode);
 
     onZoomChanged.listen((event) {
       setState(() {
@@ -110,38 +109,16 @@ class _MapPageState extends State<MapPage> {
 
     return Scaffold(
         appBar: buildAppBar,
-        body: BlocBuilder<LocationBloc, LocationState>(
-
-          buildWhen: (previous, current) =>
-              current.status.isLoading ||
-              current.status.isError ||
-              current.status.isSuccess,
-          builder: (context, locationState) {
-            print(locationState.status);
-            if (locationState.status.isSuccess) {
-              return BlocBuilder<NavigationCubit, NavigationState>(
-                builder: (context, navigationState) {
-                  if (navigationState.runtimeType == NavigationLoading) {
-                    return const Center(child: CupertinoActivityIndicator());
-                  } else if (navigationState.runtimeType == NavigationSuccess ||
-                      navigationState.runtimeType == NavigationFailed) {
-                    return _buildBody(size, navigationState);
-                  } else {
-                    return const SizedBox();
-                  }
-                },
-              );
+        body: BlocBuilder<NavigationCubit, NavigationState>(
+          builder: (context, navigationState) {
+            if (navigationState.runtimeType == NavigationLoading) {
+              return const Center(child: CupertinoActivityIndicator());
+            } else if (navigationState.runtimeType == NavigationSuccess ||
+                navigationState.runtimeType == NavigationFailed) {
+              return _buildBody(size, navigationState);
+            } else {
+              return const SizedBox();
             }
-
-            if (locationState.status.isError) {
-              return LocationErrorWidget(
-                errorMessage: locationState.errorMessage,
-              );
-            }
-
-            return const Center(
-              child: CupertinoActivityIndicator(),
-            );
           },
         ),
         floatingActionButton: FloatingActionButton(
@@ -172,25 +149,26 @@ class _MapPageState extends State<MapPage> {
       );
 
   Widget _buildBody(Size size, state) {
-    return Consumer<GeneralProvider>(
-        builder: (context, provider, _) => FutureBuilder<Map<String, String>?>(
-            future: provider.currentStore == null
+    return BlocBuilder<GeneralCubit, GeneralState>(
+        builder: (context, generalState) => FutureBuilder<Map<String, String>?>(
+            future: generalState.currentStore == null
                 ? Future.sync(() => {})
-                : FMTC.instance(provider.currentStore!).metadata.readAsync,
+                : FMTC.instance(generalState.currentStore!).metadata.readAsync,
             builder: (context, metadata) {
               if (!metadata.hasData ||
                   metadata.data == null ||
-                  (provider.currentStore != null && metadata.data!.isEmpty)) {
+                  (generalState.currentStore != null &&
+                      metadata.data!.isEmpty)) {
                 return const LoadingIndicator(
                   message:
                       'Loading Settings...\n\nSeeing this screen for a long time?\nThere may be a misconfiguration of the\nstore. Try disabling caching and deleting\n faulty stores.',
                 );
               }
 
-              final String urlTemplate =
-                  provider.currentStore != null && metadata.data != null
-                      ? metadata.data!['sourceURL']!
-                      : 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}@2x?access_token={accessToken}';
+              final String urlTemplate = generalState.currentStore != null &&
+                      metadata.data != null
+                  ? metadata.data!['sourceURL']!
+                  : 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}@2x?access_token={accessToken}';
 
               return BlocBuilder<NavigationCubit, NavigationState>(
                   builder: (context, state) => SingleChildScrollView(
@@ -202,14 +180,29 @@ class _MapPageState extends State<MapPage> {
                                   builder: (context, networkState) {
                                 switch (networkState.runtimeType) {
                                   case NetworkInitial:
-                                    return _buildBodyNetworkSuccess(size, state,
-                                        true, urlTemplate, provider, metadata);
+                                    return _buildBodyNetworkSuccess(
+                                        size,
+                                        state,
+                                        true,
+                                        urlTemplate,
+                                        generalState,
+                                        metadata);
                                   case NetworkFailure:
-                                    return _buildBodyNetworkSuccess(size, state,
-                                        true, urlTemplate, provider, metadata);
+                                    return _buildBodyNetworkSuccess(
+                                        size,
+                                        state,
+                                        true,
+                                        urlTemplate,
+                                        generalState,
+                                        metadata);
                                   case NetworkSuccess:
-                                    return _buildBodyNetworkSuccess(size, state,
-                                        false, urlTemplate, provider, metadata);
+                                    return _buildBodyNetworkSuccess(
+                                        size,
+                                        state,
+                                        false,
+                                        urlTemplate,
+                                        generalState,
+                                        metadata);
                                   default:
                                     return const SizedBox();
                                 }
@@ -217,8 +210,8 @@ class _MapPageState extends State<MapPage> {
             }));
   }
 
-  Widget _buildBodyNetworkSuccess(
-      Size size, state, bool offline, String urlTemplate, provider, metadata) {
+  Widget _buildBodyNetworkSuccess(Size size, state, bool offline,
+      String urlTemplate, generalState, metadata) {
     return Stack(
       children: [
         state.works.isNotEmpty
@@ -267,10 +260,8 @@ class _MapPageState extends State<MapPage> {
                             ? widget.enterpriseConfig!.mapbox!
                             : 'sk.eyJ1IjoiYmV4aXRhY29sMiIsImEiOiJjbDVnc3ltaGYwMm16M21wZ21rMXg1OWd6In0.Dwtkt3r6itc0gCXDQ4CVxg',
                       },
-                      tileProvider: provider.currentStore != null
-                          ? FMTC
-                              .instance(provider.currentStore!)
-                              .getTileProvider(
+                      tileProvider: generalState.currentStore != null
+                          ? FMTC.instance(state.currentStore!).getTileProvider(
                                 FMTCTileProviderSettings(
                                   behavior: CacheBehavior.values
                                       .byName(metadata.data!['behaviour']!),

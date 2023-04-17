@@ -8,6 +8,7 @@ import '../../domain/models/transaction.dart';
 import '../../domain/models/transaction_summary.dart';
 import '../../domain/models/reason.dart';
 import '../../domain/models/processing_queue.dart';
+import '../../domain/models/history_order.dart';
 
 class DatabaseRepositoryImpl implements DatabaseRepository {
   final AppDatabase _appDatabase;
@@ -217,6 +218,12 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyProcessingQueues() async {
     return _appDatabase.processingQueueDao.emptyProcessingQueue();
+  }
+
+  //HISTORY ORDER
+  @override
+  Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId) async {
+    return _appDatabase.historyOrderDao.getHistoryOrder(workcode, zoneId);
   }
 
   // initialize and close methods go here

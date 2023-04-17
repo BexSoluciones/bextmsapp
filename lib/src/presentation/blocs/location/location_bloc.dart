@@ -21,8 +21,6 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
 
       var currentLocation = await locationRepository.getCurrentLocation();
 
-      print(currentLocation);
-
       emit(
         state.copyWith(
           currentUserLocation: currentLocation,
