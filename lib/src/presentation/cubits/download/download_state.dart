@@ -1,11 +1,11 @@
 part of 'download_cubit.dart';
 
 class DownloadState extends Equatable {
-  final RegionMode? regionMode;
+  RegionMode? regionMode;
   final BaseRegion? region;
-  final int? regionTiles;
-  final int minZoom;
-  final int maxZoom;
+  int? regionTiles;
+  int minZoom;
+  int maxZoom;
   StoreDirectory? selectedStore;
   final StreamController<void> manualPolygonRecalcTrigger = StreamController.broadcast();
   Stream<DownloadProgress>? downloadProgress;

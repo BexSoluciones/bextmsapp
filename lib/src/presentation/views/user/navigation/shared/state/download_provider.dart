@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
-import '../vars/region_mode.dart';
+//utils
+import '../../../../../../utils/constants/enums.dart';
 
 class DownloadProvider extends ChangeNotifier {
   RegionMode _regionMode = RegionMode.square;

@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 //cubit
 import '../../../../../../cubits/general/general_cubit.dart';
 
-import '../../../shared/vars/size_formatter.dart';
+//utils
+import '../../../../../../../utils/extensions/size_formatter_extension.dart';
+
 import '../../../features/store_editor.dart';
 import 'stat_display.dart';
 

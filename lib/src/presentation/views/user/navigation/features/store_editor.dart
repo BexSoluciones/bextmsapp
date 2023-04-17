@@ -1,14 +1,17 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:validators/validators.dart' as validators;
 
+//cubit
+import '../../../../cubits/download/download_cubit.dart';
+import '../../../../cubits/general/general_cubit.dart';
 
-import '../shared/state/download_provider.dart';
-import '../shared/state/general_provider.dart';
+
 import '../components/header.dart';
 
 //widgets
@@ -47,8 +50,8 @@ class _StoreEditorPopupState extends State<StoreEditorPopup> {
   }
 
   @override
-  Widget build(BuildContext context) => Consumer<DownloadProvider>(
-    builder: (context, downloadProvider, _) => WillPopScope(
+  Widget build(BuildContext context) => BlocBuilder<DownloadCubit, DownloadState>(
+    builder: (context, state) => WillPopScope(
       onWillPop: () async {
         scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('Changes not saved')),
@@ -65,8 +68,8 @@ class _StoreEditorPopupState extends State<StoreEditorPopup> {
           cacheModeValue: _cacheModeValue,
           context: context,
         ),
-        body: Consumer<GeneralProvider>(
-          builder: (context, provider, _) => Padding(
+        body: BlocBuilder<GeneralCubit, GeneralState>(
+          builder: (context, state) => Padding(
             padding: const EdgeInsets.all(12),
             child: FutureBuilder<Map<String, String>?>(
               future: widget.existingStoreName == null

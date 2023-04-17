@@ -9,7 +9,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:path/path.dart' as p;
-import 'package:provider/provider.dart';
 
 //plugins
 import 'plugins/index.dart';
@@ -38,15 +37,14 @@ import 'src/presentation/cubits/respawn/respawn_cubit.dart';
 import 'src/presentation/cubits/collection/collection_cubit.dart';
 import 'src/presentation/cubits/database/database_cubit.dart';
 import 'src/presentation/cubits/navigation/navigation_cubit.dart';
+import 'src/presentation/cubits/general/general_cubit.dart';
+import 'src/presentation/cubits/download/download_cubit.dart';
 
 //blocs
 import 'src/presentation/blocs/network/network_bloc.dart';
 import 'src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 import 'src/presentation/blocs/location/location_bloc.dart';
 
-//TODO:: refactor provider to cubit
-import 'src/presentation/views/user/navigation/shared/state/download_provider.dart';
-import 'src/presentation/views/user/navigation/shared/state/general_provider.dart';
 
 //utils
 import 'src/utils/constants/strings.dart';
@@ -249,17 +247,14 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => DatabaseCubit(locator<ApiRepository>()),
           ),
+          BlocProvider(
+            create: (context) => GeneralCubit(),
+          ),
+          BlocProvider(
+            create: (context) => DownloadCubit(),
+          ),
         ],
-        child: MultiProvider(
-            providers: [
-              ChangeNotifierProvider<GeneralProvider>(
-                create: (context) => GeneralProvider(),
-              ),
-              ChangeNotifierProvider<DownloadProvider>(
-                create: (context) => DownloadProvider(),
-              ),
-            ],
-            child: BlocProvider(
+        child: BlocProvider(
                 create: (context) => ThemeBloc(),
                 child: BlocBuilder<ThemeBloc, ThemeState>(
                     builder: (context, state) {
@@ -286,6 +281,6 @@ class MyApp extends StatelessWidget {
                         onGenerateRoute: router.generateRoute,
                       ),
                   );
-                }))));
+                })));
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
-import '../../../shared/vars/size_formatter.dart';
+//utils
+import '../../../../../../../utils/extensions/size_formatter_extension.dart';
+
 import 'stat_display.dart';
 import 'tile_image.dart';
 

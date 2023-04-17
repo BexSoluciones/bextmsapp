@@ -1,18 +1,17 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:badges/badges.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+//cubit
+import '../../../cubits/download/download_cubit.dart';
 
 //domain
 import '../../../../domain/models/enterprise_config.dart';
-
-//features
-//TODO:: change
-//provider
-import 'shared/state/download_provider.dart';
 
 //pages
 import 'pages/map/map_view.dart';
@@ -52,8 +51,8 @@ class _NavigationScreenState extends State<NavigationView> {
                 ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
                 : null),
         const StoresPage(),
-        Consumer<DownloadProvider>(
-          builder: (context, provider, _) => provider.downloadProgress == null
+        BlocBuilder<DownloadCubit, DownloadState>(
+          builder: (context, state) => state.downloadProgress == null
               ? DownloaderPage(
                   enterpriseConfig: _storageService.getObject('config') != null
                       ? EnterpriseConfig.fromMap(
