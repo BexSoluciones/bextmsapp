@@ -1,0 +1,3 @@
+class LogoutRequest {
+  LogoutRequest();
+}

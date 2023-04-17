@@ -69,7 +69,6 @@ class SubItemWorkState extends State<SubItemWork> {
                   ),
                   title: Text(
                     widget.work.customer!,
-                    // textScaleFactor: textScaleFactor(context),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 16),
@@ -80,7 +79,6 @@ class SubItemWorkState extends State<SubItemWork> {
                       Flexible(
                           child: Text(
                         widget.work.address!,
-                        // textScaleFactor: textScaleFactor(context),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 14),
@@ -89,7 +87,6 @@ class SubItemWorkState extends State<SubItemWork> {
                         children: [
                           Icon(Icons.move_to_inbox, color: Colors.brown[300]),
                           Text(widget.work.count.toString(),
-                              // textScaleFactor: textScaleFactor(context),
                               style: const TextStyle(fontSize: 14))
                         ],
                       )

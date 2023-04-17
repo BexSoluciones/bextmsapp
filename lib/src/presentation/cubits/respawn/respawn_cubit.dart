@@ -46,8 +46,8 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
         workcode: arguments.work.workcode,
         orderNumber: arguments.orderNumber,
         operativeCenter: arguments.operativeCenter,
-        status: 'reject',
-        firm: null);
+        status: 'respawn',
+    );
 
     currentLocation = await _locationRepository.getCurrentLocation();
 

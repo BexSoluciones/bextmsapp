@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../shared/state/download_provider.dart';
+//cubit
+import '../../../..//cubits/download/download_cubit.dart';
 
 class BufferingConfiguration extends StatelessWidget {
   const BufferingConfiguration({super.key});
 
   @override
-  Widget build(BuildContext context) => Consumer<DownloadProvider>(
-    builder: (context, provider, _) => Column(
+  Widget build(BuildContext context) => BlocBuilder<DownloadCubit, DownloadState>(
+    bloc: context.read<DownloadCubit>(),
+    builder: (context, state) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('BUFFERING CONFIGURATION'),
         const SizedBox(height: 15),
-        if (provider.regionTiles == null)
+        if (state.regionTiles == null)
           const CircularProgressIndicator()
         else ...[
           Column(
@@ -39,39 +41,39 @@ class BufferingConfiguration extends StatelessWidget {
                         icon: Icon(Icons.storage_rounded),
                       ),
                     ],
-                    selected: {provider.bufferMode},
-                    onSelectionChanged: (s) => provider.bufferMode = s.single,
+                    selected: {state.bufferMode},
+                    onSelectionChanged: (s) => state.bufferMode = s.single,
                   ),
                 ],
               ),
-              provider.bufferMode == DownloadBufferMode.disabled
+              state.bufferMode == DownloadBufferMode.disabled
                   ? const SizedBox.shrink()
                   : Text(
-                provider.bufferMode == DownloadBufferMode.tiles &&
-                    provider.bufferingAmount >=
-                        provider.regionTiles!
+                state.bufferMode == DownloadBufferMode.tiles &&
+                    state.bufferingAmount >=
+                        state.regionTiles!
                     ? 'Write Once'
-                    : '${provider.bufferingAmount} ${provider.bufferMode == DownloadBufferMode.tiles ? 'tiles' : 'kB'}',
+                    : '${state.bufferingAmount} ${state.bufferMode == DownloadBufferMode.tiles ? 'tiles' : 'kB'}',
               ),
             ],
           ),
           const SizedBox(height: 5),
-          provider.bufferMode == DownloadBufferMode.disabled
+          state.bufferMode == DownloadBufferMode.disabled
               ? const Slider(value: 0.5, onChanged: null)
               : Slider(
-            value: provider.bufferMode == DownloadBufferMode.tiles
-                ? provider.bufferingAmount
-                .clamp(10, provider.regionTiles!)
+            value: state.bufferMode == DownloadBufferMode.tiles
+                ? state.bufferingAmount
+                .clamp(10, state.regionTiles!)
                 .roundToDouble()
-                : provider.bufferingAmount.roundToDouble(),
-            min: provider.bufferMode == DownloadBufferMode.tiles
+                : state.bufferingAmount.roundToDouble(),
+            min: state.bufferMode == DownloadBufferMode.tiles
                 ? 10
                 : 500,
-            max: provider.bufferMode == DownloadBufferMode.tiles
-                ? provider.regionTiles!.toDouble()
+            max: state.bufferMode == DownloadBufferMode.tiles
+                ? state.regionTiles!.toDouble()
                 : 10000,
             onChanged: (value) =>
-            provider.bufferingAmount = value.round(),
+            state.bufferingAmount = value.round(),
           ),
         ],
       ],

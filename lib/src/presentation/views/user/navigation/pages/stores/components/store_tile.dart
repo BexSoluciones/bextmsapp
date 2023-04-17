@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:fmtc_plus_sharing/fmtc_plus_sharing.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../shared/state/general_provider.dart';
+//cubit
+import '../../../../../../cubits/general/general_cubit.dart';
+
 import '../../../shared/vars/size_formatter.dart';
 import '../../../features/store_editor.dart';
 import 'stat_display.dart';
@@ -106,28 +108,9 @@ class _StoreTileState extends State<StoreTile> {
       );
 
   @override
-  Widget build(BuildContext context) => Consumer<GeneralProvider>(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            FutureBuilder<Image?>(
-              future: _image,
-              builder: (context, snapshot) => snapshot.data == null
-                  ? const SizedBox(
-                      height: 125,
-                      width: 125,
-                      child: Icon(Icons.help_outline, size: 36),
-                    )
-                  : snapshot.data!,
-            ),
-            if (MediaQuery.of(context).size.width > 675)
-              ...stats
-            else
-              Column(children: stats),
-          ],
-        ),
-        builder: (context, provider, statistics) {
-          final bool isCurrentStore = provider.currentStore == widget.storeName;
+  Widget build(BuildContext context) => BlocBuilder<GeneralCubit, GeneralState>(
+        builder: (context, state) {
+          final bool isCurrentStore = state.currentStore == widget.storeName;
 
           return ExpansionTile(
             title: Text(
@@ -156,7 +139,25 @@ class _StoreTileState extends State<StoreTile> {
                   child: _store.manage.ready
                       ? Column(
                           children: [
-                            statistics!,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                FutureBuilder<Image?>(
+                                  future: _image,
+                                  builder: (context, snapshot) => snapshot.data == null
+                                      ? const SizedBox(
+                                    height: 125,
+                                    width: 125,
+                                    child: Icon(Icons.help_outline, size: 36),
+                                  )
+                                      : snapshot.data!,
+                                ),
+                                if (MediaQuery.of(context).size.width > 675)
+                                  ...stats
+                                else
+                                  Column(children: stats),
+                              ],
+                            ),
                             const SizedBox(height: 15),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -256,9 +257,8 @@ class _StoreTileState extends State<StoreTile> {
                                   onPressed: isCurrentStore
                                       ? null
                                       : () {
-                                          provider
-                                            ..currentStore = widget.storeName
-                                            ..resetMap();
+                                          state.currentStore = widget.storeName;
+                                          BlocProvider.of<GeneralCubit>(context).resetMap();
                                         },
                                 ),
                               ],

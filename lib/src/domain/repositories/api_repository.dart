@@ -6,6 +6,9 @@ import '../models/responses/enterprise_response.dart';
 import '../models/requests/login_request.dart';
 import '../models/responses/login_response.dart';
 
+import '../models/requests/logout_request.dart';
+import '../models/responses/logout_response.dart';
+
 import '../models/requests/work_request.dart';
 import '../models/responses/work_response.dart';
 
@@ -40,6 +43,10 @@ abstract class ApiRepository {
 
   Future<DataState<LoginResponse>> login({
     required LoginRequest request,
+  });
+
+  Future<DataState<LogoutResponse>> logout({
+    required LogoutRequest request,
   });
 
   Future<DataState<WorkResponse>> works({

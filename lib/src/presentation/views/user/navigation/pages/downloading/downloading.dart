@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../shared/state/download_provider.dart';
+//cubit
+import '../../../../../cubits/download/download_cubit.dart';
+
+
 import 'components/header.dart';
 import 'components/horizontal_layout.dart';
 import 'components/vertical_layout.dart';
@@ -28,19 +31,16 @@ class _DownloadingPageState extends State<DownloadingPage> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(6),
-                    child: Consumer<DownloadProvider>(
-                      builder: (context, provider, _) =>
+                    child: BlocBuilder<DownloadCubit, DownloadState>(
+                      builder: (context, state) =>
                           StreamBuilder<DownloadProgress>(
-                        stream: provider.downloadProgress,
+                        stream: state.downloadProgress,
                         initialData: DownloadProgress.empty(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.done) {
                             WidgetsBinding.instance.addPostFrameCallback(
-                              (_) => provider.setDownloadProgress(
-                                null,
-                                notify: false,
-                              ),
+                              (_) => state.downloadProgress = null,
                             );
                           }
 

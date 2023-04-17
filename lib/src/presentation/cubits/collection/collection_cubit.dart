@@ -79,12 +79,9 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   }
 
   Future<void> confirmTransaction(InventoryArgument arguments, paymentEfectyController, paymentTransferController) async {
-    print(isBusy);
     if (isBusy) return;
 
     await run(() async {
-
-      print('paso a crear la transaccion');
 
       emit(const CollectionLoading());
 
@@ -98,8 +95,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         firm = base64Encode(base64Firm);
       }
 
-      print('1');
-
       var images = await helperFunctions.getImages(arguments.orderNumber);
       var imagesServer = <String>[];
       if (images.isNotEmpty) {
@@ -110,15 +105,13 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         }
       }
 
-      print('2');
-
       var totalSummary = await _databaseRepository.getTotalSummaries(arguments.work.id!, arguments.orderNumber);
 
       var payments = <Payment>[];
 
       if (paymentEfectyController.text.isNotEmpty) {
         payments.add(Payment(
-          method: 'efecty',
+          method: 'cash',
           paid: paymentEfectyController.text,
         ));
       }
@@ -161,8 +154,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             createdAt: now(),
             updatedAt: now());
 
-        _processingQueueBloc
-            .add(ProcessingQueueAdd(processingQueue: processingQueue));
+        _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue));
 
         if (status == 'partial') {
           await Future.forEach(arguments.summaries!, (summary) async {
@@ -204,8 +196,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
         var validateTx =
             await _databaseRepository.validateTransaction(arguments.work.id!);
-
-        print('4');
 
         if (validateTx == false) {
           await _navigationService.goTo(summaryRoute,

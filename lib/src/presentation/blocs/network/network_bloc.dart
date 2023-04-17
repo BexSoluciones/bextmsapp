@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+//blocs
 import '../processing_queue/processing_queue_bloc.dart';
 
 part 'network_event.dart';

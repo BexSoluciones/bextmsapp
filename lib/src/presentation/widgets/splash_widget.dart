@@ -3,9 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 //cubits
 import '../blocs/splash/splash_bloc.dart';
-import '../blocs/splash/splash_event.dart';
 
-//contansts
+//constants
 import '../../utils/constants/colors.dart';
 
 class SplashScreenWidget extends StatefulWidget {

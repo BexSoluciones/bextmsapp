@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../shared/state/general_provider.dart';
+//cubit
+import '../../../../../../cubits/general/general_cubit.dart';
 
 class Header extends StatelessWidget {
   const Header({
@@ -18,12 +19,12 @@ class Header extends StatelessWidget {
                 const Text(
                   'Stores',
                 ),
-                Consumer<GeneralProvider>(
-                  builder: (context, provider, _) =>
-                      provider.currentStore == null
+                BlocBuilder<GeneralCubit, GeneralState>(
+                  builder: (context, state) =>
+                      state.currentStore == null
                           ? const Text('Caching Disabled')
                           : Text(
-                              'Current Store: ${provider.currentStore}',
+                              'Current Store: ${state.currentStore}',
                               overflow: TextOverflow.fade,
                               softWrap: false,
                             ),
@@ -32,17 +33,15 @@ class Header extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 15),
-          Consumer<GeneralProvider>(
-            child: const Icon(Icons.cancel),
-            builder: (context, provider, child) => IconButton(
-              icon: child!,
+          BlocBuilder<GeneralCubit, GeneralState>(
+            builder: (context, state) => IconButton(
+              icon: const Icon(Icons.cancel),
               tooltip: 'Disable Caching',
-              onPressed: provider.currentStore == null
+              onPressed: state.currentStore == null
                   ? null
                   : () {
-                      provider
-                        ..currentStore = null
-                        ..resetMap();
+                      state.currentStore = null;
+                      BlocProvider.of<GeneralCubit>(context).resetMap();
                     },
             ),
           ),

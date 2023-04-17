@@ -1,23 +1,24 @@
 part of 'general_cubit.dart';
 
 class GeneralState extends Equatable {
-  final String? currentStore;
-  final String? error;
+  String? currentStore;
+  StreamController<void>? resetController = StreamController.broadcast();
+  String? error;
 
-  const GeneralState({this.currentStore, this.error});
+  GeneralState({this.currentStore, this.resetController, this.error});
 
   @override
-  List<Object?> get props => [currentStore, error];
+  List<Object?> get props => [currentStore, resetController, error];
 }
 
 class GeneralLoading extends GeneralState {
-  const GeneralLoading();
+  GeneralLoading();
 }
 
 class GeneralSuccess extends GeneralState {
-  const GeneralSuccess({super.currentStore});
+  GeneralSuccess({super.currentStore, super.resetController});
 }
 
 class GeneralFailed extends GeneralState {
-  const GeneralFailed({super.error});
+  GeneralFailed({super.error});
 }

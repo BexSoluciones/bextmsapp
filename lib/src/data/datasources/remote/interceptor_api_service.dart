@@ -37,6 +37,8 @@ class Logging extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
+
+    print(response.statusCode);
     if (kDebugMode) {
       print(
         'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',

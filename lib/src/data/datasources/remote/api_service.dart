@@ -16,6 +16,7 @@ import 'interceptor_api_service.dart';
 //response
 import '../../../domain/models/responses/enterprise_response.dart';
 import '../../../domain/models/responses/login_response.dart';
+import '../../../domain/models/responses/logout_response.dart';
 import '../../../domain/models/responses/work_response.dart';
 import '../../../domain/models/responses/database_response.dart';
 import '../../../domain/models/responses/enterprise_config_response.dart';
@@ -145,6 +146,36 @@ class ApiService {
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = LoginResponse(login: Login.fromMap(result.data!));
+
+    return Response(
+        data: value,
+        requestOptions: result.requestOptions,
+        statusCode: result.statusCode,
+        statusMessage: result.statusMessage,
+        isRedirect: result.isRedirect,
+        redirects: result.redirects,
+        extra: result.extra,
+        headers: result.headers);
+  }
+
+  Future<Response<LogoutResponse>> logout() async {
+
+    final headers = <String, dynamic>{
+      HttpHeaders.contentTypeHeader: 'application/json'
+    };
+
+    final result = await dio.fetch<Map<String, dynamic>>(
+        _setStreamType<Response<LogoutResponse>>(Options(
+          method: 'POST',
+          headers: headers,
+        )
+            .compose(
+          dio.options,
+          '/auth/logout',
+        )
+            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+
+    final value = LogoutResponse(message: result.data!['message']);
 
     return Response(
         data: value,
@@ -430,8 +461,10 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-
     final data = transaction.toJson();
+
+    print('**************');
+    print(data);
 
     final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
         Options(

@@ -6,14 +6,14 @@ class DownloadState extends Equatable {
   final int? regionTiles;
   final int minZoom;
   final int maxZoom;
-  final StoreDirectory? selectedStore;
+  StoreDirectory? selectedStore;
   final StreamController<void> manualPolygonRecalcTrigger = StreamController.broadcast();
-  final Stream<DownloadProgress>? downloadProgress;
-  final bool preventRedownload;
-  final bool seaTileRemoval;
-  final bool disableRecovery;
-  final DownloadBufferMode bufferMode;
-  final int bufferingAmount;
+  Stream<DownloadProgress>? downloadProgress;
+  bool preventRedownload;
+  bool seaTileRemoval;
+  bool disableRecovery;
+  DownloadBufferMode bufferMode;
+  int bufferingAmount;
 
   final String? error;
 

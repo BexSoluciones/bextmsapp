@@ -4,12 +4,12 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
 //utils
-import '../../../utils/constants/enums.dart';
+import 'package:bexdeliveries/src/utils/constants/enums.dart';
 
 part 'download_state.dart';
 
-class DownloadBloc extends Cubit<DownloadState> {
-  DownloadBloc() : super(DownloadLoading());
+class DownloadCubit extends Cubit<DownloadState> {
+  DownloadCubit() : super(DownloadLoading());
 
   RegionMode? get regionMode => state.regionMode;
 
@@ -77,14 +77,12 @@ class DownloadBloc extends Cubit<DownloadState> {
   }
 
   DownloadBufferMode get bufferMode => state.bufferMode;
-
   set bufferMode(DownloadBufferMode newMode) {
     bufferMode = newMode;
     bufferingAmount = newMode == DownloadBufferMode.tiles ? 500 : 5000;
   }
 
   int get bufferingAmount => state.bufferingAmount;
-
   set bufferingAmount(int newNum) {
     bufferingAmount = newNum;
   }

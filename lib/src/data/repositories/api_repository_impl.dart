@@ -4,6 +4,9 @@ import '../../utils/resources/data_state.dart';
 import '../../domain/models/requests/login_request.dart';
 import '../../domain/models/responses/login_response.dart';
 
+import '../../domain/models/requests/logout_request.dart';
+import '../../domain/models/responses/logout_response.dart';
+
 import '../../domain/models/requests/enterprise_request.dart';
 import '../../domain/models/responses/enterprise_response.dart';
 
@@ -76,6 +79,15 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     return getStateOf<LoginResponse>(
       request: () => _apiService.login(
           username: request.username, password: request.password),
+    );
+  }
+
+  @override
+  Future<DataState<LogoutResponse>> logout({
+    required LogoutRequest request,
+  }) {
+    return getStateOf<LogoutResponse>(
+      request: () => _apiService.logout(),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/src/domain/models/requests/logout_request.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //utils
@@ -351,12 +352,20 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
           break;
         case 'ASJBVKJDFS':
           try {
-            var body = jsonDecode(queue.body);
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
 
+            var response = await _apiRepository.logout(request: LogoutRequest());
 
+            if(response is DataSuccess){
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+
+            await _databaseRepository.updateProcessingQueue(queue);
 
           } catch (e) {
             queue.task = 'error';

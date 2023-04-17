@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../shared/state/download_provider.dart';
-import '../../../shared/state/general_provider.dart';
+//cubit
+import '../../../../../../cubits/download/download_cubit.dart';
+import '../../../../../../cubits/general/general_cubit.dart';
+
 import 'min_max_zoom_controller_popup.dart';
 import 'shape_controller_popup.dart';
 
@@ -21,8 +23,8 @@ class Header extends StatelessWidget {
               const Text(
                 'Downloader',
               ),
-              Consumer<GeneralProvider>(
-                builder: (context, provider, _) => provider.currentStore == null
+              BlocBuilder<GeneralCubit, GeneralState>(
+                builder: (context, state) => state.currentStore == null
                     ? const SizedBox.shrink()
                     : const Text(
                         'Existing tiles will appear in red',
@@ -39,7 +41,7 @@ class Header extends StatelessWidget {
               isScrollControlled: true,
               builder: (_) => const MinMaxZoomControllerPopup(),
             ).then(
-              (_) => Provider.of<DownloadProvider>(context, listen: false)
+              (_) => BlocProvider.of<DownloadCubit>(context, listen: false)
                   .triggerManualPolygonRecalc(),
             ),
             icon: const Icon(Icons.zoom_in),
@@ -51,7 +53,7 @@ class Header extends StatelessWidget {
               isScrollControlled: true,
               builder: (_) => const ShapeControllerPopup(),
             ).then(
-              (_) => Provider.of<DownloadProvider>(context, listen: false)
+              (_) => BlocProvider.of<DownloadCubit>(context, listen: false)
                   .triggerManualPolygonRecalc(),
             ),
             icon: const Icon(Icons.select_all),

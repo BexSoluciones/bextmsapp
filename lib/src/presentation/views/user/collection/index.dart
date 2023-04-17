@@ -352,17 +352,10 @@ class CollectionViewState extends State<CollectionView>
                       widget: const Text('Confirmar',
                           style: TextStyle(fontSize: 20)),
                       press: () async {
-                        print('*****');
                         final form = _formKey.currentState;
                         if (form!.validate()) {
-                          print('paso la validación');
-
-                          print(state.enterpriseConfig);
                           switch (state.enterpriseConfig.allowInsetsBelow) {
                             case false:
-                              print('es falso');
-                              print(total);
-                              print(totalSummary);
                               if (widget.arguments.typeOfCharge == 'CREDITO' && total == 0.0) {
                                 await context
                                     .read<CollectionCubit>()
@@ -376,16 +369,13 @@ class CollectionViewState extends State<CollectionView>
                                             style: TextStyle(
                                                 color: Colors.white))));
                               } else {
-                                print('enviando');
                                 await context
                                     .read<CollectionCubit>()
                                     .confirmTransaction(widget.arguments, paymentEfectyController, paymentTransferController);
                               }
                               break;
                             case true:
-                              print('es true');
-                              if (total <= state.totalSummary ||
-                                  widget.arguments.typeOfCharge == 'CREDITO') {
+                              if (total <= state.totalSummary || widget.arguments.typeOfCharge == 'CREDITO') {
                                 await context
                                     .read<CollectionCubit>()
                                     .confirmTransaction(widget.arguments, paymentEfectyController, paymentTransferController);

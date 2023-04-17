@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../shared/state/download_provider.dart';
+import '../../../../cubits/download/download_cubit.dart';
 
 class OptionalFunctionality extends StatelessWidget {
   const OptionalFunctionality({super.key});
@@ -11,8 +11,8 @@ class OptionalFunctionality extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const Text('OPTIONAL FUNCTIONALITY'),
-      Consumer<DownloadProvider>(
-        builder: (context, provider, _) => Column(
+      BlocBuilder<DownloadCubit, DownloadState>(
+        builder: (context, state) => Column(
           children: [
             Row(
               children: [
@@ -32,8 +32,8 @@ class OptionalFunctionality extends StatelessWidget {
                   icon: const Icon(Icons.help_outline),
                 ),
                 Switch(
-                  value: provider.preventRedownload,
-                  onChanged: (val) => provider.preventRedownload = val,
+                  value: state.preventRedownload,
+                  onChanged: (val) => state.preventRedownload = val,
                   activeColor: Theme.of(context).colorScheme.primary,
                 )
               ],
@@ -57,8 +57,8 @@ class OptionalFunctionality extends StatelessWidget {
                   icon: const Icon(Icons.help_outline),
                 ),
                 Switch(
-                  value: provider.seaTileRemoval,
-                  onChanged: (val) => provider.seaTileRemoval = val,
+                  value: state.seaTileRemoval,
+                  onChanged: (val) => state.seaTileRemoval = val,
                   activeColor: Theme.of(context).colorScheme.primary,
                 )
               ],
@@ -82,7 +82,7 @@ class OptionalFunctionality extends StatelessWidget {
                   icon: const Icon(Icons.help_outline),
                 ),
                 Switch(
-                  value: provider.disableRecovery,
+                  value: state.disableRecovery,
                   onChanged: (val) async {
                     if (val) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,7 +94,7 @@ class OptionalFunctionality extends StatelessWidget {
                         ),
                       );
                     }
-                    provider.disableRecovery = val;
+                    state.disableRecovery = val;
                   },
                   activeColor: Colors.amber,
                 )

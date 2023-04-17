@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:provider/provider.dart';
 
-import '../shared/state/download_provider.dart';
-import '../shared/state/general_provider.dart';
+import '../../../../cubits/download/download_cubit.dart';
+import '../../../../cubits/general/general_cubit.dart';
 import '../features/store_editor.dart';
 
 AppBar buildHeader({
@@ -50,11 +50,9 @@ AppBar buildHeader({
                   : await existingStore.manage.rename(newValues['storeName']!);
               if (!mounted) return;
 
-              final downloadProvider =
-              Provider.of<DownloadProvider>(context, listen: false);
-              if (existingStore != null &&
-                  downloadProvider.selectedStore == existingStore) {
-                downloadProvider.setSelectedStore(newStore);
+              final downloadCubit = BlocProvider.of<DownloadCubit>(context, listen: false);
+              if (existingStore != null && downloadCubit.selectedStore == existingStore) {
+                downloadCubit.selectedStore = newStore;
               }
 
               await newStore.manage.createAsync();
@@ -81,8 +79,7 @@ AppBar buildHeader({
 
               if (!mounted) return;
               if (widget.isStoreInUse && widget.existingStoreName != null) {
-                Provider.of<GeneralProvider>(context, listen: false)
-                    .currentStore = newValues['storeName'];
+                BlocProvider.of<GeneralCubit>(context, listen: false).currentStore = newValues['storeName'];
               }
               Navigator.of(context).pop();
 
