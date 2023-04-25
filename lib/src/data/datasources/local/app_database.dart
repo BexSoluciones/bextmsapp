@@ -9,6 +9,7 @@ import 'package:bexdeliveries/src/utils/constants/strings.dart';
 
 //models
 import 'package:bexdeliveries/src/domain/models/work.dart';
+import 'package:bexdeliveries/src/domain/models/warehouse.dart';
 import 'package:bexdeliveries/src/domain/models/summary.dart';
 import 'package:bexdeliveries/src/domain/models/transaction.dart' as t;
 import 'package:bexdeliveries/src/domain/models/transaction_summary.dart';
@@ -26,6 +27,7 @@ part '../local/dao/location_dao.dart';
 part '../local/dao/processing_queue_dao.dart';
 part '../local/dao/reason_dao.dart';
 part '../local/dao/history_order_dao.dart';
+part '../local/dao/warehouse_dao.dart';
 
 class AppDatabase {
   static BriteDatabase? _streamDatabase;
@@ -254,6 +256,8 @@ class AppDatabase {
   }
 
   WorkDao get workDao => WorkDao(instance);
+
+  WarehouseDao get warehouseDao => WarehouseDao(instance);
 
   SummaryDao get summaryDao => SummaryDao(instance);
 

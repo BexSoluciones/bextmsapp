@@ -33,7 +33,6 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
 
   CurrentUserLocationEntity? currentLocation;
 
-
   RejectCubit(
       this._databaseRepository, this._locationRepository, this._processingQueueBloc)
       : super(const RejectLoading());
@@ -95,6 +94,8 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
 
         var validate =
             await _databaseRepository.validateTransaction(arguments.work.id!);
+
+        emit(RejectSuccess(reasons: state.reasons));
 
         if (validate == false) {
           await _navigationService.goTo(summaryRoute,

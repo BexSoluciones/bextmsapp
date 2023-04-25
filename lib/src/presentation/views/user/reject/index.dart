@@ -59,7 +59,6 @@ class _RejectViewState extends State<RejectView> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => _navigationService.goBack(),
@@ -67,8 +66,7 @@ class _RejectViewState extends State<RejectView> {
       ),
       body: ListView(
         children: [
-          Container(
-            color: Theme.of(context).colorScheme.primaryContainer,
+          SizedBox(
             height: size.height * 0.25,
             width: size.width,
             child: HeaderReject(arguments: widget.arguments),
@@ -101,7 +99,7 @@ class _RejectViewState extends State<RejectView> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: Colors.deepOrange.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: const ListTile(
@@ -120,7 +118,7 @@ class _RejectViewState extends State<RejectView> {
             const Spacer(),
             if(state.error != null)
               Text(state.error, maxLines: 2, style: const TextStyle(color: Colors.red, fontSize: 16)),
-            DefaultButton(widget: const Text('Confirmar', style: TextStyle(fontSize: 20)), press: () {
+            DefaultButton(widget: const Text('Confirmar', style: TextStyle(color: Colors.white, fontSize: 20)), press: () {
               BlocProvider.of<RejectCubit>(context).confirmTransaction(widget.arguments, reasonController.text, null);
             })
           ],

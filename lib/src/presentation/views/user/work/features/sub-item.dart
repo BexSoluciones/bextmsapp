@@ -51,7 +51,7 @@ class SubItemWorkState extends State<SubItemWork> {
         child: Material(
             child: Ink(
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: ListTile(
@@ -59,8 +59,7 @@ class SubItemWorkState extends State<SubItemWork> {
                   leading: GestureDetector(
                       onTap: null,
                       child: CircleAvatar(
-                          backgroundColor:
-                              Colors.primaries[widget.work.color ?? 1],
+                          backgroundColor: Colors.primaries[widget.work.color ?? 1],
                           child: Text('${widget.work.order ?? 0 + 1}'))),
                   onTap: () => _navigationService.goTo(summaryRoute,
                       arguments: SummaryArgument(work: widget.work)),

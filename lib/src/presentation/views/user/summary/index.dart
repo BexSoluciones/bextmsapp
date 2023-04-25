@@ -93,7 +93,7 @@ class SummaryViewState extends State<SummaryView> {
           return Scaffold(
             resizeToAvoidBottomInset: true,
             appBar: AppBar(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              // backgroundColor: Theme.of(context).colorScheme.primary,
               leading: IconButton(
                   onPressed: () {
                     if (widget.arguments.origin != null &&

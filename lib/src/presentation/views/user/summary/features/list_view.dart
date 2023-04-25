@@ -146,7 +146,7 @@ class ListViewSummaryState extends State<ListViewSummary> {
                   padding: const EdgeInsets.all(kDefaultPadding),
                   child: DefaultButton(
                       widget: const Text('¿Llegaste donde el cliente?',
-                          style: TextStyle(fontSize: 18)),
+                          style: TextStyle(color: Colors.white, fontSize: 18)),
                       press: () async {
                         var transaction = Transaction(
                             workId: widget.arguments.work.id!,
@@ -168,7 +168,7 @@ class ListViewSummaryState extends State<ListViewSummary> {
                   padding: const EdgeInsets.all(kDefaultPadding),
                   child: DefaultButton(
                       widget: const Text('¿Quieres georeferenciarlo?',
-                          style: TextStyle(fontSize: 18)),
+                          style: TextStyle(color: Colors.white, fontSize: 18)),
                       press: () => _navigationService.goTo(
                           summaryGeoreferenceRoute,
                           arguments: widget.arguments.work)),

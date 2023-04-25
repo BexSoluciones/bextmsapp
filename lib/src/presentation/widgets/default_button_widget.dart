@@ -22,7 +22,7 @@ class DefaultButton extends StatelessWidget {
       height: 56,
       child: TextButton(
           style: TextButton.styleFrom(
-            backgroundColor: color ?? Theme.of(context).colorScheme.primaryContainer,
+            backgroundColor: color ?? Theme.of(context).colorScheme.primary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
           onPressed: press,

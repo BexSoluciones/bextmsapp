@@ -23,7 +23,7 @@ class ItemWork extends StatelessWidget {
     return Material(
       child: Ink(
         decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: ListTile(
@@ -32,21 +32,18 @@ class ItemWork extends StatelessWidget {
           },
           title: Text(
             'Servicio: ${work?.workcode}',
-            // textScaleFactor: textScaleFactor(context),
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           subtitle: Row(
             children: [
               Text(
                 'Clientes: ${work?.count}',
-                // textScaleFactor: textScaleFactor(context),
                 style: const TextStyle(
                     fontWeight: FontWeight.normal, fontSize: 14),
               ),
               Flexible(
                   child: Text(
                 ' Atendidos: ${work!.right ?? '0'} Pendientes: ${work!.left ?? '0'}',
-                // textScaleFactor: textScaleFactor(context),
                 style: const TextStyle(
                     fontSize: 14, fontWeight: FontWeight.normal),
                 textAlign: TextAlign.center,

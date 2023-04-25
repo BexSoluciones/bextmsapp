@@ -18,13 +18,9 @@ import '../base/base_cubit.dart';
 import '../../../domain/models/work.dart';
 import '../../../domain/repositories/database_repository.dart';
 
-//service
-import '../../../locator.dart';
-import '../../../services/storage.dart';
 
 part 'navigation_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class LayerMoodle {
   LayerMoodle(this.polygons);
@@ -79,6 +75,8 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
     currentLocation = await _locationRepository.getCurrentLocation();
 
+    // var warehouse = await _databaseRepository.findWarehouse(works.first.warehouse);
+
     return await Future.forEach(worksDatabase, (work) async {
       if (work.latitude != null && work.longitude != null) {
         if (work.hasCompleted != null && work.hasCompleted == 1) {
@@ -98,6 +96,19 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         data.addAll(works);
       }
       //TODO:: get warehouse
+      markers.add(
+          Marker(
+              height: 25,
+              width: 25,
+              point:
+              LatLng(currentLocation!.latitude, currentLocation!.longitude),
+              builder: (ctx) => GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  child: Stack(alignment: Alignment.center, children: <Widget>[
+                    Image.asset('assets/icons/point.png', color: Colors.blue),
+                    const Icon(Icons.location_on, size: 14, color: Colors.white),
+                  ]))),
+      );
 
       //TODO::  get current position
       markers.add(

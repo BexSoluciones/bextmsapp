@@ -24,24 +24,21 @@ class HeaderInventory extends StatelessWidget with FormatNumber {
         delegate: _SliverAppBarDelegate(
           child: PreferredSize(
               preferredSize: const Size.fromHeight(50.0),
-              child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 12.0, horizontal: 8.0),
-                  child: Showcase(
-                      key: two,
-                      disableMovingAnimation: true,
-                      description: 'Este es el total que debes recaudar 😁',
-                      child: Center(
-                        child: Text(
-                            'TOTAL A RECAUDAR: \$${formatter.format(totalSummaries ?? 0.0)}',
-                            textAlign: TextAlign.start,
-                            // textScaleFactor: textScaleFactor(context),
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                      )),
-                ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 8.0),
+                child: Showcase(
+                    key: two,
+                    disableMovingAnimation: true,
+                    description: 'Este es el total que debes recaudar 😁',
+                    child: Center(
+                      child: Text(
+                          'TOTAL A RECAUDAR: \$${formatter.format(totalSummaries ?? 0.0)}',
+                          textAlign: TextAlign.start,
+                          // textScaleFactor: textScaleFactor(context),
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                    )),
               )),
         ));
   }

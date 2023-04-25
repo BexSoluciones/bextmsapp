@@ -5,6 +5,7 @@ import '../models/summary.dart';
 import '../models/transaction.dart';
 import '../models/reason.dart';
 import '../models/history_order.dart';
+import '../models/warehouse.dart';
 
 abstract class DatabaseRepository {
   //WORKS
@@ -16,6 +17,13 @@ abstract class DatabaseRepository {
   Future<int> updateWork(Work work);
   Future<void> insertWorks(List<Work> works);
   Future<void> emptyWorks();
+
+  //WAREHOUSES
+  Future<Warehouse?> findWarehouse(Warehouse warehouse);
+  Future<int> insertWarehouse(Warehouse warehouse);
+  Future<int> updateWarehouse(Warehouse warehouse);
+  Future<void> insertWarehouses(List<Warehouse> warehouses);
+  Future<void> emptyWarehouses();
 
   //SUMMARIES
   Future<List<Summary>> getAllSummariesByOrderNumber(int workId);

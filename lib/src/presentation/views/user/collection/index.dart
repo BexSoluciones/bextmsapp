@@ -350,7 +350,7 @@ class CollectionViewState extends State<CollectionView>
                       left: kDefaultPadding, right: kDefaultPadding),
                   child: DefaultButton(
                       widget: const Text('Confirmar',
-                          style: TextStyle(fontSize: 20)),
+                          style: TextStyle(color: Colors.white, fontSize: 20)),
                       press: () async {
                         final form = _formKey.currentState;
                         if (form!.validate()) {

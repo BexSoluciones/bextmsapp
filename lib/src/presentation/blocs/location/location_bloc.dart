@@ -8,12 +8,15 @@ part 'location_event.dart';
 part 'location_state.dart';
 
 class LocationBloc extends Bloc<LocationEvent, LocationState> {
+
+  final LocationRepository locationRepository;
+
   LocationBloc({
     required this.locationRepository,
   }) : super(LocationState()) {
     on<GetLocation>(_getLocationEvent);
   }
-  final LocationRepository locationRepository;
+
 
   void _getLocationEvent(GetLocation event, Emitter<LocationState> emit) async {
     try {

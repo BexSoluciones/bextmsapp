@@ -68,9 +68,8 @@ class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
     if (works.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Lottie.asset('assets/animations/36499-page-not-found.json'),
-          const Text('No hay clientes sin georeferenciación.')
+        children: const [
+          Text('No hay clientes sin georeferenciación.', style: TextStyle(fontWeight: FontWeight.w600))
         ],
       );
     } else {

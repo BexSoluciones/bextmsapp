@@ -9,6 +9,7 @@ import '../../domain/models/transaction_summary.dart';
 import '../../domain/models/reason.dart';
 import '../../domain/models/processing_queue.dart';
 import '../../domain/models/history_order.dart';
+import '../../domain/models/warehouse.dart';
 
 class DatabaseRepositoryImpl implements DatabaseRepository {
   final AppDatabase _appDatabase;
@@ -55,6 +56,32 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyWorks() async {
     return _appDatabase.workDao.emptyWorks();
+  }
+
+  //WAREHOUSES
+  @override
+  Future<Warehouse?> findWarehouse(Warehouse warehouse) async {
+    return _appDatabase.warehouseDao.findWarehouse(warehouse);
+  }
+
+  @override
+  Future<int> insertWarehouse(Warehouse warehouse) async {
+    return _appDatabase.warehouseDao.insertWarehouse(warehouse);
+  }
+
+  @override
+  Future<int> updateWarehouse(Warehouse warehouse) async {
+    return _appDatabase.warehouseDao.updateWarehouse(warehouse);
+  }
+
+  @override
+  Future<void> insertWarehouses(List<Warehouse> warehouses) async {
+    return _appDatabase.warehouseDao.insertWarehouses(warehouses);
+  }
+
+  @override
+  Future<void> emptyWarehouses() async {
+    return _appDatabase.warehouseDao.emptyWarehouses();
   }
 
   //SUMMARIES

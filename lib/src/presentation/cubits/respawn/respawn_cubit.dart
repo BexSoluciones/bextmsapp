@@ -65,8 +65,11 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
 
     _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue));
 
+
     var validate =
         await _databaseRepository.validateTransaction(arguments.work.id!);
+
+    emit(const RespawnSuccess());
 
     if (validate == false) {
       await _navigationService.goTo(summaryRoute,

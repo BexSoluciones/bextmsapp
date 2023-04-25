@@ -78,7 +78,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
             child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: ListTile(

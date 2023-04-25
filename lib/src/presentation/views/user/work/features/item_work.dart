@@ -54,7 +54,7 @@ class ItemWorkState extends State<ItemWork> {
               child: Material(
                   child: Ink(
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: ListTile(

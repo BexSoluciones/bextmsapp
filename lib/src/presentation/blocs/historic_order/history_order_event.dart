@@ -13,7 +13,6 @@ class HistoryOrderInitialRequest extends HistoryOrderEvent {
 
   final Work work;
   final BuildContext context;
-//final int likelihood;
 }
 
 class ChangeCurrentWork extends HistoryOrderEvent {

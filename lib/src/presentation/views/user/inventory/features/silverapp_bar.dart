@@ -44,7 +44,6 @@ class AppBarInventory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       leading: IconButton(
           onPressed: () {
             context

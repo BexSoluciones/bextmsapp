@@ -68,15 +68,15 @@ class _NavigationScreenState extends State<NavigationView> {
   List<NavigationDestination> get _destinations => [
         const NavigationDestination(
           icon: Icon(Icons.map),
-          label: 'Map',
+          label: 'Mapa',
         ),
         const NavigationDestination(
           icon: Icon(Icons.folder),
-          label: 'Stores',
+          label: 'Carpetas',
         ),
         const NavigationDestination(
           icon: Icon(Icons.download),
-          label: 'Download',
+          label: 'Descargar',
         ),
         NavigationDestination(
           icon: StreamBuilder(
@@ -96,11 +96,11 @@ class _NavigationScreenState extends State<NavigationView> {
               ),
             ),
           ),
-          label: 'Recover',
+          label: 'Recuperar',
         ),
         const NavigationDestination(
           icon: Icon(Icons.settings),
-          label: 'Settings',
+          label: 'Configuraciones',
         ),
       ];
 
@@ -123,18 +123,7 @@ class _NavigationScreenState extends State<NavigationView> {
   @override
   void initState() {
     super.initState();
-
     _pageController = PageController(initialPage: currentPageIndex);
-    // if (widget.damagedDatabaseDeleted) {
-    //   WidgetsBinding.instance.addPostFrameCallback(
-    //         (_) => ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(
-    //         content: Text('At least one corrupted database has been deleted.'),
-    //       ),
-    //     ),
-    //   );
-    // }
-
     startNavigationScreen();
   }
 
@@ -145,14 +134,6 @@ class _NavigationScreenState extends State<NavigationView> {
           ShowCaseWidget.of(context).startShowCase([one, two]);
         }
       });
-
-      // if (_storageService.getBool('${widget.workcode}-routing') == true) {
-      //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      //       backgroundColor: Colors.deepOrange,
-      //       content: Text(
-      //           'La nueva ruta se esta calculando por favor espere a que cargue',
-      //           style: TextStyle(color: Colors.white))));
-      // }
     });
   }
 

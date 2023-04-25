@@ -16,8 +16,8 @@ class HeaderSummary extends StatelessWidget {
 
     final size = MediaQuery.of(context).size;
 
-    return Container(
-      color: Theme.of(context).colorScheme.primaryContainer,
+    return SizedBox(
+      // color: Theme.of(context).colorScheme.primary,
       width: size.width,
       height: size.height / 3.8,
       child: Padding(
