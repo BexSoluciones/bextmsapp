@@ -18,23 +18,25 @@ class WorkDao {
     final db = await _appDatabase.streamDatabase;
     final workList = await db!.rawQuery(
         '''
-        SELECT *, 
-        COUNT(DISTINCT number_customer || code_place) as count
+        SELECT works.*, 
+        COUNT(DISTINCT number_customer || code_place) as count,
+        COUNT(DISTINCT summaries.order_number) as left,
+        COUNT(DISTINCT transactions.order_number) as right
         FROM $tableWorks 
+        INNER JOIN $tableSummaries ON $tableSummaries.${SummaryFields.workId} = $tableWorks.${WorkFields.id}
+        LEFT JOIN ${t.tableTransactions} ON (
+          ${t.tableTransactions}.${t.TransactionFields.workId} = $tableWorks.${WorkFields.id} AND
+          ${t.tableTransactions}.${t.TransactionFields.status} != 'start' AND
+          ${t.tableTransactions}.${t.TransactionFields.status} != 'arrived' AND
+          ${t.tableTransactions}.${t.TransactionFields.status} != 'summary'
+        )
         GROUP BY $tableWorks.${WorkFields.workcode}
         '''
     );
 
     /*
-     COUNT(DISTINCT summaries.order_number) as left,
-     COUNT(DISTINCT transactions.order_number) as right
-     INNER JOIN $tableSummaries ON $tableSummaries.${SummaryFields.workId} = $tableWorks.${WorkFields.id}
-      LEFT JOIN ${t.tableTransactions} ON (
-        ${t.tableTransactions}.${t.TransactionFields.workId} = $tableWorks.${WorkFields.id} AND
-        ${t.tableTransactions}.${t.TransactionFields.status} != 'start' AND
-        ${t.tableTransactions}.${t.TransactionFields.status} != 'arrived' AND
-        ${t.tableTransactions}.${t.TransactionFields.status} != 'summary'
-      )
+
+
      */
 
     return parseWorks(workList);

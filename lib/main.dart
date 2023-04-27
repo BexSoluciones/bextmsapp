@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
@@ -11,7 +12,7 @@ import 'package:location_repository/location_repository.dart';
 import 'package:path/path.dart' as p;
 
 //plugins
-import 'plugins/index.dart';
+import 'plugins/charge_status.dart';
 //theme
 import 'src/config/theme/index.dart';
 
@@ -53,6 +54,7 @@ import 'src/utils/constants/strings.dart';
 import 'src/locator.dart';
 import 'src/services/navigation.dart';
 import 'src/services/storage.dart';
+import 'src/services/isolate.dart';
 
 //router
 import 'src/config/router/index.dart' as router;
@@ -104,13 +106,18 @@ Future<bool> _listenToGeoLocations() async {
 }
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
+final IsolateService _isolateService = locator<IsolateService>();
 
 List<CameraDescription> cameras = [];
 
 Future<void> main() async {
+  RootIsolateToken rootIsolateToken = RootIsolateToken.instance!;
+
   WidgetsFlutterBinding.ensureInitialized();
 
   await initializeDependencies();
+
+  Isolate.spawn(_isolateService.isolateMain, rootIsolateToken);
 
   try {
     cameras = await availableCameras();

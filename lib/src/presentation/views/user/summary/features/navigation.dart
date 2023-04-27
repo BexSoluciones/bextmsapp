@@ -1,4 +1,7 @@
+import 'package:bexdeliveries/src/presentation/cubits/summary/summary_cubit.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 //domain
@@ -46,7 +49,6 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
             decoration: InputDecoration(
                 label: Text('Conducción',
                     textAlign: TextAlign.center,
-                    // textScaleFactor: textScaleFactor(context),
                     style: TextStyle(fontSize: 30)),
                 icon: Icon(Icons.directions_car)));
       case 1:
@@ -55,7 +57,6 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
             decoration: InputDecoration(
                 label: Text('Caminando',
                     textAlign: TextAlign.center,
-                    // textScaleFactor: textScaleFactor(context),
                     style: TextStyle(fontSize: 30)),
                 icon: Icon(Icons.directions_walk)));
       case 2:
@@ -63,7 +64,6 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
             enabled: false,
             decoration: InputDecoration(
               label: Text('Tren',
-                  // textScaleFactor: textScaleFactor(context),
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 30)),
               icon: Icon(
@@ -77,7 +77,6 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
                 label: Text(
                   'Bicicleta',
                   textAlign: TextAlign.center,
-                  // textScaleFactor: textScaleFactor(context),
                   style: TextStyle(fontSize: 30),
                 ),
                 icon: Icon(Icons.directions_bike)));
@@ -91,31 +90,28 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
       appBar: AppBar(),
       body: SingleChildScrollView(
         child: SafeArea(
-          child: Container(
+          child: SizedBox(
             height: size.height,
             width: size.width,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const FormTitle('Destino', Colors.white),
+                        const FormTitle('Destino', Colors.black),
                         const SizedBox(height: 10),
                         Text(widget.arguments.work.customer!,
-                            // textScaleFactor: textScaleFactor(context),
                             style: const TextStyle(fontSize: 20)),
-                        Text('Dir: ${widget.arguments.work.address}',
-                            // textScaleFactor: textScaleFactor(context),
+                        Text('Dirección: ${widget.arguments.work.address}',
                             style: const TextStyle(fontSize: 20)),
                         const SizedBox(height: 10),
                         Text('Latitud ${widget.arguments.work.latitude}',
-                            // textScaleFactor: textScaleFactor(context),
                             style: const TextStyle(fontSize: 20)),
                         Text('Longitud ${widget.arguments.work.longitude}',
-                            // textScaleFactor: textScaleFactor(context),
                             style: const TextStyle(fontSize: 20))
                       ],
                     )),
@@ -132,8 +128,6 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
                           alignment: Alignment.centerLeft,
                           child: DecoratedBox(
                               decoration: BoxDecoration(
-                                color:
-                                    kPrimaryColor, //background color of dropdown buttonborder of dropdown button
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Padding(
@@ -160,44 +154,29 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
                                         child: Icon(
                                             Icons.arrow_circle_down_sharp)),
                                     iconEnabledColor: Colors.white, //Icon color
-                                    style: const TextStyle(
-                                        //Font color
-                                        fontSize:
-                                            20 //font size on dropdown button
-                                        ),
-                                    dropdownColor:
-                                        kPrimaryColor, //dropdown background color
+                                    style: const TextStyle(fontSize: 20),
                                     underline: Container(), //remove underline
                                     isExpanded:
                                         true, //make true to make width 100%
                                   ))),
                         ),
                         SizedBox(height: size.height / 2.9),
-                        DefaultButton(
-                            widget: const Text('Mostrar Mapas',
-                                // textScaleFactor: textScaleFactor(context),
-                                style: TextStyle(fontSize: 20)),
-                            press: () {
-                              // MapsSheet.show(
-                              //   context: context,
-                              //   onMapTap: (map) {
-                              //     map.showDirections(
-                              //       destination: Coords(
-                              //         double.parse(
-                              //             widget.arguments.work.latitude!),
-                              //         double.parse(
-                              //             widget.arguments.work.longitude!),
-                              //       ),
-                              //       destinationTitle:
-                              //       widget.arguments.work.customer,
-                              //       origin: Coords(_locationData.latitude!,
-                              //           _locationData.longitude!),
-                              //       originTitle: 'Origen',
-                              //       directionsMode: directionsMode,
-                              //     );
-                              //   },
-                              // );
-                            })
+                        BlocBuilder<SummaryCubit, SummaryState>(
+                            builder: (context, state) {
+                          if (state.runtimeType == SummaryLoadingMap) {
+                            return const Center(
+                                child: CupertinoActivityIndicator());
+                          } else {
+                            return DefaultButton(
+                                widget: const Text('Mostrar Mapas',
+                                    style: TextStyle(
+                                        fontSize: 20, color: Colors.white)),
+                                press: () => context
+                                    .read<SummaryCubit>()
+                                    .showMaps(context, widget.arguments,
+                                        directionsMode));
+                          }
+                        })
                       ],
                     ),
                   ),

@@ -54,6 +54,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+
   late NavigationCubit navigationCubit;
   late LocationBloc locationBloc;
   late NetworkBloc networkCubit;
@@ -66,8 +67,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     networkCubit = BlocProvider.of<NetworkBloc>(context);
-    networkCubit.add(NetworkObserve(
-        processingQueueBloc: context.read<ProcessingQueueBloc>()));
+    networkCubit.add(NetworkObserve(processingQueueBloc: context.read<ProcessingQueueBloc>()));
 
     navigationCubit = BlocProvider.of<NavigationCubit>(context);
     navigationCubit.getAllWorksByWorkcode(widget.workcode);
@@ -142,7 +142,11 @@ class _MapPageState extends State<MapPage> {
               description:
                   'Ingresa a la navegación completa y deja que te guiemos!',
               child: IconButton(
-                  icon: const Icon(Icons.directions), onPressed: () async {})),
+                  icon: const Icon(Icons.directions), onPressed: () {
+                    var navigationCubit = context.read<NavigationCubit>();
+                    var work = navigationCubit.state.works[navigationCubit.state.pageIndex];
+                context.read<NavigationCubit>().showMaps(context, work);
+              })),
         ],
       );
 

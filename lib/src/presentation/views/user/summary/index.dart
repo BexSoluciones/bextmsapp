@@ -60,6 +60,14 @@ class SummaryViewState extends State<SummaryView> {
     super.initState();
   }
 
+  @override
+  void didChangeDependencies() {
+    summaryCubit = BlocProvider.of<SummaryCubit>(context);
+    summaryCubit.getAllSummariesByOrderNumber(widget.arguments.work.id!);
+    super.didChangeDependencies();
+  }
+
+
   void startWidgetSummary() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _isFirstLaunch().then((result) {
@@ -88,12 +96,10 @@ class SummaryViewState extends State<SummaryView> {
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async => false,
-        child:
-            BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
+        child: BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
           return Scaffold(
             resizeToAvoidBottomInset: true,
             appBar: AppBar(
-              // backgroundColor: Theme.of(context).colorScheme.primary,
               leading: IconButton(
                   onPressed: () {
                     if (widget.arguments.origin != null &&
@@ -123,22 +129,26 @@ class SummaryViewState extends State<SummaryView> {
                 return notification.depth == 1;
               },
             ),
-            body: SafeArea(
-                child: Center(
-              child: ListView(
-                children: [
-                  HeaderSummary(arguments: widget.arguments),
-                  ListViewSummary(
-                      arguments: widget.arguments,
-                      one: one,
-                      two: two,
-                      three: three,
-                      four: four,
-                      five: five)
-                ],
-              ),
-            )),
+            body: _buildBody()
           );
         }));
+  }
+
+  Widget _buildBody() {
+    return SafeArea(
+        child: Center(
+          child: ListView(
+            children: [
+              HeaderSummary(arguments: widget.arguments),
+              ListViewSummary(
+                  arguments: widget.arguments,
+                  one: one,
+                  two: two,
+                  three: three,
+                  four: four,
+                  five: five)
+            ],
+          ),
+        ));
   }
 }

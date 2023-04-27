@@ -6,11 +6,8 @@ import '../../../../../domain/models/work.dart';
 //helpers
 import '../../../../../utils/constants/colors.dart';
 
-//services
-import '../../../../../locator.dart';
-import '../../../../../services/navigation.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
+//features
+import 'item_work.dart';
 
 class SearchHomeDelegate extends SearchDelegate<Work?> {
   SearchHomeDelegate(this.works);
@@ -52,42 +49,10 @@ class SearchHomeDelegate extends SearchDelegate<Work?> {
             ),
             child: ListView.separated(
               itemCount: _filters.length,
-              separatorBuilder: (context, index) =>
-                  const SizedBox(height: 16.0),
+              separatorBuilder: (context, index) => const SizedBox(height: 16.0),
               itemBuilder: (context, index) {
                 final work = _filters[index];
-
-                return Material(
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: ListTile(
-                      //enabled: !snapshot.data,
-                      onTap: null,
-                      title: Text(
-                        'Servicio: ${work.workcode}',
-                        style: const TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w500),
-                      ),
-                      subtitle: Row(
-                        children: [
-                          Text(
-                            'Clientes: ${works[index].count}',
-                            style: const TextStyle(
-                                fontSize: 14.0, fontWeight: FontWeight.normal),
-                          ),
-                          Text(
-                            ' Atendidos: ${work.right ?? '0'} Pendientes: ${work.left ?? '0'}',
-                            style: const TextStyle(
-                                fontSize: 14.0, fontWeight: FontWeight.normal),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+                return ItemWork(work: work);
               },
             )));
   }
@@ -114,38 +79,7 @@ class SearchHomeDelegate extends SearchDelegate<Work?> {
                   const SizedBox(height: 16.0),
               itemBuilder: (context, index) {
                 final work = _filters[index];
-
-                return Material(
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: ListTile(
-                      //enabled: !snapshot.data,
-                      onTap: null,
-                      title: Text(
-                        'Servicio: ${work.workcode}',
-                        style: const TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w500),
-                      ),
-                      subtitle: Row(
-                        children: [
-                          Text(
-                            'Clientes: ${works[index].count}',
-                            style: const TextStyle(
-                                fontSize: 14.0, fontWeight: FontWeight.normal),
-                          ),
-                          Text(
-                            ' Atendidos: ${work.right ?? '0'} Pendientes: ${work.left ?? '0'}',
-                            style: const TextStyle(
-                                fontSize: 14.0, fontWeight: FontWeight.normal),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+                return ItemWork(work: work);
               },
             )));
   }

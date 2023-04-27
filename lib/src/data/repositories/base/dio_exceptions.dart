@@ -45,7 +45,7 @@ class DioExceptions implements Exception {
       case 403:
         return 'Forbidden';
       case 404:
-        return error['message'] != '' ? error['message'] : 'Oops something went wrong';
+        return error['message'] != null && error['message'] != '' ? error['message'] : 'Oops something went wrong';
       case 500:
         return 'Internal server error';
       case 502:

@@ -27,9 +27,8 @@ class SyncBar extends StatelessWidget {
                     'Sincroniza todas las planillas para que estes al día',
                 child: IconButton(
                     icon: const Icon(Icons.sync),
-                    onPressed: () {
-                      BlocProvider.of<HomeCubit>(context).sync();
-                    }));
+                    onPressed: () => context.read<HomeCubit>().sync()
+                    ));
           default:
             return const SizedBox();
         }

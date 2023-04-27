@@ -41,7 +41,7 @@ extension LoginButton on LoginViewState {
 
   Widget buildChild(LoginState state) {
     return state is LoginLoading
-        ? const CircularProgressIndicator.adaptive()
-        : const Icon(Icons.arrow_forward_ios);
+        ? const CircularProgressIndicator.adaptive(backgroundColor: Colors.white)
+        : const Icon(Icons.arrow_forward_ios, color: Colors.white);
   }
 }

@@ -1,3 +1,4 @@
+
 import 'package:get_it/get_it.dart';
 import 'package:location_repository/location_repository.dart';
 
@@ -15,6 +16,7 @@ import 'domain/repositories/database_repository.dart';
 //services
 import 'services/storage.dart';
 import 'services/navigation.dart';
+import 'package:bexdeliveries/src/services/isolate.dart';
 
 final locator = GetIt.instance;
 
@@ -25,6 +27,9 @@ Future<void> initializeDependencies() async {
 
   final navigation = NavigationService();
   locator.registerSingleton<NavigationService>(navigation);
+
+  final isolate = IsolateService();
+  locator.registerSingleton<IsolateService>(isolate);
 
   final db = AppDatabase.instance;
   locator.registerSingleton<AppDatabase>(db);

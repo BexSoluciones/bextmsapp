@@ -23,6 +23,10 @@ class SummaryLoading extends SummaryState {
   const SummaryLoading();
 }
 
+class SummaryLoadingMap extends SummaryState {
+  const SummaryLoadingMap();
+}
+
 class SummarySuccess extends SummaryState {
   const SummarySuccess(
       {super.summaries,

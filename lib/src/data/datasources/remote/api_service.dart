@@ -463,9 +463,6 @@ class ApiService {
 
     final data = transaction.toJson();
 
-    print('**************');
-    print(data);
-
     final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
         Options(
       method: 'POST',
@@ -549,8 +546,6 @@ class ApiService {
     };
 
     data.removeWhere((k, v) => v == null);
-
-    print(data);
 
     final result = await dio.fetch(_setStreamType<Response<TransactionSummaryResponse>>(
         Options(

@@ -63,9 +63,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> {
         ? User.fromMap(_storageService.getObject('user')!)
         : null;
 
-    print(_storageService.getObject('config'));
-    print(_storageService.getObject('user'));
-
     return HomeSuccess(works: works, user: user);
   }
 
@@ -88,14 +85,11 @@ class HomeCubit extends BaseCubit<HomeState, String?> {
 
       if (results.isNotEmpty) {
         if (results[0] is DataSuccess) {
-
-          print('success config');
           var data = results[0].data as EnterpriseConfigResponse;
           _storageService.setObject('config', data.enterpriseConfig.toMap());
         }
 
         if (results[1] is DataSuccess) {
-          print('success config');
           var data = results[1].data as ReasonResponse;
           _databaseRepository.insertReasons(data.reasons);
         }

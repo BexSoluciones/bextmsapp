@@ -1,9 +1,16 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:location_repository/location_repository.dart';
+import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 
 //domain
 import '../../src/domain/models/isolate.dart';
+import '../../src/domain/models/work.dart';
+
+//widgets
+import '../../src/presentation/widgets/show_map_direction_widget.dart';
 
 class HelperFunctions {
 
@@ -203,6 +210,49 @@ class HelperFunctions {
 
     File('$path/$folder/$fileName.png')
         .writeAsBytesSync(image.buffer.asInt8List());
+  }
+
+  Future<Widget?> showMapDirection(BuildContext context, Work work, CurrentUserLocationEntity location) async {
+
+    final availableMaps = await MapLauncher.installedMaps;
+
+    if (availableMaps.length == 1) {
+      await availableMaps.first.showDirections(
+        destination: Coords(
+          double.parse(work.latitude!),
+          double.parse(work.longitude!),
+        ),
+        destinationTitle: work.customer,
+        origin: Coords(location.latitude, location.longitude),
+        originTitle: 'Origen',
+        waypoints: null,
+        directionsMode: DirectionsMode.driving,
+      );
+
+      return null;
+    } else {
+      if(context.mounted){
+        return await MapsSheet.show(
+            context: context,
+            onMapTap: (map) {
+              map.showDirections(
+                destination: Coords(
+                  double.parse(work.latitude!),
+                  double.parse(work.longitude!),
+                ),
+                destinationTitle: work.customer,
+                origin:
+                Coords(location.latitude, location.longitude),
+                originTitle: 'Origen',
+                waypoints: null,
+                directionsMode: DirectionsMode.driving,
+              );
+            });
+      } else {
+        return null;
+      }
+    }
+
   }
 
 

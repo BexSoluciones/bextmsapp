@@ -53,6 +53,10 @@ class NavigationLoading extends NavigationState {
   const NavigationLoading();
 }
 
+class NavigationLoadingMap extends NavigationState {
+  const NavigationLoadingMap();
+}
+
 class NavigationSuccess extends NavigationState {
   const NavigationSuccess(
       {super.works,

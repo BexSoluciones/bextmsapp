@@ -79,7 +79,6 @@ class LoginViewState extends State<LoginView> {
   }
 
   AppBar get buildAppBar => AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.read<LoginCubit>().goToCompany(),

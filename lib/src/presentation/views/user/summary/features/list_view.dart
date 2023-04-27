@@ -159,9 +159,8 @@ class ListViewSummaryState extends State<ListViewSummary> {
                             latitude: null,
                             longitude: null,
                             firm: null);
-                        BlocProvider.of<SummaryCubit>(context)
-                            .sendTransactionArrived(
-                                widget.arguments.work, transaction);
+                        context.read<SummaryCubit>().sendTransactionArrived(
+                            widget.arguments.work, transaction);
                       }),
                 )
               : Padding(

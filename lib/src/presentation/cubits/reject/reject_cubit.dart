@@ -95,7 +95,7 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
         var validate =
             await _databaseRepository.validateTransaction(arguments.work.id!);
 
-        emit(RejectSuccess(reasons: state.reasons));
+        emit(RejectSuccess(reasons: reasons));
 
         if (validate == false) {
           await _navigationService.goTo(summaryRoute,

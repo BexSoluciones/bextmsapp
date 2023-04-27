@@ -6,7 +6,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
-import 'package:location_repository/location_repository.dart';
+
+import 'package:map_launcher/map_launcher.dart';
+
+//core
+import 'package:bexdeliveries/core/helpers/index.dart';
 
 //cubits
 import '../base/base_cubit.dart';
@@ -17,6 +21,7 @@ import '../base/base_cubit.dart';
 //domain
 import '../../../domain/models/work.dart';
 import '../../../domain/repositories/database_repository.dart';
+import 'package:location_repository/location_repository.dart';
 
 
 part 'navigation_state.dart';
@@ -30,6 +35,7 @@ class LayerMoodle {
 class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   final DatabaseRepository _databaseRepository;
   final LocationRepository _locationRepository;
+  final helperFunctions = HelperFunctions();
 
   CurrentUserLocationEntity? currentLocation;
 
@@ -261,5 +267,18 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     }).catchError((error) {
       emit(NavigationFailed(error: error.toString()));
     });
+  }
+
+  Future<void> showMaps(
+      BuildContext context,
+      Work work,
+    ) async {
+    emit(const NavigationLoadingMap());
+    currentLocation ??= await _locationRepository.getCurrentLocation();
+    if (context.mounted) {
+      helperFunctions.showMapDirection(context, work, currentLocation!);
+    }
+
+    emit(const NavigationLoading());
   }
 }
