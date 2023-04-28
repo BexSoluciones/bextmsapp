@@ -22,7 +22,14 @@ class ProcessingQueueDao {
     yield processingQueues;
   }
 
-
+  Future<int> countProcessingQueueIncompleteToTransactions() async {
+    final db = await _appDatabase.streamDatabase;
+    final processingQueueList = await db!.query(tableProcessingQueues,
+        where: 'task != ? AND code != ? AND code != ? AND code != ?',
+        whereArgs: ['done', 'VNAIANBTLM', 'ASJBVKJDFS', 'AB5A8E10Y3']);
+    final processingQueues = parseProcessingQueues(processingQueueList);
+    return processingQueues.length;
+  }
 
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete() async {
     final db = await _appDatabase.streamDatabase;

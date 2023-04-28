@@ -34,9 +34,15 @@ import '../../presentation/views/user/collection/features/firm.dart';
 import '../../presentation/views/user/partial/index.dart';
 import '../../presentation/views/user/reject/index.dart';
 import '../../presentation/views/user/respawn/index.dart';
+import '../../presentation/views/user/transaction/index.dart';
+import '../../presentation/views/user/query/index.dart';
+import '../../presentation/views/user/query/features/devolution.dart';
+import '../../presentation/views/user/query/features/respawn.dart';
+import '../../presentation/views/user/query/features/collection.dart';
 
 //developer
 import '../../presentation/views/developer/processing_queue/index.dart';
+import '../../presentation/views/developer/locations/index.dart';
 
 //drawer
 import '../../presentation/views/user/database/index.dart';
@@ -77,7 +83,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               autoPlayDelay: const Duration(seconds: 3),
               blurValue: 1,
               builder: Builder(builder: (context) {
-                return ConfirmWorkView(arguments: settings.arguments as WorkArgument);
+                return ConfirmWorkView(
+                    arguments: settings.arguments as WorkArgument);
               })));
     case navigationRoute:
       return MaterialPageRoute(
@@ -165,8 +172,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               autoPlayDelay: const Duration(seconds: 3),
               blurValue: 1,
               builder: Builder(builder: (context) {
-                return FirmView(
-                    orderNumber: settings.arguments as String);
+                return FirmView(orderNumber: settings.arguments as String);
               })));
     case cameraRoute:
       return MaterialPageRoute(
@@ -174,14 +180,32 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               autoPlayDelay: const Duration(seconds: 3),
               blurValue: 1,
               builder: Builder(builder: (context) {
-                return CameraView(
-                    orderNumber: settings.arguments as String);
+                return CameraView(orderNumber: settings.arguments as String);
               })));
-      //drawer routes
+    //drawer routes
     case databaseRoute:
       return MaterialPageRoute(builder: (context) => const DatabaseView());
     case processingQueueRoute:
-      return MaterialPageRoute(builder: (context) => const ProcessingQueueView());
+      return MaterialPageRoute(
+          builder: (context) => const ProcessingQueueView());
+    case locationsRoute:
+      return MaterialPageRoute(builder: (context) => const LocationsView());
+    case transactionRoute:
+      return MaterialPageRoute(builder: (context) => const TransactionView());
+    case queryRoute:
+      return MaterialPageRoute(builder: (context) => const QueryView());
+    case collectionQueryRoute:
+      return MaterialPageRoute(
+          builder: (context) =>
+              CollectionQueryView(workcode: settings.arguments as String));
+    case devolutionQueryRoute:
+      return MaterialPageRoute(
+          builder: (context) =>
+              DevolutionQueryView(workcode: settings.arguments as String));
+    case respawnQueryRoute:
+      return MaterialPageRoute(
+          builder: (context) =>
+              RespawnQueryView(workcode: settings.arguments as String));
     default:
       return MaterialPageRoute(
           builder: (context) => UndefinedView(

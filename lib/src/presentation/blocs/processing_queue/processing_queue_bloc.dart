@@ -41,6 +41,8 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
   ProcessingQueueBloc(this._databaseRepository, this._apiRepository) : super(ProcessingQueueInitial()) {
     on<ProcessingQueueAdd>(_add);
     on<ProcessingQueueObserve>(_observe);
+    on<ProcessingQueueSender>(_sender);
+    on<ProcessingQueueCancel>(_cancel);
     _addProcessingQueueController.stream.listen(_handleAddProcessingQueue);
     _processingQueueController.stream.listen(sendProcessingQueue);
   }
@@ -49,12 +51,16 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
     return _databaseRepository.getAllProcessingQueues();
   }
 
+  Future<int> countProcessingQueueIncompleteToTransactions() {
+    return _databaseRepository.countProcessingQueueIncompleteToTransactions();
+  }
+
   void dispose() {
     _processingQueueController.close();
     _addProcessingQueueController.close();
   }
 
-  void _getProcessingQueue() async {
+  Future<void> _getProcessingQueue() async {
     final queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
     _inProcessingQueue.add(queues);
   }
@@ -66,6 +72,15 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
 
   void _observe(event, emit){
     _getProcessingQueue();
+    emit(ProcessingQueueSuccess());
+  }
+
+  void _sender(event, emit){
+    emit(ProcessingQueueSending());
+    _getProcessingQueue().then((_) => emit(ProcessingQueueSuccess()));
+  }
+
+  void _cancel(event, emit){
     emit(ProcessingQueueSuccess());
   }
 

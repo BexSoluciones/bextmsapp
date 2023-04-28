@@ -10,6 +10,7 @@ import '../../domain/models/reason.dart';
 import '../../domain/models/processing_queue.dart';
 import '../../domain/models/history_order.dart';
 import '../../domain/models/warehouse.dart';
+import '../../domain/models/location.dart';
 
 class DatabaseRepositoryImpl implements DatabaseRepository {
   final AppDatabase _appDatabase;
@@ -231,6 +232,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<int> countProcessingQueueIncompleteToTransactions() {
+    return _appDatabase.processingQueueDao.countProcessingQueueIncompleteToTransactions();
+  }
+
+  @override
   Future<int> updateProcessingQueue(ProcessingQueue processingQueue) async {
     return _appDatabase.processingQueueDao
         .updateProcessingQueue(processingQueue);
@@ -245,6 +251,39 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyProcessingQueues() async {
     return _appDatabase.processingQueueDao.emptyProcessingQueue();
+  }
+
+  //LOCATIONS
+  @override
+  Stream<List<Location>> watchAllLocations() {
+    return _appDatabase.locationDao.watchAllLocations();
+  }
+
+  @override
+  Future<List<Location>> getAllLocations() async {
+    return _appDatabase.locationDao.getAllLocations();
+  }
+
+  @override
+  Future<Location?> getLastLocation() async {
+    return _appDatabase.locationDao.getLastLocation();
+  }
+
+  @override
+  Future<int> updateLocation(Location location) async {
+    return _appDatabase.locationDao
+        .updateLocation(location);
+  }
+
+  @override
+  Future<int> insertLocation(Location location) async {
+    return _appDatabase.locationDao
+        .insertLocation(location);
+  }
+
+  @override
+  Future<void> emptyLocations() async {
+    return _appDatabase.locationDao.emptyLocations();
   }
 
   //HISTORY ORDER

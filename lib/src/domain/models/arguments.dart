@@ -51,16 +51,9 @@ class InventoryArgument {
 
 class PackageArgument {
   PackageArgument({
-    required this.workId,
+    required this.work,
     required this.summaryId,
-    required this.zoneId,
-    required this.workcode,
-    required this.type,
-    required this.customer,
-    required this.nit,
-    required this.address,
     required this.typeOfCharge,
-    this.contact,
     required this.orderNumber,
     required this.operativeCenter,
     this.codePlace,
@@ -68,27 +61,18 @@ class PackageArgument {
     this.packing,
     this.idPacking,
     this.expedition,
-    this.r,
   });
 
-  final int workId;
-  final int? zoneId;
+  final Work work;
   final int summaryId;
-  final String workcode;
-  final String type;
   final String operativeCenter;
-  final String customer;
-  final String nit;
-  final String address;
   final String typeOfCharge;
-  final String? contact;
   final String orderNumber;
   final String? codePlace;
   final String? idPacking;
   final String? packing;
   final String? expedition;
   final List<Summary>? summaries;
-  final List<dynamic>? r;
 }
 
 class HistoryArgument {
@@ -96,10 +80,8 @@ class HistoryArgument {
     required this.work,
     required this.likelihood,
     required this.different,
-    // required this.maxProbability
   });
 
-  // final Probability maxProbability;
   final Work work;
   final double? likelihood;
   final List<Different> different;

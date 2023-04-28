@@ -4,17 +4,26 @@ import 'package:location/location.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../domain/models/location.dart' as l;
+import '../../../domain/repositories/database_repository.dart';
+
 part 'location_event.dart';
 part 'location_state.dart';
 
 class LocationBloc extends Bloc<LocationEvent, LocationState> {
 
   final LocationRepository locationRepository;
+  final DatabaseRepository databaseRepository;
 
   LocationBloc({
     required this.locationRepository,
+    required this.databaseRepository
   }) : super(LocationState()) {
     on<GetLocation>(_getLocationEvent);
+  }
+
+  Stream<List<l.Location>> get locations {
+    return databaseRepository.watchAllLocations();
   }
 
 

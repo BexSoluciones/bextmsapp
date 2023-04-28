@@ -8,3 +8,7 @@ class ProcessingQueueAdd extends ProcessingQueueEvent {
 }
 
 class ProcessingQueueObserve extends ProcessingQueueEvent {}
+
+class ProcessingQueueSender extends ProcessingQueueEvent {}
+
+class ProcessingQueueCancel extends ProcessingQueueEvent {}

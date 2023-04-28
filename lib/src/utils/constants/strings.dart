@@ -46,6 +46,8 @@ const respawnQueryRoute = '/respawn-query';
 
 const databaseRoute = '/database';
 const processingQueueRoute = '/processing-queue';
+const transactionRoute = '/transaction';
+const locationsRoute = '/locations';
 
 // Form Error
 const String kEmailNullError = 'Por favor ingresa un correo';

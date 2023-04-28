@@ -3,7 +3,7 @@ const String tableLocations = 'locations';
 class LocationFields {
   static final List<String> values = [id, latitude, longitude, type, workcode, time];
 
-  static const String id = '_id';
+  static const String id = 'id';
   static const String latitude = 'latitude';
   static const String longitude = 'longitude';
   static const String accuracy = 'accuracy';
@@ -31,8 +31,6 @@ class Location {
         required this.isMock,
         required this.userId,
         required this.time,
-        this.type,
-        this.workcode
       });
 
   Location copy(
@@ -46,8 +44,6 @@ class Location {
         double? heading,
         bool? isMock,
         int? userId,
-        String? type,
-        String? workcode,
         DateTime? time}) =>
       Location(
         id: id ?? this.id,
@@ -61,8 +57,6 @@ class Location {
         isMock: isMock ?? this.isMock,
         userId: userId ?? this.userId,
         time: time ?? this.time,
-        type: type ?? this.type,
-        workcode: workcode ?? this.workcode,
       );
 
   // ignore: sort_constructors_first
@@ -78,8 +72,6 @@ class Location {
       isMock: json[LocationFields.isMock] == 1,
       userId: json[LocationFields.userId],
       time: DateTime.parse(json[LocationFields.time] as String),
-      type: json[LocationFields.type],
-      workcode: json[LocationFields.workcode]
   );
 
   Map<String, dynamic> toJson() => {
@@ -90,11 +82,9 @@ class Location {
     'speed': speed,
     'speed_accuracy': speedAccuracy,
     'heading': heading,
-    'is_mock': isMock ? 1 : 0,
+    'is_mock': isMock != null && isMock == true ? 1 : 0,
     'user_id' : userId,
     'time': time.toIso8601String(),
-    'type': type,
-    'workcode': workcode,
   };
 
   int? id;
@@ -105,9 +95,7 @@ class Location {
   double? speed;
   double? speedAccuracy;
   double? heading;
-  bool isMock;
+  bool? isMock;
   int userId;
   DateTime time;
-  String? type;
-  String? workcode;
 }

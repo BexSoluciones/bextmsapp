@@ -1,13 +1,12 @@
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:location/location.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:path/path.dart' as p;
 
@@ -40,6 +39,7 @@ import 'src/presentation/cubits/database/database_cubit.dart';
 import 'src/presentation/cubits/navigation/navigation_cubit.dart';
 import 'src/presentation/cubits/general/general_cubit.dart';
 import 'src/presentation/cubits/download/download_cubit.dart';
+import 'src/presentation/cubits/query/query_cubit.dart';
 
 //blocs
 import 'src/presentation/blocs/network/network_bloc.dart';
@@ -55,6 +55,8 @@ import 'src/locator.dart';
 import 'src/services/navigation.dart';
 import 'src/services/storage.dart';
 import 'src/services/isolate.dart';
+import 'src/services/location.dart';
+import 'src/services/timer.dart';
 
 //router
 import 'src/config/router/index.dart' as router;
@@ -62,13 +64,24 @@ import 'src/config/router/index.dart' as router;
 //undefined
 import 'src/presentation/views/global/undefined_view.dart';
 
+
+
+final LocalStorageService _storageService = locator<LocalStorageService>();
+final IsolateService _isolateService = locator<IsolateService>();
+final LocationService _locationService = locator<LocationService>();
+final TimerService _timerService = locator<TimerService>();
+
+List<CameraDescription> cameras = [];
+
 @pragma('vm:entry-point')
 void callbackDispatcher() async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
 
   ChargerStatus.instance.listenToEvents().listen((event) {
-    print("onNewEvent: $event");
+    if (kDebugMode) {
+      print("onNewEvent: $event");
+    }
   });
 
   ChargerStatus.instance.startPowerChangesListener();
@@ -76,26 +89,17 @@ void callbackDispatcher() async {
 }
 
 Future<bool> _listenToGeoLocations() async {
-  var serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (serviceEnabled) {
-    late LocationSettings locationSettings;
+  var status = await _locationService.location.hasPermission();
 
+  if (status == PermissionStatus.granted) {
     if (Platform.isAndroid) {
-      locationSettings = AndroidSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 0,
-          forceLocationManager: true,
-          foregroundNotificationConfig: const ForegroundNotificationConfig(
-            notificationText: "Obteniendo tu localización en segundo plano",
-            notificationTitle: "Corriendo en segundo plano",
-            enableWakeLock: false,
-          ));
-      Geolocator.getPositionStream(locationSettings: locationSettings)
-          .listen((Position? position) {
+      _locationService.activateBackgroundMode();
+
+      _locationService.locationStream.listen((event) {
         if (kDebugMode) {
-          print(position == null
-              ? 'Unknown'
-              : 'onLocationChanged: ${position.latitude.toString()}, ${position.longitude.toString()}');
+          if(event != null){
+            _timerService.setLocation();
+          }
         }
       });
     }
@@ -104,11 +108,6 @@ Future<bool> _listenToGeoLocations() async {
     return false;
   }
 }
-
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final IsolateService _isolateService = locator<IsolateService>();
-
-List<CameraDescription> cameras = [];
 
 Future<void> main() async {
   RootIsolateToken rootIsolateToken = RootIsolateToken.instance!;
@@ -122,7 +121,9 @@ Future<void> main() async {
   try {
     cameras = await availableCameras();
   } on CameraException catch (e) {
-    print(e.code + e.description!);
+    if (kDebugMode) {
+      print(e.code + e.description!);
+    }
   }
 
   bool damagedDatabaseDeleted = false;
@@ -150,7 +151,7 @@ Future<void> main() async {
 
   if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
 
-  // await _listenToGeoLocations();
+  await _listenToGeoLocations();
   ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
   runApp(const MyApp());
@@ -166,7 +167,9 @@ class MyApp extends StatelessWidget {
           RepositoryProvider(create: (context) => LocationRepository()),
           BlocProvider(
               create: (context) => LocationBloc(
-                  locationRepository: context.read<LocationRepository>())
+                  locationRepository: context.read<LocationRepository>(),
+                  databaseRepository: locator<DatabaseRepository>()
+              )
                 ..add(GetLocation())),
           BlocProvider(
             create: (context) => ThemeBloc(),
@@ -259,6 +262,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => DownloadCubit(),
+          ),
+          BlocProvider(
+            create: (context) => QueryCubit(locator<DatabaseRepository>()),
           ),
         ],
         child: BlocProvider(

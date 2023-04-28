@@ -16,7 +16,9 @@ import 'domain/repositories/database_repository.dart';
 //services
 import 'services/storage.dart';
 import 'services/navigation.dart';
-import 'package:bexdeliveries/src/services/isolate.dart';
+import 'services/location.dart';
+import 'services/isolate.dart';
+import 'services/timer.dart';
 
 final locator = GetIt.instance;
 
@@ -30,6 +32,12 @@ Future<void> initializeDependencies() async {
 
   final isolate = IsolateService();
   locator.registerSingleton<IsolateService>(isolate);
+
+  var location = await LocationService.getInstance();
+  locator.registerSingleton<LocationService>(location!);
+
+  var timer = await TimerService.getInstance();
+  locator.registerSingleton<TimerService>(timer!);
 
   final db = AppDatabase.instance;
   locator.registerSingleton<AppDatabase>(db);

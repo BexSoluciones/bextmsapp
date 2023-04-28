@@ -26,7 +26,6 @@ dependencies:
   #locations
   location: ^4.4.0
   latlong2: ^0.8.1
-  geolocator: ^9.0.2
   #connectivy
   connectivity_plus: ^3.0.3
   #map
@@ -57,7 +56,6 @@ dependencies:
   validators: ^3.0.0
   camera: ^0.10.3+2
   #download regions
-
   better_open_file: ^3.6.4
   version: ^3.0.2
   flutter_speed_dial: ^6.2.0
@@ -66,6 +64,7 @@ dependencies:
   path: ^1.8.2
   stream_transform: ^2.1.0
   flutter_svg: ^2.0.5
+  flutter_slidable: ^3.0.0
 
 
 dev_dependencies:

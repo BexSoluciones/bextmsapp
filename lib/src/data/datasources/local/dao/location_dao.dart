@@ -21,6 +21,13 @@ class LocationDao {
     return locations;
   }
 
+  Stream<List<Location>> watchAllLocations() async* {
+    final db = await _appDatabase.streamDatabase;
+    final locationList = await db!.query(tableLocations);
+    final locations = parseLocations(locationList);
+    yield locations;
+  }
+
   Future<Location?> getLastLocation() async {
     final db = await _appDatabase.streamDatabase;
 
@@ -43,5 +50,11 @@ class LocationDao {
   Future<int> updateLocation(Location location) {
     return _appDatabase.update(
         tableLocations, location.toJson(), 'id', location.id!);
+  }
+
+  Future<void> emptyLocations() async {
+    final db = await _appDatabase.streamDatabase;
+    await db!.delete(tableLocations);
+    return Future.value();
   }
 }

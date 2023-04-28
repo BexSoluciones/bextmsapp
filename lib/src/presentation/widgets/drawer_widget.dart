@@ -27,12 +27,8 @@ Drawer drawer(BuildContext context, User? user) {
       padding: EdgeInsets.zero,
       children: <Widget>[
         UserAccountsDrawerHeader(
-          // decoration: BoxDecoration(
-          //   color: Theme.of(context).colorScheme.primaryContainer,
-          // ),
           accountName: Text(
             user != null ? '${user.username} - ${user.name}' : 'No User',
-            // textScaleFactor: textScaleFactor(context)
           ),
           accountEmail: Text(
             user != null ? user.email! : 'no-repy@bexsoluciones.com',
@@ -86,7 +82,7 @@ Drawer drawer(BuildContext context, User? user) {
             context: context,
             icon: Icons.transfer_within_a_station,
             text: 'Transacciones.',
-            onTap: () => _navigationService.goTo('')),
+            onTap: () => _navigationService.goTo(transactionRoute)),
         if (kDebugMode) const Divider(),
         if (kDebugMode)
           _createDrawerItem(
@@ -99,13 +95,7 @@ Drawer drawer(BuildContext context, User? user) {
               context: context,
               icon: Icons.location_history,
               text: 'Localizaciones.',
-              onTap: () => _navigationService.goTo('')),
-        if (kDebugMode)
-          _createDrawerItem(
-              context: context,
-              icon: Icons.location_history,
-              text: 'Background.',
-              onTap: () => _navigationService.goTo('')),
+              onTap: () => _navigationService.goTo(locationsRoute)),
         const Divider(),
         //_createDrawerItem(icon: Icons.bug_report, text: 'Reportar un problema'),
         FutureBuilder(

@@ -252,8 +252,6 @@ class HelperFunctions {
         return null;
       }
     }
-
   }
-
 
 }

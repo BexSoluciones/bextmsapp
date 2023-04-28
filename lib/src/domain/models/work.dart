@@ -77,6 +77,36 @@ class WorkFields {
   static const String updatedAt = 'updated_at';
 }
 
+class WorkAdditional {
+  WorkAdditional({
+    required this.work,
+    required this.orderNumber,
+    required this.totalSummary,
+    required this.totalPayment,
+    this.status
+  });
+
+  final Work work;
+  final String orderNumber;
+  final double totalSummary;
+  final double totalPayment;
+  final String? status;
+}
+
+class WorkTypes {
+  WorkTypes({
+    required this.delivery,
+    required this.partial,
+    required this.respawn,
+    required this.rejects
+  });
+
+  final int delivery;
+  final int partial;
+  final int respawn;
+  final int rejects;
+}
+
 class Work {
   Work(
       {required this.id,

@@ -269,6 +269,8 @@ class AppDatabase {
 
   ProcessingQueueDao get processingQueueDao => ProcessingQueueDao(instance);
 
+  LocationDao get locationDao => LocationDao(instance);
+
   void close() {
     _database = null;
     _streamDatabase!.close();

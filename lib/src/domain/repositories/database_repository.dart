@@ -6,6 +6,7 @@ import '../models/transaction.dart';
 import '../models/reason.dart';
 import '../models/history_order.dart';
 import '../models/warehouse.dart';
+import '../models/location.dart';
 
 abstract class DatabaseRepository {
   //WORKS
@@ -59,9 +60,18 @@ abstract class DatabaseRepository {
   //PROCESSING QUEUE
   Stream<List<ProcessingQueue>> getAllProcessingQueues();
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete();
+  Future<int> countProcessingQueueIncompleteToTransactions();
   Future<int> updateProcessingQueue(ProcessingQueue processingQueue);
   Future<void> insertProcessingQueue(ProcessingQueue processingQueue);
   Future<void> emptyProcessingQueues();
+
+  //LOCATIONS
+  Stream<List<Location>> watchAllLocations();
+  Future<List<Location>> getAllLocations();
+  Future<Location?> getLastLocation();
+  Future<int> updateLocation(Location location);
+  Future<void> insertLocation(Location location);
+  Future<void> emptyLocations();
 
   //HISTORY ORDER
   Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId);
