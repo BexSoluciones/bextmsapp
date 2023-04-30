@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -12,6 +11,7 @@ import '../../../../cubits/summary/summary_cubit.dart';
 //domain
 import '../../../../../domain/models/arguments.dart';
 import '../../../../../domain/models/transaction.dart';
+import '../../../../../domain/abstracts/format_abstract.dart';
 
 //utils
 import '../../../../../utils/constants/nums.dart';
@@ -45,7 +45,7 @@ class ListViewSummary extends StatefulWidget {
   ListViewSummaryState createState() => ListViewSummaryState();
 }
 
-class ListViewSummaryState extends State<ListViewSummary> {
+class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
   @override
   void setState(fn) {
     if (mounted) {
@@ -152,10 +152,8 @@ class ListViewSummaryState extends State<ListViewSummary> {
                             workId: widget.arguments.work.id!,
                             workcode: widget.arguments.work.workcode!,
                             status: 'arrived',
-                            start: DateFormat('yyyy-MM-dd HH:mm:ss')
-                                .format(DateTime.now()),
-                            end: DateFormat('yyyy-MM-dd HH:mm:ss')
-                                .format(DateTime.now()),
+                            start: now(),
+                            end: now(),
                             latitude: null,
                             longitude: null,
                             firm: null);
@@ -206,13 +204,19 @@ class ListViewSummaryState extends State<ListViewSummary> {
                     summary: summary,
                     arguments: widget.arguments,
                     isArrived: isArrived,
-                    onTap: () => _navigationService.goTo(inventoryRoute,
-                        arguments: InventoryArgument(
-                            work: widget.arguments.work,
-                            summaryId: summary.id,
-                            typeOfCharge: summary.typeOfCharge,
-                            orderNumber: summary.orderNumber,
-                            operativeCenter: summary.operativeCenter)));
+                    onTap: () async {
+                      var transaction = Transaction(
+                        workId: widget.arguments.work.id!,
+                        workcode: widget.arguments.work.workcode!,
+                        status: 'summary',
+                        start: now(),
+                        end: now(),
+                        latitude: null,
+                        longitude: null,
+                      );
+                      context.read<SummaryCubit>().sendTransactionSummary(
+                          widget.arguments.work, summary, transaction);
+                    });
               }
             },
           ));
@@ -228,12 +232,18 @@ class ListViewSummaryState extends State<ListViewSummary> {
             summary: summary,
             arguments: widget.arguments,
             isArrived: false,
-            onTap: () => _navigationService.goTo(inventoryRoute,
-                arguments: InventoryArgument(
-                    work: widget.arguments.work,
-                    summaryId: summary.id,
-                    typeOfCharge: summary.typeOfCharge,
-                    orderNumber: summary.orderNumber,
-                    operativeCenter: summary.operativeCenter))));
+            onTap: () async {
+              var transaction = Transaction(
+                workId: widget.arguments.work.id!,
+                workcode: widget.arguments.work.workcode!,
+                status: 'summary',
+                start: now(),
+                end: now(),
+                latitude: null,
+                longitude: null,
+              );
+              context.read<SummaryCubit>().sendTransactionSummary(
+                  widget.arguments.work, summary, transaction);
+            }));
   }
 }

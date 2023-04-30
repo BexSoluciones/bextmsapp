@@ -127,7 +127,7 @@ class LocationService with FormatDate {
         LatLng(lastLocation.latitude, lastLocation.longitude);
 
         var diff =
-        calculateRadiusBetweenTwoLatLng(currentPosition, radiusPosition, 10);
+        calculateRadiusBetweenTwoLatLng(currentPosition, radiusPosition, 30);
 
         var distance =
         calculateDistanceBetweenTwoLatLng(currentPosition, radiusPosition);

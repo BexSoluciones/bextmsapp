@@ -12,6 +12,9 @@ import 'package:bexdeliveries/core/helpers/index.dart';
 //blocs
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
 
+//utils
+import '../../../utils/constants/strings.dart';
+
 //domain
 import '../../../domain/models/work.dart';
 import '../../../domain/models/summary.dart';
@@ -21,8 +24,13 @@ import '../../../domain/models/arguments.dart';
 import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
+//services
+import '../../../locator.dart';
+import '../../../services/navigation.dart';
 
 part 'summary_state.dart';
+
+final NavigationService _navigationService = locator<NavigationService>();
 
 class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   final DatabaseRepository _databaseRepository;
@@ -65,6 +73,48 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         isGeoreference: state.isGeoreference));
   }
 
+  Future<void> sendTransactionSummary(Work work, Summary summary, Transaction transaction) async {
+    emit(const SummaryLoading());
+
+    var vts = await _databaseRepository.validateTransactionSummary(work.workcode!, summary.orderNumber, 'summary');
+    var isArrived = await _databaseRepository.validateTransactionArrived(transaction.workId, 'arrived');
+
+    if(isArrived && vts == false){
+      currentLocation ??= await _locationRepository.getCurrentLocation();
+
+      transaction.latitude = currentLocation!.latitude.toString();
+      transaction.longitude = currentLocation!.longitude.toString();
+
+      await _databaseRepository.insertTransaction(transaction);
+
+      var processingQueue = ProcessingQueue(
+          body: jsonEncode(transaction.toJson()),
+          task: 'incomplete',
+          code: 'PISADJOFJO',
+          createdAt: now(),
+          updatedAt: now());
+
+      _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue));
+    }
+
+    final summaries = await _databaseRepository.getAllSummariesByOrderNumber(work.id!);
+
+    emit(SummarySuccess(
+        summaries: summaries,
+        origin: state.origin,
+        time: state.time,
+        isArrived: isArrived,
+        isGeoreference: state.isGeoreference));
+
+    _navigationService.goTo(inventoryRoute,
+        arguments: InventoryArgument(
+            work: work,
+            summaryId: summary.id,
+            typeOfCharge: summary.typeOfCharge!,
+            orderNumber: summary.orderNumber,
+            operativeCenter: summary.operativeCenter!));
+  }
+
   Future<void> sendTransactionArrived(
       Work work, Transaction transaction) async {
     emit(const SummaryLoading());
@@ -76,8 +126,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
     await _databaseRepository.insertTransaction(transaction);
 
-    var isArrived = await _databaseRepository.validateTransactionArrived(
-        transaction.workId, 'arrived');
+    var isArrived = await _databaseRepository.validateTransactionArrived(transaction.workId, 'arrived');
 
     var processingQueue = ProcessingQueue(
         body: jsonEncode(transaction.toJson()),

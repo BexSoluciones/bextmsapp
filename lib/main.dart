@@ -64,8 +64,6 @@ import 'src/config/router/index.dart' as router;
 //undefined
 import 'src/presentation/views/global/undefined_view.dart';
 
-
-
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final IsolateService _isolateService = locator<IsolateService>();
 final LocationService _locationService = locator<LocationService>();
@@ -85,7 +83,7 @@ void callbackDispatcher() async {
   });
 
   ChargerStatus.instance.startPowerChangesListener();
-  await _listenToGeoLocations();
+  // await _listenToGeoLocations();
 }
 
 Future<bool> _listenToGeoLocations() async {
@@ -151,7 +149,7 @@ Future<void> main() async {
 
   if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
 
-  await _listenToGeoLocations();
+  // await _listenToGeoLocations();
   ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
   runApp(const MyApp());

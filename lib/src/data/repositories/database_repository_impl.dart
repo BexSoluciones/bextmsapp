@@ -160,6 +160,12 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<bool> validateTransactionSummary(String workcode, String orderNumber, String status) {
+    return _appDatabase.transactionDao
+        .validateTransactionSummary(workcode, orderNumber, status);
+  }
+
+  @override
   Future<String?> getDiffTime(int workId) async {
     return _appDatabase.transactionDao.getDiffTime(workId);
   }

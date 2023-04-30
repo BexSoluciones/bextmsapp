@@ -44,7 +44,8 @@ abstract class DatabaseRepository {
   Future<int> insertTransaction(Transaction transaction);
   Future<int> insertTransactionSummary(TransactionSummary transactionSummary);
   Future<bool> validateTransaction(int workId);
-  Future<bool> validateTransactionArrived(int workI, String status);
+  Future<bool> validateTransactionArrived(int workId, String status);
+  Future<bool> validateTransactionSummary(String workcode, String orderNumber, String status);
   Future<int> updateTransaction(Transaction transaction);
   Future<void> insertTransactions(List<Transaction> transactions);
   Future<void> emptyTransactions();

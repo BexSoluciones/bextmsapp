@@ -208,7 +208,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new),
+            icon: const Icon(Icons.arrow_back_ios_new),
             onPressed: () => _navigationService.goBack(),
           ),
         ),
@@ -257,7 +257,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                                             .toString()
                                             .split('.')[1]
                                             .toUpperCase(),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontSize: 12,
                                             color: Colors.white),
                                       ),
@@ -271,7 +271,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                                   onNewCameraSelected(
                                       controller!.description);
                                 },
-                                hint: Text('Select item'),
+                                hint: const Text('Select item'),
                               ),
                             ),
                           ),
@@ -288,10 +288,9 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                _currentExposureOffset
-                                    .toStringAsFixed(1) +
-                                    'x',
-                                style: TextStyle(color: Colors.black),
+                                '${_currentExposureOffset
+                                    .toStringAsFixed(1)}x',
+                                style: const TextStyle(color: Colors.black),
                               ),
                             ),
                           ),
@@ -299,7 +298,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                         Expanded(
                           child: RotatedBox(
                             quarterTurns: 3,
-                            child: Container(
+                            child: SizedBox(
                               height: 30,
                               child: Slider(
                                 value: _currentExposureOffset,
@@ -346,9 +345,8 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
-                                    _currentZoomLevel.toStringAsFixed(1) +
-                                        'x',
-                                    style: TextStyle(color: Colors.white),
+                                    '${_currentZoomLevel.toStringAsFixed(1)}x',
+                                    style: const TextStyle(color: Colors.white),
                                   ),
                                 ),
                               ),
