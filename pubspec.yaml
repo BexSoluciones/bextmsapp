@@ -24,7 +24,7 @@ dependencies:
   shared_preferences: ^2.0.18
   meta: ^1.8.0
   #locations
-  location: ^4.4.0
+  location: ^5.0.0-dev.8
   latlong2: ^0.8.1
   #connectivy
   connectivity_plus: ^3.0.3
@@ -66,20 +66,25 @@ dependencies:
   flutter_svg: ^2.0.5
   flutter_slidable: ^3.0.0
 
+dependency_overrides:
+  isar: 3.0.6-dev.0
+  isar_flutter_libs: 3.0.6-dev.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.11.0
+
+flutter_icons:
+  ios: true
+  android: true
+  image_path_ios: "assets/launcher/icon.png"
+  image_path_android: "assets/launcher/icon.png"
+  adaptive_icon_background: "assets/launcher/background.png"
+  adaptive_icon_foreground: "assets/launcher/foreground.png"
 
 flutter:
-  plugin:
-    platforms:
-      android:
-        package: com.example.bexdeliveries
-        pluginClass: ChargerStatusPlugin
-      ios:
-        pluginClass: ChargerStatusPlugin
   uses-material-design: true
   assets:
     - assets/images/

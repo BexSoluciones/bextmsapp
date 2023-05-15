@@ -20,31 +20,29 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class LocationService with FormatDate {
   static LocationService? _instance;
-  static Location? _preferences;
 
   static Future<LocationService?> getInstance() async {
     _instance ??= LocationService();
-    _preferences ??= Location();
-
     return _instance;
   }
 
-  Future<bool> activateBackgroundMode() async {
-    var backgroundMode = await _preferences?.isBackgroundModeEnabled();
+  bool inBackground = false;
 
-    if (backgroundMode! == false) {
-      await _preferences?.enableBackgroundMode(enable: true);
-      await _preferences?.changeNotificationOptions(
-        title: 'Localización en segundo plano activa',
-      );
-    }
+  Future<bool> activateBackgroundMode() async {
+    // var backgroundMode = await _preferences?.isBackgroundModeEnabled();
+    //
+    // if (backgroundMode! == false) {
+    //   await _preferences?.enableBackgroundMode(enable: true);
+    //   await _preferences?.changeNotificationOptions(
+    //     title: 'Localización en segundo plano activa',
+    //   );
+    // }
 
     return Future.value(false);
   }
 
   // Keep track of current Location
   LocationData? _currentLocation;
-  Location location = Location();
 
   // Continuously emit location updates
   final StreamController<LocationData?> _locationController =
@@ -52,13 +50,18 @@ class LocationService with FormatDate {
 
   // ignore: sort_constructors_first
   LocationService() {
-    location.requestPermission().then((granted) {
-      if (granted == PermissionStatus.granted) {
-        location.onLocationChanged.listen((locationData) {
+    Future.value(getPermissionStatus())
+    .then((granted) {
+      if (granted == PermissionStatus.authorizedAlways) {
+        onLocationChanged(inBackground: inBackground).listen((locationData) {
           _locationController.add(locationData);
         });
       }
     });
+  }
+
+  Future<PermissionStatus> hasPermission() async {
+    return await getPermissionStatus();
   }
 
   bool calculateRadiusBetweenTwoLatLng(
@@ -87,7 +90,7 @@ class LocationService with FormatDate {
 
   Future<LocationData> getLocation() async {
     try {
-      _currentLocation = await location.getLocation();
+      _currentLocation = await getLocation();
     } catch (e) {
       if (kDebugMode) {
         print('Could not get the location: $e');
@@ -114,7 +117,7 @@ class LocationService with FormatDate {
           longitude: locationData.longitude!,
           accuracy: locationData.accuracy,
           altitude: locationData.altitude,
-          heading: locationData.heading,
+          heading: locationData.bearing,
           isMock: locationData.isMock,
           speed: locationData.speed,
           speedAccuracy: locationData.speedAccuracy,

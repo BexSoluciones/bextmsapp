@@ -94,8 +94,8 @@ class PoliticsViewState extends State<PoliticsView> {
                             )
                           : const Text('Aceptar y continuar',
                               softWrap: false,
-                              // textScaleFactor: textScaleFactor(context),
                               style: TextStyle(
+                                color: Colors.white,
                                 fontSize: 16.0,
                               )),
                       press: () => _dispatchEvent(context),

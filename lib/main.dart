@@ -83,13 +83,13 @@ void callbackDispatcher() async {
   });
 
   ChargerStatus.instance.startPowerChangesListener();
-  // await _listenToGeoLocations();
+  await _listenToGeoLocations();
 }
 
 Future<bool> _listenToGeoLocations() async {
-  var status = await _locationService.location.hasPermission();
+  var status = await _locationService.hasPermission();
 
-  if (status == PermissionStatus.granted) {
+  if (status == PermissionStatus.authorizedAlways) {
     if (Platform.isAndroid) {
       _locationService.activateBackgroundMode();
 
@@ -149,7 +149,7 @@ Future<void> main() async {
 
   if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
 
-  // await _listenToGeoLocations();
+  await _listenToGeoLocations();
   ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
   runApp(const MyApp());

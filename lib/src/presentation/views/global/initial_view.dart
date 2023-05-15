@@ -141,11 +141,8 @@ class InitialViewState extends State<InitialView> {
               right: kDefaultPadding,
               bottom: kDefaultPadding),
           child: buildCompanyField()),
-      // const Spacer(),
       if (error != null) Text(error),
       Column(
-        // crossAxisAlignment: CrossAxisAlignment.center,
-        // mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.only(
@@ -157,6 +154,7 @@ class InitialViewState extends State<InitialView> {
                       )
                     : Text('Comenzar'.toUpperCase(),
                         style: const TextStyle(
+                            color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.normal)),
                 press: () async {

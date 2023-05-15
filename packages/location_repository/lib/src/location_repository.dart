@@ -17,27 +17,21 @@ class CurrentLocationFailure implements Exception {
 /// {@endtemplate}
 class LocationRepository {
   /// {@macro location_repository}
-  LocationRepository({
-    Location? location,
-  }) : _location = location ?? Location();
-  final Location _location;
+  LocationRepository();
 
   /// Function to get current location
   Future<CurrentUserLocationEntity> getCurrentLocation() async {
-    final serviceEnabled = await _location.serviceEnabled();
+    final serviceEnabled = await isGPSEnabled();
     if (!serviceEnabled) {
-      final isEnabled = await _location.requestService();
-      if (!isEnabled) {
-        throw CurrentLocationFailure(
-          error: "You don't have location service enabled",
-        );
-      }
+      throw CurrentLocationFailure(
+        error: "You don't have location service enabled",
+      );
     }
 
-    final permissionStatus = await _location.hasPermission();
+    final permissionStatus = await requestPermission();
     if (permissionStatus == PermissionStatus.denied) {
-      final status = await _location.requestPermission();
-      if (status != PermissionStatus.granted) {
+      final status = await requestPermission();
+      if (status != PermissionStatus.authorizedAlways) {
         throw CurrentLocationFailure(
           error: "You don't have all the permissions granted."
               '\nYou need to activate them manually.',
@@ -47,7 +41,7 @@ class LocationRepository {
 
     late final LocationData locationData;
     try {
-      locationData = await _location.getLocation();
+      locationData = await getLocation();
     } catch (_) {
       throw CurrentLocationFailure(
         error: 'Something went wrong getting your location, '

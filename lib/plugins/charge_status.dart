@@ -8,8 +8,8 @@ class ChargerStatus {
 
   static ChargerStatus get instance => _instance ??= ChargerStatus._();
 
-  final _methodChannel = const MethodChannel('com.example.bexdeliveriesapp:method_channel');
-  final _eventChannel = const EventChannel('com.example.bexdeliveriesapp:event_channel');
+  final _methodChannel = const MethodChannel('com.example.bexdeliveries:method_channel');
+  final _eventChannel = const EventChannel('com.example.bexdeliveries:event_channel');
 
   Future<String?> getBatteryLevel() async =>  _methodChannel.invokeMethod<String>('getBatteryLevel');
   Future<String?> getChargerStatus() async =>  _methodChannel.invokeMethod<String>('getChargerStatus');

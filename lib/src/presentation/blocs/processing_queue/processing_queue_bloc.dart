@@ -186,8 +186,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
             }
 
             await _databaseRepository.updateProcessingQueue(queue);
-
-
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();
@@ -381,7 +379,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
             }
 
             await _databaseRepository.updateProcessingQueue(queue);
-
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();

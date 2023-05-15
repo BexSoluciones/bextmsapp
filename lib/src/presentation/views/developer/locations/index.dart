@@ -13,8 +13,10 @@ import 'features/item.dart';
 //services
 import '../../../../locator.dart';
 import '../../../../services/navigation.dart';
+import '../../../../../plugins/charge_status.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
+final ChargerStatus _chargerStatus = locator<ChargerStatus>();
 
 class LocationsView extends StatelessWidget {
   const LocationsView({super.key});
@@ -29,6 +31,29 @@ class LocationsView extends StatelessWidget {
           onPressed: () => _navigationService.goBack(),
         ),
         title: const Text('Localizaciones'),
+        actions: [
+          FutureBuilder<String?>(
+              future: _chargerStatus.getBatteryLevel(),
+              builder: (context, snapshot) {
+                if(snapshot.hasData){
+
+                  if(snapshot.data != null){
+                    return Row(
+                      children: [
+                        Text(snapshot.data!),
+                        const Icon(Icons.battery_0_bar)
+                      ],
+                    );
+                  }
+
+                  return const Icon(Icons.battery_alert_sharp);
+
+                }
+
+                return const Icon(Icons.battery_alert_sharp);
+              }
+          )
+        ],
       ),
       body: StreamBuilder<List<Location>>(
         stream: bloc.locations,

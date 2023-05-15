@@ -6,6 +6,9 @@ import 'package:location_repository/location_repository.dart';
 import '../core/cache/cache_manager.dart';
 import '../core/cache/storage/cache_storage.dart';
 
+//plugins
+import '../plugins/charge_status.dart';
+
 import 'data/datasources/local/app_database.dart';
 import 'data/datasources/remote/api_service.dart';
 import 'data/repositories/api_repository_impl.dart';
@@ -38,6 +41,9 @@ Future<void> initializeDependencies() async {
 
   var timer = await TimerService.getInstance();
   locator.registerSingleton<TimerService>(timer!);
+
+  var chargeStatus = ChargerStatus.instance;
+  locator.registerSingleton<ChargerStatus>(chargeStatus);
 
   final db = AppDatabase.instance;
   locator.registerSingleton<AppDatabase>(db);
