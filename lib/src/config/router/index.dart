@@ -1,19 +1,23 @@
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
+
+//utils
+import '../../utils/resources/camera.dart';
+import '../../utils/constants/strings.dart';
 
 //models
 import '../../domain/models/arguments.dart';
 import '../../domain/models/work.dart';
 
-//config
-
-import '../../utils/constants/strings.dart';
+//bloc
+import '../../presentation/blocs/camera/camera_bloc.dart';
 
 //SCREENS
 //global
 import '../../presentation/views/global/initial_view.dart';
 import '../../presentation/views/global/permission_view.dart';
-// import '../../presentation/views/global/location_view.dart';
 import '../../presentation/views/global/login_view.dart';
 import '../../presentation/views/global/undefined_view.dart';
 import '../../presentation/views/global/splash_view.dart';
@@ -39,13 +43,15 @@ import '../../presentation/views/user/query/index.dart';
 import '../../presentation/views/user/query/features/devolution.dart';
 import '../../presentation/views/user/query/features/respawn.dart';
 import '../../presentation/views/user/query/features/collection.dart';
+import '../../presentation/views/user/database/index.dart';
+import '../../presentation/views/user/photos/index.dart';
+import '../../presentation/views/user/photos/features/detail.dart';
 
 //developer
 import '../../presentation/views/developer/processing_queue/index.dart';
 import '../../presentation/views/developer/locations/index.dart';
 
-//drawer
-import '../../presentation/views/user/database/index.dart';
+
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
@@ -180,8 +186,17 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               autoPlayDelay: const Duration(seconds: 3),
               blurValue: 1,
               builder: Builder(builder: (context) {
-                return CameraView(orderNumber: settings.arguments as String);
+                // return CameraView(orderNumber: settings.arguments as String);
+                return BlocProvider(
+                  create: (_) => CameraBloc(cameraUtils: CameraUtils())
+                    ..add(CameraInitialized()),
+                  child: CameraView(),
+                );
               })));
+    case photoRoute:
+      return MaterialPageRoute(builder: (context) => const PhotoView());
+    case detailPhotoRoute:
+      return MaterialPageRoute(builder: (context) => const DetailPhotoView());
     //drawer routes
     case databaseRoute:
       return MaterialPageRoute(builder: (context) => const DatabaseView());

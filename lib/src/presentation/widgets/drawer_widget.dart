@@ -96,6 +96,18 @@ Drawer drawer(BuildContext context, User? user) {
               icon: Icons.location_history,
               text: 'Localizaciones.',
               onTap: () => _navigationService.goTo(locationsRoute)),
+        if (kDebugMode)
+          _createDrawerItem(
+              context: context,
+              icon: Icons.camera_alt,
+              text: 'Camara.',
+              onTap: () => _navigationService.goTo(cameraRoute)),
+        if (kDebugMode)
+          _createDrawerItem(
+              context: context,
+              icon: Icons.photo,
+              text: 'Fotos.',
+              onTap: () => _navigationService.goTo(photoRoute)),
         const Divider(),
         //_createDrawerItem(icon: Icons.bug_report, text: 'Reportar un problema'),
         FutureBuilder(

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 //cubit
 import '../../../../cubits/work/work_cubit.dart';
 
-class TabViewWork extends StatefulWidget  with PreferredSizeWidget {
+class TabViewWork extends StatefulWidget  implements PreferredSizeWidget {
   const TabViewWork({super.key,  required this.tabController, required this.workcode });
 
   final TabController tabController;

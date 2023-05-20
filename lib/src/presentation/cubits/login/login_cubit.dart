@@ -73,7 +73,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
                     : null),
             null);
 
-  Future getConfigEnterprise() async {
+  Future<void> getConfigEnterprise() async {
     var response = await _apiRepository.getConfigEnterprise(request: EnterpriseConfigRequest());
     if (response is DataSuccess) {
       var data = response.data as EnterpriseConfigResponse;
@@ -81,7 +81,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
     }
   }
 
-  Future getReasons() async {
+  Future<void> getReasons() async {
     var response = await _apiRepository.reasons(request: ReasonRequest());
     if (response is DataSuccess) {
       var data = response.data as ReasonResponse;
@@ -110,12 +110,10 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
 
       currentLocation = await _locationRepository.getCurrentLocation();
 
-      await Isolate.spawn<IsolateModel>(
-          helperFunctions.heavyTask,
-          IsolateModel(2, [
-            getConfigEnterprise(),
-            getReasons()
-          ]));
+      Future.wait([
+        getConfigEnterprise(),
+        getReasons()
+      ]);
 
       final response = await _apiRepository.login(
         request: LoginRequest(usernameController.text, passwordController.text),
@@ -176,44 +174,44 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
           });
 
           //TODO:: refactoring
-          var workcodes = groupBy(works, (Work work) => work.workcode);
-
-          if (workcodes.isNotEmpty) {
-            var localWorks = await _databaseRepository.getAllWorks();
-            var localWorkcode = groupBy(localWorks, (Work obj) => obj.workcode);
-            await differenceWorks(localWorkcode.keys.toList(), workcodes.keys.toList());
-          }
-
-          for (var key in groupBy(works, (Work obj) => obj.workcode).keys) {
-            var worksF = works.where((element) => element.workcode == key);
-
-            if (worksF.first.zoneId != null) {
-              var processingQueueHistoric = ProcessingQueue(
-                  body: jsonEncode({
-                    'zone_id': worksF.first.zoneId!,
-                    'workcode': worksF.first.workcode
-                  }),
-                  task: 'incomplete',
-                  code: 'AB5A8E10Y3',
-                  createdAt: now(),
-                  updatedAt: now()
-              );
-
-              _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueHistoric));
-            }
-
-            if (worksF.first.status == 'unsync') {
-              var processingQueueWork = ProcessingQueue(
-                  body: jsonEncode({'workcode': key, 'status': 'sync'}),
-                  task: 'incomplete',
-                  code: 'EBSVAEKRJB',
-                  createdAt: now(),
-                  updatedAt: now()
-              );
-
-              _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueWork));
-            }
-          }
+          // var workcodes = groupBy(works, (Work work) => work.workcode);
+          //
+          // if (workcodes.isNotEmpty) {
+          //   var localWorks = await _databaseRepository.getAllWorks();
+          //   var localWorkcode = groupBy(localWorks, (Work obj) => obj.workcode);
+          //   await differenceWorks(localWorkcode.keys.toList(), workcodes.keys.toList());
+          // }
+          //
+          // for (var key in groupBy(works, (Work obj) => obj.workcode).keys) {
+          //   var worksF = works.where((element) => element.workcode == key);
+          //
+          //   if (worksF.first.zoneId != null) {
+          //     var processingQueueHistoric = ProcessingQueue(
+          //         body: jsonEncode({
+          //           'zone_id': worksF.first.zoneId!,
+          //           'workcode': worksF.first.workcode
+          //         }),
+          //         task: 'incomplete',
+          //         code: 'AB5A8E10Y3',
+          //         createdAt: now(),
+          //         updatedAt: now()
+          //     );
+          //
+          //     _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueHistoric));
+          //   }
+          //
+          //   if (worksF.first.status == 'unsync') {
+          //     var processingQueueWork = ProcessingQueue(
+          //         body: jsonEncode({'workcode': key, 'status': 'sync'}),
+          //         task: 'incomplete',
+          //         code: 'EBSVAEKRJB',
+          //         createdAt: now(),
+          //         updatedAt: now()
+          //     );
+          //
+          //     _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueWork));
+          //   }
+          // }
 
           await _databaseRepository.insertWorks(works);
           await _databaseRepository.insertSummaries(summaries);

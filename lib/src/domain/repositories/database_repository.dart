@@ -7,6 +7,7 @@ import '../models/reason.dart';
 import '../models/history_order.dart';
 import '../models/warehouse.dart';
 import '../models/location.dart';
+import '../models/photo.dart';
 
 abstract class DatabaseRepository {
   //WORKS
@@ -74,6 +75,15 @@ abstract class DatabaseRepository {
   Future<int> updateLocation(Location location);
   Future<void> insertLocation(Location location);
   Future<void> emptyLocations();
+
+  //PHOTOS
+  Future<List<Photo>> getAllPhotos();
+  Future<Photo?> findPhoto(String path);
+  Future<int> insertPhoto(Photo photo);
+  Future<int> updatePhoto(Photo photo);
+  Future<void> insertPhotos(List<Photo> photos);
+  Future<void> emptyPhotos();
+
 
   //HISTORY ORDER
   Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId);

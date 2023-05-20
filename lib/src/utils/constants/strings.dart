@@ -31,6 +31,9 @@ const packageRoute = '/package';
 const cameraRoute = '/camera';
 const firmRoute = '/firm';
 const qrRoute = '/code-qr';
+const photoRoute = '/photos';
+const detailPhotoRoute = '/detail-photo';
+
 
 const collectionRoute = '/collection';
 const partialRoute = '/partial';

@@ -44,7 +44,11 @@ import 'src/presentation/cubits/query/query_cubit.dart';
 import 'src/presentation/blocs/network/network_bloc.dart';
 import 'src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 import 'src/presentation/blocs/location/location_bloc.dart';
+import 'src/presentation/blocs/photo/photo_bloc.dart';
+import 'src/presentation/blocs/camera/camera_bloc.dart';
 
+//providers
+import 'src/presentation/providers/photo_provider.dart';
 
 //utils
 import 'src/utils/constants/strings.dart';
@@ -92,7 +96,7 @@ Future<bool> _listenToGeoLocations() async {
 
       _locationService.locationStream.listen((event) {
         if (kDebugMode) {
-          if(event != null){
+          if (event != null) {
             _timerService.setLocation();
           }
         }
@@ -156,10 +160,15 @@ class MyApp extends StatelessWidget {
         providers: [
           RepositoryProvider(create: (context) => LocationRepository()),
           BlocProvider(
+            create: (context) => PhotosBloc(
+                photoProvider: PhotoProvider(
+                    databaseRepository: locator<DatabaseRepository>()))
+              ..add(PhotosLoaded()),
+          ),
+          BlocProvider(
               create: (context) => LocationBloc(
                   locationRepository: context.read<LocationRepository>(),
-                  databaseRepository: locator<DatabaseRepository>()
-              )
+                  databaseRepository: locator<DatabaseRepository>())
                 ..add(GetLocation())),
           BlocProvider(
             create: (context) => ThemeBloc(),
@@ -184,8 +193,7 @@ class MyApp extends StatelessWidget {
                   locator<ApiRepository>(),
                   locator<DatabaseRepository>(),
                   locator<LocationRepository>(),
-                  BlocProvider.of<ProcessingQueueBloc>(context)
-              )),
+                  BlocProvider.of<ProcessingQueueBloc>(context))),
           BlocProvider(
               create: (context) => HomeCubit(locator<DatabaseRepository>(),
                   locator<ApiRepository>(), locator<LocationRepository>())),
@@ -260,32 +268,29 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: BlocProvider(
-                create: (context) => ThemeBloc(),
-                child: BlocBuilder<ThemeBloc, ThemeState>(
-                    builder: (context, state) {
-                  return GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      FocusScope.of(context).requestFocus(FocusNode());
-                    },
-                    child: MaterialApp(
-                        debugShowCheckedModeBanner: false,
-                        title: appTitle,
-                        theme:
-                            state.isDarkTheme ? AppTheme.light : AppTheme.dark,
-                        darkTheme: AppTheme.dark,
-                        themeMode: ThemeMode.system,
-                        navigatorKey: locator<NavigationService>().navigatorKey,
-                        onUnknownRoute: (RouteSettings settings) =>
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    UndefinedView(
-                                      name: settings.name,
-                                    )),
-                        initialRoute: '/splash',
-                        onGenerateRoute: router.generateRoute,
-                      ),
-                  );
-                })));
+            create: (context) => ThemeBloc(),
+            child:
+                BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  FocusScope.of(context).requestFocus(FocusNode());
+                },
+                child: MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  title: appTitle,
+                  theme: state.isDarkTheme ? AppTheme.light : AppTheme.dark,
+                  darkTheme: AppTheme.dark,
+                  themeMode: ThemeMode.system,
+                  navigatorKey: locator<NavigationService>().navigatorKey,
+                  onUnknownRoute: (RouteSettings settings) => MaterialPageRoute(
+                      builder: (BuildContext context) => UndefinedView(
+                            name: settings.name,
+                          )),
+                  initialRoute: '/splash',
+                  onGenerateRoute: router.generateRoute,
+                ),
+              );
+            })));
   }
 }

@@ -11,6 +11,7 @@ import '../../domain/models/processing_queue.dart';
 import '../../domain/models/history_order.dart';
 import '../../domain/models/warehouse.dart';
 import '../../domain/models/location.dart';
+import '../../domain/models/photo.dart';
 
 class DatabaseRepositoryImpl implements DatabaseRepository {
   final AppDatabase _appDatabase;
@@ -295,6 +296,37 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyLocations() async {
     return _appDatabase.locationDao.emptyLocations();
+  }
+
+  //PHOTOS
+  @override
+  Future<List<Photo>> getAllPhotos() async {
+    return _appDatabase.photoDao.getAllPhotos();
+  }
+
+  @override
+  Future<Photo?> findPhoto(String path) async {
+    return _appDatabase.photoDao.findPhoto(path);
+  }
+
+  @override
+  Future<int> insertPhoto(Photo photo) async {
+    return _appDatabase.photoDao.insertPhoto(photo);
+  }
+
+  @override
+  Future<int> updatePhoto(Photo photo) async {
+    return _appDatabase.photoDao.updatePhoto(photo);
+  }
+
+  @override
+  Future<void> insertPhotos(List<Photo> photos) async {
+    return _appDatabase.photoDao.insertPhotos(photos);
+  }
+
+  @override
+  Future<void> emptyPhotos() async {
+    return _appDatabase.photoDao.emptyPhotos();
   }
 
   //HISTORY ORDER

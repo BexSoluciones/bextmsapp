@@ -17,6 +17,7 @@ import 'package:bexdeliveries/src/domain/models/location.dart';
 import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
 import 'package:bexdeliveries/src/domain/models/reason.dart';
 import 'package:bexdeliveries/src/domain/models/history_order.dart';
+import 'package:bexdeliveries/src/domain/models/photo.dart';
 
 //daos
 part '../local/dao/work_dao.dart';
@@ -28,6 +29,7 @@ part '../local/dao/processing_queue_dao.dart';
 part '../local/dao/reason_dao.dart';
 part '../local/dao/history_order_dao.dart';
 part '../local/dao/warehouse_dao.dart';
+part '../local/dao/photo_dao.dart';
 
 class AppDatabase {
   static BriteDatabase? _streamDatabase;
@@ -198,19 +200,21 @@ class AppDatabase {
   final migrations = [
     '''
       CREATE INDEX workcode_index ON $tableWorks(${WorkFields.workcode});
+    ''',
+    '''
+      CREATE TABLE $tablePhotos (
+        ${PhotoFields.id} INTEGER PRIMARY KEY,
+        ${PhotoFields.name} TEXT DEFAULT NULL,
+        ${PhotoFields.path} TEXT DEFAULT NULL
+      )
     '''
   ];
 
   Future<Database> _initDatabase(databaseName) async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
-
     final config = MigrationConfig(
         initializationScript: initialScript, migrationScripts: migrations);
-
     final path = join(documentsDirectory.path, databaseName);
-
-    await Sqflite.setDebugModeOn(false);
-
     return await openDatabaseWithMigration(path, config);
   }
 
@@ -270,6 +274,8 @@ class AppDatabase {
   ProcessingQueueDao get processingQueueDao => ProcessingQueueDao(instance);
 
   LocationDao get locationDao => LocationDao(instance);
+
+  PhotoDao get photoDao => PhotoDao(instance);
 
   void close() {
     _database = null;
