@@ -1,5 +1,5 @@
 // App
-const String appTitle = 'Bex deliveries';
+const String appTitle = 'Bex Deliveries';
 
 // Networking and APIs
 const String baseUrl = 'https://demo.bexdeliveries.com/api/v1/';
@@ -48,16 +48,6 @@ const databaseRoute = '/database';
 const processingQueueRoute = '/processing-queue';
 const transactionRoute = '/transaction';
 const locationsRoute = '/locations';
-
-// Form Error
-const String kEmailNullError = 'Por favor ingresa un correo';
-const String kInvalidEmailError = 'Porfavor ingresa un correo válido';
-const String kPassNullError = 'Porfavor ingresa una contraseña';
-const String kShortPassError = 'La contraseña es demasiado corta';
-const String kMatchPassError = 'La contraseña no coindice';
-const String kNameNullError = 'Porfavor ingresa un nombre';
-const String kPhoneNumberNullError = 'Porfavor ingresa tu número de telefono';
-const String kAddressNullError = 'Porfavor ingresa tu dirección';
 
 const String buttonTextDefault = "Permitir";
 const String buttonTextSuccess = "Continuar";

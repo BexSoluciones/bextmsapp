@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 class IsolateService {
   static IsolateService? _instance;
 
-
-
   static Future<IsolateService?> getInstance() async {
     _instance ??= IsolateService();
     return _instance;
@@ -18,8 +16,4 @@ class IsolateService {
 
     // BackgroundIsolateBinding.initializeBackgroundIsolate(binding);
   }
-
-
-
-
 }

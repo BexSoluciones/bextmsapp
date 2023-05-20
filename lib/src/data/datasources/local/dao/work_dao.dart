@@ -33,12 +33,6 @@ class WorkDao {
         GROUP BY $tableWorks.${WorkFields.workcode}
         '''
     );
-
-    /*
-
-
-     */
-
     return parseWorks(workList);
   }
 
@@ -103,6 +97,12 @@ class WorkDao {
 
   Future<int> updateWork(Work work) {
     return _appDatabase.update(tableWorks, work.toJson(), 'id', work.id!);
+  }
+
+  Future<int> updateStatusWork(String workcode, String status) async {
+    final db = await _appDatabase.streamDatabase;
+    return db!.update(tableWorks, {'status': status },
+        where: 'workcode = ?', whereArgs: [workcode]);
   }
 
   Future<void> insertWorks(List<Work> works) async {

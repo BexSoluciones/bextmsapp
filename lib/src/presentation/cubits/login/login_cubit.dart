@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:isolate';
+import 'package:collection/collection.dart';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -7,12 +11,15 @@ import 'package:yaml/yaml.dart';
 import 'package:location_repository/location_repository.dart';
 
 //domain
+import '../../../../core/helpers/index.dart';
 ///models
 import '../../../domain/models/login.dart';
 import '../../../domain/models/enterprise.dart';
 import '../../../domain/models/work.dart';
 import '../../../domain/models/summary.dart';
 import '../../../domain/models/transaction.dart';
+import '../../../domain/models/isolate.dart';
+import '../../../domain/models/processing_queue.dart';
 ///requests
 import '../../../domain/models/requests/login_request.dart';
 import '../../../domain/models/requests/work_request.dart';
@@ -24,6 +31,11 @@ import '../../../domain/models/responses/enterprise_config_response.dart';
 ///repositories
 import '../../../domain/repositories/api_repository.dart';
 import '../../../domain/repositories/database_repository.dart';
+//abstracts
+import '../../../domain/abstracts/format_abstract.dart';
+
+//bloc
+import '../../blocs/processing_queue/processing_queue_bloc.dart';
 
 //cubit
 import '../base/base_cubit.dart';
@@ -42,14 +54,17 @@ part 'login_state.dart';
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
 
-class LoginCubit extends BaseCubit<LoginState, Login?> {
+class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   final ApiRepository _apiRepository;
   final DatabaseRepository _databaseRepository;
   final LocationRepository _locationRepository;
+  final ProcessingQueueBloc _processingQueueBloc;
 
   CurrentUserLocationEntity? currentLocation;
+  
+  var helperFunctions = HelperFunctions();
 
-  LoginCubit(this._apiRepository, this._databaseRepository, this._locationRepository)
+  LoginCubit(this._apiRepository, this._databaseRepository, this._locationRepository, this._processingQueueBloc)
       : super(
             LoginSuccess(
                 enterprise: _storageService.getObject('enterprise') != null
@@ -57,6 +72,31 @@ class LoginCubit extends BaseCubit<LoginState, Login?> {
                         _storageService.getObject('enterprise')!)
                     : null),
             null);
+
+  Future getConfigEnterprise() async {
+    var response = await _apiRepository.getConfigEnterprise(request: EnterpriseConfigRequest());
+    if (response is DataSuccess) {
+      var data = response.data as EnterpriseConfigResponse;
+      _storageService.setObject('config', data.enterpriseConfig.toMap());
+    }
+  }
+
+  Future getReasons() async {
+    var response = await _apiRepository.reasons(request: ReasonRequest());
+    if (response is DataSuccess) {
+      var data = response.data as ReasonResponse;
+      _databaseRepository.insertReasons(data.reasons);
+    }
+  }
+
+  Future<void> differenceWorks(List<String?> localWorks, List<String?> externalWorks) async {
+    var difference = localWorks.toSet().difference(externalWorks.toSet()).toList();
+    if (difference.isNotEmpty) {
+      for (var key in difference) {
+        await _databaseRepository.updateStatusWork(key!, 'complete');
+      }
+    }
+  }
 
   Future<void> onPressedLogin(TextEditingController usernameController,
       TextEditingController passwordController) async {
@@ -70,22 +110,12 @@ class LoginCubit extends BaseCubit<LoginState, Login?> {
 
       currentLocation = await _locationRepository.getCurrentLocation();
 
-      final results = await Future.wait([
-        _apiRepository.getConfigEnterprise(request: EnterpriseConfigRequest()),
-        _apiRepository.reasons(request: ReasonRequest()),
-      ]);
-
-      if (results.isNotEmpty) {
-        if (results[0] is DataSuccess) {
-          var data = results[0].data as EnterpriseConfigResponse;
-          _storageService.setObject('config', data.enterpriseConfig.toMap());
-        }
-
-        if (results[1] is DataSuccess) {
-          var data = results[1].data as ReasonResponse;
-          _databaseRepository.insertReasons(data.reasons);
-        }
-      }
+      await Isolate.spawn<IsolateModel>(
+          helperFunctions.heavyTask,
+          IsolateModel(2, [
+            getConfigEnterprise(),
+            getReasons()
+          ]));
 
       final response = await _apiRepository.login(
         request: LoginRequest(usernameController.text, passwordController.text),
@@ -112,7 +142,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> {
                 version,
                 currentLocation!.latitude.toString(),
                 currentLocation!.longitude.toString(),
-                DateTime.now().toIso8601String(),
+                now(),
                 'login'));
 
         if (responseWorks is DataSuccess) {
@@ -123,14 +153,10 @@ class LoginCubit extends BaseCubit<LoginState, Login?> {
           await Future.forEach(responseWorks.data!.works, (work) async {
             works.add(work);
             if (work.summaries != null) {
-              await Future.forEach(work.summaries as Iterable<Object?>,
-                  (element) {
+              await Future.forEach(work.summaries as Iterable<Object?>, (element) {
                 var summary = element as Summary;
-                if (summary.idPacking != null && summary.packing != null) {
-                  summary.cant = 1;
-                } else {
-                  summary.cant = ((double.parse(summary.amount) * 100.0 / double.parse(summary.unitOfMeasurement)).round() / 100);
-                }
+                summary.cant = ((double.parse(summary.amount) * 100.0 / double.parse(summary.unitOfMeasurement)).round() / 100);
+
                 summary.grandTotalCopy = summary.grandTotal;
                 if (summary.transaction != null) {
                   transactions.add(summary.transaction!);
@@ -148,6 +174,46 @@ class LoginCubit extends BaseCubit<LoginState, Login?> {
               }
             }
           });
+
+          //TODO:: refactoring
+          var workcodes = groupBy(works, (Work work) => work.workcode);
+
+          if (workcodes.isNotEmpty) {
+            var localWorks = await _databaseRepository.getAllWorks();
+            var localWorkcode = groupBy(localWorks, (Work obj) => obj.workcode);
+            await differenceWorks(localWorkcode.keys.toList(), workcodes.keys.toList());
+          }
+
+          for (var key in groupBy(works, (Work obj) => obj.workcode).keys) {
+            var worksF = works.where((element) => element.workcode == key);
+
+            if (worksF.first.zoneId != null) {
+              var processingQueueHistoric = ProcessingQueue(
+                  body: jsonEncode({
+                    'zone_id': worksF.first.zoneId!,
+                    'workcode': worksF.first.workcode
+                  }),
+                  task: 'incomplete',
+                  code: 'AB5A8E10Y3',
+                  createdAt: now(),
+                  updatedAt: now()
+              );
+
+              _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueHistoric));
+            }
+
+            if (worksF.first.status == 'unsync') {
+              var processingQueueWork = ProcessingQueue(
+                  body: jsonEncode({'workcode': key, 'status': 'sync'}),
+                  task: 'incomplete',
+                  code: 'EBSVAEKRJB',
+                  createdAt: now(),
+                  updatedAt: now()
+              );
+
+              _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueWork));
+            }
+          }
 
           await _databaseRepository.insertWorks(works);
           await _databaseRepository.insertSummaries(summaries);

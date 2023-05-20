@@ -16,6 +16,7 @@ abstract class DatabaseRepository {
   Future<int> countAllWorksByWorkcode(String workcode);
   Future<int> insertWork(Work work);
   Future<int> updateWork(Work work);
+  Future<int> updateStatusWork(String workcode, String status);
   Future<void> insertWorks(List<Work> works);
   Future<void> emptyWorks();
 

@@ -50,6 +50,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<int> updateStatusWork(String workcode, String status) async {
+    return _appDatabase.workDao.updateStatusWork(workcode, status);
+  }
+
+  @override
   Future<void> insertWorks(List<Work> works) async {
     return _appDatabase.workDao.insertWorks(works);
   }

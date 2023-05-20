@@ -14,7 +14,7 @@ import '../../src/presentation/widgets/show_map_direction_widget.dart';
 
 class HelperFunctions {
 
-  static void heavyTask(IsolateModel model) {
+  void heavyTask(IsolateModel model) {
     for (var i = 0; i < model.iteration; i++) {
       model.functions[i];
     }

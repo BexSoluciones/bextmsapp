@@ -24,7 +24,11 @@ dependencies:
   shared_preferences: ^2.0.18
   meta: ^1.8.0
   #locations
-  location: ^5.0.0-dev.8
+  location:
+    git:
+      url: https://github.com/fairuzmn/flutterlocation.git
+      ref: location-v5.5.0.0-dev.9-fix
+      path: packages/location
   latlong2: ^0.8.1
   #connectivy
   connectivity_plus: ^3.0.3

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -54,7 +53,6 @@ import 'src/utils/constants/strings.dart';
 import 'src/locator.dart';
 import 'src/services/navigation.dart';
 import 'src/services/storage.dart';
-import 'src/services/isolate.dart';
 import 'src/services/location.dart';
 import 'src/services/timer.dart';
 
@@ -65,7 +63,6 @@ import 'src/config/router/index.dart' as router;
 import 'src/presentation/views/global/undefined_view.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
-final IsolateService _isolateService = locator<IsolateService>();
 final LocationService _locationService = locator<LocationService>();
 final TimerService _timerService = locator<TimerService>();
 
@@ -108,13 +105,8 @@ Future<bool> _listenToGeoLocations() async {
 }
 
 Future<void> main() async {
-  RootIsolateToken rootIsolateToken = RootIsolateToken.instance!;
-
   WidgetsFlutterBinding.ensureInitialized();
-
   await initializeDependencies();
-
-  Isolate.spawn(_isolateService.isolateMain, rootIsolateToken);
 
   try {
     cameras = await availableCameras();
@@ -191,7 +183,9 @@ class MyApp extends StatelessWidget {
               create: (context) => LoginCubit(
                   locator<ApiRepository>(),
                   locator<DatabaseRepository>(),
-                  locator<LocationRepository>())),
+                  locator<LocationRepository>(),
+                  BlocProvider.of<ProcessingQueueBloc>(context)
+              )),
           BlocProvider(
               create: (context) => HomeCubit(locator<DatabaseRepository>(),
                   locator<ApiRepository>(), locator<LocationRepository>())),
