@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bexdeliveries/src/domain/models/photo.dart';
+import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
@@ -13,6 +15,7 @@ part 'camera_state.dart';
 
 class CameraBloc extends Bloc<CameraEvent, CameraState> {
   final CameraUtils cameraUtils;
+  final DatabaseRepository databaseRepository;
   final ResolutionPreset resolutionPreset;
   final CameraLensDirection cameraLensDirection;
 
@@ -20,6 +23,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
 
   CameraBloc({
     required this.cameraUtils,
+    required this.databaseRepository,
     this.resolutionPreset = ResolutionPreset.medium,
     this.cameraLensDirection = CameraLensDirection.back,
   }) : super(CameraInitial()) {
@@ -51,7 +55,9 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       emit(CameraCaptureInProgress());
       try {
         final path = await cameraUtils.getPath();
-        await _controller.takePicture();
+        var picture = await _controller.takePicture();
+        var photo = Photo(name: picture.name, path: picture.path);
+        await databaseRepository.insertPhoto(photo);
         emit(CameraCaptureSuccess(path));
       } on CameraException catch (error) {
         emit(CameraCaptureFailure(error: error.description!));

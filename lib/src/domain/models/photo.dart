@@ -12,13 +12,12 @@ class PhotoFields {
   static const String path = 'path';
 }
 
-
 class Photo{
-  late int id;
+  int? id;
   late String name;
   late String path;
 
-  Photo({required this.id, required this.name,required this.path});
+  Photo({this.id, required this.name,required this.path});
 
   Photo.fromJson(Map<String, dynamic> json){
     id = json['id'];

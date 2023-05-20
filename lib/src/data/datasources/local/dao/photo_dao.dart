@@ -37,7 +37,7 @@ class PhotoDao {
   }
 
   Future<int> updatePhoto(Photo photo) {
-    return _appDatabase.update(tablePhotos, photo.toJson(), 'id', photo.id);
+    return _appDatabase.update(tablePhotos, photo.toJson(), 'id', photo.id!);
   }
 
   Future<void> insertPhotos(List<Photo> photos) async {

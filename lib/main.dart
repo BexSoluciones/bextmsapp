@@ -45,7 +45,6 @@ import 'src/presentation/blocs/network/network_bloc.dart';
 import 'src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 import 'src/presentation/blocs/location/location_bloc.dart';
 import 'src/presentation/blocs/photo/photo_bloc.dart';
-import 'src/presentation/blocs/camera/camera_bloc.dart';
 
 //providers
 import 'src/presentation/providers/photo_provider.dart';

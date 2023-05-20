@@ -1,7 +1,11 @@
 
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
+
+//repositories
+import '../../domain/repositories/database_repository.dart';
 
 //utils
 import '../../utils/resources/camera.dart';
@@ -51,7 +55,8 @@ import '../../presentation/views/user/photos/features/detail.dart';
 import '../../presentation/views/developer/processing_queue/index.dart';
 import '../../presentation/views/developer/locations/index.dart';
 
-
+//locator
+import '../../locator.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
@@ -188,7 +193,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               builder: Builder(builder: (context) {
                 // return CameraView(orderNumber: settings.arguments as String);
                 return BlocProvider(
-                  create: (_) => CameraBloc(cameraUtils: CameraUtils())
+                  create: (_) => CameraBloc(cameraUtils: CameraUtils(), databaseRepository: locator<DatabaseRepository>())
                     ..add(CameraInitialized()),
                   child: CameraView(),
                 );
