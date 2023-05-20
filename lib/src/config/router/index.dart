@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //repositories
+import '../../domain/models/photo.dart';
 import '../../domain/repositories/database_repository.dart';
 
 //utils
@@ -201,7 +202,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case photoRoute:
       return MaterialPageRoute(builder: (context) => const PhotoView());
     case detailPhotoRoute:
-      return MaterialPageRoute(builder: (context) => const DetailPhotoView());
+      return MaterialPageRoute(builder: (context) => DetailPhotoView(
+        photo: settings.arguments as Photo,
+      ));
     //drawer routes
     case databaseRoute:
       return MaterialPageRoute(builder: (context) => const DatabaseView());

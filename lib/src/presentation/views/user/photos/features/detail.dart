@@ -9,11 +9,12 @@ import '../../../../../domain/models/photo.dart';
 import '../../../../blocs/photo/photo_bloc.dart';
 
 class DetailPhotoView extends StatelessWidget {
-  const DetailPhotoView({super.key});
+  const DetailPhotoView({super.key, required this.photo });
+
+  final Photo photo;
 
   @override
   Widget build(BuildContext context) {
-    final Photo photo = ModalRoute.of(context)?.settings.arguments as Photo;
 
     deletePhoto() {
       BlocProvider.of<PhotosBloc>(context).add(PhotosDeleted(photo: photo));
