@@ -27,6 +27,9 @@ import '../models/responses/transaction_response.dart';
 import '../models/requests/transaction_summary_request.dart';
 import '../models/responses/transaction_summary_response.dart';
 
+import '../models/requests/status_request.dart';
+import '../models/responses/status_response.dart';
+
 abstract class ApiRepository {
   //SYNCHRONOUS
   Future<DataState<EnterpriseResponse>> getEnterprise({
@@ -58,6 +61,10 @@ abstract class ApiRepository {
   });
 
   //ASYNCHRONOUS
+  Future<DataState<StatusResponse>> status({
+    required StatusRequest request
+  });
+
   Future<DataState<TransactionResponse>> start({
     required TransactionRequest request
   });

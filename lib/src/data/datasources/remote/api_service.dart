@@ -23,6 +23,7 @@ import '../../../domain/models/responses/enterprise_config_response.dart';
 import '../../../domain/models/responses/reason_response.dart';
 import '../../../domain/models/responses/transaction_response.dart';
 import '../../../domain/models/responses/transaction_summary_response.dart';
+import '../../../domain/models/responses/status_response.dart';
 
 //services
 import '../../../locator.dart';
@@ -315,7 +316,7 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<TransactionResponse>> start(Transaction transaction) async {
+  Future<Response<StatusResponse>> status(String workcode, String status) async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
@@ -325,16 +326,41 @@ class ApiService {
     };
 
     final data = <String, dynamic>{
-      r'work_id': transaction.workId,
-      r'workcode': transaction.workcode,
-      r'status': transaction.status,
-      r'start': transaction.start,
-      r'end': transaction.end,
-      r'latitude': transaction.latitude,
-      r'longitude': transaction.longitude,
+      r'workcode': workcode,
+      r'status' : status
     };
 
-    data.removeWhere((k, v) => v == null);
+    final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
+        Options(
+          method: 'POST',
+          headers: headers,
+          extra: extra,
+        )
+            .compose(dio.options, '/works/status',
+            queryParameters: queryParameters, data: data)
+            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+
+    final value = StatusResponse.fromMap(result.data!);
+
+    return Response(
+        data: value,
+        requestOptions: result.requestOptions,
+        statusCode: result.statusCode,
+        statusMessage: result.statusMessage,
+        isRedirect: result.isRedirect,
+        redirects: result.redirects,
+        extra: result.extra,
+        headers: result.headers);
+  }
+
+  Future<Response<TransactionResponse>> start(Transaction transaction) async {
+    const extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+
+    final headers = <String, dynamic>{
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
 
     final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
         Options(
@@ -343,7 +369,7 @@ class ApiService {
       extra: extra,
     )
             .compose(dio.options, '/works/transactions/client',
-                queryParameters: queryParameters, data: data)
+                queryParameters: queryParameters, data: transaction.toJson())
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value =
@@ -369,18 +395,6 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    final data = <String, dynamic>{
-      r'work_id': transaction.workId,
-      r'workcode': transaction.workcode,
-      r'status': transaction.status,
-      r'start': transaction.start,
-      r'end': transaction.end,
-      r'latitude': transaction.latitude,
-      r'longitude': transaction.longitude,
-    };
-
-    data.removeWhere((k, v) => v == null);
-
     final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
         Options(
       method: 'POST',
@@ -388,7 +402,7 @@ class ApiService {
       extra: extra,
     )
             .compose(dio.options, '/works/transactions/arrived',
-                queryParameters: queryParameters, data: data)
+                queryParameters: queryParameters, data: transaction.toJson())
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value =
@@ -414,19 +428,7 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    final data = <String, dynamic>{
-      r'work_id': transaction.workId,
-      r'workcode': transaction.workcode,
-      r'summary_id': transaction.summaryId,
-      r'order_number': transaction.orderNumber,
-      r'status': transaction.status,
-      r'start': transaction.start,
-      r'end': transaction.end,
-      r'latitude': transaction.latitude,
-      r'longitude': transaction.longitude,
-    };
-
-    data.removeWhere((k, v) => v == null);
+    print(transaction.toJson());
 
     final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
         Options(
@@ -435,7 +437,7 @@ class ApiService {
       extra: extra,
     )
             .compose(dio.options, '/works/transactions/summary',
-                queryParameters: queryParameters, data: data)
+                queryParameters: queryParameters, data: transaction.toJson())
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value =

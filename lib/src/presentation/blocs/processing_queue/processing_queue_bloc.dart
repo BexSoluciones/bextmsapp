@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bexdeliveries/src/domain/models/requests/logout_request.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //utils
@@ -14,6 +13,8 @@ import '../../../domain/models/transaction_summary.dart';
 //request
 import '../../../domain/models/requests/transaction_request.dart';
 import '../../../domain/models/requests/transaction_summary_request.dart';
+import '../../../domain/models/requests/logout_request.dart';
+import '../../../domain/models/requests/status_request.dart';
 //repositories
 import '../../../domain/repositories/api_repository.dart';
 import '../../../domain/repositories/database_repository.dart';
@@ -98,44 +99,35 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
         case 'YDASBDCUDD':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
             final response =  await _apiRepository.start(request: TransactionRequest(Transaction.fromJson(body)));
-
             if(response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
               queue.error = response.error;
             }
-
             await _databaseRepository.updateProcessingQueue(queue);
-
           } catch (e) {
+            print('error from code');
             queue.task = 'error';
             queue.error = e.toString();
             await _databaseRepository.updateProcessingQueue(queue);
           }
-
           break;
         case 'LLKFNVLKNE':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
             final response =  await _apiRepository.arrived(request: TransactionRequest(Transaction.fromJson(body)));
-
             if(response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
               queue.error = response.error;
             }
-
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e) {
             queue.task = 'error';
@@ -147,44 +139,34 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
         case 'PISADJOFJO':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
             final response =  await _apiRepository.summary(request: TransactionRequest(Transaction.fromJson(body)));
-
             if(response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
               queue.error = response.error;
             }
-
             await _databaseRepository.updateProcessingQueue(queue);
-
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();
             await _databaseRepository.updateProcessingQueue(queue);
           }
-
           break;
         case 'Z8RPOZDTJB':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
             final response =  await _apiRepository.index(request: TransactionRequest(Transaction.fromJson(body)));
-
             if(response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
               queue.error = response.error;
             }
-
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e) {
             queue.task = 'error';
@@ -195,16 +177,12 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
         case 'LIALIVNRAA':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
             final res =  await _apiRepository.transaction(request: TransactionSummaryRequest(TransactionSummary.fromJson(body)));
-
             if(res is DataSuccess) {
               body['transaction_id'] = res.data!.transaction.id;
               final response =  await _apiRepository.product(request: TransactionSummaryRequest(TransactionSummary.fromJson(body)));
-
               if(response is DataSuccess) {
                 queue.task = 'done';
               } else {
@@ -215,7 +193,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
               queue.task = 'error';
               queue.error = res.error;
             }
-
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e) {
             queue.task = 'error';
@@ -226,12 +203,8 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
         case 'VNAIANBTLM':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
-
-
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();
@@ -242,28 +215,27 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
         case 'EBSVAEKRJB':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
-
-
+            final response =  await _apiRepository.status(request: StatusRequest(body['workcode'], body['status']));
+            if(response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();
             await _databaseRepository.updateProcessingQueue(queue);
           }
-
           break;
         case 'A48NDIVKJF':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
-
-
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();

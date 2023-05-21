@@ -60,168 +60,6 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    WillPopScope confirmation(context, setState, r, type) => WillPopScope(
-          onWillPop: () async => false,
-          child: SafeArea(
-            child: SizedBox(
-              height: size.height,
-              width: size.width,
-              child: Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Container(
-                        height: 250,
-                        color: kPrimaryColor,
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 30),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                    icon: const Icon(Icons.close,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    })
-                              ],
-                            ),
-                            const SizedBox(height: 30),
-                            Text(
-                                'Estar seguro de confirmar tu entrega como $type?',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.white)),
-                          ],
-                        ),
-                      ),
-                      // Padding(
-                      //     padding:
-                      //     const EdgeInsets.symmetric(horizontal: kDefaultPadding),
-                      //     child: ReasonsGlobal(
-                      //       context: context, r: r, setState: setState,
-                      //       type: type,
-                      //       typeAheadController: _typeAheadController,
-                      //       //context, type, r, setState
-                      //     )),
-                      // if (Provider.of<DataInventory>(context, listen: true)
-                      //     .getShowObservartionIcon)
-                      //   Padding(
-                      //       padding: EdgeInsets.all(20),
-                      //       child: TextField(
-                      //         maxLines: 4,
-                      //         controller: _observationController,
-                      //         decoration: InputDecoration(
-                      //           hintText: observationRequired
-                      //               ? 'La observación es requerida'
-                      //               : '',
-                      //           labelText: 'Observación',
-                      //           fillColor: Colors.black,
-                      //           enabledBorder: OutlineInputBorder(
-                      //             borderSide: const BorderSide(
-                      //                 color: Colors.black, width: 1.0),
-                      //             borderRadius: BorderRadius.circular(25.0),
-                      //           ),
-                      //           focusedBorder: OutlineInputBorder(
-                      //             borderSide: const BorderSide(
-                      //                 color: kPrimaryColor, width: 1.0),
-                      //             borderRadius: BorderRadius.circular(25.0),
-                      //           ),
-                      //         ),
-                      //       )),
-                      // if (Provider.of<DataInventory>(context, listen: true)
-                      //     .getShowFirmIcon)
-                      //   Padding(
-                      //       padding: EdgeInsets.all(20),
-                      //       child: DefaultButton(
-                      //           widget: firmRequired
-                      //               ? Row(
-                      //               mainAxisAlignment:
-                      //               MainAxisAlignment.spaceEvenly,
-                      //               children: [
-                      //                 Text('La firma es requerida',
-                      //                     textScaleFactor:
-                      //                     textScaleFactor(context),
-                      //                     style: TextStyle(
-                      //                         fontSize:
-                      //                         getProportionateScreenHeight(
-                      //                             14),
-                      //                         color: Colors.white)),
-                      //                 Icon(Icons.edit,
-                      //                     color: Colors.white)
-                      //               ])
-                      //               : Icon(Icons.edit, color: Colors.white),
-                      //           press: () async {
-                      //             await _navigationService.goTo(FirmRoute,
-                      //                 arguments: widget.arguments.orderNumber);
-                      //           })),
-                      // if (Provider.of<DataInventory>(context, listen: true)
-                      //     .getShowPhotoIcon)
-                      //   Padding(
-                      //       padding: EdgeInsets.all(20),
-                      //       child: DefaultButton(
-                      //           widget: photoRequired
-                      //               ? Row(
-                      //               mainAxisAlignment:
-                      //               MainAxisAlignment.spaceEvenly,
-                      //               children: [
-                      //                 Text('La foto es requerida',
-                      //                     textScaleFactor:
-                      //                     textScaleFactor(context),
-                      //                     style: TextStyle(
-                      //                         fontSize:
-                      //                         getProportionateScreenHeight(
-                      //                             14),
-                      //                         color: Colors.white)),
-                      //                 Icon(Icons.camera_alt,
-                      //                     color: Colors.white)
-                      //               ])
-                      //               : Icon(Icons.camera_alt,
-                      //               color: Colors.white),
-                      //           press: () async {
-                      //             await Navigator.of(context).pushNamed(
-                      //                 CameraRoute,
-                      //                 arguments: widget.arguments.orderNumber);
-                      //           })),
-                      // if (isErrorReasons)
-                      //   FormError(errors: [
-                      //     'El motivo de rechazo no puede estar vacio'
-                      //   ]),
-                      Padding(
-                          padding: const EdgeInsets.all(kDefaultPadding),
-                          child: isLoading
-                              ? const CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      kPrimaryColor),
-                                )
-                              : DefaultButton(
-                                  widget: const Text('Confirmar',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                      )),
-                                  press: () async {
-                                    // if (type == 'Rechazado' &&
-                                    //     _typeAheadController.text.isEmpty) {
-                                    //   setState(() {
-                                    //     isErrorReasons = true;
-                                    //   });
-                                    // } else {
-                                    //   await confirmateTransaction(
-                                    //     context,
-                                    //     type,
-                                    //   );
-                                    // }
-                                  }))
-                    ]),
-              ),
-            ),
-          ),
-        );
-
     return widget.isArrived == false
         ? SizedBox(
             height: 0,
@@ -233,13 +71,12 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                 child: InkWell(
                   onTap: () => _navigationService.goTo(rejectRoute,
                       arguments: widget.arguments),
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
+                  child: const Padding(
+                    padding: EdgeInsets.only(top: 8.0),
                     child: Column(
-                      children: const <Widget>[
+                      children: <Widget>[
                         Icon(Icons.cancel_outlined, color: kPrimaryColor),
                         Text('Rechazado',
-                            // textScaleFactor: textScaleFactor(context),
                             style: TextStyle(fontSize: 14)),
                       ],
                     ),
@@ -251,10 +88,10 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                     child: InkWell(
                       onTap: () => _navigationService.goTo(partialRoute,
                           arguments: widget.arguments),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      child: const Padding(
+                        padding:  EdgeInsets.all(8.0),
                         child: Column(
-                          children: const <Widget>[
+                          children: <Widget>[
                             Icon(Icons.all_inbox_outlined,
                                 color: kPrimaryColor),
                             Text('Parcial', style: TextStyle(fontSize: 14)),

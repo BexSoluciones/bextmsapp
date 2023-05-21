@@ -58,7 +58,7 @@ class PhotoViewState extends State<PhotoView> {
       }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, cameraRoute),
-        tooltip: 'Add',
+        tooltip: 'Añadir',
         child: const Icon(Icons.add),
       ),
     );

@@ -136,7 +136,8 @@ class AppDatabase {
         ${t.TransactionFields.start} TEXT DEFAULT NULL,
         ${t.TransactionFields.end} TEXT DEFAULT NULL,
         ${t.TransactionFields.latitude} TEXT DEFAULT NULL,
-        ${t.TransactionFields.longitude} TEXT DEFAULT NULL
+        ${t.TransactionFields.longitude} TEXT DEFAULT NULL,
+        ${t.TransactionFields.historyId} INTEGER DEFAULT NULL
       )
     ''',
     '''

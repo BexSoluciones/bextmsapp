@@ -10,6 +10,7 @@ import '../../../../cubits/summary/summary_cubit.dart';
 
 //domain
 import '../../../../../domain/models/arguments.dart';
+import '../../../../../domain/models/summary.dart';
 import '../../../../../domain/models/transaction.dart';
 import '../../../../../domain/abstracts/format_abstract.dart';
 
@@ -175,7 +176,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
     );
   }
 
-  Widget _buildList(isArrived, summaries) {
+  Widget _buildList(isArrived, List<Summary> summaries) {
     if (summaries.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -207,7 +208,9 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                     onTap: () async {
                       var transaction = Transaction(
                         workId: widget.arguments.work.id!,
+                        summaryId: summary.id,
                         workcode: widget.arguments.work.workcode!,
+                        orderNumber: summary.orderNumber,
                         status: 'summary',
                         start: now(),
                         end: now(),
@@ -235,7 +238,9 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
             onTap: () async {
               var transaction = Transaction(
                 workId: widget.arguments.work.id!,
+                summaryId: summary.id,
                 workcode: widget.arguments.work.workcode!,
+                orderNumber: summary.orderNumber,
                 status: 'summary',
                 start: now(),
                 end: now(),

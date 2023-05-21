@@ -28,6 +28,9 @@ import '../../domain/models/responses/transaction_response.dart';
 import '../../domain/models/requests/transaction_summary_request.dart';
 import '../../domain/models/responses/transaction_summary_response.dart';
 
+import '../../domain/models/requests/status_request.dart';
+import '../../domain/models/responses/status_response.dart';
+
 import '../../domain/repositories/api_repository.dart';
 
 import '../datasources/remote/api_service.dart';
@@ -119,6 +122,15 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }) {
     return getStateOf<DatabaseResponse>(
       request: () => _apiService.database(path: request.path),
+    );
+  }
+
+  @override
+  Future<DataState<StatusResponse>> status({
+    required StatusRequest request,
+  }) {
+    return getStateOf<StatusResponse>(
+      request: () => _apiService.status(request.workcode, request.status),
     );
   }
 

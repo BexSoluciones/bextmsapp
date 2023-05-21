@@ -44,6 +44,7 @@ class TransactionFields {
   static const String end = 'end';
   static const String latitude = 'latitude';
   static const String longitude = 'longitude';
+  static const String historyId = 'history_id';
 }
 
 class Transaction {
@@ -66,7 +67,8 @@ class Transaction {
         this.start,
         this.end,
         this.latitude,
-        this.longitude
+        this.longitude,
+        this.historyId
       });
 
   Transaction copy({
@@ -89,7 +91,9 @@ class Transaction {
           file: file,
           firm: firm,
           start: start,
-          end: end);
+          end: end,
+          historyId: historyId
+      );
 
   int? id;
   late int workId;
@@ -109,6 +113,7 @@ class Transaction {
   String? operativeCenter;
   String? latitude;
   String? longitude;
+  int? historyId;
   List<String>? images;
 
   // ignore: sort_constructors_first
@@ -121,7 +126,6 @@ class Transaction {
     status = json['status'];
     codmotvis = json['codmotvis'];
     reason = json['reason'];
-
     if(json['payments'] != null){
       payments = [];
       if(json['payments'] is String && json['payments'].contains('[]')){
@@ -132,7 +136,6 @@ class Transaction {
     } else {
       payments = [];
     }
-
     if(json['images'] != null) {
       images = [];
       if(json['images'] is String) {
@@ -143,7 +146,6 @@ class Transaction {
     } else {
       images = [];
     }
-
     observation = json['observation'];
     delivery = json['delivery'];
     file = json['file'];
@@ -153,6 +155,7 @@ class Transaction {
     end = json['end'];
     latitude = json['latitude'];
     longitude = json['longitude'];
+    historyId = json['history_id'];
   }
 
   Map<String, dynamic> toJson() {
@@ -175,6 +178,7 @@ class Transaction {
     data['end'] = end;
     data['latitude'] = latitude;
     data['longitude'] = longitude;
+    data['history_id'] = historyId;
     return data;
   }
 }

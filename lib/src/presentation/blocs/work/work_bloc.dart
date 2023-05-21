@@ -37,10 +37,8 @@ class WorkBloc extends Bloc<WorkEvent, WorkState> {
   void _confirm(event, emit) async {}
 
   void _observe(event, emit) async {
-    final total =
-        await _databaseRepository.countAllWorksByWorkcode(event.workcode);
-    final works = await _databaseRepository.findAllWorksPaginatedByWorkcode(
-        event.workcode, 1);
+    final total = await _databaseRepository.countAllWorksByWorkcode(event.workcode);
+    final works = await _databaseRepository.findAllWorksPaginatedByWorkcode(event.workcode, 1);
 
     var started = _storageService.getBool('${event.workcode}-started');
     var blocked = _storageService.getBool('${event.workcode}-blocked');
