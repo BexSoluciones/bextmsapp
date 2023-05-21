@@ -30,6 +30,8 @@ import '../models/responses/transaction_summary_response.dart';
 import '../models/requests/status_request.dart';
 import '../models/responses/status_response.dart';
 
+import '../models/requests/client_request.dart';
+
 abstract class ApiRepository {
   //SYNCHRONOUS
   Future<DataState<EnterpriseResponse>> getEnterprise({
@@ -87,5 +89,9 @@ abstract class ApiRepository {
 
   Future<DataState<TransactionSummaryResponse>> product({
     required TransactionSummaryRequest request
+  });
+
+  Future<DataState<StatusResponse>> georeference({
+    required ClientRequest request
   });
 }

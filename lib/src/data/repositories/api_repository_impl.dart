@@ -31,6 +31,8 @@ import '../../domain/models/responses/transaction_summary_response.dart';
 import '../../domain/models/requests/status_request.dart';
 import '../../domain/models/responses/status_response.dart';
 
+import '../../domain/models/requests/client_request.dart';
+
 import '../../domain/repositories/api_repository.dart';
 
 import '../datasources/remote/api_service.dart';
@@ -185,6 +187,15 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }) {
     return getStateOf<TransactionSummaryResponse>(
       request: () => _apiService.product(request.transactionSummary),
+    );
+  }
+
+  @override
+  Future<DataState<StatusResponse>> georeference({
+    required ClientRequest request,
+  }) {
+    return getStateOf<StatusResponse>(
+      request: () => _apiService.georeference(request.client),
     );
   }
 

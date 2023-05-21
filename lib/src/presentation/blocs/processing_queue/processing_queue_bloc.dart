@@ -11,6 +11,7 @@ import '../../../utils/resources/data_state.dart';
 import '../../../domain/models/processing_queue.dart';
 import '../../../domain/models/isolate.dart';
 import '../../../domain/models/transaction.dart';
+import '../../../domain/models/client.dart';
 import '../../../domain/models/transaction_summary.dart';
 
 //request
@@ -18,6 +19,7 @@ import '../../../domain/models/requests/transaction_request.dart';
 import '../../../domain/models/requests/transaction_summary_request.dart';
 import '../../../domain/models/requests/logout_request.dart';
 import '../../../domain/models/requests/status_request.dart';
+import '../../../domain/models/requests/client_request.dart';
 //repositories
 import '../../../domain/repositories/api_repository.dart';
 import '../../../domain/repositories/database_repository.dart';
@@ -317,12 +319,16 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
         case 'UWEBBEVWDC':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
-
-
+            final response =  await _apiRepository.georeference(request: ClientRequest(Client.fromJson(body)));
+            if(response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();
@@ -400,7 +406,7 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
           var processingQueue = ProcessingQueue(
               body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
               task: 'incomplete',
-              code: 'IUBCIUDOIP',
+              code: 'EBSVAEKRJB',
               createdAt: now(),
               updatedAt: now(),
           );
