@@ -59,7 +59,7 @@ class _RespawnViewState extends State<RespawnView> {
       ),
       body: ListView(
         children: [
-          Container(
+          SizedBox(
             height: size.height * 0.25,
             width: size.width,
             child: HeaderRespawn(arguments: widget.arguments),

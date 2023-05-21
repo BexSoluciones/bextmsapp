@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:isolate';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //utils
@@ -7,6 +9,7 @@ import '../../../utils/resources/data_state.dart';
 
 //domain
 import '../../../domain/models/processing_queue.dart';
+import '../../../domain/models/isolate.dart';
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/transaction_summary.dart';
 
@@ -21,7 +24,6 @@ import '../../../domain/repositories/database_repository.dart';
 //abstract
 import '../../../domain/abstracts/format_abstract.dart';
 
-
 part 'processing_queue_event.dart';
 part 'processing_queue_state.dart';
 
@@ -33,9 +35,7 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
   final _processingQueueController = StreamController<List<ProcessingQueue>>.broadcast();
   final _addProcessingQueueController = StreamController<ProcessingQueue>.broadcast();
 
-
   Stream<List<ProcessingQueue>> get processingQueue => _processingQueueController.stream;
-
   StreamSink<List<ProcessingQueue>> get _inProcessingQueue => _processingQueueController.sink;
   StreamSink<ProcessingQueue> get inAddPq => _addProcessingQueueController.sink;
 
@@ -44,8 +44,34 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
     on<ProcessingQueueObserve>(_observe);
     on<ProcessingQueueSender>(_sender);
     on<ProcessingQueueCancel>(_cancel);
-    _addProcessingQueueController.stream.listen(_handleAddProcessingQueue);
+    // _addProcessingQueueController.stream.listen(_handleAddProcessingQueue);
+    _addProcessingQueueController.stream.listen((p) async {
+      await _databaseRepository.insertProcessingQueue(p);
+      await Isolate.spawn<IsolateModel>(
+          heavyTask,
+          IsolateModel(2, [
+            _getProcessingQueue(),
+            validateIfServiceIsCompleted(p),
+          ]));
+    }, onError: (error) {
+      if (kDebugMode) {
+        print('error');
+        print(error);
+      }
+
+    }, onDone: () {
+      if (kDebugMode) {
+        print('done');
+      }
+    });
+
     _processingQueueController.stream.listen(sendProcessingQueue);
+  }
+
+  static void heavyTask(IsolateModel model) {
+    for (var i = 0; i < model.iteration; i++) {
+      model.functions[i];
+    }
   }
 
   Stream<List<ProcessingQueue>> get todos {
@@ -85,10 +111,10 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
     emit(ProcessingQueueSuccess());
   }
 
-  void _handleAddProcessingQueue(ProcessingQueue processingQueue) async {
-    await _databaseRepository.insertProcessingQueue(processingQueue);
-    _getProcessingQueue();
-  }
+  // void _handleAddProcessingQueue(ProcessingQueue processingQueue) async {
+  //   await _databaseRepository.insertProcessingQueue(processingQueue);
+  //   _getProcessingQueue();
+  // }
 
   void sendProcessingQueue(List<ProcessingQueue> queues) async {
     await Future.forEach(queues, (queue) async {
@@ -363,5 +389,28 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
     });
 
 
+  }
+
+  Future<void> validateIfServiceIsCompleted(ProcessingQueue p) async {
+    try {
+      if (p.code == 'Z8RPOZDTJB') {
+        var workcode = jsonDecode(p.body)['workcode'];
+        var isLast = await _databaseRepository.checkLastTransaction(workcode);
+        if (isLast) {
+          var processingQueue = ProcessingQueue(
+              body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
+              task: 'incomplete',
+              code: 'IUBCIUDOIP',
+              createdAt: now(),
+              updatedAt: now(),
+          );
+          await _databaseRepository.insertProcessingQueue(processingQueue);
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
   }
 }

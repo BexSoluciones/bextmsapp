@@ -46,6 +46,7 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
         workcode: arguments.work.workcode,
         orderNumber: arguments.orderNumber,
         operativeCenter: arguments.operativeCenter,
+        delivery: arguments.total.toString(),
         status: 'respawn',
     );
 

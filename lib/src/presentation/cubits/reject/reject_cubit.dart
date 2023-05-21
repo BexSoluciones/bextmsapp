@@ -67,6 +67,7 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
             workcode: arguments.work.workcode,
             orderNumber: arguments.orderNumber,
             operativeCenter: arguments.operativeCenter,
+            delivery: arguments.total.toString(),
             status: 'reject',
             codmotvis: reason.codmotvis,
             reason: reason.nommotvis,

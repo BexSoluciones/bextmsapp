@@ -51,13 +51,11 @@ class CollectionViewState extends State<CollectionView>
   String message = '';
   final allowInsetsBelow = _storageService.getBool('allow_insets_below');
 
-  String get _currency =>
-      '  ${NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol}';
+  String get _currency => '  ${NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol}';
 
   final TextEditingController _typeAheadController = TextEditingController();
   final TextEditingController paymentEfectyController = TextEditingController();
-  final TextEditingController paymentTransferController =
-      TextEditingController();
+  final TextEditingController paymentTransferController = TextEditingController();
 
   String? get firmS => null;
 
@@ -205,10 +203,10 @@ class CollectionViewState extends State<CollectionView>
                   key: _formKey,
                   child: Column(
                     children: [
-                      Row(
+                      const Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(children: const [
+                            Row(children:  [
                               Text('EFECTIVO', style: TextStyle(fontSize: 14)),
                               Icon(Icons.money, color: Colors.green),
                             ]),
@@ -258,7 +256,7 @@ class CollectionViewState extends State<CollectionView>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(children: const [
+                          const Row(children: [
                             Text('TRANSFERENCIA BANCARIA',
                                 style: TextStyle(fontSize: 14)),
                             Icon(Icons.credit_card)

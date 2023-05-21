@@ -8,7 +8,6 @@ import '../../../../../domain/models/arguments.dart';
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/strings.dart';
 
-
 //services
 import '../../../../../locator.dart';
 import '../../../../../services/navigation.dart';
@@ -24,6 +23,7 @@ class BottomBarInventory extends StatefulWidget {
       {Key? key,
       required this.myContext,
       required this.arguments,
+      required this.totalSummaries,
       required this.four,
       required this.isArrived,
       required this.isPartial,
@@ -32,6 +32,7 @@ class BottomBarInventory extends StatefulWidget {
 
   final BuildContext myContext;
   final InventoryArgument arguments;
+  final double? totalSummaries;
   final GlobalKey four;
   final bool isArrived;
   final bool isPartial;
@@ -76,8 +77,7 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                     child: Column(
                       children: <Widget>[
                         Icon(Icons.cancel_outlined, color: kPrimaryColor),
-                        Text('Rechazado',
-                            style: TextStyle(fontSize: 14)),
+                        Text('Rechazado', style: TextStyle(fontSize: 14)),
                       ],
                     ),
                   ),
@@ -89,7 +89,7 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                       onTap: () => _navigationService.goTo(partialRoute,
                           arguments: widget.arguments),
                       child: const Padding(
-                        padding:  EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: Column(
                           children: <Widget>[
                             Icon(Icons.all_inbox_outlined,
@@ -110,6 +110,8 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                           setState(() {
                             currentIndex = index;
                           });
+
+                          widget.arguments.total = widget.totalSummaries;
 
                           switch (currentIndex) {
                             case 0:

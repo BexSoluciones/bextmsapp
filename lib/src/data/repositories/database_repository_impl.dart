@@ -172,6 +172,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<bool> checkLastTransaction(String workcode) {
+    return _appDatabase.transactionDao.checkLastTransaction(workcode);
+  }
+
+  @override
   Future<String?> getDiffTime(int workId) async {
     return _appDatabase.transactionDao.getDiffTime(workId);
   }

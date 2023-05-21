@@ -428,8 +428,6 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    print(transaction.toJson());
-
     final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
         Options(
       method: 'POST',
@@ -463,8 +461,6 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    final data = transaction.toJson();
-
     final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
         Options(
       method: 'POST',
@@ -472,7 +468,7 @@ class ApiService {
       extra: extra,
     )
             .compose(dio.options, '/works/transactions/store',
-                queryParameters: queryParameters, data: data)
+                queryParameters: queryParameters, data: transaction.toJson())
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value =

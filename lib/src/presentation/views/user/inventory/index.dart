@@ -102,6 +102,7 @@ class InventoryViewState extends State<InventoryView> {
                 ],
               ),
               bottomNavigationBar: BottomBarInventory(
+                totalSummaries: state.totalSummaries,
                 arguments: widget.arguments,
                 isArrived: state.isArrived ?? false,
                 isRejected: state.isRejected ?? false,

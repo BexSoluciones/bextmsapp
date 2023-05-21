@@ -112,7 +112,8 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
             summaryId: summary.id,
             typeOfCharge: summary.typeOfCharge!,
             orderNumber: summary.orderNumber,
-            operativeCenter: summary.operativeCenter!));
+            operativeCenter: summary.operativeCenter!,
+        ));
   }
 
   Future<void> sendTransactionArrived(

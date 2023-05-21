@@ -110,6 +110,29 @@ class TransactionDao {
     return transactions.isNotEmpty;
   }
 
+  Future<bool> checkLastTransaction(String workcode) async {
+    final db = await _appDatabase.streamDatabase;
+
+    var summaries = await db!.rawQuery('''
+      select COUNT(distinct order_number) as count from summaries inner join works on works.id = summaries.work_id
+      where works.workcode = "$workcode"
+    ''');
+
+    var transactions = await db.rawQuery('''
+      select COUNT(id) as count from transactions 
+      where status != 'start' and status != 'arrived' and status != 'summary' and workcode = "$workcode"
+    ''');
+
+    var countSummaries = summaries[0]['count'] as int;
+    var countTransactions = transactions[0]['count'] as int;
+
+    if ((countSummaries - countTransactions) == 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   Stream<bool?> watchTransactionClient(String workcode, String status) async* {
     final db = await _appDatabase.streamDatabase;
 

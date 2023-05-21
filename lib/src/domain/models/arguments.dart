@@ -30,6 +30,7 @@ class InventoryArgument {
     required this.typeOfCharge,
     required this.orderNumber,
     required this.operativeCenter,
+    this.total,
     this.expedition,
     this.codePlace,
     this.summaries,
@@ -42,6 +43,7 @@ class InventoryArgument {
   final String typeOfCharge;
   final String operativeCenter;
   final String orderNumber;
+  double? total;
   String? codePlace;
   int? validate;
   String? expedition;
