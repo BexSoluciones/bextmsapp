@@ -24,7 +24,9 @@ class ClientFields {
 class Client {
 
   Client(
-      { required this.nit,
+      {
+        this.id,
+        required this.nit,
         required this.operativeCenter,
         required this.latitude,
         required this.longitude,
@@ -32,6 +34,7 @@ class Client {
         required this.userId});
 
   Client.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
     nit = json['nit'];
     operativeCenter = json['operative_center'];
     latitude = json['latitude'];
@@ -40,6 +43,7 @@ class Client {
     userId = json['user_id'];
   }
 
+  int? id;
   String? nit;
   String? operativeCenter;
   String? latitude;
@@ -49,6 +53,7 @@ class Client {
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
+    data['id'] = id;
     data['nit'] = nit;
     data['operative_center'] = operativeCenter;
     data['latitude'] = latitude;

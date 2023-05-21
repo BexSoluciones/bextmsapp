@@ -18,6 +18,7 @@ import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
 import 'package:bexdeliveries/src/domain/models/reason.dart';
 import 'package:bexdeliveries/src/domain/models/history_order.dart';
 import 'package:bexdeliveries/src/domain/models/photo.dart';
+import 'package:bexdeliveries/src/domain/models/client.dart';
 
 //daos
 part '../local/dao/work_dao.dart';
@@ -30,6 +31,7 @@ part '../local/dao/reason_dao.dart';
 part '../local/dao/history_order_dao.dart';
 part '../local/dao/warehouse_dao.dart';
 part '../local/dao/photo_dao.dart';
+part '../local/dao/client_dao.dart';
 
 class AppDatabase {
   static BriteDatabase? _streamDatabase;
@@ -208,7 +210,18 @@ class AppDatabase {
         ${PhotoFields.name} TEXT DEFAULT NULL,
         ${PhotoFields.path} TEXT DEFAULT NULL
       )
+    ''',
     '''
+      CREATE TABLE $tableClients (
+        ${ClientFields.id} INTEGER PRIMARY KEY,
+        ${ClientFields.nit} TEXT DEFAULT NULL,
+        ${ClientFields.operativeCenter} TEXT DEFAULT NULL,
+        ${ClientFields.latitude} TEXT DEFAULT NULL,
+        ${ClientFields.longitude} TEXT DEFAULT NULL,
+        ${ClientFields.action} TEXT DEFAULT NULL,
+        ${ClientFields.userId} TEXT DEFAULT NULL
+      )
+    ''',
   ];
 
   Future<Database> _initDatabase(databaseName) async {
@@ -277,6 +290,8 @@ class AppDatabase {
   LocationDao get locationDao => LocationDao(instance);
 
   PhotoDao get photoDao => PhotoDao(instance);
+
+  ClientDao get clientDao => ClientDao(instance);
 
   void close() {
     _database = null;

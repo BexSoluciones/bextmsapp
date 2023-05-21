@@ -8,6 +8,7 @@ import '../models/history_order.dart';
 import '../models/warehouse.dart';
 import '../models/location.dart';
 import '../models/photo.dart';
+import '../models/client.dart';
 
 abstract class DatabaseRepository {
   //WORKS
@@ -84,6 +85,13 @@ abstract class DatabaseRepository {
   Future<int> updatePhoto(Photo photo);
   Future<void> insertPhotos(List<Photo> photos);
   Future<void> emptyPhotos();
+
+  //PHOTOS
+  Stream<List<Client>> watchAllClients();
+  Future<List<Client>> getAllClients();
+  Future<int> insertClient(Client client);
+  Future<int> updateClient(Client client);
+  Future<void> emptyClients();
 
 
   //HISTORY ORDER

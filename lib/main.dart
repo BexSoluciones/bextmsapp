@@ -204,10 +204,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => ConfirmCubit(
-              locator<DatabaseRepository>(),
-              locator<LocationRepository>(),
-              BlocProvider.of<ProcessingQueueBloc>(context),
-            ),
+                locator<DatabaseRepository>(),
+                locator<LocationRepository>(),
+                BlocProvider.of<ProcessingQueueBloc>(context)),
           ),
           BlocProvider(
             create: (context) => SummaryCubit(
@@ -217,7 +216,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => GeoreferenceCubit(
-                locator<DatabaseRepository>(), locator<LocationRepository>()),
+                locator<DatabaseRepository>(),
+                locator<LocationRepository>(),
+                BlocProvider.of<ProcessingQueueBloc>(context)),
           ),
           BlocProvider(
             create: (context) => InventoryCubit(

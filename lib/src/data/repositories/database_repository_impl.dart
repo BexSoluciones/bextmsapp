@@ -12,6 +12,7 @@ import '../../domain/models/history_order.dart';
 import '../../domain/models/warehouse.dart';
 import '../../domain/models/location.dart';
 import '../../domain/models/photo.dart';
+import '../../domain/models/client.dart';
 
 class DatabaseRepositoryImpl implements DatabaseRepository {
   final AppDatabase _appDatabase;
@@ -332,6 +333,35 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyPhotos() async {
     return _appDatabase.photoDao.emptyPhotos();
+  }
+
+  //CLIENTS
+  //LOCATIONS
+  @override
+  Stream<List<Client>> watchAllClients() {
+    return _appDatabase.clientDao.watchAllClients();
+  }
+
+  @override
+  Future<List<Client>> getAllClients() async {
+    return _appDatabase.clientDao.getAllClients();
+  }
+
+  @override
+  Future<int> updateClient(Client client) async {
+    return _appDatabase.clientDao
+        .updateClient(client);
+  }
+
+  @override
+  Future<int> insertClient(Client client) async {
+    return _appDatabase.clientDao
+        .insertClient(client);
+  }
+
+  @override
+  Future<void> emptyClients() async {
+    return _appDatabase.clientDao.emptyClients();
   }
 
   //HISTORY ORDER
