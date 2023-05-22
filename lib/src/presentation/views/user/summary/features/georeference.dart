@@ -52,7 +52,7 @@ class SummaryGeoreferenceViewState extends State<SummaryGeoreferenceView> {
             case GeoreferenceLoading:
               return const Center(child: CupertinoActivityIndicator());
             case GeoreferenceSuccess:
-              return _buildGeoreference(context, state, widget, size);
+              return _buildGeoreference(context, state, widget.work, size);
             default:
               return const SizedBox();
           }
@@ -60,7 +60,7 @@ class SummaryGeoreferenceViewState extends State<SummaryGeoreferenceView> {
   }
 }
 
-Widget _buildGeoreference(context, state, widget, Size size) {
+Widget _buildGeoreference(context, state, Work work, Size size) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.all(kDefaultPadding),
@@ -79,24 +79,21 @@ Widget _buildGeoreference(context, state, widget, Size size) {
             const SizedBox(height: 20),
             const Text(
                 'Cuando georeferencies a un cliente asegurate de estar lo más cercano posible a él.',
-                // textScaleFactor: textScaleFactor(context),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
             const Spacer(),
             DefaultButton(
                 widget: Text(
-                    widget.work.latitude != null &&
-                            widget.work.longitude != null
+                    work.latitude != null &&
+                            work.longitude != null
                         ? 'Actualizar'
                         : 'Guardar',
-                    style: const TextStyle(fontSize: 20)),
+                    style: const TextStyle(fontSize: 20, color: Colors.white)),
                 press: () async {
                   var client = Client(
-                      nit: widget.nit,
-                      operativeCenter: widget.codePlace,
-                      latitude: null,
-                      longitude: null,
-                      action: widget.work.latitude != null &&
-                              widget.work.longitude != null
+                      nit: work.numberCustomer,
+                      operativeCenter: work.codePlace,
+                      action: work.latitude != null &&
+                              work.longitude != null
                           ? 'update'
                           : 'save',
                       userId: null);
@@ -108,7 +105,7 @@ Widget _buildGeoreference(context, state, widget, Size size) {
                 color: Colors.grey,
                 widget: const Text('Cancelar',
                     // textScaleFactor: textScaleFactor(context),
-                    style: TextStyle(fontSize: 20)),
+                    style: TextStyle(fontSize: 20, color: Colors.white)),
                 press: () => _navigationService.goBack())
           ],
         ),

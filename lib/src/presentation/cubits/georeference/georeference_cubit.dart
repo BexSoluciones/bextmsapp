@@ -14,7 +14,15 @@ import '../../../domain/models/client.dart';
 import '../../../domain/models/processing_queue.dart';
 import '../../../domain/repositories/database_repository.dart';
 
+//services
+import '../../../locator.dart';
+import '../../../services/navigation.dart';
+import '../../../services/storage.dart';
+
 part 'georeference_state.dart';
+
+final NavigationService _navigationService = locator<NavigationService>();
+final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class GeoreferenceCubit extends Cubit<GeoreferenceState> with FormatDate {
   final DatabaseRepository _databaseRepository;
@@ -33,6 +41,7 @@ class GeoreferenceCubit extends Cubit<GeoreferenceState> with FormatDate {
 
     client.latitude = currentLocation!.latitude.toString();
     client.longitude = currentLocation!.longitude.toString();
+    client.userId = _storageService.getInt('user_id');
 
     await _databaseRepository.insertClient(client);
 
@@ -47,6 +56,9 @@ class GeoreferenceCubit extends Cubit<GeoreferenceState> with FormatDate {
         .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
     emit(GeoreferenceFinished());
+
+    _navigationService.goBack();
+
   }
 
 }

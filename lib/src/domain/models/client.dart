@@ -1,4 +1,3 @@
-
 const String tableClients = 'clients';
 
 class ClientFields {
@@ -22,16 +21,14 @@ class ClientFields {
 }
 
 class Client {
-
   Client(
-      {
-        this.id,
-        required this.nit,
-        required this.operativeCenter,
-        required this.latitude,
-        required this.longitude,
-        required this.action,
-        required this.userId});
+      {this.id,
+      this.nit,
+      this.operativeCenter,
+      this.latitude,
+      this.longitude,
+      this.action,
+      this.userId});
 
   Client.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -49,7 +46,7 @@ class Client {
   String? latitude;
   String? longitude;
   String? action;
-  String? userId;
+  int? userId;
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};

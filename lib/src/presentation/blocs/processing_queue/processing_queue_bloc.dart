@@ -49,12 +49,10 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
     // _addProcessingQueueController.stream.listen(_handleAddProcessingQueue);
     _addProcessingQueueController.stream.listen((p) async {
       await _databaseRepository.insertProcessingQueue(p);
-      await Isolate.spawn<IsolateModel>(
-          heavyTask,
-          IsolateModel(2, [
-            _getProcessingQueue(),
-            validateIfServiceIsCompleted(p),
-          ]));
+      await Future.value([
+        _getProcessingQueue(),
+        validateIfServiceIsCompleted(p),
+      ]);
     }, onError: (error) {
       if (kDebugMode) {
         print('error');
