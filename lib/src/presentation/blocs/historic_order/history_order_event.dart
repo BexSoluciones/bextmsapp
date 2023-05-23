@@ -6,17 +6,21 @@ abstract class HistoryOrderEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class HistoryOrderStart extends HistoryOrderEvent {
+  HistoryOrderStart({required this.work, required this.context});
+
+  final Work work;
+  final BuildContext context;
+}
+
 class HistoryOrderInitialRequest extends HistoryOrderEvent {
-  HistoryOrderInitialRequest(
-      { required this.work,
-        required this.context});
+  HistoryOrderInitialRequest({required this.work, required this.context});
 
   final Work work;
   final BuildContext context;
 }
 
 class ChangeCurrentWork extends HistoryOrderEvent {
-  ChangeCurrentWork({required this.newWorks, required this.work});
+  ChangeCurrentWork({required this.work});
   final Work work;
-  final List<Work> newWorks;
 }

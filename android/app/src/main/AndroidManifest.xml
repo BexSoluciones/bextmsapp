@@ -22,6 +22,7 @@
 
    <application
         android:label="bexdeliveries"
+        android:requestLegacyExternalStorage="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 

@@ -21,23 +21,23 @@ class LocationRepository {
 
   /// Function to get current location
   Future<CurrentUserLocationEntity> getCurrentLocation() async {
-    final serviceEnabled = await isGPSEnabled();
-    if (!serviceEnabled) {
-      throw CurrentLocationFailure(
-        error: "You don't have location service enabled",
-      );
-    }
+    // final serviceEnabled = await isGPSEnabled();
+    // if (!serviceEnabled) {
+    //   throw CurrentLocationFailure(
+    //     error: "You don't have location service enabled",
+    //   );
+    // }
 
-    final permissionStatus = await requestPermission();
-    if (permissionStatus == PermissionStatus.denied) {
-      final status = await requestPermission();
-      if (status != PermissionStatus.authorizedAlways) {
-        throw CurrentLocationFailure(
-          error: "You don't have all the permissions granted."
-              '\nYou need to activate them manually.',
-        );
-      }
-    }
+    // final permissionStatus = await requestPermission();
+    // if (permissionStatus == PermissionStatus.denied) {
+    //   final status = await requestPermission();
+    //   if (status != PermissionStatus.authorizedAlways) {
+    //     throw CurrentLocationFailure(
+    //       error: "You don't have all the permissions granted."
+    //           '\nYou need to activate them manually.',
+    //     );
+    //   }
+    // }
 
     late final LocationData locationData;
     try {

@@ -22,53 +22,67 @@ import '../../../locator.dart';
 import '../../../services/storage.dart';
 import '../../../services/navigation.dart';
 
-
 part 'history_order_event.dart';
 part 'history_order_state.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
 
-class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with FormatDate {
+class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState>
+    with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
 
-  HistoryOrderBloc(this._databaseRepository, this._processingQueueBloc) : super(HistoryOrderInitial()) {
+  HistoryOrderBloc(this._databaseRepository, this._processingQueueBloc)
+      : super(HistoryOrderInitial()) {
     on<HistoryOrderInitialRequest>(_requestHistory);
     on<ChangeCurrentWork>(_changeCurrentWork);
+    on<HistoryOrderStart>(_onTap);
   }
 
   HistoryOrder? historyOrder;
+
+  void _onTap(event, emit) {
+    if (_storageService.getBool('${event.work.workcode}-usedHistoric') != null &&
+        _storageService.getBool('${event.work.workcode}-recentlyUpdated')! ==
+            false) {
+      _storageService.setBool('${event.work.workcode}-recentlyUpdated', true);
+      emit(ChangeCurrentWork(work: event.work));
+    } else {
+      emit(HistoryOrderInitialRequest(
+        work: event.work,
+        context: event.context,
+      ));
+    }
+  }
 
   Future<void> _requestHistory(
     HistoryOrderInitialRequest event,
     Emitter<HistoryOrderState> emit,
   ) async {
-    if (_storageService.getBool('${event.work.workcode}-show-again') == true) {
+    if (_storageService.getBool('${event.work.workcode}-oneOrMoreFinished') ==
+        true) {
       await _navigationService.goTo(workRoute,
-          arguments: WorkArgument(work: event.work));
+          arguments: WorkArgument(
+            work: event.work,
+          ));
     }
 
     emit(HistoryOrderLoading());
 
-    historyOrder = await _databaseRepository.getHistoryOrder(event.work.workcode!, event.work.zoneId!);
+    historyOrder = await _databaseRepository.getHistoryOrder(
+        event.work.workcode!, event.work.zoneId!);
 
     if (historyOrder != null) {
       emit(HistoryOrderShow(historyOrder: historyOrder));
 
-      bool? isStarted;
-      isStarted = _storageService.getBool('${event.work.workcode}-started');
+      bool? showAgain;
+      showAgain = _storageService.getBool('${event.work.workcode}-showAgain');
 
-      (historyOrder != null && isStarted == false)
-          ? await _navigationService.goTo(historyRoute,
-              arguments: HistoryArgument(
-                  work: event.work,
-                  likelihood: historyOrder!.likelihood,
-                  different: historyOrder!.different))
+      (historyOrder != null && showAgain == false)
+          ? await _navigationService.goTo(historyRoute, arguments: historyOrder)
           : await _navigationService.goTo(workRoute,
-              arguments: WorkArgument(
-                work: event.work,
-              ));
+              arguments: WorkArgument(work: event.work));
     } else {
       await _navigationService.goTo(workRoute,
           arguments: WorkArgument(work: event.work));
@@ -94,32 +108,31 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
   }
 
   Future<void> useHistoric(
-      String workcode,
-      int historyId,
-      ) async {
-
+    String workcode,
+    int historyId,
+  ) async {
     var processingQueue = ProcessingQueue(
-        body: jsonEncode({'workcode': workcode, 'history_id': historyId}),
-        task: 'incomplete',
-        code: 'SDAJBVKJAD',
-        createdAt: now(),
-        updatedAt: now(),
+      body: jsonEncode({'workcode': workcode, 'history_id': historyId}),
+      task: 'incomplete',
+      code: 'SDAJBVKJAD',
+      createdAt: now(),
+      updatedAt: now(),
     );
 
-    _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue));
+    _processingQueueBloc
+        .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
     processingQueue = ProcessingQueue(
         body: jsonEncode({'workcode': workcode, 'count': 1}),
         task: 'incomplete',
         code: '90QQOINCQW',
         createdAt: now(),
-        updatedAt: now()
-    );
+        updatedAt: now());
 
-    _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue));
+    _processingQueueBloc
+        .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
     _storageService.setBool('$workcode-routing', true);
     _storageService.setBool('$workcode-historic', true);
-
   }
 }

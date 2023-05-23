@@ -1,23 +1,27 @@
 import 'storage.dart';
-import 'package:hive/hive.dart';
+// import 'package:hive/hive.dart';
 
+//TODO:: change to isar database
+
+import '../../../src/locator.dart';
+import '../../../src/services/storage.dart';
+
+final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class CacheStorage implements Storage {
-  static const _hiveBoxName = "cache";
+  static const _boxName = "cache";
 
-  CacheStorage() {
-    Hive.init(_hiveBoxName);
-  }
+  CacheStorage();
 
   @override
   Future<void> clear({String? prefix}) async {
-    final box = await Hive.openBox(_hiveBoxName);
     if (prefix == null) {
-      await box.clear();
+      await _storageService.clear();
     } else {
-      for (var key in box.keys) {
-        if (key is String && key.startsWith(prefix)) {
-          await box.delete(key);
+      final box = _storageService.getObject(prefix);
+      for (var key in box!.keys) {
+        if (key.startsWith(prefix)) {
+          _storageService.remove(key);
         }
       }
     }
@@ -25,31 +29,28 @@ class CacheStorage implements Storage {
 
   @override
   Future<void> delete(String key) async {
-    final box = await Hive.openBox(_hiveBoxName);
-    return box.delete(key);
+    return _storageService.remove(key);
   }
 
   @override
   Future<String?> read(String key) async {
-    final box = await Hive.openBox(_hiveBoxName);
-    return box.get(key);
+    return _storageService.getString(key);
   }
 
   @override
   Future<void> write(String key, String value) async {
-    final box = await Hive.openBox(_hiveBoxName);
-    return box.put(key, value);
+    return _storageService.setString(key, value);
   }
 
   @override
   Future<int> count({String? prefix}) async {
-    final box = await Hive.openBox(_hiveBoxName);
+    final box = _storageService.getObject(prefix);
     if (prefix == null) {
-      return box.length;
+      return box!.length;
     } else {
       var count = 0;
-      for (var key in box.keys) {
-        if (key is String && key.startsWith(prefix)) {
+      for (var key in box!.keys) {
+        if (key.startsWith(prefix)) {
           count++;
         }
       }

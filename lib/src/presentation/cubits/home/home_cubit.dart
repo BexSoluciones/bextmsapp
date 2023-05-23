@@ -8,9 +8,6 @@ import 'package:flutter_udid/flutter_udid.dart';
 //cubit
 import '../base/base_cubit.dart';
 
-//blocs
-
-
 //utils
 import '../../../utils/resources/data_state.dart';
 import '../../../utils/constants/strings.dart';
@@ -102,12 +99,11 @@ class HomeCubit extends BaseCubit<HomeState, String?> {
 
       if (response is DataSuccess) {
         final login = response.data!.login;
-
         var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
         var version = yaml['version'];
-
         _storageService.setString('token', response.data!.login.token);
         _storageService.setObject('user', response.data!.login.user!.toMap());
+        _storageService.setInt('user_id', response.data!.login.user!.id);
 
         String udid = await FlutterUdid.udid;
 

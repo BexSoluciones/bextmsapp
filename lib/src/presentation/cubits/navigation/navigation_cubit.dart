@@ -17,15 +17,12 @@ import '../base/base_cubit.dart';
 
 //blocs
 
-
 //domain
 import '../../../domain/models/work.dart';
 import '../../../domain/repositories/database_repository.dart';
 import 'package:location_repository/location_repository.dart';
 
-
 part 'navigation_state.dart';
-
 
 class LayerMoodle {
   LayerMoodle(this.polygons);
@@ -74,35 +71,35 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   }
 
   Future<NavigationState> _getAllWorksByWorkcode(String workcode) async {
-    final worksDatabase =
-        await _databaseRepository.findAllWorksByWorkcode(workcode);
+    try {
+      final worksDatabase =
+      await _databaseRepository.findAllWorksByWorkcode(workcode);
 
-    var works = <Work>[];
+      var works = <Work>[];
 
-    currentLocation = await _locationRepository.getCurrentLocation();
+      currentLocation = await _locationRepository.getCurrentLocation();
 
-    // var warehouse = await _databaseRepository.findWarehouse(works.first.warehouse);
+      // var warehouse = await _databaseRepository.findWarehouse(works.first.warehouse);
 
-    return await Future.forEach(worksDatabase, (work) async {
-      if (work.latitude != null && work.longitude != null) {
-        if (work.hasCompleted != null && work.hasCompleted == 1) {
-          work.color = 5;
-        } else {
-          work.color = 8;
+      return await Future.forEach(worksDatabase, (work) async {
+        if (work.latitude != null && work.longitude != null) {
+          if (work.hasCompleted != null && work.hasCompleted == 1) {
+            work.color = 5;
+          } else {
+            work.color = 8;
+          }
+          await _databaseRepository.updateWork(work);
         }
-        await _databaseRepository.updateWork(work);
-      }
 
-      works.add(work);
-    }).then((_) async {
+        works.add(work);
+      }).then((_) async {
+        data = [];
 
-      data = [];
-
-      if (data.isEmpty) {
-        data.addAll(works);
-      }
-      //TODO:: get warehouse
-      markers.add(
+        if (data.isEmpty) {
+          data.addAll(works);
+        }
+        //TODO:: get warehouse
+        markers.add(
           Marker(
               height: 25,
               width: 25,
@@ -114,100 +111,104 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
                     Image.asset('assets/icons/point.png', color: Colors.blue),
                     const Icon(Icons.location_on, size: 14, color: Colors.white),
                   ]))),
-      );
+        );
 
-      //TODO::  get current position
-      markers.add(
-        Marker(
-            height: 25,
-            width: 25,
-            point:
-                LatLng(currentLocation!.latitude, currentLocation!.longitude),
-            builder: (ctx) => GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                child: Stack(alignment: Alignment.center, children: <Widget>[
-                  Image.asset('assets/icons/point.png', color: Colors.blue),
-                  const Icon(Icons.location_on, size: 14, color: Colors.white),
-                ]))),
-      );
+        //TODO::  get current position
+        markers.add(
+          Marker(
+              height: 25,
+              width: 25,
+              point:
+              LatLng(currentLocation!.latitude, currentLocation!.longitude),
+              builder: (ctx) => GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  child: Stack(alignment: Alignment.center, children: <Widget>[
+                    Image.asset('assets/icons/point.png', color: Colors.blue),
+                    const Icon(Icons.location_on, size: 14, color: Colors.white),
+                  ]))),
+        );
 
-      for (var index = 0; index < works.length; index++) {
-        if (works[index].latitude != null &&
-            works[index].longitude != null &&
-            works[index].distance != null &&
-            works[index].duration != null &&
-            works[index].geometry != null) {
-          try {
-            var geometry = jsonDecode(works[index].geometry!);
+        for (var index = 0; index < works.length; index++) {
+          if (works[index].latitude != null &&
+              works[index].longitude != null &&
+              works[index].distance != null &&
+              works[index].duration != null &&
+              works[index].geometry != null) {
+            try {
+              var geometry = jsonDecode(works[index].geometry!);
 
-            var layers = geometry['coordinates'] as List<dynamic>;
+              var layers = geometry['coordinates'] as List<dynamic>;
 
-            markers.add(
-              Marker(
-                  height: 25,
-                  width: 25,
-                  point: getLatLngFromString(
-                      works[index].latitude!, works[index].longitude!),
-                  builder: (ctx) => GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        buttonCarouselController.jumpToPage(index);
-                      },
-                      child:
-                          Stack(alignment: Alignment.center, children: <Widget>[
-                        Image.asset('assets/icons/point.png',
-                            color: Colors.primaries[works[index].color ?? 1]),
-                        Text((index + 1).toString()),
-                      ]))),
-            );
+              markers.add(
+                Marker(
+                    height: 25,
+                    width: 25,
+                    point: getLatLngFromString(
+                        works[index].latitude!, works[index].longitude!),
+                    builder: (ctx) => GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          buttonCarouselController.jumpToPage(index);
+                        },
+                        child:
+                        Stack(alignment: Alignment.center, children: <Widget>[
+                          Image.asset('assets/icons/point.png',
+                              color: Colors.primaries[works[index].color ?? 1]),
+                          Text((index + 1).toString()),
+                        ]))),
+              );
 
-            var polygon = Polyline(
-                color:
-                    Colors.primaries[Random().nextInt(Colors.primaries.length)],
-                strokeWidth: 2,
-                points: layers.map((e) => getPosition(e)).toList());
+              var polygon = Polyline(
+                  color:
+                  Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                  strokeWidth: 2,
+                  points: layers.map((e) => getPosition(e)).toList());
 
-            carouselData.add({
-              'index': index,
-              'distance': num.parse(works[index].distance!),
-              'duration': num.parse(works[index].duration!),
-              'geometry': geometry,
-              'polygon': polygon
-            });
-          } on FormatException catch (e) {
-            emit(NavigationFailed(error: e.message));
+              carouselData.add({
+                'index': index,
+                'distance': num.parse(works[index].distance!),
+                'duration': num.parse(works[index].duration!),
+                'geometry': geometry,
+                'polygon': polygon
+              });
+            } on FormatException catch (e) {
+              emit(NavigationFailed(error: e.message));
+            }
           }
         }
-      }
 
-      if (carouselData.isNotEmpty) {
-        var polygons = List<Polyline>.generate(
-            carouselData.length, (index) => carouselData[index]['polygon']);
+        if (carouselData.isNotEmpty) {
+          var polygons = List<Polyline>.generate(
+              carouselData.length, (index) => carouselData[index]['polygon']);
 
-        model.add(LayerMoodle(polygons));
+          model.add(LayerMoodle(polygons));
 
-        layer.addAll(model.map((layer) {
-          return PolylineLayer(polylines: layer.polygons);
-        }));
+          layer.addAll(model.map((layer) {
+            return PolylineLayer(polylines: layer.polygons);
+          }));
 
-        // initialize map symbols in the same order as carousel widgets
-        kWorksList = List<LatLng>.generate(
-            carouselData.length,
-            (index) =>
-                getLatLngFromWorksData(works, carouselData[index]['index']));
-      }
+          // initialize map symbols in the same order as carousel widgets
+          kWorksList = List<LatLng>.generate(
+              carouselData.length,
+                  (index) =>
+                  getLatLngFromWorksData(works, carouselData[index]['index']));
+        }
 
-      return NavigationSuccess(
-          works: data,
-          mapController: mapController,
-          buttonCarouselController: buttonCarouselController,
-          layer: layer,
-          markers: markers,
-          kWorksList: kWorksList,
-          carouselData: carouselData,
-          pageIndex: state.pageIndex,
-          model: model);
-    });
+        return NavigationSuccess(
+            works: data,
+            mapController: mapController,
+            buttonCarouselController: buttonCarouselController,
+            layer: layer,
+            markers: markers,
+            kWorksList: kWorksList,
+            carouselData: carouselData,
+            pageIndex: state.pageIndex,
+            model: model);
+      });
+    } catch(e){
+      print(e);
+      return NavigationFailed(error: e.toString());
+    }
   }
 
   Future<void> getCurrentPosition(double zoom) async {
@@ -270,9 +271,9 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   }
 
   Future<void> showMaps(
-      BuildContext context,
-      Work work,
-    ) async {
+    BuildContext context,
+    Work work,
+  ) async {
     emit(const NavigationLoadingMap());
     currentLocation ??= await _locationRepository.getCurrentLocation();
     if (context.mounted) {

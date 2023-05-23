@@ -22,6 +22,7 @@ class PermissionCubit extends Cubit<PermissionState> {
   Future<void> checkIfPermissionNeeded() async {
     for (var permission in permissionList) {
       currentPermission = permission;
+      print(currentPermission);
       var status = await permission.status;
       if (!status.isGranted) {
         emit(PermissionNeeded(
