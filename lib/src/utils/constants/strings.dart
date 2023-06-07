@@ -51,6 +51,8 @@ const databaseRoute = '/database';
 const processingQueueRoute = '/processing-queue';
 const transactionRoute = '/transaction';
 const locationsRoute = '/locations';
+const issueRoute = '/issues';
+const fillIssueRoute = '/fill-issue-route';
 
 const String buttonTextDefault = "Permitir";
 const String buttonTextSuccess = "Continuar";

@@ -28,8 +28,8 @@ part 'history_order_state.dart';
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
 
-class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState>
-    with FormatDate {
+class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with FormatDate {
+
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
 
@@ -47,9 +47,9 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState>
         _storageService.getBool('${event.work.workcode}-recentlyUpdated')! ==
             false) {
       _storageService.setBool('${event.work.workcode}-recentlyUpdated', true);
-      emit(ChangeCurrentWork(work: event.work));
+      event(ChangeCurrentWork(work: event.work));
     } else {
-      emit(HistoryOrderInitialRequest(
+      event(HistoryOrderInitialRequest(
         work: event.work,
         context: event.context,
       ));

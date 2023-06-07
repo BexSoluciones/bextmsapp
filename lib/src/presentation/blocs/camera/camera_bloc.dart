@@ -45,7 +45,6 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       _controller.dispose();
       emit(CameraFailure(error: error.description!));
     } catch (error) {
-      print(error);
       emit(CameraFailure(error: error.toString()));
     }
   }

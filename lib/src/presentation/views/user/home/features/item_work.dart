@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -111,7 +112,7 @@ class _ItemWorkState extends State<ItemWork> {
     showDialog(
       context: context,
       builder: (BuildContext context) => const Center(
-        child: CircularProgressIndicator(),
+        child: CupertinoActivityIndicator(),
       ),
     );
 

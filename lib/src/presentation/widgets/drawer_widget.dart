@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/presentation/blocs/issues/issues_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +22,8 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 
 Drawer drawer(BuildContext context, User? user) {
   bool isTheme = context.read<ThemeBloc>().state.isDarkTheme;
+
+  var issuesBloc = context.read<IssuesBloc>();
 
   return Drawer(
     child: ListView(
@@ -83,6 +86,15 @@ Drawer drawer(BuildContext context, User? user) {
             icon: Icons.transfer_within_a_station,
             text: 'Transacciones.',
             onTap: () => _navigationService.goTo(transactionRoute)),
+        _createDrawerItem(
+            context: context,
+            icon: Icons.warning_rounded,
+            text: 'Reportar un problema.',
+            onTap: () async {
+              issuesBloc.add(GetIssuesList(
+                  currentStatus: 'general', summaryId: null, workId: null));
+              await _navigationService.goTo(issueRoute);
+            }),
         if (kDebugMode) const Divider(),
         if (kDebugMode)
           _createDrawerItem(
