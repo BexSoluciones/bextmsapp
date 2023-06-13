@@ -7,7 +7,7 @@ import '../../../../../domain/models/work.dart';
 import '../../../../../utils/constants/colors.dart';
 
 //features
-import 'item_work.dart';
+import 'item.dart';
 
 class SearchHomeDelegate extends SearchDelegate<Work?> {
   SearchHomeDelegate(this.works);

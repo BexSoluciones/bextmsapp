@@ -11,7 +11,7 @@ import '../../../../cubits/home/home_cubit.dart';
 
 //widgets
 import '../../../../widgets/skeleton_loader_widget.dart';
-import 'item_work.dart';
+import 'item.dart';
 
 class HomeListView extends StatefulWidget {
   const HomeListView({Key? key, required this.five}) : super(key: key);

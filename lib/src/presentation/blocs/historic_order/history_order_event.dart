@@ -22,5 +22,6 @@ class HistoryOrderInitialRequest extends HistoryOrderEvent {
 
 class ChangeCurrentWork extends HistoryOrderEvent {
   ChangeCurrentWork({required this.work});
+
   final Work work;
 }

@@ -46,6 +46,7 @@ import 'src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 import 'src/presentation/blocs/location/location_bloc.dart';
 import 'src/presentation/blocs/photo/photo_bloc.dart';
 import 'src/presentation/blocs/historic_order/history_order_bloc.dart';
+import 'src/presentation/blocs/issues/issues_bloc.dart';
 
 //providers
 import 'src/presentation/providers/photo_provider.dart';
@@ -271,6 +272,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => QueryCubit(locator<DatabaseRepository>()),
+          ),
+          BlocProvider(
+            create: (context) => IssuesBloc(locator<DatabaseRepository>()),
           ),
         ],
         child: BlocProvider(

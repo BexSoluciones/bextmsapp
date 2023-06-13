@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -51,6 +49,8 @@ import '../../presentation/views/user/query/features/collection.dart';
 import '../../presentation/views/user/database/index.dart';
 import '../../presentation/views/user/photos/index.dart';
 import '../../presentation/views/user/photos/features/detail.dart';
+import '../../presentation/views/user/issues/pages/index.dart';
+import '../../presentation/views/user/issues/pages/fill_issues.dart';
 
 //developer
 import '../../presentation/views/developer/processing_queue/index.dart';
@@ -177,6 +177,22 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               builder: Builder(builder: (context) {
                 return RespawnView(
                     arguments: settings.arguments as InventoryArgument);
+              })));
+    case issueRoute:
+      return MaterialPageRoute(
+          builder: (context) => ShowCaseWidget(
+              autoPlayDelay: const Duration(seconds: 3),
+              blurValue: 1,
+              builder: Builder(builder: (context) {
+                return const IssuesView();
+              })));
+    case fillIssueRoute:
+      return MaterialPageRoute(
+          builder: (context) => ShowCaseWidget(
+              autoPlayDelay: const Duration(seconds: 3),
+              blurValue: 1,
+              builder: Builder(builder: (context) {
+                return const FillIssueView();
               })));
     case firmRoute:
       return MaterialPageRoute(

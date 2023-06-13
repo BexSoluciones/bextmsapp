@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bexdeliveries/src/presentation/blocs/issues/issues_bloc.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -37,24 +38,10 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
       : super(HistoryOrderInitial()) {
     on<HistoryOrderInitialRequest>(_requestHistory);
     on<ChangeCurrentWork>(_changeCurrentWork);
-    on<HistoryOrderStart>(_onTap);
   }
 
   HistoryOrder? historyOrder;
 
-  void _onTap(event, emit) {
-    if (_storageService.getBool('${event.work.workcode}-usedHistoric') != null &&
-        _storageService.getBool('${event.work.workcode}-recentlyUpdated')! ==
-            false) {
-      _storageService.setBool('${event.work.workcode}-recentlyUpdated', true);
-      event(ChangeCurrentWork(work: event.work));
-    } else {
-      event(HistoryOrderInitialRequest(
-        work: event.work,
-        context: event.context,
-      ));
-    }
-  }
 
   Future<void> _requestHistory(
     HistoryOrderInitialRequest event,

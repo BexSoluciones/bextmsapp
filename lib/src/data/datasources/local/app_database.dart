@@ -222,6 +222,36 @@ class AppDatabase {
         ${ClientFields.userId} TEXT DEFAULT NULL
       )
     ''',
+    '''
+      CREATE TABLE $tableHistoryOrders (
+        ${HistoryOrderFields.id} INTEGER PRIMARY KEY,
+        ${HistoryOrderFields.workId} INTEGER NOT NULL,
+        ${HistoryOrderFields.workcode} TEXT NOT NULL ,
+        ${HistoryOrderFields.zoneId} INTEGER DEFAULT NULL,
+        ${HistoryOrderFields.likelihood} REAL DEFAULT NULL,
+        ${HistoryOrderFields.used} BOOLEAN DEFAULT NULL,
+        ${HistoryOrderFields.listOrder} TEXT NOT NULL,
+        ${HistoryOrderFields.works} TEXT NOT NULL,
+        ${HistoryOrderFields.different} TEXT NOT NULL
+      )
+    ''',
+    // '''
+    //   CREATE TABLE $tableNews (
+    //     ${NewsFields.id} INTEGER PRIMARY KEY,
+    //     ${NewsFields.userId} INTEGER NOT NULL,
+    //     ${NewsFields.workId} INTEGER DEFAULT NULL,
+    //     ${NewsFields.summaryId} INTEGER DEFAULT NULL,
+    //     ${NewsFields.status} TEXT NOT NULL,
+    //     ${NewsFields.nommotvis} TEXT NOT NULL,
+    //     ${NewsFields.codmotvis} TEXT NOT NULL,
+    //     ${NewsFields.latitude} TEXT NOT NULL,
+    //     ${NewsFields.longitude} TEXT NOT NULL,
+    //     ${NewsFields.images} TEXT DEFAULT NULL,
+    //     ${NewsFields.firm} TEXT DEFAULT NULL,
+    //     ${NewsFields.observation} TEXT DEFAULT NULL,
+    //     ${NewsFields.createdAt} TEXT DEFAULT NULL,
+    //     ${NewsFields.updatedAt} TEXT DEFAULT NULL)
+    // ''',
   ];
 
   Future<Database> _initDatabase(databaseName) async {

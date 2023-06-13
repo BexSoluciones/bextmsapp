@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //blocs
-import '../../../blocs/issues/issues_bloc.dart';
+import '../../../../blocs/issues/issues_bloc.dart';
 
 //features
-import '../partial/features/build_reasons_text-field.dart';
-import 'features/listview.dart';
+import '../../partial/features/build_reasons_text-field.dart';
+import '../features/listview.dart';
 
 class IssuesView extends StatelessWidget {
   const IssuesView({

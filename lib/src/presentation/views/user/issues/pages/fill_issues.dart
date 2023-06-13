@@ -27,14 +27,14 @@ final LocationService _locationService = locator<LocationService>();
 final IsolateService _isolateService = locator<IsolateService>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
 
-class FillIssueScreen extends StatefulWidget {
-  const FillIssueScreen({super.key});
+class FillIssueView extends StatefulWidget {
+  const FillIssueView({super.key});
 
   @override
-  State<FillIssueScreen> createState() => _FillIssueScreenState();
+  State<FillIssueView> createState() => _FillIssueViewState();
 }
 
-class _FillIssueScreenState extends State<FillIssueScreen> {
+class _FillIssueViewState extends State<FillIssueView> {
   final TextEditingController observationsController = TextEditingController();
 
   late IssuesBloc issuesBloc;
