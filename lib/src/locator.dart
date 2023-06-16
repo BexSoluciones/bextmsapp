@@ -23,6 +23,7 @@ import 'services/location.dart';
 import 'services/isolate.dart';
 import 'services/timer.dart';
 import 'services/notifications.dart';
+import 'services/analytics.dart';
 
 final locator = GetIt.instance;
 
@@ -45,6 +46,8 @@ Future<void> initializeDependencies() async {
 
   var chargeStatus = ChargerStatus.instance;
   locator.registerSingleton<ChargerStatus>(chargeStatus);
+
+  locator.registerLazySingleton(() => FirebaseAnalyticsService());
 
   var notification = await NotificationService.getInstance();
   locator.registerSingleton<NotificationService>(notification!);

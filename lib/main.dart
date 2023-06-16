@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -62,6 +64,7 @@ import 'src/services/navigation.dart';
 import 'src/services/storage.dart';
 import 'src/services/location.dart';
 import 'src/services/timer.dart';
+import 'src/services/analytics.dart';
 
 //router
 import 'src/config/router/index.dart' as router;
@@ -111,19 +114,54 @@ Future<bool> _listenToGeoLocations() async {
   }
 }
 
+Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Handling a background message: ${message.messageId!}");
+}
+
+// It is assumed that all messages contain a data field with the key 'type'
+Future<void> setupInteractedMessage() async {
+  // Get any messages which caused the application to open from
+  // a terminated state.
+  RemoteMessage? initialMessage =
+      await FirebaseMessaging.instance.getInitialMessage();
+
+  // If the message also contains a data property with a "type" of "chat",
+  // navigate to a chat screen
+  if (initialMessage != null) {
+    _handleMessage(initialMessage);
+  }
+
+  // Also handle any interaction when the app is in the background via a
+  // Stream listener
+  // await FirebaseMessaging.instance.getToken();
+  FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+}
+
+void _handleMessage(RemoteMessage message) {
+
+  print(message);
+
+  PushNotification notification = PushNotification(
+    title: message.notification?.title,
+    body: message.notification?.body,
+    // dataTitle: message.data['title'],
+    // dataBody: message.data['body'],
+  );
+
+  showSimpleNotification(
+    Text(notification.title!),
+    subtitle: Text(notification.body!),
+    background: Colors.cyan.shade700,
+    duration: const Duration(seconds: 2),
+  );
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  setupInteractedMessage();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await initializeDependencies();
-
-  try {
-    cameras = await availableCameras();
-  } on CameraException catch (e) {
-    if (kDebugMode) {
-      print(e.code + e.description!);
-    }
-  }
 
   bool damagedDatabaseDeleted = false;
 
@@ -203,9 +241,8 @@ class MyApp extends StatelessWidget {
               create: (context) => HomeCubit(locator<DatabaseRepository>(),
                   locator<ApiRepository>(), locator<LocationRepository>())),
           BlocProvider(
-              create: (context) => HistoryOrderBloc(
-                  locator<DatabaseRepository>(),
-                  BlocProvider.of<ProcessingQueueBloc>(context)),
+            create: (context) => HistoryOrderBloc(locator<DatabaseRepository>(),
+                BlocProvider.of<ProcessingQueueBloc>(context)),
           ),
           BlocProvider(
             create: (context) => WorkCubit(
@@ -298,10 +335,15 @@ class MyApp extends StatelessWidget {
                     darkTheme: AppTheme.dark,
                     themeMode: ThemeMode.system,
                     navigatorKey: locator<NavigationService>().navigatorKey,
-                    onUnknownRoute: (RouteSettings settings) => MaterialPageRoute(
-                        builder: (BuildContext context) => UndefinedView(
-                              name: settings.name,
-                            )),
+                    navigatorObservers: [
+                      locator<FirebaseAnalyticsService>().appAnalyticsObserver(),
+
+                    ],
+                    onUnknownRoute: (RouteSettings settings) =>
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => UndefinedView(
+                                  name: settings.name,
+                                )),
                     initialRoute: '/splash',
                     onGenerateRoute: router.generateRoute,
                   ),
