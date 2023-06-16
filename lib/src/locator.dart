@@ -22,6 +22,7 @@ import 'services/navigation.dart';
 import 'services/location.dart';
 import 'services/isolate.dart';
 import 'services/timer.dart';
+import 'services/notifications.dart';
 
 final locator = GetIt.instance;
 
@@ -44,6 +45,9 @@ Future<void> initializeDependencies() async {
 
   var chargeStatus = ChargerStatus.instance;
   locator.registerSingleton<ChargerStatus>(chargeStatus);
+
+  var notification = await NotificationService.getInstance();
+  locator.registerSingleton<NotificationService>(notification!);
 
   final db = AppDatabase.instance;
   locator.registerSingleton<AppDatabase>(db);

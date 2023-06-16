@@ -1,4 +1,4 @@
-package com.example.bexdeliveries
+package com.bexsoluciones.bexdeliveries
 
 import android.content.Context
 import android.content.Intent

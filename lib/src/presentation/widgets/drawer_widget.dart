@@ -96,26 +96,29 @@ Drawer drawer(BuildContext context, User? user) {
               await _navigationService.goTo(issueRoute);
             }),
         if (kDebugMode) const Divider(),
-        if (kDebugMode)
+        if (kDebugMode) ... [
           _createDrawerItem(
               context: context,
               icon: Icons.queue,
               text: 'Cola de procesamiento.',
               onTap: () => _navigationService.goTo(processingQueueRoute)),
-        if (kDebugMode)
           _createDrawerItem(
               context: context,
               icon: Icons.location_history,
               text: 'Localizaciones.',
               onTap: () => _navigationService.goTo(locationsRoute)),
-        if (kDebugMode)
           _createDrawerItem(
               context: context,
               icon: Icons.photo,
               text: 'Fotos.',
               onTap: () => _navigationService.goTo(photoRoute)),
+          _createDrawerItem(
+              context: context,
+              icon: Icons.notifications,
+              text: 'Notificaciones.',
+              onTap: () => _navigationService.goTo(notificationsRoute)),
+        ],
         const Divider(),
-        //_createDrawerItem(icon: Icons.bug_report, text: 'Reportar un problema'),
         FutureBuilder(
             future: rootBundle.loadString('pubspec.yaml'),
             builder: (context, snapshot) {

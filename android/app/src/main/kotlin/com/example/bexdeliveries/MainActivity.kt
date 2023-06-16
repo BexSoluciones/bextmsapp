@@ -1,4 +1,4 @@
-package com.example.bexdeliveries
+package com.bexsoluciones.bexdeliveries
 
 import android.os.Build
 import android.os.Bundle

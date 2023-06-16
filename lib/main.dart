@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:camera/camera.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:location/location.dart';
 import 'package:location_repository/location_repository.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
 
 //plugins
@@ -109,8 +111,10 @@ Future<bool> _listenToGeoLocations() async {
   }
 }
 
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   await initializeDependencies();
 
   try {
@@ -286,19 +290,21 @@ class MyApp extends StatelessWidget {
                 onTap: () {
                   FocusScope.of(context).requestFocus(FocusNode());
                 },
-                child: MaterialApp(
-                  debugShowCheckedModeBanner: false,
-                  title: appTitle,
-                  theme: state.isDarkTheme ? AppTheme.light : AppTheme.dark,
-                  darkTheme: AppTheme.dark,
-                  themeMode: ThemeMode.system,
-                  navigatorKey: locator<NavigationService>().navigatorKey,
-                  onUnknownRoute: (RouteSettings settings) => MaterialPageRoute(
-                      builder: (BuildContext context) => UndefinedView(
-                            name: settings.name,
-                          )),
-                  initialRoute: '/splash',
-                  onGenerateRoute: router.generateRoute,
+                child: OverlaySupport(
+                  child: MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    title: appTitle,
+                    theme: state.isDarkTheme ? AppTheme.light : AppTheme.dark,
+                    darkTheme: AppTheme.dark,
+                    themeMode: ThemeMode.system,
+                    navigatorKey: locator<NavigationService>().navigatorKey,
+                    onUnknownRoute: (RouteSettings settings) => MaterialPageRoute(
+                        builder: (BuildContext context) => UndefinedView(
+                              name: settings.name,
+                            )),
+                    initialRoute: '/splash',
+                    onGenerateRoute: router.generateRoute,
+                  ),
                 ),
               );
             })));

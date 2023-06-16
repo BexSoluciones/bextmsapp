@@ -49,6 +49,7 @@ const respawnQueryRoute = '/respawn-query';
 
 const databaseRoute = '/database';
 const processingQueueRoute = '/processing-queue';
+const notificationsRoute = '/notifications';
 const transactionRoute = '/transaction';
 const locationsRoute = '/locations';
 const issueRoute = '/issues';

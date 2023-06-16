@@ -1,4 +1,4 @@
-package com.example.bexdeliveries
+package com.bexsoluciones.bexdeliveries
 
 import android.util.Log
 import io.flutter.plugin.common.EventChannel
