@@ -65,6 +65,7 @@ import 'src/services/storage.dart';
 import 'src/services/location.dart';
 import 'src/services/timer.dart';
 import 'src/services/analytics.dart';
+import 'src/services/notifications.dart';
 
 //router
 import 'src/config/router/index.dart' as router;
@@ -75,6 +76,7 @@ import 'src/presentation/views/global/undefined_view.dart';
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final LocationService _locationService = locator<LocationService>();
 final TimerService _timerService = locator<TimerService>();
+final NotificationService _notificationService = locator<NotificationService>();
 
 List<CameraDescription> cameras = [];
 
@@ -91,6 +93,16 @@ void callbackDispatcher() async {
 
   ChargerStatus.instance.startPowerChangesListener();
   await _listenToGeoLocations();
+}
+
+@pragma('vm:entry-point')
+Future<void> _messageHandler(RemoteMessage message) async {
+  print('Got a message whilst in the foreground!');
+  print('Message data: ${message.data}');
+
+  if (message.notification != null) {
+    print('Message also contained a notification: ${message.notification}');
+  }
 }
 
 Future<bool> _listenToGeoLocations() async {
@@ -114,82 +126,52 @@ Future<bool> _listenToGeoLocations() async {
   }
 }
 
-Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("Handling a background message: ${message.messageId!}");
-}
-
-// It is assumed that all messages contain a data field with the key 'type'
-Future<void> setupInteractedMessage() async {
-  // Get any messages which caused the application to open from
-  // a terminated state.
-  RemoteMessage? initialMessage =
-      await FirebaseMessaging.instance.getInitialMessage();
-
-  // If the message also contains a data property with a "type" of "chat",
-  // navigate to a chat screen
-  if (initialMessage != null) {
-    _handleMessage(initialMessage);
-  }
-
-  // Also handle any interaction when the app is in the background via a
-  // Stream listener
-  // await FirebaseMessaging.instance.getToken();
-  FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
-}
-
-void _handleMessage(RemoteMessage message) {
-
-  print(message);
-
-  PushNotification notification = PushNotification(
-    title: message.notification?.title,
-    body: message.notification?.body,
-    // dataTitle: message.data['title'],
-    // dataBody: message.data['body'],
-  );
-
-  showSimpleNotification(
-    Text(notification.title!),
-    subtitle: Text(notification.body!),
-    background: Colors.cyan.shade700,
-    duration: const Duration(seconds: 2),
-  );
-}
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  setupInteractedMessage();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  await initializeDependencies();
 
-  bool damagedDatabaseDeleted = false;
-
-  await FlutterMapTileCaching.initialise(
-    errorHandler: (error) => damagedDatabaseDeleted = error.wasFatal,
-    debugMode: true,
-  );
-
-  _storageService.setBool('damaged_database_deleted', damagedDatabaseDeleted);
-
-  await FMTC.instance.rootDirectory.migrator.fromV6(urlTemplates: []);
-
-  if (_storageService.getBool('reset') ?? false) {
-    await FMTC.instance.rootDirectory.manage.reset();
+  try {
+    await Firebase.initializeApp();
+    await initializeDependencies();
+  } catch (e) {
+    print(e);
   }
 
-  final File newAppVersionFile = File(
-    p.join(
-      // ignore: invalid_use_of_internal_member, invalid_use_of_protected_member
-      FMTC.instance.rootDirectory.directory.absolute.path,
-      'newAppVersion.${Platform.isWindows ? 'exe' : 'apk'}',
-    ),
-  );
+  try{
+    FirebaseMessaging.onBackgroundMessage(_messageHandler);
+    FirebaseMessaging.instance.setAutoInitEnabled(true);
+    // await _notificationService.init();
+  } catch (e) {
+    print(e);
+  }
 
-  if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
 
-  await _listenToGeoLocations();
-  ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
+  // bool damagedDatabaseDeleted = false;
+  //
+  // await FlutterMapTileCaching.initialise(
+  //   errorHandler: (error) => damagedDatabaseDeleted = error.wasFatal,
+  //   debugMode: true,
+  // );
+  //
+  // _storageService.setBool('damaged_database_deleted', damagedDatabaseDeleted);
+  //
+  // await FMTC.instance.rootDirectory.migrator.fromV6(urlTemplates: []);
+  //
+  // if (_storageService.getBool('reset') ?? false) {
+  //   await FMTC.instance.rootDirectory.manage.reset();
+  // }
+  //
+  // final File newAppVersionFile = File(
+  //   p.join(
+  //     // ignore: invalid_use_of_internal_member, invalid_use_of_protected_member
+  //     FMTC.instance.rootDirectory.directory.absolute.path,
+  //     'newAppVersion.${Platform.isWindows ? 'exe' : 'apk'}',
+  //   ),
+  // );
+  //
+  // if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
+  //
+  // await _listenToGeoLocations();
+  // ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
   runApp(const MyApp());
 }

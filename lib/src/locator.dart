@@ -35,22 +35,22 @@ Future<void> initializeDependencies() async {
   final navigation = NavigationService();
   locator.registerSingleton<NavigationService>(navigation);
 
-  final isolate = IsolateService();
-  locator.registerSingleton<IsolateService>(isolate);
+  final notification = await NotificationService.getInstance();
+  locator.registerSingleton<NotificationService>(notification!);
 
-  var location = await LocationService.getInstance();
+  // final isolate = IsolateService();
+  // locator.registerSingleton<IsolateService>(isolate);
+
+  final location = await LocationService.getInstance();
   locator.registerSingleton<LocationService>(location!);
 
-  var timer = await TimerService.getInstance();
+  final timer = await TimerService.getInstance();
   locator.registerSingleton<TimerService>(timer!);
 
-  var chargeStatus = ChargerStatus.instance;
+  final chargeStatus = ChargerStatus.instance;
   locator.registerSingleton<ChargerStatus>(chargeStatus);
 
   locator.registerLazySingleton(() => FirebaseAnalyticsService());
-
-  var notification = await NotificationService.getInstance();
-  locator.registerSingleton<NotificationService>(notification!);
 
   final db = AppDatabase.instance;
   locator.registerSingleton<AppDatabase>(db);

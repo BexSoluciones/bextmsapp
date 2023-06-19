@@ -33,8 +33,6 @@ class _NotificationsViewState extends State<NotificationsView> {
     super.initState();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -21,13 +21,13 @@ class MainActivity: FlutterActivity() {
             splashScreen.setOnExitAnimationListener { splashScreenView -> splashScreenView.remove() }
         }
 
-        chargerStatusPlugin = ChargerStatusPlugin()
+//        chargerStatusPlugin = ChargerStatusPlugin()
         super.onCreate(savedInstanceState)
     }
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        chargerStatusPlugin.onAttachedToEngine(flutterEngine)
+        //chargerStatusPlugin.onAttachedToEngine(flutterEngine)
     }
 
 

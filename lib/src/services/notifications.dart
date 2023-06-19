@@ -8,8 +8,15 @@ import '../../src/domain/models/notification.dart';
 //widgets
 import '../presentation/widgets/custom_notification_badge.dart';
 
-class NotificationService {
+Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Got a message whilst in the background!');
+  if (message.notification != null) {
+    print('Notification Title: ${message.notification!.title}');
+    print('Notification Body: ${message.notification!.body}');
+  }
+}
 
+class NotificationService {
   static NotificationService? _instance;
   static FirebaseMessaging? _firebaseMessaging;
 
@@ -18,47 +25,58 @@ class NotificationService {
   static Future<NotificationService?> getInstance() async {
     _instance ??= NotificationService();
     _firebaseMessaging = FirebaseMessaging.instance;
-    settings = await _firebaseMessaging?.requestPermission(
-      alert: true,
-      badge: true,
-      provisional: false,
-      sound: true,
-    );
     return _instance;
   }
 
+  bool _initialized = false;
 
-  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  void sendNotification() async {
-      if (settings?.authorizationStatus == AuthorizationStatus.authorized) {
-
-        // For handling the received notifications
-        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-          // Parse the message received
-          PushNotification notification = PushNotification(
-            title: message.notification?.title,
-            body: message.notification?.body,
-            dataTitle: message.data['title'],
-            dataBody: message.data['body'],
-          );
-
-          showSimpleNotification(
-            Text(notification.title!),
-            leading: const NotificationBadge(totalNotifications: 0),
-            subtitle: Text(notification.body!),
-            background: Colors.cyan.shade700,
-            duration: const Duration(seconds: 2),
-          );
-        });
-      } else {
-        print('User declined or has not accepted permission');
-      }
+  Future init() async {
+    if (!_initialized) {
+      settings = await _firebaseMessaging?.requestPermission(
+        alert: true,
+        badge: true,
+        provisional: false,
+        sound: true,
+      );
+      String? token = await _firebaseMessaging?.getToken();
+      _initialized = true;
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      await setupInteractedMessage();
+    }
   }
 
 
+  Future<void> setupInteractedMessage() async {
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
 
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
 
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
 
+  void _handleMessage(RemoteMessage message) {
+    print('Got a message whilst in the foreground!');
+    print('Message data: ${message.data}');
 
+    if (message.notification != null) {
+      print('Message also contained a notification: ${message.notification}');
+
+      PushNotification notification = PushNotification(
+        title: message.notification?.title,
+        body: message.notification?.body,
+        // dataTitle: message.data['title'],
+        // dataBody: message.data['body'],
+      );
+
+      showSimpleNotification(
+        Text(notification.title!),
+        subtitle: Text(notification.body!),
+        background: Colors.cyan.shade700,
+        duration: const Duration(seconds: 2),
+      );
+    }
+  }
 }
