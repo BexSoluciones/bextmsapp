@@ -60,6 +60,7 @@ class NotificationService {
   void _handleMessage(RemoteMessage message) {
     print('Got a message whilst in the foreground!');
     print('Message data: ${message.data}');
+    print(message.notification);
 
     if (message.notification != null) {
       print('Message also contained a notification: ${message.notification}');
@@ -71,12 +72,7 @@ class NotificationService {
         // dataBody: message.data['body'],
       );
 
-      showSimpleNotification(
-        Text(notification.title!),
-        subtitle: Text(notification.body!),
-        background: Colors.cyan.shade700,
-        duration: const Duration(seconds: 2),
-      );
+
     }
   }
 }

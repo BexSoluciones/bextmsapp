@@ -1,5 +1,5 @@
 import 'package:bexdeliveries/src/services/notifications.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:bexdeliveries/src/utils/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:overlay_support/overlay_support.dart';
 
@@ -31,6 +31,16 @@ class _NotificationsViewState extends State<NotificationsView> {
   void initState() {
     _totalNotifications = 0;
     super.initState();
+  }
+
+  void show() {
+    showSimpleNotification(
+      const Text('Hola'),
+      leading: const Icon(Icons.notification_important_outlined),
+      subtitle: const Text('este es un mensage'),
+      background: kPrimaryColor,
+      duration: const Duration(seconds: 2),
+    );
   }
 
   @override
@@ -78,6 +88,7 @@ class _NotificationsViewState extends State<NotificationsView> {
                   ],
                 )
               : Container(),
+          TextButton(onPressed: () => show(), child: const Text('mostrar'))
         ],
       ),
     );
