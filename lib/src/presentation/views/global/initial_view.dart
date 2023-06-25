@@ -73,45 +73,46 @@ class InitialViewState extends State<InitialView> {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: BlocBuilder<InitialCubit, InitialState>(
-          builder: (context, state) {
-            if (state.runtimeType == InitialLoading) {
-              return const Center(child: CupertinoActivityIndicator());
-            } else if (state.runtimeType == InitialSuccess ||
-                state.runtimeType == InitialFailed) {
-              return _buildBody(size, state.enterprise, state.error);
-            } else {
-              return const SizedBox();
-            }
-          },
-        ));
+            builder: (context, state) => buildBlocConsumer(size)));
   }
 
-  Widget _buildBody(Size size, Enterprise? enterprise, String? error) {
-    return BlocListener<InitialCubit, InitialState>(
-        listener: (context, state) {
-          if (state.enterprise != null) {
-            _navigationService.goTo(loginRoute);
-          }
-        },
-        child: SingleChildScrollView(
-            child: SafeArea(
-                child: SizedBox(
-                    height: size.height,
-                    width: size.width,
-                    child: BlocBuilder<NetworkBloc, NetworkState>(
-                        builder: (context, networkState) {
-                      switch (networkState.runtimeType) {
-                        case NetworkInitial:
-                          return const Center(
-                              child: CupertinoActivityIndicator());
-                        case NetworkFailure:
-                          return _buildNetworkFailed();
-                        case NetworkSuccess:
-                          return _buildBodyNetworkSuccess(size, error);
-                        default:
-                          return const SizedBox();
-                      }
-                    })))));
+  Widget buildBlocConsumer(Size size) {
+    return BlocConsumer<InitialCubit, InitialState>(
+      listener: buildBlocListener,
+      builder: (context, state) {
+        return _buildBody(size, state);
+      },
+    );
+  }
+
+  void buildBlocListener(context, state) {
+    if (state is InitialSuccess || state is InitialFailed) {
+      if (state.error != null) {
+      } else {
+        initialCubit.goToLogin();
+      }
+    }
+  }
+
+  Widget _buildBody(Size size, InitialState state) {
+    return SingleChildScrollView(
+        child: SafeArea(
+            child: SizedBox(
+                height: size.height,
+                width: size.width,
+                child: BlocBuilder<NetworkBloc, NetworkState>(
+                    builder: (context, networkState) {
+                  switch (networkState.runtimeType) {
+                    case NetworkInitial:
+                      return const Center(child: CupertinoActivityIndicator());
+                    case NetworkFailure:
+                      return _buildNetworkFailed();
+                    case NetworkSuccess:
+                      return _buildBodyNetworkSuccess(size, state);
+                    default:
+                      return const SizedBox();
+                  }
+                }))));
   }
 
   Widget _buildNetworkFailed() {
@@ -127,7 +128,7 @@ class InitialViewState extends State<InitialView> {
     );
   }
 
-  Widget _buildBodyNetworkSuccess(Size size, String? error) {
+  Widget _buildBodyNetworkSuccess(Size size, InitialState state) {
     return ListView(
       children: [
         Padding(
@@ -144,7 +145,8 @@ class InitialViewState extends State<InitialView> {
                 bottom: kDefaultPadding),
             child: buildCompanyField()),
         gapH4,
-        if (error != null) Text(error, textAlign: TextAlign.center),
+        if (state.error != null)
+          Text(state.error!, textAlign: TextAlign.center),
         SizedBox(height: size.height * 0.26),
         Column(
           children: [
@@ -152,15 +154,16 @@ class InitialViewState extends State<InitialView> {
               padding: const EdgeInsets.only(
                   left: kDefaultPadding, right: kDefaultPadding),
               child: DefaultButton(
-                  widget: isLoading
+                  widget: state is InitialLoading
                       ? const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  )
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
                       : Text('Comenzar'.toUpperCase(),
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.normal)),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal)),
                   press: () async {
                     initialCubit.getEnterprise(companyNameController);
                   }),
