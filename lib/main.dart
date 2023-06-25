@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:camera/camera.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -15,7 +16,7 @@ import 'package:path/path.dart' as p;
 //plugins
 import 'plugins/charge_status.dart';
 //theme
-import 'src/config/theme/index.dart';
+import 'src/config/theme/app.dart';
 
 //domain
 import 'src/domain/repositories/api_repository.dart';
@@ -125,12 +126,12 @@ Future<void> main() async {
     print(e);
   }
 
-  try{
+  try {
     await _notificationService.init();
   } catch (e) {
     print(e);
   }
-  
+
   bool damagedDatabaseDeleted = false;
 
   await FlutterMapTileCaching.initialise(
@@ -297,17 +298,47 @@ class MyApp extends StatelessWidget {
                 onTap: () {
                   FocusScope.of(context).requestFocus(FocusNode());
                 },
-                child: OverlaySupport(
-                  child: MaterialApp(
+                child: OverlaySupport(child: DynamicColorBuilder(builder:
+                    (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+                  ColorScheme lightScheme;
+                  ColorScheme darkScheme;
+
+                  lightScheme = lightColorScheme;
+                  darkScheme = darkColorScheme;
+
+                  // if (lightDynamic != null && darkDynamic != null) {
+                  //   lightScheme = lightDynamic.harmonized();
+                  //   lightCustomColors =
+                  //       lightCustomColors.harmonized(lightScheme);
+                  //
+                  //   // Repeat for the dark color scheme.
+                  //   darkScheme = darkDynamic.harmonized();
+                  //   darkCustomColors = darkCustomColors.harmonized(darkScheme);
+                  // } else {
+                  //   // Otherwise, use fallback schemes.
+
+                  // }
+                  return MaterialApp(
                     debugShowCheckedModeBanner: false,
                     title: appTitle,
-                    theme: state.isDarkTheme ? AppTheme.light : AppTheme.dark,
-                    darkTheme: AppTheme.dark,
+                    // theme: state.isDarkTheme ? AppTheme.light : AppTheme.dark,
+                    // darkTheme: AppTheme.dark,
+
+                    theme: ThemeData(
+                      useMaterial3: true,
+                      colorScheme: lightScheme,
+                      // extensions: [lightCustomColors],
+                    ),
+                    darkTheme: ThemeData(
+                      useMaterial3: true,
+                      colorScheme: darkScheme,
+                      // extensions: [darkCustomColors],
+                    ),
                     themeMode: ThemeMode.system,
                     navigatorKey: locator<NavigationService>().navigatorKey,
                     navigatorObservers: [
-                      locator<FirebaseAnalyticsService>().appAnalyticsObserver(),
-
+                      locator<FirebaseAnalyticsService>()
+                          .appAnalyticsObserver(),
                     ],
                     onUnknownRoute: (RouteSettings settings) =>
                         MaterialPageRoute(
@@ -316,8 +347,8 @@ class MyApp extends StatelessWidget {
                                 )),
                     initialRoute: '/splash',
                     onGenerateRoute: router.generateRoute,
-                  ),
-                ),
+                  );
+                })),
               );
             })));
   }

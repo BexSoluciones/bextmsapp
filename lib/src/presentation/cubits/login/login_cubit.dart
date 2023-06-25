@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +10,7 @@ import 'package:location_repository/location_repository.dart';
 
 //domain
 import '../../../../core/helpers/index.dart';
+
 ///models
 import '../../../domain/models/login.dart';
 import '../../../domain/models/enterprise.dart';
@@ -15,14 +18,17 @@ import '../../../domain/models/work.dart';
 import '../../../domain/models/summary.dart';
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/processing_queue.dart';
+
 ///requests
 import '../../../domain/models/requests/login_request.dart';
 import '../../../domain/models/requests/work_request.dart';
 import '../../../domain/models/requests/enterprise_config_request.dart';
 import '../../../domain/models/requests/reason_request.dart';
+
 ///responses
 import '../../../domain/models/responses/reason_response.dart';
 import '../../../domain/models/responses/enterprise_config_response.dart';
+
 ///repositories
 import '../../../domain/repositories/api_repository.dart';
 import '../../../domain/repositories/database_repository.dart';
@@ -56,10 +62,11 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   final ProcessingQueueBloc _processingQueueBloc;
 
   CurrentUserLocationEntity? currentLocation;
-  
+
   var helperFunctions = HelperFunctions();
 
-  LoginCubit(this._apiRepository, this._databaseRepository, this._locationRepository, this._processingQueueBloc)
+  LoginCubit(this._apiRepository, this._databaseRepository,
+      this._locationRepository, this._processingQueueBloc)
       : super(
             LoginSuccess(
                 enterprise: _storageService.getObject('enterprise') != null
@@ -69,7 +76,8 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
             null);
 
   Future<void> getConfigEnterprise() async {
-    var response = await _apiRepository.getConfigEnterprise(request: EnterpriseConfigRequest());
+    var response = await _apiRepository.getConfigEnterprise(
+        request: EnterpriseConfigRequest());
     if (response is DataSuccess) {
       var data = response.data as EnterpriseConfigResponse;
       _storageService.setObject('config', data.enterpriseConfig.toMap());
@@ -84,8 +92,10 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
     }
   }
 
-  Future<void> differenceWorks(List<String?> localWorks, List<String?> externalWorks) async {
-    var difference = localWorks.toSet().difference(externalWorks.toSet()).toList();
+  Future<void> differenceWorks(
+      List<String?> localWorks, List<String?> externalWorks) async {
+    var difference =
+        localWorks.toSet().difference(externalWorks.toSet()).toList();
     if (difference.isNotEmpty) {
       for (var key in difference) {
         await _databaseRepository.updateStatusWork(key!, 'complete');
@@ -105,10 +115,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
 
       currentLocation = await _locationRepository.getCurrentLocation();
 
-      Future.wait([
-        getConfigEnterprise(),
-        getReasons()
-      ]);
+      Future.wait([getConfigEnterprise(), getReasons()]);
 
       final response = await _apiRepository.login(
         request: LoginRequest(usernameController.text, passwordController.text),
@@ -147,9 +154,14 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
           await Future.forEach(responseWorks.data!.works, (work) async {
             works.add(work);
             if (work.summaries != null) {
-              await Future.forEach(work.summaries as Iterable<Object?>, (element) {
+              await Future.forEach(work.summaries as Iterable<Object?>,
+                  (element) {
                 var summary = element as Summary;
-                summary.cant = ((double.parse(summary.amount) * 100.0 / double.parse(summary.unitOfMeasurement)).round() / 100);
+                summary.cant = ((double.parse(summary.amount) *
+                            100.0 /
+                            double.parse(summary.unitOfMeasurement))
+                        .round() /
+                    100);
 
                 summary.grandTotalCopy = summary.grandTotal;
                 if (summary.transaction != null) {
@@ -170,44 +182,45 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
           });
 
           //TODO:: refactoring
-          // var workcodes = groupBy(works, (Work work) => work.workcode);
-          //
-          // if (workcodes.isNotEmpty) {
-          //   var localWorks = await _databaseRepository.getAllWorks();
-          //   var localWorkcode = groupBy(localWorks, (Work obj) => obj.workcode);
-          //   await differenceWorks(localWorkcode.keys.toList(), workcodes.keys.toList());
-          // }
-          //
-          // for (var key in groupBy(works, (Work obj) => obj.workcode).keys) {
-          //   var worksF = works.where((element) => element.workcode == key);
-          //
-          //   if (worksF.first.zoneId != null) {
-          //     var processingQueueHistoric = ProcessingQueue(
-          //         body: jsonEncode({
-          //           'zone_id': worksF.first.zoneId!,
-          //           'workcode': worksF.first.workcode
-          //         }),
-          //         task: 'incomplete',
-          //         code: 'AB5A8E10Y3',
-          //         createdAt: now(),
-          //         updatedAt: now()
-          //     );
-          //
-          //     _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueHistoric));
-          //   }
-          //
-          //   if (worksF.first.status == 'unsync') {
-          //     var processingQueueWork = ProcessingQueue(
-          //         body: jsonEncode({'workcode': key, 'status': 'sync'}),
-          //         task: 'incomplete',
-          //         code: 'EBSVAEKRJB',
-          //         createdAt: now(),
-          //         updatedAt: now()
-          //     );
-          //
-          //     _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueWork));
-          //   }
-          // }
+          var workcodes = groupBy(works, (Work work) => work.workcode);
+
+          if (workcodes.isNotEmpty) {
+            var localWorks = await _databaseRepository.getAllWorks();
+            var localWorkcode = groupBy(localWorks, (Work obj) => obj.workcode);
+            await differenceWorks(
+                localWorkcode.keys.toList(), workcodes.keys.toList());
+          }
+
+          for (var key in groupBy(works, (Work obj) => obj.workcode).keys) {
+            var worksF = works.where((element) => element.workcode == key);
+
+            if (worksF.first.status == 'unsync') {
+              var processingQueueWork = ProcessingQueue(
+                  body: jsonEncode({'workcode': key, 'status': 'sync'}),
+                  task: 'incomplete',
+                  code: 'EBSVAEKRJB',
+                  createdAt: now(),
+                  updatedAt: now());
+
+              _processingQueueBloc.add(
+                  ProcessingQueueAdd(processingQueue: processingQueueWork));
+
+              if (worksF.first.zoneId != null) {
+                var processingQueueHistoric = ProcessingQueue(
+                    body: jsonEncode({
+                      'zone_id': worksF.first.zoneId!,
+                      'workcode': worksF.first.workcode
+                    }),
+                    task: 'incomplete',
+                    code: 'AB5A8E10Y3',
+                    createdAt: now(),
+                    updatedAt: now());
+
+                _processingQueueBloc.add(ProcessingQueueAdd(
+                    processingQueue: processingQueueHistoric));
+              }
+            }
+          }
 
           await _databaseRepository.insertWorks(works);
           await _databaseRepository.insertSummaries(summaries);
@@ -244,6 +257,5 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
     _storageService.remove('enterprise');
 
     _navigationService.replaceTo(companyRoute);
-
   }
 }
