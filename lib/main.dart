@@ -1,9 +1,8 @@
 import 'dart:io';
 import 'dart:ui';
-import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -95,16 +94,6 @@ void callbackDispatcher() async {
   await _listenToGeoLocations();
 }
 
-@pragma('vm:entry-point')
-Future<void> _messageHandler(RemoteMessage message) async {
-  print('Got a message whilst in the foreground!');
-  print('Message data: ${message.data}');
-
-  if (message.notification != null) {
-    print('Message also contained a notification: ${message.notification}');
-  }
-}
-
 Future<bool> _listenToGeoLocations() async {
   var status = await _locationService.hasPermission();
 
@@ -137,41 +126,40 @@ Future<void> main() async {
   }
 
   try{
-    FirebaseMessaging.onBackgroundMessage(_messageHandler);
-    FirebaseMessaging.instance.setAutoInitEnabled(true);
-    // await _notificationService.init();
+    await _notificationService.init();
   } catch (e) {
     print(e);
   }
+  
+  bool damagedDatabaseDeleted = false;
 
+  await FlutterMapTileCaching.initialise(
+    errorHandler: (error) => damagedDatabaseDeleted = error.wasFatal,
+    debugMode: true,
+  );
 
-  // bool damagedDatabaseDeleted = false;
-  //
-  // await FlutterMapTileCaching.initialise(
-  //   errorHandler: (error) => damagedDatabaseDeleted = error.wasFatal,
-  //   debugMode: true,
-  // );
-  //
-  // _storageService.setBool('damaged_database_deleted', damagedDatabaseDeleted);
-  //
-  // await FMTC.instance.rootDirectory.migrator.fromV6(urlTemplates: []);
-  //
-  // if (_storageService.getBool('reset') ?? false) {
-  //   await FMTC.instance.rootDirectory.manage.reset();
-  // }
-  //
-  // final File newAppVersionFile = File(
-  //   p.join(
-  //     // ignore: invalid_use_of_internal_member, invalid_use_of_protected_member
-  //     FMTC.instance.rootDirectory.directory.absolute.path,
-  //     'newAppVersion.${Platform.isWindows ? 'exe' : 'apk'}',
-  //   ),
-  // );
-  //
-  // if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
-  //
-  // await _listenToGeoLocations();
-  // ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
+  _storageService.setBool('damaged_database_deleted', damagedDatabaseDeleted);
+
+  await FMTC.instance.rootDirectory.migrator.fromV6(urlTemplates: []);
+
+  if (_storageService.getBool('reset') ?? false) {
+    await FMTC.instance.rootDirectory.manage.reset();
+  }
+
+  final File newAppVersionFile = File(
+    p.join(
+      // ignore: invalid_use_of_internal_member, invalid_use_of_protected_member
+      FMTC.instance.rootDirectory.directory.absolute.path,
+      'newAppVersion.${Platform.isWindows ? 'exe' : 'apk'}',
+    ),
+  );
+
+  if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
+
+  await _listenToGeoLocations();
+  ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
+
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   runApp(const MyApp());
 }

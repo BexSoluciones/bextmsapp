@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +9,7 @@ import '../../../domain/models/enterprise.dart';
 //utils
 import '../../../utils/constants/nums.dart';
 import '../../../utils/constants/strings.dart';
+import '../../../utils/constants/gaps.dart';
 
 //cubits
 import '../../cubits/initial/initial_cubit.dart';
@@ -128,43 +128,49 @@ class InitialViewState extends State<InitialView> {
   }
 
   Widget _buildBodyNetworkSuccess(Size size, String? error) {
-    return Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-      Padding(
-          padding: const EdgeInsets.all(60),
-          child: Image.asset(
-            'assets/images/bex-deliveries-icon.png',
-            fit: BoxFit.contain,
-          )),
-      Padding(
-          padding: const EdgeInsets.only(
-              left: kDefaultPadding,
-              right: kDefaultPadding,
-              bottom: kDefaultPadding),
-          child: buildCompanyField()),
-      if (error != null) Text(error),
-      Column(
-        children: [
-          Padding(
+    return ListView(
+      children: [
+        Padding(
+            padding: const EdgeInsets.all(60),
+            child: Image.asset(
+              'assets/images/bex-deliveries-icon.png',
+              fit: BoxFit.contain,
+            )),
+        gapH64,
+        Padding(
             padding: const EdgeInsets.only(
-                left: kDefaultPadding, right: kDefaultPadding),
-            child: DefaultButton(
-                widget: isLoading
-                    ? const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      )
-                    : Text('Comenzar'.toUpperCase(),
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.normal)),
-                press: () async {
-                  initialCubit.getEnterprise(companyNameController);
-                }),
-          ),
-          const VersionWidget()
-        ],
-      ),
-    ]);
+                left: kDefaultPadding,
+                right: kDefaultPadding,
+                bottom: kDefaultPadding),
+            child: buildCompanyField()),
+        gapH4,
+        if (error != null) Text(error, textAlign: TextAlign.center),
+        SizedBox(height: size.height * 0.26),
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: kDefaultPadding, right: kDefaultPadding),
+              child: DefaultButton(
+                  widget: isLoading
+                      ? const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                      : Text('Comenzar'.toUpperCase(),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal)),
+                  press: () async {
+                    initialCubit.getEnterprise(companyNameController);
+                  }),
+            ),
+            gapH12,
+            const VersionWidget()
+          ],
+        ),
+      ],
+    );
   }
 
   MediaQuery buildCompanyField() {

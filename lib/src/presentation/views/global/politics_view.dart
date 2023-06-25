@@ -8,6 +8,7 @@ import '../../cubits/politics/politics_cubit.dart';
 //utils
 import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/nums.dart';
+import '../../../utils/constants/gaps.dart';
 
 // animation
 import 'package:lottie/lottie.dart';
@@ -56,36 +57,33 @@ class PoliticsViewState extends State<PoliticsView> {
                 child: Padding(
                   padding: const EdgeInsets.all(kDefaultPadding),
                   child: ListView(children: [
-                    const SizedBox(height: 10),
+                    gapH12,
                     Lottie.asset('assets/animations/47956-area-map.json',
                         height: 300, width: 300),
-                    const SizedBox(height: 20),
+                    gapH12,
                     const Text(
                         'Tu ubicación actual se mostrará en el mapa y se usará para rutas, búsquedas de sitios y estimaciones del tiempo de entrega de tus pedidos.',
                         textAlign: TextAlign.justify,
-                        // textScaleFactor: textScaleFactor(context),
                         style: TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w300)),
-                    const SizedBox(height: 10),
+                    gapH12,
                     const Text(
                         'Bex deliveries recopila datos de tu ubicación para habilitar el seguimiento continuo de los transportadores en la entrega de clientes y mejorar los tiempo de entrega incluso cuando la aplicación esta cerrada o no esta en uso.',
                         textAlign: TextAlign.justify,
-                        // textScaleFactor: textScaleFactor(context),
                         style: TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w300)),
-                    const SizedBox(height: 20),
+                    gapH20,
                     InkWell(
                         onTap: () => _launchUrl(Uri.parse(
                             'https://bexdeliveries.com/politicas-de-datos-terminos-y-condiciones')),
                         child: const Text(
                             'Para ver nuestras politicas de privacidad haz click aquí',
                             textAlign: TextAlign.justify,
-                            // textScaleFactor: textScaleFactor(context),
                             style: TextStyle(
                                 color: kPrimaryColor,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w300))),
-                    const SizedBox(height: 40),
+                    gapH64,
                     DefaultButton(
                       widget: isLoading
                           ? const CircularProgressIndicator(

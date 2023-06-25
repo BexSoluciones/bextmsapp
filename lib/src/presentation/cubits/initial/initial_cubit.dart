@@ -38,6 +38,8 @@ class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
     if (isBusy) return;
 
     await run(() async {
+      emit(const InitialLoading());
+
       _storageService.setString('company_name', companyNameController.text);
 
       final response = await _apiRepository.getEnterprise(

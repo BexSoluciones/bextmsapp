@@ -24,12 +24,10 @@ class AppTheme  with ChangeNotifier {
 
     return defaultTheme.copyWith(
       textTheme: defaultTheme.textTheme.copyWith(
-        // Note: Default text style for Text widget.
         bodyMedium: AppTypography.body1.copyWith(color: Colors.black),
       ),
       extensions: [
         _lightAppColors,
-        // 1. Here
         _lightTextTheme,
       ],
     );

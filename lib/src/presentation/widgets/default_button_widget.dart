@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
+//utils
+import '../../utils/extensions/app_theme.dart';
 
-import '../../utils/constants/colors.dart';
-
-class DefaultButton extends StatelessWidget {
+class DefaultButton extends StatelessWidget  {
   const DefaultButton({
     Key? key,
     required this.widget,
@@ -22,7 +22,7 @@ class DefaultButton extends StatelessWidget {
       height: 56,
       child: TextButton(
           style: TextButton.styleFrom(
-            backgroundColor: color ?? Theme.of(context).colorScheme.primary,
+            backgroundColor: color ?? context.theme.colorScheme.primary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
           onPressed: press,

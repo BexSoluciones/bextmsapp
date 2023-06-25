@@ -1,8 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:isolate';
-import 'package:collection/collection.dart';
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +14,6 @@ import '../../../domain/models/enterprise.dart';
 import '../../../domain/models/work.dart';
 import '../../../domain/models/summary.dart';
 import '../../../domain/models/transaction.dart';
-import '../../../domain/models/isolate.dart';
 import '../../../domain/models/processing_queue.dart';
 ///requests
 import '../../../domain/models/requests/login_request.dart';

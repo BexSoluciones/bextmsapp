@@ -169,10 +169,10 @@ class LoginViewState extends State<LoginView> {
                 ],
               );
             } else {
-              return Center(
+              return const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text('Algo ocurrió mientras cargaba la información'),
                     IconButton(
                       icon: Icon(Icons.refresh),
