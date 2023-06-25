@@ -209,8 +209,11 @@ class MyApp extends StatelessWidget {
                   locator<LocationRepository>(),
                   BlocProvider.of<ProcessingQueueBloc>(context))),
           BlocProvider(
-              create: (context) => HomeCubit(locator<DatabaseRepository>(),
-                  locator<ApiRepository>(), locator<LocationRepository>())),
+              create: (context) => HomeCubit(
+                  locator<DatabaseRepository>(),
+                  locator<ApiRepository>(),
+                  locator<LocationRepository>(),
+                  BlocProvider.of<ProcessingQueueBloc>(context))),
           BlocProvider(
             create: (context) => HistoryOrderBloc(locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context)),

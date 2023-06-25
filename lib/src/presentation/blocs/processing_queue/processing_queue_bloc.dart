@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
+import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -136,7 +137,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e) {
-            print('error from code');
             queue.task = 'error';
             queue.error = e.toString();
             await _databaseRepository.updateProcessingQueue(queue);

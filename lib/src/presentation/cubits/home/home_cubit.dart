@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
 import 'package:location_repository/location_repository.dart';
@@ -7,6 +9,9 @@ import 'package:flutter_udid/flutter_udid.dart';
 
 //cubit
 import '../base/base_cubit.dart';
+
+//blocs
+import '../../blocs/processing_queue/processing_queue_bloc.dart';
 
 //utils
 import '../../../utils/resources/data_state.dart';
@@ -17,9 +22,12 @@ import '../../../domain/models/work.dart';
 import '../../../domain/models/user.dart';
 import '../../../domain/models/summary.dart';
 import '../../../domain/models/transaction.dart';
+import '../../../domain/models/processing_queue.dart';
 
 import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/repositories/api_repository.dart';
+
+import '../../../domain/abstracts/format_abstract.dart';
 
 import '../../../domain/models/requests/login_request.dart';
 import '../../../domain/models/requests/work_request.dart';
@@ -38,16 +46,17 @@ part 'home_state.dart';
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
 
-class HomeCubit extends BaseCubit<HomeState, String?> {
+class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   final ApiRepository _apiRepository;
   final DatabaseRepository _databaseRepository;
   final LocationRepository _locationRepository;
+  final ProcessingQueueBloc _processingQueueBloc;
 
   StreamSubscription? locationSubscription;
   CurrentUserLocationEntity? currentLocation;
 
-  HomeCubit(
-      this._databaseRepository, this._apiRepository, this._locationRepository)
+  HomeCubit(this._databaseRepository, this._apiRepository,
+      this._locationRepository, this._processingQueueBloc)
       : super(const HomeLoading(), null);
 
   Future<void> getAllWorks() async {
@@ -61,6 +70,17 @@ class HomeCubit extends BaseCubit<HomeState, String?> {
         : null;
 
     return HomeSuccess(works: works, user: user);
+  }
+
+  Future<void> differenceWorks(
+      List<String?> localWorks, List<String?> externalWorks) async {
+    var difference =
+        localWorks.toSet().difference(externalWorks.toSet()).toList();
+    if (difference.isNotEmpty) {
+      for (var key in difference) {
+        await _databaseRepository.updateStatusWork(key!, 'complete');
+      }
+    }
   }
 
   Future<void> sync() async {
@@ -155,6 +175,47 @@ class HomeCubit extends BaseCubit<HomeState, String?> {
               }
             }
           });
+
+          //TODO:: refactoring
+          var workcodes = groupBy(works, (Work work) => work.workcode);
+
+          if (workcodes.isNotEmpty) {
+            var localWorks = await _databaseRepository.getAllWorks();
+            var localWorkcode = groupBy(localWorks, (Work obj) => obj.workcode);
+            await differenceWorks(
+                localWorkcode.keys.toList(), workcodes.keys.toList());
+          }
+
+          for (var key in groupBy(works, (Work obj) => obj.workcode).keys) {
+            var worksF = works.where((element) => element.workcode == key);
+
+            if (worksF.first.status == 'unsync') {
+              var processingQueueWork = ProcessingQueue(
+                  body: jsonEncode({'workcode': key, 'status': 'sync'}),
+                  task: 'incomplete',
+                  code: 'EBSVAEKRJB',
+                  createdAt: now(),
+                  updatedAt: now());
+
+              _processingQueueBloc.add(
+                  ProcessingQueueAdd(processingQueue: processingQueueWork));
+
+              if (worksF.first.zoneId != null) {
+                var processingQueueHistoric = ProcessingQueue(
+                    body: jsonEncode({
+                      'zone_id': worksF.first.zoneId!,
+                      'workcode': worksF.first.workcode
+                    }),
+                    task: 'incomplete',
+                    code: 'AB5A8E10Y3',
+                    createdAt: now(),
+                    updatedAt: now());
+
+                _processingQueueBloc.add(ProcessingQueueAdd(
+                    processingQueue: processingQueueHistoric));
+              }
+            }
+          }
 
           await _databaseRepository.insertWorks(works);
           await _databaseRepository.insertSummaries(summaries);
