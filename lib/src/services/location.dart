@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
 
 //domain
 import '../../src/domain/models/location.dart' as l;
@@ -27,41 +27,60 @@ class LocationService with FormatDate {
   }
 
   bool inBackground = false;
-
-  Future<bool> activateBackgroundMode() async {
-    // var backgroundMode = await _preferences?.isBackgroundModeEnabled();
-    //
-    // if (backgroundMode! == false) {
-    //   await _preferences?.enableBackgroundMode(enable: true);
-    //   await _preferences?.changeNotificationOptions(
-    //     title: 'Localización en segundo plano activa',
-    //   );
-    // }
-
-    return Future.value(false);
-  }
+  late LocationSettings locationSettings;
 
   // Keep track of current Location
-  LocationData? _currentLocation;
+  Position? _currentLocation;
 
   // Continuously emit location updates
-  final StreamController<LocationData?> _locationController =
-      StreamController<LocationData?>.broadcast();
+  final StreamController<Position?> _locationController =
+      StreamController<Position?>.broadcast();
 
   // ignore: sort_constructors_first
   LocationService() {
-    Future.value(getPermissionStatus())
-    .then((granted) {
-      if (granted == PermissionStatus.authorizedAlways) {
-        onLocationChanged(inBackground: inBackground).listen((locationData) {
+    hasPermission().then((granted) {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        locationSettings = AndroidSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 100,
+            forceLocationManager: true,
+            intervalDuration: const Duration(seconds: 10),
+            //(Optional) Set foreground notification config to keep the app alive
+            //when going to the background
+            foregroundNotificationConfig: const ForegroundNotificationConfig(
+              notificationText:
+                  "Example app will continue to receive your location even when you aren't using it",
+              notificationTitle: "Running in Background",
+              enableWakeLock: true,
+            ));
+      } else if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        locationSettings = AppleSettings(
+          accuracy: LocationAccuracy.high,
+          activityType: ActivityType.fitness,
+          distanceFilter: 100,
+          pauseLocationUpdatesAutomatically: true,
+          // Only set to true if our app will be started up in the background.
+          showBackgroundLocationIndicator: false,
+        );
+      } else {
+        locationSettings = const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 100,
+        );
+      }
+
+      if (granted == LocationPermission.always) {
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((locationData) {
           _locationController.add(locationData);
         });
       }
     });
   }
 
-  Future<PermissionStatus> hasPermission() async {
-    return await getPermissionStatus();
+  Future<LocationPermission> hasPermission() async {
+    return await Geolocator.requestPermission();
   }
 
   bool calculateRadiusBetweenTwoLatLng(
@@ -86,9 +105,9 @@ class LocationService with FormatDate {
     return date1.difference(date2).inSeconds;
   }
 
-  Stream<LocationData?> get locationStream => _locationController.stream;
+  Stream<Position?> get locationStream => _locationController.stream;
 
-  Future<LocationData> getLocation() async {
+  Future<Position> getLocation() async {
     try {
       _currentLocation = await getLocation();
     } catch (e) {
@@ -101,7 +120,6 @@ class LocationService with FormatDate {
   }
 
   Future<void> saveLocation(String type) async {
-
     try {
       var lastLocation = await _databaseRepository.getLastLocation();
 
@@ -113,12 +131,12 @@ class LocationService with FormatDate {
       locationData ??= await getLocation();
 
       var location = l.Location(
-          latitude: locationData.latitude!,
-          longitude: locationData.longitude!,
+          latitude: locationData.latitude,
+          longitude: locationData.longitude,
           accuracy: locationData.accuracy,
           altitude: locationData.altitude,
-          heading: locationData.bearing,
-          isMock: locationData.isMock,
+          heading: locationData.heading,
+          isMock: locationData.isMocked,
           speed: locationData.speed,
           speedAccuracy: locationData.speedAccuracy,
           userId: _storageService.getInt('user_id') ?? 0,
@@ -127,15 +145,15 @@ class LocationService with FormatDate {
       if (lastLocation != null) {
         var currentPosition = LatLng(location.latitude, location.longitude);
         var radiusPosition =
-        LatLng(lastLocation.latitude, lastLocation.longitude);
+            LatLng(lastLocation.latitude, lastLocation.longitude);
 
-        var diff =
-        calculateRadiusBetweenTwoLatLng(currentPosition, radiusPosition, 30);
+        var diff = calculateRadiusBetweenTwoLatLng(
+            currentPosition, radiusPosition, 30);
 
         var distance =
-        calculateDistanceBetweenTwoLatLng(currentPosition, radiusPosition);
+            calculateDistanceBetweenTwoLatLng(currentPosition, radiusPosition);
         var seconds =
-        calculateDateBetweenTwoLatLng(location.time, lastLocation.time);
+            calculateDateBetweenTwoLatLng(location.time, lastLocation.time);
 
         var speed = ((distance / seconds) * 18) / 5;
 
@@ -160,7 +178,6 @@ class LocationService with FormatDate {
           print('no se ha movido');
         }
       } else {
-
         var processingQueue = ProcessingQueue(
           body: jsonEncode(location.toJson()),
           task: 'incomplete',
@@ -175,6 +192,5 @@ class LocationService with FormatDate {
     } catch (e) {
       print('error saving ---- $e');
     }
-
   }
 }

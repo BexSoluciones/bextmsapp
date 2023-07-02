@@ -1,4 +1,4 @@
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:location_repository/src/model/current_location.dart';
 
 /// Failure model that implement error
@@ -12,36 +12,41 @@ class CurrentLocationFailure implements Exception {
   final String error;
 }
 
-/// {@template location_repository}
-/// A Very Good Project created by Very Good CLI.
-/// {@endtemplate}
 class LocationRepository {
   /// {@macro location_repository}
   LocationRepository();
 
   /// Function to get current location
   Future<CurrentUserLocationEntity> getCurrentLocation() async {
-    // final serviceEnabled = await isGPSEnabled();
-    // if (!serviceEnabled) {
-    //   throw CurrentLocationFailure(
-    //     error: "You don't have location service enabled",
-    //   );
-    // }
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      throw CurrentLocationFailure(
+        error: "You don't have location service enabled",
+      );
+    }
 
-    // final permissionStatus = await requestPermission();
-    // if (permissionStatus == PermissionStatus.denied) {
-    //   final status = await requestPermission();
-    //   if (status != PermissionStatus.authorizedAlways) {
-    //     throw CurrentLocationFailure(
-    //       error: "You don't have all the permissions granted."
-    //           '\nYou need to activate them manually.',
-    //     );
-    //   }
-    // }
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw CurrentLocationFailure(
+          error: "You don't have all the permissions granted."
+              '\nYou need to activate them manually.',
+        );
+      }
+    }
 
-    late final LocationData locationData;
+    if (permission == LocationPermission.deniedForever) {
+      throw CurrentLocationFailure(
+        error: "You don't have all the permissions granted."
+            '\nYou need to activate them manually.',
+      );
+    }
+
+
+    late final Position position;
     try {
-      locationData = await getLocation();
+      position = await Geolocator.getCurrentPosition();
     } catch (_) {
       throw CurrentLocationFailure(
         error: 'Something went wrong getting your location, '
@@ -49,15 +54,9 @@ class LocationRepository {
       );
     }
 
-    final latitude = locationData.latitude;
-    final longitude = locationData.longitude;
+    final latitude = position.latitude;
+    final longitude = position.longitude;
 
-    if (latitude == null || longitude == null) {
-      throw CurrentLocationFailure(
-        error: 'Something went wrong getting your location, '
-            'please try again later',
-      );
-    }
 
     return CurrentUserLocationEntity(
       latitude: latitude,

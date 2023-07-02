@@ -20,6 +20,7 @@ import '../../../../services/navigation.dart';
 
 //features
 import 'features/header.dart';
+import 'features/reason_global_page.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
 
@@ -35,9 +36,13 @@ class RespawnView extends StatefulWidget {
 class _RespawnViewState extends State<RespawnView> {
   late RespawnCubit respawnCubit;
 
+  final observationController = TextEditingController();
+  final reasonController = TextEditingController();
+
   @override
   void initState() {
     respawnCubit = BlocProvider.of<RespawnCubit>(context);
+    respawnCubit.getReasons();
     super.initState();
   }
 
@@ -102,6 +107,12 @@ class _RespawnViewState extends State<RespawnView> {
                 ),
               ),
             ),
+            ReasonsGlobal(
+              reasons: state.reasons,
+              context: context,
+              setState: setState,
+              typeAheadController: reasonController,
+            ),
             const Spacer(),
             if (state.error != null)
               Text(state.error,
@@ -111,7 +122,7 @@ class _RespawnViewState extends State<RespawnView> {
                 widget: const Text('Confirmar', style: TextStyle(color: Colors.white, fontSize: 20)),
                 press: () {
                   BlocProvider.of<RespawnCubit>(context)
-                      .confirmTransaction(widget.arguments);
+                      .confirmTransaction(widget.arguments, reasonController.text, null);
                 })
           ],
         ),

@@ -13,6 +13,7 @@ import '../../../utils/constants/strings.dart';
 //domain
 import '../../../domain/models/processing_queue.dart';
 import '../../../domain/models/arguments.dart';
+import '../../../domain/models/reason.dart';
 import '../../../domain/models/transaction.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 import '../../../domain/repositories/database_repository.dart';
@@ -35,10 +36,24 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
 
   RespawnCubit(this._databaseRepository, this._locationRepository,
       this._processingQueueBloc)
-      : super(const RespawnSuccess());
+      : super(const RespawnLoading());
 
-  Future<void> confirmTransaction(InventoryArgument arguments) async {
+
+  Future<void> getReasons() async {
+    emit(await _getReasons());
+  }
+
+  Future<RespawnState> _getReasons() async {
+    final reasons = await _databaseRepository.getAllReasons();
+    return RespawnSuccess(reasons: reasons);
+  }
+
+  Future<void> confirmTransaction(InventoryArgument arguments, String? nameReason, String? observation) async {
     emit(const RespawnLoading());
+    final reasons = await _databaseRepository.getAllReasons();
+
+
+
 
     var transaction = Transaction(
         workId: arguments.work.id!,

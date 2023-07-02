@@ -37,7 +37,7 @@ class LocationState extends Equatable {
     LocationStateStatus? status,
     CurrentUserLocationEntity? currentUserLocation,
     LatLng? initLocation,
-    LocationData? location,
+    Position? location,
     String? errorMessage,
   }) {
     return LocationState(
