@@ -8,6 +8,9 @@ import 'package:url_launcher/url_launcher.dart';
 //cubit
 import '../../../../cubits/summary/summary_cubit.dart';
 
+//blocs
+import '../../../../blocs/issues/issues_bloc.dart';
+
 //domain
 import '../../../../../domain/models/arguments.dart';
 import '../../../../../domain/models/summary.dart';
@@ -47,11 +50,19 @@ class ListViewSummary extends StatefulWidget {
 }
 
 class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
+  late IssuesBloc issuesBloc;
+
   @override
   void setState(fn) {
     if (mounted) {
       super.setState(fn);
     }
+  }
+
+  @override
+  void initState() {
+    issuesBloc = BlocProvider.of<IssuesBloc>(context);
+    super.initState();
   }
 
   @override
@@ -73,7 +84,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
     });
   }
 
-  Widget _buildSummary(state, Size size) {
+  Widget _buildSummary(SummaryState state, Size size) {
     return SizedBox(
       width: size.width,
       height: size.height / 1.55,
@@ -132,9 +143,17 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                 Showcase(
                     key: widget.four,
                     disableMovingAnimation: true,
-                    description: 'Llama al telefono del cliente!',
-                    child: const IconButton(
-                        onPressed: null, icon: Icon(Icons.public, size: 35)))
+                    description: 'Reportar un problema',
+                    child: IconButton(
+                        onPressed: () async {
+                          issuesBloc.add(GetIssuesList(
+                              currentStatus: 'summary',
+                              workId: null,
+                              summaryId: state.summaries.first.id));
+
+                          await _navigationService.goTo(issueRoute);
+                        },
+                        icon: const Icon(Icons.report_problem, size: 35))),
               ],
             ),
           ),
