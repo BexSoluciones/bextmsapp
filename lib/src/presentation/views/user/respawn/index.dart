@@ -86,7 +86,7 @@ class _RespawnViewState extends State<RespawnView> {
     );
   }
 
-  SizedBox buildBody(Size size, state) {
+  SizedBox buildBody(Size size, RespawnState state) {
     return SizedBox(
       height: size.height / 1.5,
       width: size.width,
@@ -97,7 +97,10 @@ class _RespawnViewState extends State<RespawnView> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withOpacity(0.7),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: const ListTile(
@@ -107,22 +110,25 @@ class _RespawnViewState extends State<RespawnView> {
                 ),
               ),
             ),
-            ReasonsGlobal(
-              reasons: state.reasons,
-              context: context,
-              setState: setState,
-              typeAheadController: reasonController,
-            ),
+            state.enterpriseConfig?.hadReasonRespawn == true
+                ? ReasonsGlobal(
+                    reasons: state.reasons!,
+                    context: context,
+                    setState: setState,
+                    typeAheadController: reasonController,
+                  )
+                : Container(),
             const Spacer(),
             if (state.error != null)
-              Text(state.error,
+              Text(state.error!,
                   maxLines: 2,
                   style: const TextStyle(color: Colors.red, fontSize: 16)),
             DefaultButton(
-                widget: const Text('Confirmar', style: TextStyle(color: Colors.white, fontSize: 20)),
+                widget: const Text('Confirmar',
+                    style: TextStyle(color: Colors.white, fontSize: 20)),
                 press: () {
-                  BlocProvider.of<RespawnCubit>(context)
-                      .confirmTransaction(widget.arguments, reasonController.text, null);
+                  BlocProvider.of<RespawnCubit>(context).confirmTransaction(
+                      widget.arguments, reasonController.text, null);
                 })
           ],
         ),

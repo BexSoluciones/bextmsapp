@@ -103,6 +103,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       if (results.isNotEmpty) {
         if (results[0] is DataSuccess) {
           var data = results[0].data as EnterpriseConfigResponse;
+          print('**************');
+          print(data.enterpriseConfig.toMap());
           _storageService.setObject('config', data.enterpriseConfig.toMap());
         }
 

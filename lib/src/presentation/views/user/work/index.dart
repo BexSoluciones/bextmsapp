@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/presentation/blocs/issues/issues_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -49,8 +50,10 @@ class WorkViewState extends State<WorkView>
   final GlobalKey five = GlobalKey();
   final GlobalKey six = GlobalKey();
   final GlobalKey seven = GlobalKey();
+  final GlobalKey eight = GlobalKey();
 
   late WorkCubit workCubit;
+  late IssuesBloc issuesBloc;
 
   late TabController tabController;
   var tabIndex = 0;
@@ -67,6 +70,8 @@ class WorkViewState extends State<WorkView>
     tabController = TabController(length: 3, vsync: this);
 
     workCubit = BlocProvider.of<WorkCubit>(context);
+    issuesBloc = BlocProvider.of<IssuesBloc>(context);
+
     workCubit.getAllWorksByWorkcode(widget.arguments.work.workcode!, true);
 
     setState(() {
@@ -160,6 +165,23 @@ class WorkViewState extends State<WorkView>
                                     context: context,
                                     delegate: SearchWorkDelegate(state.works));
                               }))),
+                  Showcase(
+                      key: eight,
+                      disableMovingAnimation: true,
+                      title: 'Reporta un problema!',
+                      description:
+                          'Cuando tengas un problema con tu ruta, reportalo!',
+                      child: Visibility(
+                          visible: state.started,
+                          child: IconButton(
+                              icon: const Icon(Icons.warning),
+                              onPressed: () async {
+                                issuesBloc.add(GetIssuesList(
+                                    currentStatus: 'work',
+                                    summaryId: null,
+                                    workId: widget.arguments.work.id));
+                                await _navigationService.goTo(issueRoute);
+                              }))),
                 ],
                 bottom: state.started
                     ? TabViewWork(
@@ -172,7 +194,8 @@ class WorkViewState extends State<WorkView>
                 children: [
                   NotVisitedViewWork(workcode: widget.arguments.work.workcode!),
                   VisitedViewWork(workcode: widget.arguments.work.workcode!),
-                  NotGeoreferencedViewWork(workcode: widget.arguments.work.workcode!)
+                  NotGeoreferencedViewWork(
+                      workcode: widget.arguments.work.workcode!)
                 ],
               ),
               floatingActionButton: Showcase(
