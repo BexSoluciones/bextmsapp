@@ -9,7 +9,7 @@ import '../../../../blocs/processing_queue/processing_queue_bloc.dart';
 import '../../../../blocs/issues/issues_bloc.dart';
 
 //domain
-import '../../../../../domain/news.dart';
+import '../../../../../domain/models/news.dart';
 
 //services
 import '../../../../../locator.dart';
@@ -113,7 +113,7 @@ class _FillIssueViewState extends State<FillIssueView> {
                                   state.firm != null && state.firm.length != 0
                                       ? Colors.green
                                       : theme.primaryColor,
-                              widget: /* true */
+                              widget:
                                   state.firm != null && state.firm.length != 0
                                       ? const Row(
                                           mainAxisAlignment:

@@ -41,6 +41,7 @@ class NewsFields {
 }
 
 class News {
+  int? id;
   String status;
   int userId;
   int? workId;
@@ -54,6 +55,7 @@ class News {
   String observation;
 
   News({
+    this.id,
     required this.status,
     required this.userId,
     required this.workId,
@@ -68,6 +70,7 @@ class News {
   });
 
   factory News.fromJson(Map<String, dynamic> json) => News(
+    id: json["id"],
     status: json["status"],
     userId: json["user_id"],
     workId: json["work_id"],
@@ -82,6 +85,7 @@ class News {
   );
 
   Map<String, dynamic> toJson() => {
+    "id": id,
     "status": status,
     "user_id": userId,
     "work_id": workId,

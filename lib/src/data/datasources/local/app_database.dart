@@ -19,6 +19,8 @@ import 'package:bexdeliveries/src/domain/models/reason.dart';
 import 'package:bexdeliveries/src/domain/models/history_order.dart';
 import 'package:bexdeliveries/src/domain/models/photo.dart';
 import 'package:bexdeliveries/src/domain/models/client.dart';
+import 'package:bexdeliveries/src/domain/models/account.dart';
+import 'package:bexdeliveries/src/domain/models/news.dart';
 
 //daos
 part '../local/dao/work_dao.dart';
@@ -32,6 +34,8 @@ part '../local/dao/history_order_dao.dart';
 part '../local/dao/warehouse_dao.dart';
 part '../local/dao/photo_dao.dart';
 part '../local/dao/client_dao.dart';
+part '../local/dao/account_dao.dart';
+part '../local/dao/news_dao.dart';
 
 class AppDatabase {
   static BriteDatabase? _streamDatabase;
@@ -235,23 +239,33 @@ class AppDatabase {
         ${HistoryOrderFields.different} TEXT NOT NULL
       )
     ''',
-    // '''
-    //   CREATE TABLE $tableNews (
-    //     ${NewsFields.id} INTEGER PRIMARY KEY,
-    //     ${NewsFields.userId} INTEGER NOT NULL,
-    //     ${NewsFields.workId} INTEGER DEFAULT NULL,
-    //     ${NewsFields.summaryId} INTEGER DEFAULT NULL,
-    //     ${NewsFields.status} TEXT NOT NULL,
-    //     ${NewsFields.nommotvis} TEXT NOT NULL,
-    //     ${NewsFields.codmotvis} TEXT NOT NULL,
-    //     ${NewsFields.latitude} TEXT NOT NULL,
-    //     ${NewsFields.longitude} TEXT NOT NULL,
-    //     ${NewsFields.images} TEXT DEFAULT NULL,
-    //     ${NewsFields.firm} TEXT DEFAULT NULL,
-    //     ${NewsFields.observation} TEXT DEFAULT NULL,
-    //     ${NewsFields.createdAt} TEXT DEFAULT NULL,
-    //     ${NewsFields.updatedAt} TEXT DEFAULT NULL)
-    // ''',
+    '''
+      CREATE TABLE $tableNews (
+        ${NewsFields.id} INTEGER PRIMARY KEY,
+        ${NewsFields.userId} INTEGER NOT NULL,
+        ${NewsFields.workId} INTEGER DEFAULT NULL,
+        ${NewsFields.summaryId} INTEGER DEFAULT NULL,
+        ${NewsFields.status} TEXT NOT NULL,
+        ${NewsFields.nommotvis} TEXT NOT NULL,
+        ${NewsFields.codmotvis} TEXT NOT NULL,
+        ${NewsFields.latitude} TEXT NOT NULL,
+        ${NewsFields.longitude} TEXT NOT NULL,
+        ${NewsFields.images} TEXT DEFAULT NULL,
+        ${NewsFields.firm} TEXT DEFAULT NULL,
+        ${NewsFields.observation} TEXT DEFAULT NULL,
+        ${NewsFields.createdAt} TEXT DEFAULT NULL,
+        ${NewsFields.updatedAt} TEXT DEFAULT NULL)
+    ''',
+    '''
+       CREATE TABLE $tableAccount (
+        ${AccountFields.id} INTEGER PRIMARY KEY,
+        ${AccountFields.accountId} INTEGER DEFAULT NULL,
+        ${AccountFields.name} TEXT DEFAULT NULL,
+        ${AccountFields.bankId} INTEGER DEFAULT NULL,
+        ${AccountFields.accountNumber} INTEGER DEFAULT NULL,
+        ${AccountFields.createdAt} TEXT DEFAULT NULL
+      )
+    '''
   ];
 
   Future<Database> _initDatabase(databaseName) async {
@@ -322,6 +336,10 @@ class AppDatabase {
   PhotoDao get photoDao => PhotoDao(instance);
 
   ClientDao get clientDao => ClientDao(instance);
+
+  AccountDao get accountDao => AccountDao(instance);
+
+  NewsDao get newsDao => NewsDao(instance);
 
   void close() {
     _database = null;
