@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 
 //domain
 import '../../src/domain/models/isolate.dart';
@@ -13,7 +15,6 @@ import '../../src/domain/models/work.dart';
 import '../../src/presentation/widgets/show_map_direction_widget.dart';
 
 class HelperFunctions {
-
   static void heavyTask(IsolateModel model) {
     for (var i = 0; i < model.iteration; i++) {
       model.functions[i];
@@ -37,7 +38,7 @@ class HelperFunctions {
 
     if (directory.existsSync()) {
       var fileList =
-      directory.listSync().map((item) => item.path).toList(growable: false);
+          directory.listSync().map((item) => item.path).toList(growable: false);
 
       yield fileList.length;
 
@@ -199,11 +200,23 @@ class HelperFunctions {
     dir.deleteSync(recursive: true);
   }
 
+  Future<void> launchWhatsApp(String phone, String message) async {
+    try {
+      final link = WhatsAppUnilink(
+        phoneNumber: phone,
+        text: message,
+      );
+      await FlutterWebBrowser.openWebPage(url: link.toString());
+    } catch (e) {
+      return;
+    }
+  }
+
   Future<void> saveFirm(
-      String folder,
-      String fileName,
-      ByteData image,
-      ) async {
+    String folder,
+    String fileName,
+    ByteData image,
+  ) async {
     var directory = await getExternalStorageDirectory();
     var path = directory!.path;
     await Directory('$path/$folder').create(recursive: true);
@@ -212,8 +225,8 @@ class HelperFunctions {
         .writeAsBytesSync(image.buffer.asInt8List());
   }
 
-  Future<Widget?> showMapDirection(BuildContext context, Work work, CurrentUserLocationEntity location) async {
-
+  Future<Widget?> showMapDirection(BuildContext context, Work work,
+      CurrentUserLocationEntity? location) async {
     final availableMaps = await MapLauncher.installedMaps;
 
     if (availableMaps.length == 1) {
@@ -223,7 +236,7 @@ class HelperFunctions {
           double.parse(work.longitude!),
         ),
         destinationTitle: work.customer,
-        origin: Coords(location.latitude, location.longitude),
+        origin: Coords(location!.latitude, location.longitude),
         originTitle: 'Origen',
         waypoints: null,
         directionsMode: DirectionsMode.driving,
@@ -231,7 +244,7 @@ class HelperFunctions {
 
       return null;
     } else {
-      if(context.mounted){
+      if (context.mounted) {
         return await MapsSheet.show(
             context: context,
             onMapTap: (map) {
@@ -241,8 +254,7 @@ class HelperFunctions {
                   double.parse(work.longitude!),
                 ),
                 destinationTitle: work.customer,
-                origin:
-                Coords(location.latitude, location.longitude),
+                origin: Coords(location!.latitude, location.longitude),
                 originTitle: 'Origen',
                 waypoints: null,
                 directionsMode: DirectionsMode.driving,
@@ -253,5 +265,4 @@ class HelperFunctions {
       }
     }
   }
-
 }

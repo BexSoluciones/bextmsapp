@@ -23,6 +23,7 @@ import '../../../../../utils/constants/strings.dart';
 
 //features
 import '../../../../widgets/default_button_widget.dart';
+import '../../../../widgets/showcase.dart';
 import 'item_summary.dart';
 
 //services
@@ -50,19 +51,11 @@ class ListViewSummary extends StatefulWidget {
 }
 
 class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
-  late IssuesBloc issuesBloc;
-
   @override
   void setState(fn) {
     if (mounted) {
       super.setState(fn);
     }
-  }
-
-  @override
-  void initState() {
-    issuesBloc = BlocProvider.of<IssuesBloc>(context);
-    super.initState();
   }
 
   @override
@@ -97,63 +90,10 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Showcase(
-                    key: widget.one,
-                    disableMovingAnimation: true,
-                    description: 'Llama al telefono del cliente!',
-                    child: IconButton(
-                        onPressed: () {
-                          if (widget.arguments.work.cellphone != null &&
-                              widget.arguments.work.cellphone != '0') {
-                            launchUrl(Uri.parse(
-                                'tel://${widget.arguments.work.cellphone}'));
-                          } else {
-                            return;
-                          }
-                        },
-                        icon: const Icon(Icons.phone, size: 35))),
-                Showcase(
-                    key: widget.two,
-                    disableMovingAnimation: true,
-                    description: 'Deja le un mensaje de whatsapp!',
-                    child: IconButton(
-                      onPressed: () async {
-                        if (widget.arguments.work.cellphone != null &&
-                            widget.arguments.work.cellphone != '0') {
-                          //   await helperFunctions.launchWhatsApp(
-                          //       '+57${work.cellphone}', 'Hola!, ¿Como estas?');
-                        } else {
-                          return;
-                        }
-                      },
-                      icon: const Icon(Icons.chat),
-                      iconSize: 35,
-                    )),
-                Showcase(
-                    key: widget.three,
-                    disableMovingAnimation: true,
-                    description:
-                        'Te perdiste? usa esa opción para ver al cliente en Google maps!',
-                    child: IconButton(
-                        onPressed: () => _navigationService.goTo(
-                            summaryNavigationRoute,
-                            arguments: SummaryNavigationArgument(
-                                work: widget.arguments.work)),
-                        icon: const Icon(Icons.directions, size: 35))),
-                Showcase(
-                    key: widget.four,
-                    disableMovingAnimation: true,
-                    description: 'Reportar un problema',
-                    child: IconButton(
-                        onPressed: () async {
-                          issuesBloc.add(GetIssuesList(
-                              currentStatus: 'summary',
-                              workId: null,
-                              summaryId: state.summaries.first.id));
-
-                          await _navigationService.goTo(issueRoute);
-                        },
-                        icon: const Icon(Icons.report_problem, size: 35))),
+                buildPhoneShowcase(widget.arguments.work, widget.one),
+                buildWhatsAppShowcase(widget.arguments.work, widget.two),
+                buildMapShowcase(context, widget.arguments.work, widget.three),
+                buildPublishShowcase(widget.four, state.summaries.first.id),
               ],
             ),
           ),
