@@ -10,6 +10,7 @@ import '../../../domain/models/work.dart';
 import '../../../domain/models/reason.dart';
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/transaction_summary.dart';
+import '../../../domain/models/account.dart';
 
 //interceptor
 import 'interceptor_api_service.dart';
@@ -25,6 +26,7 @@ import '../../../domain/models/responses/reason_response.dart';
 import '../../../domain/models/responses/transaction_response.dart';
 import '../../../domain/models/responses/transaction_summary_response.dart';
 import '../../../domain/models/responses/status_response.dart';
+import '../../../domain/models/responses/account_response.dart';
 
 //services
 import '../../../locator.dart';
@@ -216,6 +218,44 @@ class ApiService {
     final value = ReasonResponse(
         reasons: List<Reason>.from(
             result.data.map((e) => Reason.fromJson(e)).toList()));
+
+    return Response(
+        data: value,
+        requestOptions: result.requestOptions,
+        statusCode: result.statusCode,
+        statusMessage: result.statusMessage,
+        isRedirect: result.isRedirect,
+        redirects: result.redirects,
+        extra: result.extra,
+        headers: result.headers);
+  }
+
+  Future<Response<AccountResponse>> accounts() async {
+    const extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+
+    queryParameters.removeWhere((k, v) => v == null);
+
+    final headers = <String, dynamic>{
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    final result =
+    await dio.fetch(_setStreamType<Response<AccountResponse>>(Options(
+      method: 'GET',
+      headers: headers,
+      extra: extra,
+    )
+        .compose(
+      dio.options,
+      '/bank-accounts',
+      queryParameters: queryParameters,
+    )
+        .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+
+    final value = AccountResponse(
+        accounts: List<Account>.from(
+            result.data.map((e) => Account.fromJson(e)).toList()));
 
     return Response(
         data: value,

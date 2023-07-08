@@ -31,6 +31,9 @@ import '../../domain/models/responses/transaction_summary_response.dart';
 import '../../domain/models/requests/status_request.dart';
 import '../../domain/models/responses/status_response.dart';
 
+import '../../domain/models/requests/account_request.dart';
+import '../../domain/models/responses/account_response.dart';
+
 import '../../domain/models/requests/client_request.dart';
 
 import '../../domain/repositories/api_repository.dart';
@@ -74,6 +77,15 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }) {
     return getStateOf<ReasonResponse>(
       request: () => _apiService.reasons(),
+    );
+  }
+
+  @override
+  Future<DataState<AccountResponse>> accounts({
+    required AccountRequest request,
+  }) {
+    return getStateOf<AccountResponse>(
+      request: () => _apiService.accounts(),
     );
   }
 
