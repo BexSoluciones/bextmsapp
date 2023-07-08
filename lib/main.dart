@@ -49,7 +49,7 @@ import 'src/presentation/blocs/network/network_bloc.dart';
 import 'src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 import 'src/presentation/blocs/location/location_bloc.dart';
 import 'src/presentation/blocs/photo/photo_bloc.dart';
-import 'src/presentation/blocs/historic_order/history_order_bloc.dart';
+import 'src/presentation/blocs/history_order/history_order_bloc.dart';
 import 'src/presentation/blocs/issues/issues_bloc.dart';
 
 //providers

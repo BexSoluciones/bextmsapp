@@ -269,7 +269,7 @@ class CollectionViewState extends State<CollectionView>
                               onPressed: () => context
                                   .read<CollectionCubit>()
                                   .goToCamera(widget.arguments.orderNumber)),
-                          state.enterpriseConfig!.codeQr != ''
+                          state.enterpriseConfig != null && state.enterpriseConfig!.codeQr != null
                               ? IconButton(
                                   icon: const Icon(Icons.qr_code_2,
                                       size: 32, color: kPrimaryColor),
@@ -321,7 +321,7 @@ class CollectionViewState extends State<CollectionView>
                           return null;
                         },
                       ),
-                      state.enterpriseConfig!.specifiedAccountTransfer == true
+                      state.enterpriseConfig != null && state.enterpriseConfig!.specifiedAccountTransfer == true
                           ? const Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -333,7 +333,7 @@ class CollectionViewState extends State<CollectionView>
                               ],
                             )
                           : Container(),
-                      state.enterpriseConfig!.specifiedAccountTransfer == true
+                      state.enterpriseConfig != null && state.enterpriseConfig!.specifiedAccountTransfer == true
                           ? DropdownButtonFormField<String>(
                               isExpanded: true,
                               value: null,

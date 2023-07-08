@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
@@ -15,10 +17,34 @@ import '../../src/domain/models/work.dart';
 import '../../src/presentation/widgets/show_map_direction_widget.dart';
 
 class HelperFunctions {
-  static void heavyTask(IsolateModel model) {
-    for (var i = 0; i < model.iteration; i++) {
-      model.functions[i];
+
+  Future<Map<String, dynamic>?> getDevice() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    const storage = FlutterSecureStorage();
+    if (Platform.isIOS) {
+      var iosDeviceInfo = await deviceInfo.iosInfo;
+      var id = await storage.read(key: 'unique_id');
+      var model = iosDeviceInfo.utsname.machine;
+      if (id != null) {
+        return { 'id': id, 'model': model };
+      } else {
+        id = iosDeviceInfo.identifierForVendor!;
+        await storage.write(key: 'unique_id', value: id);
+        return { 'id': id, 'model': model };
+      }
+    } else if (Platform.isAndroid) {
+      var androidDeviceInfo = await deviceInfo.androidInfo;
+      var id = await storage.read(key: 'unique_id');
+      var model = androidDeviceInfo.model;
+      if (id != null) {
+        return { 'id': id, 'model': model };
+      } else {
+        id = androidDeviceInfo.id;
+        await storage.write(key: 'unique_id', value: id);
+        return { 'id': id, 'model': model };
+      }
     }
+    return null;
   }
 
   Future<String> get _localPath async {

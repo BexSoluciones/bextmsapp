@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter_udid/flutter_udid.dart';
+
+//core
+import '../../../../core/helpers/index.dart';
 
 //cubit
 import '../base/base_cubit.dart';
@@ -45,6 +47,7 @@ part 'home_state.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
+final helperFunctions = HelperFunctions();
 
 class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   final ApiRepository _apiRepository;
@@ -103,8 +106,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       if (results.isNotEmpty) {
         if (results[0] is DataSuccess) {
           var data = results[0].data as EnterpriseConfigResponse;
-          print('**************');
-          print(data.enterpriseConfig.toMap());
           _storageService.setObject('config', data.enterpriseConfig.toMap());
         }
 
@@ -127,13 +128,13 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
         _storageService.setObject('user', response.data!.login.user!.toMap());
         _storageService.setInt('user_id', response.data!.login.user!.id);
 
-        String udid = await FlutterUdid.udid;
+        var device = await helperFunctions.getDevice();
 
         final responseWorks = await _apiRepository.works(
             request: WorkRequest(
                 login.user!.id!,
-                udid,
-                'SM-A336M',
+                device != null ? device['id'] : null,
+                device != null ? device['model'] : null,
                 version,
                 currentLocation!.latitude.toString(),
                 currentLocation!.longitude.toString(),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //blocs
-import '../../../../blocs/historic_order/history_order_bloc.dart';
+import '../../../../blocs/history_order/history_order_bloc.dart';
 
 //models
 import '../../../../../domain/models/work.dart';

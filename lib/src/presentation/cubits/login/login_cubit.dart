@@ -133,13 +133,13 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         _storageService.setObject('user', response.data!.login.user!.toMap());
         _storageService.setInt('user_id', response.data!.login.user!.id);
 
-        String udid = await FlutterUdid.udid;
+        var device = await helperFunctions.getDevice();
 
         final responseWorks = await _apiRepository.works(
             request: WorkRequest(
                 login.user!.id!,
-                udid,
-                'SM-A336M',
+                device != null ? device['id'] : null,
+                device != null ? device['model'] : null,
                 version,
                 currentLocation!.latitude.toString(),
                 currentLocation!.longitude.toString(),
