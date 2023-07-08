@@ -51,11 +51,13 @@ class CollectionViewState extends State<CollectionView>
   String message = '';
   final allowInsetsBelow = _storageService.getBool('allow_insets_below');
 
-  String get _currency => '  ${NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol}';
+  String get _currency =>
+      '  ${NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol}';
 
   final TextEditingController _typeAheadController = TextEditingController();
   final TextEditingController paymentEfectyController = TextEditingController();
-  final TextEditingController paymentTransferController = TextEditingController();
+  final TextEditingController paymentTransferController =
+      TextEditingController();
 
   String? get firmS => null;
 
@@ -166,7 +168,7 @@ class CollectionViewState extends State<CollectionView>
             )));
   }
 
-  Widget _buildCollection(Size size, state) {
+  Widget _buildCollection(Size size, CollectionState state) {
     return SingleChildScrollView(
         child: SafeArea(
       child: SizedBox(
@@ -195,7 +197,7 @@ class CollectionViewState extends State<CollectionView>
               ),
             ),
           ),
-          SizedBox(height: size.height * 0.08),
+          SizedBox(height: size.height * 0.05),
           Padding(
               padding: const EdgeInsets.only(
                   left: kDefaultPadding, right: kDefaultPadding),
@@ -206,7 +208,7 @@ class CollectionViewState extends State<CollectionView>
                       const Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(children:  [
+                            Row(children: [
                               Text('EFECTIVO', style: TextStyle(fontSize: 14)),
                               Icon(Icons.money, color: Colors.green),
                             ]),
@@ -267,7 +269,7 @@ class CollectionViewState extends State<CollectionView>
                               onPressed: () => context
                                   .read<CollectionCubit>()
                                   .goToCamera(widget.arguments.orderNumber)),
-                          _storageService.getString('code_qr') != ''
+                          state.enterpriseConfig!.codeQr != ''
                               ? IconButton(
                                   icon: const Icon(Icons.qr_code_2,
                                       size: 32, color: kPrimaryColor),
@@ -319,6 +321,75 @@ class CollectionViewState extends State<CollectionView>
                           return null;
                         },
                       ),
+                      state.enterpriseConfig!.specifiedAccountTransfer == true
+                          ? const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(children: [
+                                  Text('NÚMERO DE CUENTA',
+                                      style: TextStyle(fontSize: 14)),
+                                  Icon(Icons.account_balance_outlined)
+                                ]),
+                              ],
+                            )
+                          : Container(),
+                      state.enterpriseConfig!.specifiedAccountTransfer == true
+                          ? DropdownButtonFormField<String>(
+                              isExpanded: true,
+                              value: null,
+                              onChanged: (String? newValue) {
+                                // setState(() {
+                                //   selectedOption = newValue;
+                                //   showDropdownError = false;
+                                // });
+                              },
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide:
+                                  BorderSide(color: Colors.grey, width: 2.0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                  BorderSide(color: kPrimaryColor, width: 2.0),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide:
+                                  BorderSide(color: kPrimaryColor, width: 2.0),
+                                ),
+                                hintStyle: TextStyle(
+                                  color: Colors.orange,
+                                ),
+                              ),
+                              style: const TextStyle(
+                                color: kPrimaryColor,
+                              ),
+                              dropdownColor: Colors.white,
+                              validator: (value) {
+                                // if (showDropdownError &&
+                                //     (value == null ||
+                                //         value.isEmpty ||
+                                //         value == options[0])) {
+                                //   return 'Selecciona una opción válida';
+                                // }
+                                return null;
+                              },
+                              items: [
+                                'cuenta 1'
+                              ].map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(
+                                    value.contains('-')
+                                        ? '${value.split('-')[0]} - ${value.split('-')[1]}'
+                                        : 'Selecciona una cuenta',
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                );
+                              }).toList(),
+                            )
+                          : Container(),
                       const SizedBox(height: 50),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -352,12 +423,16 @@ class CollectionViewState extends State<CollectionView>
                       press: () async {
                         final form = _formKey.currentState;
                         if (form!.validate()) {
-                          switch (state.enterpriseConfig.allowInsetsBelow) {
+                          switch (state.enterpriseConfig?.allowInsetsBelow) {
                             case false:
-                              if (widget.arguments.typeOfCharge == 'CREDITO' && total == 0.0) {
+                              if (widget.arguments.typeOfCharge == 'CREDITO' &&
+                                  total == 0.0) {
                                 await context
                                     .read<CollectionCubit>()
-                                    .confirmTransaction(widget.arguments, paymentEfectyController, paymentTransferController);
+                                    .confirmTransaction(
+                                        widget.arguments,
+                                        paymentEfectyController,
+                                        paymentTransferController);
                               } else if (total != state.totalSummary) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -369,14 +444,21 @@ class CollectionViewState extends State<CollectionView>
                               } else {
                                 await context
                                     .read<CollectionCubit>()
-                                    .confirmTransaction(widget.arguments, paymentEfectyController, paymentTransferController);
+                                    .confirmTransaction(
+                                        widget.arguments,
+                                        paymentEfectyController,
+                                        paymentTransferController);
                               }
                               break;
                             case true:
-                              if (total <= state.totalSummary || widget.arguments.typeOfCharge == 'CREDITO') {
+                              if (total <= state.totalSummary!.toDouble() ||
+                                  widget.arguments.typeOfCharge == 'CREDITO') {
                                 await context
                                     .read<CollectionCubit>()
-                                    .confirmTransaction(widget.arguments, paymentEfectyController, paymentTransferController);
+                                    .confirmTransaction(
+                                        widget.arguments,
+                                        paymentEfectyController,
+                                        paymentTransferController);
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(

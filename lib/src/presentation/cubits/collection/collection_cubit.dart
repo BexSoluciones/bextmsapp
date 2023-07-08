@@ -141,7 +141,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             images: imagesServer.isNotEmpty ? imagesServer : null,
             delivery: totalSummary.toString(),
             start: now(),
-            end: now(),
+            end: null,
             latitude: currentLocation.latitude.toString(),
             longitude: currentLocation.longitude.toString());
 
