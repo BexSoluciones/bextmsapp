@@ -30,6 +30,9 @@ import '../models/responses/transaction_summary_response.dart';
 import '../models/requests/status_request.dart';
 import '../models/responses/status_response.dart';
 
+import '../models/requests/account_request.dart';
+import '../models/responses/account_response.dart';
+
 import '../models/requests/client_request.dart';
 
 abstract class ApiRepository {
@@ -44,6 +47,10 @@ abstract class ApiRepository {
 
   Future<DataState<ReasonResponse>> reasons({
     required ReasonRequest request,
+  });
+
+  Future<DataState<AccountResponse>> accounts({
+    required AccountRequest request,
   });
 
   Future<DataState<LoginResponse>> login({

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/src/domain/models/requests/account_request.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
@@ -107,6 +108,13 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
         if (results[0] is DataSuccess) {
           var data = results[0].data as EnterpriseConfigResponse;
           _storageService.setObject('config', data.enterpriseConfig.toMap());
+          if (data.enterpriseConfig.specifiedAccountTransfer == true) {
+            var response =
+                await _apiRepository.accounts(request: AccountRequest());
+            if (response is DataSuccess) {
+              _databaseRepository.insertAccounts(response.data!.accounts);
+            }
+          }
         }
 
         if (results[1] is DataSuccess) {

@@ -13,6 +13,7 @@ import '../../domain/models/warehouse.dart';
 import '../../domain/models/location.dart';
 import '../../domain/models/photo.dart';
 import '../../domain/models/client.dart';
+import '../../domain/models/account.dart';
 
 class DatabaseRepositoryImpl implements DatabaseRepository {
   final AppDatabase _appDatabase;
@@ -236,6 +237,32 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyReasons() async {
     return _appDatabase.reasonDao.emptyReasons();
+  }
+
+  //ACCOUNTS
+  @override
+  Future<List<Account>> getAllAccounts() async {
+    return _appDatabase.accountDao.getAllAccounts();
+  }
+
+  @override
+  Future<int> insertAccount(Account account) async {
+    return _appDatabase.accountDao.insertAccount(account);
+  }
+
+  @override
+  Future<int> updateAccount(Account account) async {
+    return _appDatabase.accountDao.updateAccount(account);
+  }
+
+  @override
+  Future<void> insertAccounts(List<Account> accounts) async {
+    return _appDatabase.accountDao.insertAccounts(accounts);
+  }
+
+  @override
+  Future<void> emptyAccounts() async {
+    return _appDatabase.accountDao.emptyAccounts();
   }
 
   //PROCESSING QUEUE

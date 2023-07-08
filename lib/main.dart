@@ -155,10 +155,10 @@ Future<void> main() async {
 
   if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
 
-  await _listenToGeoLocations();
-  ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
-
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  //TODO:: uncomment
+  // await _listenToGeoLocations();
+  // ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
+  // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   runApp(const MyApp());
 }

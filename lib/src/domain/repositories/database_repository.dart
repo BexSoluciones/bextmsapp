@@ -9,6 +9,7 @@ import '../models/warehouse.dart';
 import '../models/location.dart';
 import '../models/photo.dart';
 import '../models/client.dart';
+import '../models/account.dart';
 
 abstract class DatabaseRepository {
   //WORKS
@@ -61,6 +62,13 @@ abstract class DatabaseRepository {
   Future<int> updateReason(Reason reason);
   Future<void> insertReasons(List<Reason> reasons);
   Future<void> emptyReasons();
+
+  //ACCOUNTS
+  Future<List<Account>> getAllAccounts();
+  Future<int> insertAccount(Account account);
+  Future<int> updateAccount(Account account);
+  Future<void> insertAccounts(List<Account> accounts);
+  Future<void> emptyAccounts();
 
   //PROCESSING QUEUE
   Stream<List<ProcessingQueue>> getAllProcessingQueues();

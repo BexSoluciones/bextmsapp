@@ -32,6 +32,24 @@ class AccountDao {
     return _appDatabase.insert(tableAccount, account.toJson());
   }
 
+  Future<void> insertAccounts(List<Account> accounts) async {
+    final db = await _appDatabase.streamDatabase;
+    var batch = db!.batch();
+    if (accounts.isNotEmpty) {
+      await Future.forEach(accounts, (account) async {
+        var d = await db.query(tableAccount, where: 'id = ?', whereArgs: [account.id]);
+        var w = parseAccounts(d);
+        if (w.isEmpty) {
+          batch.insert(tableAccount, account.toJson());
+        } else {
+          batch.update(tableAccount, account.toJson(), where: 'id = ?', whereArgs: [account.id]);
+        }
+      });
+    }
+    await batch.commit(noResult: true);
+    return Future.value();
+  }
+
   Future<int> updateAccount(Account account) {
     return _appDatabase.update(
         tableAccount, account.toJson(), 'id', account.id!);
