@@ -21,9 +21,13 @@ class CameraFailure extends CameraState {
 
 class CameraCaptureInProgress extends CameraState {}
 
+class CameraChangeLen extends CameraState {
+  final String len;
+  const CameraChangeLen(this.len);
+}
+
 class CameraCaptureSuccess extends CameraState {
   final String path;
-
   const CameraCaptureSuccess(this.path);
 }
 

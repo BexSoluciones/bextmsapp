@@ -2,16 +2,23 @@ import 'dart:async';
 
 import 'package:bexdeliveries/src/domain/models/photo.dart';
 import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
+
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
 
-
 //utils
 import '../../../utils/resources/camera.dart';
+import '../../../utils/constants/strings.dart';
+
+//services
+import '../../../locator.dart';
+import '../../../services/navigation.dart';
 
 part 'camera_event.dart';
 part 'camera_state.dart';
+
+final NavigationService _navigationService = locator<NavigationService>();
 
 class CameraBloc extends Bloc<CameraEvent, CameraState> {
   final CameraUtils cameraUtils;
@@ -30,15 +37,18 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     on<CameraInitialized>(_mapCameraInitializedToState);
     on<CameraCaptured>(_mapCameraCapturedToState);
     on<CameraStopped>(_mapCameraStoppedToState);
+    on<CameraFolder>(_mapCameraFolderToState);
+    on<CameraChange>(_mapCameraChangeToState);
   }
 
   CameraController getController() => _controller;
 
   bool isInitialized() => _controller.value.isInitialized;
 
-   _mapCameraInitializedToState(CameraInitialized event, emit) async {
+  _mapCameraInitializedToState(CameraInitialized event, emit) async {
     try {
-      _controller = await cameraUtils.getCameraController(resolutionPreset, cameraLensDirection);
+      _controller = await cameraUtils.getCameraController(
+          resolutionPreset, cameraLensDirection);
       await _controller.initialize();
       emit(CameraReady());
     } on CameraException catch (error) {
@@ -50,7 +60,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraCapturedToState(CameraCaptured event, emit) async {
-    if(state is CameraReady){
+    if (state is CameraReady) {
       emit(CameraCaptureInProgress());
       try {
         final path = await cameraUtils.getPath();
@@ -66,6 +76,15 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     } else {
       emit(const CameraFailure(error: 'Camera is not ready'));
     }
+  }
+
+  _mapCameraFolderToState(CameraFolder event, emit) {
+    _navigationService.goTo(photoRoute, arguments: event.path);
+    emit(CameraReady());
+  }
+
+  _mapCameraChangeToState(CameraChange event, emit) {
+    emit(const CameraChangeLen("front"));
   }
 
   _mapCameraStoppedToState(CameraStopped event, emit) {

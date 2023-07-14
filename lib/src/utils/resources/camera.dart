@@ -7,13 +7,14 @@ class CameraUtils {
       ResolutionPreset resolutionPreset,
       CameraLensDirection cameraLensDirection) async {
     final cameras = await availableCameras();
-    print(cameras.length);
-    final camera = cameras.firstWhere((camera) => camera.lensDirection == cameraLensDirection);
-    return CameraController(camera, resolutionPreset, enableAudio: false, imageFormatGroup: ImageFormatGroup.yuv420);
+    final camera = cameras
+        .firstWhere((camera) => camera.lensDirection == cameraLensDirection);
+    return CameraController(camera, resolutionPreset,
+        enableAudio: false, imageFormatGroup: ImageFormatGroup.yuv420);
   }
 
   Future<String> getPath() async => join(
-    (await getTemporaryDirectory()).path,
-    '${DateTime.now()}.png',
-  );
+        (await getTemporaryDirectory()).path,
+        '${DateTime.now()}.png',
+      );
 }

@@ -12,11 +12,13 @@ import '../../../../utils/constants/keys.dart';
 import '../../../widgets/error.dart';
 
 class CameraView extends StatefulWidget {
+  const CameraView({super.key});
+
   @override
-  _CameraViewState createState() => _CameraViewState();
+  CameraViewState createState() => CameraViewState();
 }
 
-class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
+class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   final globalKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -41,15 +43,23 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
     if (state == AppLifecycleState.inactive) {
       bloc.add(CameraStopped());
-    } else if (state == AppLifecycleState.resumed)
+    } else if (state == AppLifecycleState.resumed) {
       bloc.add(CameraInitialized());
+    }
   }
 
   @override
   Widget build(BuildContext context) => BlocConsumer<CameraBloc, CameraState>(
       listener: (_, state) {
         if (state is CameraCaptureSuccess) {
-          Navigator.of(context).pop(state.path);
+
+          // Navigator.of(context).pop(state.path);
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text("foto tomada exitosamente"),
+          ));
+          BlocProvider.of<CameraBloc>(context)
+              .add(CameraInitialized());
         } else if (state is CameraCaptureFailure) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             key: MyPhotosKeys.errorSnackBar,
@@ -72,11 +82,34 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                         key: MyPhotosKeys.emptyContainerScreen,
                       ),
             floatingActionButton: state is CameraReady
-                ? FloatingActionButton(
-                    child: const Icon(Icons.camera_alt),
-                    onPressed: () => BlocProvider.of<CameraBloc>(context)
-                        .add(CameraCaptured()),
-                  )
+                ? Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+                    const SizedBox(width: 10),
+                    FloatingActionButton(
+                      heroTag: 'changeCameraBtn',
+                      child: Icon(state is CameraChangeLen
+                          ? Icons.camera_front
+                          : Icons.camera_rear),
+                      onPressed: () => BlocProvider.of<CameraBloc>(context)
+                          .add(CameraChange(state is CameraChangeLen ? "front" : "back")),
+                    ),
+                    const SizedBox(width: 70),
+                    FloatingActionButton(
+                      heroTag: 'takePhotoBtn',
+                      child: const Icon(Icons.camera_alt),
+                      onPressed: () => BlocProvider.of<CameraBloc>(context)
+                          .add(CameraCaptured()),
+                    ),
+                    const SizedBox(width: 60),
+                    FloatingActionButton(
+                      heroTag: 'showPhotoBtn',
+                      onPressed: () => BlocProvider.of<CameraBloc>(context)
+                          .add(const CameraFolder(path: "12345")),
+                      child: const Icon(Icons.folder),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                  ])
                 : Container(),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerFloat,
