@@ -1,6 +1,9 @@
 // App
 const String appTitle = 'Bex Deliveries';
 
+// Log header:
+const String headerLogger = 'main';
+
 // Networking and APIs
 const String baseUrl = 'https://demo.bexdeliveries.com/api/v1/';
 const String defaultApiKey = 'ff957763c54c44d8b00e5e082bc76cb0';

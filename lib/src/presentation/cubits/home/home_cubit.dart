@@ -43,11 +43,13 @@ import '../../../domain/models/requests/reason_request.dart';
 import '../../../locator.dart';
 import '../../../services/storage.dart';
 import '../../../services/navigation.dart';
+import '../../../services/logger.dart';
 
 part 'home_state.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
+final LoggerService _loggerService = locator<LoggerService>();
 final helperFunctions = HelperFunctions();
 
 class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
@@ -92,6 +94,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
 
     await run(() async {
       emit(const HomeLoading());
+
+      final timer0 = logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
 
       currentLocation = await _locationRepository.getCurrentLocation();
 
@@ -231,6 +235,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           await _databaseRepository.insertWorks(works);
           await _databaseRepository.insertSummaries(summaries);
           await _databaseRepository.insertTransactions(transactions);
+
+          logTimerStop(headerLogger, timer0, 'Initialization completed', level: LogLevel.success);
 
           emit(await _getAllWorks());
         } else {

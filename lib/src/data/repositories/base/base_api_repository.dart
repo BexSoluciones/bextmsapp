@@ -22,7 +22,7 @@ abstract class BaseApiRepository {
         );
       }
     } on DioError catch (error) {
-      final errorMessage = DioExceptions.fromDioError(error).toString();
+      final errorMessage = DioExceptions.fromDioError(error, 'SM-A33G').toString();
       return DataFailed(errorMessage);
     }
   }

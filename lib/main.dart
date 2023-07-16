@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -67,7 +68,7 @@ import 'src/services/location.dart';
 import 'src/services/timer.dart';
 import 'src/services/analytics.dart';
 import 'src/services/notifications.dart';
-import 'src/services/_logger.dart';
+import 'src/services/logger.dart';
 
 //router
 import 'src/config/router/index.dart' as router;
@@ -79,6 +80,7 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 final LocationService _locationService = locator<LocationService>();
 final TimerService _timerService = locator<TimerService>();
 final NotificationService _notificationService = locator<NotificationService>();
+final LoggerService _loggerService = locator<LoggerService>();
 
 List<CameraDescription> cameras = [];
 
@@ -162,7 +164,7 @@ Future<void> main() async {
   // ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
   // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-  // Logger = EventSourceLogger();
+  _loggerService.setLogLevel(LogLevel.debugFinest);
   runApp(const MyApp());
 }
 

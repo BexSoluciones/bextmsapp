@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 class DioExceptions implements Exception {
   late String message;
 
-  DioExceptions.fromDioError(DioError dioError) {
+  DioExceptions.fromDioError(DioError dioError, String? model) {
     switch (dioError.type) {
       case DioErrorType.cancel:
         message = "Request to API server was cancelled";
@@ -17,7 +17,8 @@ class DioExceptions implements Exception {
       case DioErrorType.badResponse:
         message = _handleError(
           dioError.response?.statusCode,
-          dioError.response?.data,
+          model,
+          dioError.response?.data
         );
         break;
       case DioErrorType.sendTimeout:
@@ -36,7 +37,7 @@ class DioExceptions implements Exception {
     }
   }
 
-  String _handleError(int? statusCode, dynamic error) {
+  String _handleError(int? statusCode, String? model, dynamic error) {
     switch (statusCode) {
       case 400:
         return 'Bad request';
@@ -45,7 +46,26 @@ class DioExceptions implements Exception {
       case 403:
         return 'Forbidden';
       case 404:
-        return error['message'] != null && error['message'] != '' ? error['message'] : 'Oops something went wrong';
+        switch (error['message']){
+          case null:
+            return 'Oops something went wrong';
+          case '':
+            return 'Oops something went wrong';
+          case 'max_udids_used':
+            return 'Limite de dispositivos alcanzados 🙁🙁 ($model)';
+          case 'Udid disabled':
+            return 'Actualmente te encuentras inactivo desde este dispositivo 🙁🙁 ($model)';
+          case 'the_user_has_device':
+            return 'El dispositivo con que intentas ingresas ya tiene una sesión con un transportador diferente 🙁🙁 ($model)';
+          case 'Unauthorised':
+            return 'Usuario o contraseña incorrecta 🙁🙁 ($model)';
+          case 'Invalid subdomain':
+            return 'No trabajas en esta empresa 🙁🙁 ($model)';
+          case 'Inactive user':
+            return 'El usuario no se encuentra activo 🙁🙁 ($model)';
+          default:
+            return 'Oops something went wrong';
+        }
       case 500:
         return 'Internal server error';
       case 502:

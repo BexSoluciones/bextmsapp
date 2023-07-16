@@ -12,4 +12,3 @@ enum RegionMode {
   rectangleHorizontal,
   circle,
 }
-
