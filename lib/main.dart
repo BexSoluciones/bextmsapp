@@ -67,7 +67,7 @@ import 'src/services/location.dart';
 import 'src/services/timer.dart';
 import 'src/services/analytics.dart';
 import 'src/services/notifications.dart';
-import 'src/services/logger.dart';
+import 'src/services/_logger.dart';
 
 //router
 import 'src/config/router/index.dart' as router;

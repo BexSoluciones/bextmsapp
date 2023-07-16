@@ -30,6 +30,8 @@ final locator = GetIt.instance;
 
 Future<void> initializeDependencies() async {
 
+  locator.registerLazySingleton(() => FirebaseAnalyticsService());
+
   final storage = await LocalStorageService.getInstance();
   locator.registerSingleton<LocalStorageService>(storage!);
 
@@ -42,9 +44,6 @@ Future<void> initializeDependencies() async {
   // final isolate = IsolateService();
   // locator.registerSingleton<IsolateService>(isolate);
 
-  final logger = EventSourceLogger();
-  locator.registerSingleton<EventSourceLogger>(logger!);
-
   final location = await LocationService.getInstance();
   locator.registerSingleton<LocationService>(location!);
 
@@ -54,7 +53,8 @@ Future<void> initializeDependencies() async {
   final chargeStatus = ChargerStatus.instance;
   locator.registerSingleton<ChargerStatus>(chargeStatus);
 
-  locator.registerLazySingleton(() => FirebaseAnalyticsService());
+  final logger = LoggerService();
+  locator.registerSingleton<LoggerService>(logger);
 
   final db = AppDatabase.instance;
   locator.registerSingleton<AppDatabase>(db);
