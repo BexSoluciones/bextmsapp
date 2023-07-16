@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_repository/location_repository.dart';
+import 'package:logging/logging.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
 
@@ -66,6 +67,7 @@ import 'src/services/location.dart';
 import 'src/services/timer.dart';
 import 'src/services/analytics.dart';
 import 'src/services/notifications.dart';
+import 'src/services/logger.dart';
 
 //router
 import 'src/config/router/index.dart' as router;
@@ -160,6 +162,7 @@ Future<void> main() async {
   // ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
   // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
+  // Logger = EventSourceLogger();
   runApp(const MyApp());
 }
 
@@ -287,8 +290,7 @@ class MyApp extends StatelessWidget {
             create: (context) => QueryCubit(locator<DatabaseRepository>()),
           ),
           BlocProvider(
-            create: (context) => IssuesBloc(locator<DatabaseRepository>()),
-          ),
+            create: (context) => IssuesBloc(locator<DatabaseRepository>()),     ),
         ],
         child: BlocProvider(
             create: (context) => ThemeBloc(),

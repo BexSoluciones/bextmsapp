@@ -24,6 +24,7 @@ import 'services/isolate.dart';
 import 'services/timer.dart';
 import 'services/notifications.dart';
 import 'services/analytics.dart';
+import 'services/logger.dart';
 
 final locator = GetIt.instance;
 
@@ -40,6 +41,9 @@ Future<void> initializeDependencies() async {
 
   // final isolate = IsolateService();
   // locator.registerSingleton<IsolateService>(isolate);
+
+  final logger = EventSourceLogger();
+  locator.registerSingleton<EventSourceLogger>(logger!);
 
   final location = await LocationService.getInstance();
   locator.registerSingleton<LocationService>(location!);
