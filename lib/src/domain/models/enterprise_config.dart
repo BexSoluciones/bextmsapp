@@ -39,63 +39,83 @@ class EnterpriseConfig extends Equatable {
     return EnterpriseConfig(
       id: map['id'] != null ? map['id'] as int : null,
       allowInsetsBelow: map['allow_insets_below'] != null
-          ? map['allow_insets_below'] == 1 || map['allow_insets_below']
-              ? true
-              : false
+          ? map['allow_insets_below'] is int
+              ? map['allow_insets_below'] == 1
+                  ? true
+                  : false
+              : map['allow_insets_below']
           : null,
       allowInsetsAbove: map['allow_insets_above'] != null
-          ? map['allow_insets_above'] == 1 || map['allow_insets_above']
-              ? true
-              : false
+          ? map['allow_insets_above'] is int
+              ? map['allow_insets_above'] == 1
+                  ? true
+                  : false
+              : map['allow_insets_above']
           : null,
       hadTakePicture: map['had_take_picture'] != null
-          ? map['had_take_picture'] == 1 || map['had_take_picture']
-              ? true
-              : false
+          ? map['had_take_picture'] is int
+              ? map['had_take_picture'] == 1
+                  ? true
+                  : false
+              : map['had_take_picture']
           : null,
       canBlockClients: map['can_block_clients'] != null
-          ? map['can_block_clients'] == 1 || map['can_block_clients']
-              ? true
-              : false
+          ? map['can_block_clients'] is int
+              ? map['can_block_clients'] == 1
+                  ? true
+                  : false
+              : map['can_block_clients']
           : null,
       requiredArrived: map['required_arrived'] != null
-          ? map['required_arrived'] == 1 || map['required_arrived']
-              ? true
-              : false
+          ? map['required_arrived'] is int
+              ? map['required_arrived'] == 1
+                  ? true
+                  : false
+              : map['required_arrived']
           : null,
       canMakeHistory: map['can_make_history'] != null
-          ? map['can_make_history'] == 1 || map['can_make_history']
-              ? true
-              : false
+          ? map['can_make_history'] is int
+              ? map['can_make_history'] == 1
+                  ? true
+                  : false
+              : map['can_make_history']
           : null,
       fixedDeliveryDistance: map['fixed_delivery_distance'] != null
-          ? map['fixed_delivery_distance'] == 1 ||
-                  map['fixed_delivery_distance']
-              ? true
-              : false
+          ? map['fixed_delivery_distance'] is int
+              ? map['fixed_delivery_distance'] == 1
+                  ? true
+                  : false
+              : map['fixed_delivery_distance']
           : null,
       hadReasonRespawn: map['had_reason_respawn'] != null
-          ? map['had_reason_respawn'] == 1 || map['had_reason_respawn']
-              ? true
-              : false
+          ? map['had_reason_respawn'] is int
+              ? map['had_reason_respawn'] == 1
+                  ? true
+                  : false
+              : map['had_reason_respawn']
           : null,
       specifiedAccountTransfer: map['specified_account_transfer'] != null
-          ? map['specified_account_transfer'] == 1 ||
-                  map['specified_account_transfer']
-              ? true
-              : false
+          ? map['specified_account_transfer'] is int
+              ? map['specified_account_transfer'] == 1
+                  ? true
+                  : false
+              : map['specified_account_transfer']
           : null,
       mapbox: map['mapbox'] != null ? map['mapbox'] as String : null,
       codeQr: map['code_qr'] != null ? map['code_qr'] as String : null,
       blockPartial: map['block_partial'] != null
-          ? map['block_partial'] == 1 || map['block_partial']
-              ? true
-              : false
+          ? map['block_partial'] is int
+              ? map['block_partial'] == 1
+                  ? true
+                  : false
+              : map['block_partial']
           : null,
       skipUpdate: map['skip_update'] != null
-          ? map['skip_update'] == 1 || map['skip_update']
-              ? true
-              : false
+          ? map['skip_update'] is int
+              ? map['skip_update'] == 1
+                  ? true
+                  : false
+              : map['skip_update']
           : null,
       limitDaysWorks: map['limit_days_works'] != null
           ? map['limit_days_works'] as int

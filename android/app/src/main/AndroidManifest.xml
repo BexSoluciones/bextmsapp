@@ -2,6 +2,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.bexsoluciones.bexdeliveries">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false"
+        tools:targetApi="eclair" />
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -28,7 +32,7 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="false"
-        >
+        tools:targetApi="m">
 
         <activity
             android:name=".MainActivity"
@@ -38,7 +42,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize"
-            >
+            tools:ignore="Instantiatable">
 
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
@@ -60,22 +64,22 @@
            android:name="com.google.firebase.messaging.default_notification_channel_id"
            android:value="high_importance_channel" />
 
-        <receiver android:name="plugin_receivers.BootCompleteReceiver"
-           android:exported="true">
-           <intent-filter>
-               <action android:name="android.intent.action.BOOT_COMPLETED"/>
-           </intent-filter>
-        </receiver>
+<!--        <receiver android:name="plugin_receivers.BootCompleteReceiver"-->
+<!--           android:exported="true">-->
+<!--           <intent-filter>-->
+<!--               <action android:name="android.intent.action.BOOT_COMPLETED"/>-->
+<!--           </intent-filter>-->
+<!--        </receiver>-->
 
-        <provider
-           android:name="androidx.startup.InitializationProvider"
-           android:authorities="${applicationId}.androidx-startup"
-           android:exported="false"
-           tools:node="merge">
-           <meta-data
-               android:name="initializer.AppStartup"
-               android:value="androidx.startup" />
-        </provider>
+<!--        <provider-->
+<!--           android:name="androidx.startup.InitializationProvider"-->
+<!--           android:authorities="${applicationId}.androidx-startup"-->
+<!--           android:exported="false"-->
+<!--           tools:node="merge">-->
+<!--           <meta-data-->
+<!--               android:name="initializer.AppStartup"-->
+<!--               android:value="androidx.startup" />-->
+<!--        </provider>-->
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
