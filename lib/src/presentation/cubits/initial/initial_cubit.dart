@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bexdeliveries/src/services/notifications.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -25,6 +26,7 @@ part 'initial_state.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
+final NotificationService _notificationService = locator<NotificationService>();
 
 class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
   final ApiRepository _apiRepository;
@@ -35,7 +37,8 @@ class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
                 enterprise: _storageService.getObject('enterprise') != null
                     ? Enterprise.fromMap(
                         _storageService.getObject('enterprise')!)
-                    : null),
+                    : null,
+                token: _notificationService.token),
             null);
 
   Future<void> getEnterprise(
@@ -54,7 +57,11 @@ class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
       if (response is DataSuccess) {
         final enterprise = response.data!.enterprise;
         _storageService.setObject('enterprise', enterprise.toMap());
-        emit(InitialSuccess(enterprise: enterprise));
+
+        var token = _notificationService.token;
+        print('token from initial');
+        print(token);
+        emit(InitialSuccess(enterprise: enterprise, token: token));
       } else if (response is DataFailed) {
         _storageService.setString('company_name', null);
         emit(InitialFailed(error: response.error));

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:flutter/services.dart';
 
 //models
 import '../../../domain/models/enterprise.dart';
@@ -140,13 +141,22 @@ class InitialViewState extends State<InitialView> {
         gapH64,
         Padding(
             padding: const EdgeInsets.only(
-                left: kDefaultPadding,
-                right: kDefaultPadding,
-                bottom: kDefaultPadding),
+                left: kDefaultPadding, right: kDefaultPadding),
             child: buildCompanyField()),
         gapH4,
         if (state.error != null)
-          Text(state.error!, textAlign: TextAlign.center),
+          Padding(
+              padding: const EdgeInsets.only(
+                  left: kDefaultPadding, right: kDefaultPadding),
+              child: Text(state.error!, textAlign: TextAlign.center)),
+        if (state.token != null)
+          GestureDetector(
+            onTap: () => Clipboard.setData(ClipboardData(text: state.token!)),
+            child: Padding(
+                padding: const EdgeInsets.only(
+                    left: kDefaultPadding, right: kDefaultPadding),
+                child: Text(state.token!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red))),
+          ),
         SizedBox(height: size.height * 0.26),
         Column(
           children: [

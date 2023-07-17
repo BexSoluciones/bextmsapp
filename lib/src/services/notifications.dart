@@ -29,6 +29,7 @@ class NotificationService {
   }
 
   bool _initialized = false;
+  String? token;
 
   Future init() async {
     if (!_initialized) {
@@ -38,7 +39,8 @@ class NotificationService {
         provisional: false,
         sound: true,
       );
-      String? token = await _firebaseMessaging?.getToken();
+      token = await _firebaseMessaging?.getToken();
+      print(token);
       _initialized = true;
       FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
       await setupInteractedMessage();

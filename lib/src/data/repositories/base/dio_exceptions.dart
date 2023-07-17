@@ -46,7 +46,7 @@ class DioExceptions implements Exception {
       case 403:
         return 'Forbidden';
       case 404:
-        switch (error['message']){
+        switch (error['error']){
           case null:
             return 'Oops something went wrong';
           case '':

@@ -11,7 +11,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_repository/location_repository.dart';
-import 'package:logging/logging.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
 
@@ -121,17 +120,20 @@ Future<bool> _listenToGeoLocations() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  logDebugFinest(headerLogger, 'Starting a expensive async operation...');
   try {
     await Firebase.initializeApp();
     await initializeDependencies();
-  } catch (e) {
-    print(e);
+    logDebugFine(headerLogger, 'DI done');
+  } catch (error) {
+    logErrorObject(headerLogger, error, 'Caught an error in the async operation!');
   }
 
   try {
     await _notificationService.init();
-  } catch (e) {
-    print(e);
+    logDebugFine(headerLogger, 'Notification already done');
+  } catch (error) {
+    logErrorObject(headerLogger, error, 'Caught an error in the async operation!');
   }
 
   bool damagedDatabaseDeleted = false;
