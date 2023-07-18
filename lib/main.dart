@@ -120,15 +120,16 @@ Future<bool> _listenToGeoLocations() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  logDebugFinest(headerLogger, 'Starting a expensive async operation...');
   try {
     await Firebase.initializeApp();
     await initializeDependencies();
-    logDebugFine(headerLogger, 'DI done');
   } catch (error) {
-    logErrorObject(headerLogger, error, 'Caught an error in the async operation!');
+    // logErrorObject(headerLogger, error, 'Caught an error in the async operation!');
   }
 
+  _loggerService.setLogLevel(LogLevel.debugFinest);
+
+  logDebugFinest(headerLogger, 'Starting a expensive async operation...');
   try {
     await _notificationService.init();
     logDebugFine(headerLogger, 'Notification already done');
@@ -166,7 +167,7 @@ Future<void> main() async {
   // ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
   // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-  _loggerService.setLogLevel(LogLevel.debugFinest);
+
   runApp(const MyApp());
 }
 

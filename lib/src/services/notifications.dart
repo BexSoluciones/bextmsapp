@@ -13,6 +13,9 @@ Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (message.notification != null) {
     print('Notification Title: ${message.notification!.title}');
     print('Notification Body: ${message.notification!.body}');
+    print('Notification data: ${message.data}');
+
+
   }
 }
 
@@ -66,6 +69,8 @@ class NotificationService {
 
     if (message.notification != null) {
       print('Message also contained a notification: ${message.notification}');
+
+
 
       PushNotification notification = PushNotification(
         title: message.notification?.title,
