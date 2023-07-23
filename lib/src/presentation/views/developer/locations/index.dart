@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:charger_status/charger_status.dart';
 
 //domain
 import '../../../../domain/models/location.dart';
@@ -13,10 +14,8 @@ import 'features/item.dart';
 //services
 import '../../../../locator.dart';
 import '../../../../services/navigation.dart';
-import '../../../../../plugins/charger_status.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
-final ChargerStatus _chargerStatus = locator<ChargerStatus>();
 
 class LocationsView extends StatelessWidget {
   const LocationsView({super.key});
@@ -33,7 +32,7 @@ class LocationsView extends StatelessWidget {
         title: const Text('Localizaciones'),
         actions: [
           FutureBuilder<String?>(
-              future: _chargerStatus.getBatteryLevel(),
+              future: ChargerStatus.instance.getBatteryLevel(),
               builder: (context, snapshot) {
 
                 print(snapshot.data);
