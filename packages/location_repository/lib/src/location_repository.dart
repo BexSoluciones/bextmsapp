@@ -13,22 +13,26 @@ class CurrentLocationFailure implements Exception {
 }
 
 class LocationRepository {
+
   /// {@macro location_repository}
   LocationRepository();
 
+  /// instance of location
+  final Location _location = Location();
+
   /// Function to get current location
   Future<CurrentUserLocationEntity> getCurrentLocation() async {
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    final serviceEnabled = await _location.serviceEnabled();
     if (!serviceEnabled) {
       throw CurrentLocationFailure(
         error: "You don't have location service enabled",
       );
     }
 
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
+    var permission = await _location.hasPermission();
+    if (permission == PermissionStatus.denied) {
+      permission = await _location.requestPermission();
+      if (permission == PermissionStatus.denied) {
         throw CurrentLocationFailure(
           error: "You don't have all the permissions granted."
               '\nYou need to activate them manually.',
@@ -36,17 +40,17 @@ class LocationRepository {
       }
     }
 
-    if (permission == LocationPermission.deniedForever) {
+    if (permission == PermissionStatus.deniedForever) {
       throw CurrentLocationFailure(
         error: "You don't have all the permissions granted."
             '\nYou need to activate them manually.',
       );
     }
 
+    late final LocationData position;
 
-    late final Position position;
     try {
-      position = await Geolocator.getCurrentPosition();
+      position = await _location.getLocation();
     } catch (_) {
       throw CurrentLocationFailure(
         error: 'Something went wrong getting your location, '
@@ -57,10 +61,9 @@ class LocationRepository {
     final latitude = position.latitude;
     final longitude = position.longitude;
 
-
     return CurrentUserLocationEntity(
-      latitude: latitude,
-      longitude: longitude,
+      latitude: latitude!,
+      longitude: longitude!,
     );
   }
 }

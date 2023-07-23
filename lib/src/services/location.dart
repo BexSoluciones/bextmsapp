@@ -21,38 +21,36 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class LocationService with FormatDate {
   static LocationService? _instance;
+  static Location? _location;
 
   static Future<LocationService?> getInstance() async {
     _instance ??= LocationService();
+    _location = Location();
     return _instance;
   }
 
   bool inBackground = false;
-  late LocationSettings locationSettings;
 
   // Keep track of current Location
   LocationData? _currentLocation;
 
   // Continuously emit location updates
-  final StreamController<CurrentUserLocationEntity?> _locationController =
-      StreamController<CurrentUserLocationEntity?>.broadcast();
+  final StreamController<LocationData?> _locationController =
+      StreamController<LocationData?>.broadcast();
 
   // ignore: sort_constructors_first
   LocationService() {
     hasPermission().then((granted) {
-
-
-      if (granted == LocationPermission.always) {
-        Geolocator.getPositionStream(locationSettings: locationSettings)
-            .listen((locationData) {
+      if (granted == PermissionStatus.granted) {
+        _location?.onLocationChanged.listen((locationData) {
           _locationController.add(locationData);
         });
       }
     });
   }
 
-  Future<LocationPermission> hasPermission() async {
-    return await Geolocator.requestPermission();
+  Future<PermissionStatus> hasPermission() async {
+    return await _location!.hasPermission();
   }
 
   bool calculateRadiusBetweenTwoLatLng(
@@ -103,12 +101,12 @@ class LocationService with FormatDate {
       locationData ??= await getLocation();
 
       var location = l.Location(
-          latitude: locationData.latitude,
-          longitude: locationData.longitude,
+          latitude: locationData.latitude!,
+          longitude: locationData.longitude!,
           accuracy: locationData.accuracy,
           altitude: locationData.altitude,
           heading: locationData.heading,
-          isMock: locationData.isMocked,
+          isMock: locationData.isMock,
           speed: locationData.speed,
           speedAccuracy: locationData.speedAccuracy,
           userId: _storageService.getInt('user_id') ?? 0,
