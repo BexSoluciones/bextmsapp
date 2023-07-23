@@ -1,4 +1,4 @@
-import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
 import 'package:location_repository/src/model/current_location.dart';
 
 /// Failure model that implement error

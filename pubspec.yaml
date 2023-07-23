@@ -26,7 +26,7 @@ dependencies:
   meta: ^1.8.0
   flutter_secure_storage: ^8.0.0
   #locations
-  geolocator: ^9.0.2
+  location: ^5.0.0
   latlong2: ^0.8.1
   #connectivy
   connectivity_plus: ^3.0.3

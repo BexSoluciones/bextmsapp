@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
@@ -101,7 +101,7 @@ void callbackDispatcher() async {
 Future<bool> _listenToGeoLocations() async {
   var status = await _locationService.hasPermission();
 
-  if (status == LocationPermission.always) {
+  if (status == PermissionStatus.granted) {
     if (Platform.isAndroid) {
       _locationService.locationStream.listen((event) {
         if (kDebugMode) {

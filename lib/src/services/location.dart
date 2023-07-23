@@ -3,7 +3,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
+import 'package:location_repository/location_repository.dart';
 
 //domain
 import '../../src/domain/models/location.dart' as l;
@@ -30,45 +31,16 @@ class LocationService with FormatDate {
   late LocationSettings locationSettings;
 
   // Keep track of current Location
-  Position? _currentLocation;
+  LocationData? _currentLocation;
 
   // Continuously emit location updates
-  final StreamController<Position?> _locationController =
-      StreamController<Position?>.broadcast();
+  final StreamController<CurrentUserLocationEntity?> _locationController =
+      StreamController<CurrentUserLocationEntity?>.broadcast();
 
   // ignore: sort_constructors_first
   LocationService() {
     hasPermission().then((granted) {
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        locationSettings = AndroidSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: 100,
-            forceLocationManager: true,
-            intervalDuration: const Duration(seconds: 10),
-            //(Optional) Set foreground notification config to keep the app alive
-            //when going to the background
-            foregroundNotificationConfig: const ForegroundNotificationConfig(
-              notificationText:
-                  "Example app will continue to receive your location even when you aren't using it",
-              notificationTitle: "Running in Background",
-              enableWakeLock: true,
-            ));
-      } else if (defaultTargetPlatform == TargetPlatform.iOS ||
-          defaultTargetPlatform == TargetPlatform.macOS) {
-        locationSettings = AppleSettings(
-          accuracy: LocationAccuracy.high,
-          activityType: ActivityType.fitness,
-          distanceFilter: 100,
-          pauseLocationUpdatesAutomatically: true,
-          // Only set to true if our app will be started up in the background.
-          showBackgroundLocationIndicator: false,
-        );
-      } else {
-        locationSettings = const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 100,
-        );
-      }
+
 
       if (granted == LocationPermission.always) {
         Geolocator.getPositionStream(locationSettings: locationSettings)
@@ -105,9 +77,9 @@ class LocationService with FormatDate {
     return date1.difference(date2).inSeconds;
   }
 
-  Stream<Position?> get locationStream => _locationController.stream;
+  Stream<LocationData?> get locationStream => _locationController.stream;
 
-  Future<Position> getLocation() async {
+  Future<LocationData> getLocation() async {
     try {
       _currentLocation = await getLocation();
     } catch (e) {
