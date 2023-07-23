@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:charger_status/charger_status.dart';
+import 'package:location/location.dart';
 
 //domain
 import '../../../../domain/models/location.dart';
@@ -14,8 +15,10 @@ import 'features/item.dart';
 //services
 import '../../../../locator.dart';
 import '../../../../services/navigation.dart';
+import '../../../../services/location.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
+final LocationService _locationService = locator<LocationService>();
 
 class LocationsView extends StatelessWidget {
   const LocationsView({super.key});
@@ -34,8 +37,6 @@ class LocationsView extends StatelessWidget {
           FutureBuilder<String?>(
               future: ChargerStatus.instance.getBatteryLevel(),
               builder: (context, snapshot) {
-
-                print(snapshot.data);
                 if(snapshot.hasData){
                   if(snapshot.data != null){
                     return Row(
@@ -53,8 +54,8 @@ class LocationsView extends StatelessWidget {
           )
         ],
       ),
-      body: StreamBuilder<List<Location>>(
-        stream: bloc.locations,
+      body: StreamBuilder<LocationData?>(
+        stream: _locationService.locationStream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

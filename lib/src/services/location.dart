@@ -25,7 +25,7 @@ class LocationService with FormatDate {
 
   static Future<LocationService?> getInstance() async {
     _instance ??= LocationService();
-    _location = Location();
+    _location ??= Location();
     return _instance;
   }
 
@@ -41,7 +41,7 @@ class LocationService with FormatDate {
   // ignore: sort_constructors_first
   LocationService() {
     hasPermission().then((granted) {
-      if (granted == PermissionStatus.granted) {
+      if (granted != null && granted == PermissionStatus.granted) {
         _location?.onLocationChanged.listen((locationData) {
           _locationController.add(locationData);
         });
@@ -49,7 +49,8 @@ class LocationService with FormatDate {
     });
   }
 
-  Future<PermissionStatus> hasPermission() async {
+  Future<PermissionStatus?> hasPermission() async {
+    if(_location == null) return null;
     return await _location!.hasPermission();
   }
 

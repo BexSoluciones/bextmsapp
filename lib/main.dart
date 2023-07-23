@@ -88,40 +88,19 @@ void callbackDispatcher() async {
   DartPluginRegistrant.ensureInitialized();
 
   ChargerStatus.instance.listenToEvents().listen((event) {
-    if (kDebugMode) {
-      print("onNewEvent: $event");
-    }
+    logDebug(headerLogger, 'onNewEvent: $event');
   });
 
   ChargerStatus.instance.startPowerChangesListener();
-  await _listenToGeoLocations();
-}
-
-Future<bool> _listenToGeoLocations() async {
-  var status = await _locationService.hasPermission();
-
-  if (status == PermissionStatus.granted) {
-    if (Platform.isAndroid) {
-      _locationService.locationStream.listen((event) {
-        if (kDebugMode) {
-          if (event != null) {
-            _timerService.setLocation();
-          }
-        }
-      });
-    }
-    return true;
-  } else {
-    return false;
-  }
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
   await Firebase.initializeApp();
   await initializeDependencies();
+
+  ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
   _loggerService.setLogLevel(LogLevel.debugFinest);
 
@@ -158,9 +137,6 @@ Future<void> main() async {
   );
 
   if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
-
-  //TODO:: uncomment
-  // await _listenToGeoLocations();
 
   // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
