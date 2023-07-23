@@ -35,8 +35,9 @@ class LocationsView extends StatelessWidget {
           FutureBuilder<String?>(
               future: _chargerStatus.getBatteryLevel(),
               builder: (context, snapshot) {
-                if(snapshot.hasData){
 
+                print(snapshot.data);
+                if(snapshot.hasData){
                   if(snapshot.data != null){
                     return Row(
                       children: [
@@ -45,12 +46,10 @@ class LocationsView extends StatelessWidget {
                       ],
                     );
                   }
-
                   return const Icon(Icons.battery_alert_sharp);
-
                 }
 
-                return const Icon(Icons.battery_alert_sharp);
+                return const Icon(Icons.battery_full);
               }
           )
         ],

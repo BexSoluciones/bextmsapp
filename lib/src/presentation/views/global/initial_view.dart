@@ -4,12 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter/services.dart';
 
-//models
-import '../../../domain/models/enterprise.dart';
-
 //utils
 import '../../../utils/constants/nums.dart';
-import '../../../utils/constants/strings.dart';
 import '../../../utils/constants/gaps.dart';
 
 //cubits
@@ -21,12 +17,6 @@ import '../../blocs/network/network_bloc.dart';
 //widgets
 import '../../widgets/default_button_widget.dart';
 import '../../widgets/version_widget.dart';
-
-//service
-import '../../../locator.dart';
-import '../../../services/navigation.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
 
 class InitialView extends StatefulWidget {
   const InitialView({Key? key}) : super(key: key);
@@ -149,14 +139,6 @@ class InitialViewState extends State<InitialView> {
               padding: const EdgeInsets.only(
                   left: kDefaultPadding, right: kDefaultPadding),
               child: Text(state.error!, textAlign: TextAlign.center)),
-        if (state.token != null)
-          GestureDetector(
-            onTap: () => Clipboard.setData(ClipboardData(text: state.token!)),
-            child: Padding(
-                padding: const EdgeInsets.only(
-                    left: kDefaultPadding, right: kDefaultPadding),
-                child: Text(state.token!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red))),
-          ),
         SizedBox(height: size.height * 0.26),
         Column(
           children: [

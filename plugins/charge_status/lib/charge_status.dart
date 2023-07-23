@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,8 +9,8 @@ class ChargerStatus {
 
   static ChargerStatus get instance => _instance ??= ChargerStatus._();
 
-  final _methodChannel = const MethodChannel('com.bexsoluciones.bexdeliveries:method_channel');
-  final _eventChannel = const EventChannel('com.bexsoluciones.bexdeliveries:event_channel');
+  final _methodChannel = const MethodChannel('com.example.charger_status:method_channel');
+  final _eventChannel = const EventChannel("com.example.charger_status/event_channel");
 
   Future<String?> getBatteryLevel() async =>  _methodChannel.invokeMethod<String>('getBatteryLevel');
   Future<String?> getChargerStatus() async =>  _methodChannel.invokeMethod<String>('getChargerStatus');

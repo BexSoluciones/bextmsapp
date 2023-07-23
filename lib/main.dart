@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:ui';
-import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -119,17 +118,15 @@ Future<bool> _listenToGeoLocations() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
-  try {
-    await Firebase.initializeApp();
-    await initializeDependencies();
-  } catch (error) {
-    // logErrorObject(headerLogger, error, 'Caught an error in the async operation!');
-  }
+  await Firebase.initializeApp();
+  await initializeDependencies();
 
   _loggerService.setLogLevel(LogLevel.debugFinest);
 
   logDebugFinest(headerLogger, 'Starting a expensive async operation...');
+
   try {
     await _notificationService.init();
     logDebugFine(headerLogger, 'Notification already done');
@@ -164,9 +161,8 @@ Future<void> main() async {
 
   //TODO:: uncomment
   // await _listenToGeoLocations();
-  // ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
-  // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
+  // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   runApp(const MyApp());
 }

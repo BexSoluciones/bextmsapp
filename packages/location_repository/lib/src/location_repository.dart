@@ -8,7 +8,7 @@ class CurrentLocationFailure implements Exception {
     required this.error,
   });
 
-  /// the error name if somethig went wrong
+  /// the error name if something went wrong
   final String error;
 }
 

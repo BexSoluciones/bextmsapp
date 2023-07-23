@@ -26,9 +26,9 @@ class ChargerStatusPlugin : MethodCallHandler {
     private var context: Context? = null
 
     fun onAttachedToEngine(flutterEngine: FlutterEngine) {
-        channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.bexdeliveries:method_channel")
+        channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.bexsoluciones.bexdeliveries:method_channel")
         channel.setMethodCallHandler(this)
-        eventChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.bexdeliveries:event_channel")
+        eventChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, "com.bexsoluciones.bexdeliveries:event_channel")
         eventChannel.setStreamHandler(PluginEventEmitter)
     }
 
