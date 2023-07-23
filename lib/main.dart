@@ -14,7 +14,7 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
 
 //plugins
-import 'plugins/charge_status.dart';
+import 'package:charger_status/charger_status.dart';
 //theme
 import 'src/config/theme/app.dart';
 

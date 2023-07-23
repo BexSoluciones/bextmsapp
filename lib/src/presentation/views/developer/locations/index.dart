@@ -13,7 +13,7 @@ import 'features/item.dart';
 //services
 import '../../../../locator.dart';
 import '../../../../services/navigation.dart';
-import '../../../../../plugins/charge_status.dart';
+import '../../../../../plugins/charger_status.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
 final ChargerStatus _chargerStatus = locator<ChargerStatus>();

@@ -11,6 +11,9 @@ dependencies:
   location_repository:
     path: packages/location_repository
 
+  charger_status:
+    path: plugins/charger_status
+
   #icons
   cupertino_icons: ^1.0.2
   #permission

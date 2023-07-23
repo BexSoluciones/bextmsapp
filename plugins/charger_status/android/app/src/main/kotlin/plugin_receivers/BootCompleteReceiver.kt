@@ -4,8 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.bexsoluciones.bexdeliveries.PluginEvent
-import com.bexsoluciones.bexdeliveries.PluginEventEmitter
+import com.bexsoluciones.charger_status.PluginEvent
+import com.bexsoluciones.charger_status.PluginEventEmitter
 
 private const val TAG = "BootCompleteReceiver"
 class BootCompleteReceiver : BroadcastReceiver() {

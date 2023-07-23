@@ -1,4 +1,4 @@
-package com.bexsoluciones.bexdeliveries
+package com.bexsoluciones.charger_status
 
 import android.util.Log
 import io.flutter.plugin.common.EventChannel

@@ -1,22 +1,25 @@
-package com.bexsoluciones.bexdeliveries
+package com.bexsoluciones.charger_status
 
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.hardware.BatteryState
 import android.os.BatteryManager
 import android.util.Log
+import androidx.annotation.NonNull
 
-import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.MethodChannel.Result
 import plugin_receivers.PowerStatusReceiver
 import plugin_utils.HEADLEASS_DISPATCHER_HANDLE
 import plugin_utils.PluginPreferences
 
 /** ChargerStatusPlugin */
-class ChargerStatusPlugin : MethodCallHandler {
+class ChargerStatusPlugin : FlutterPlugin, MethodCallHandler {
     /// The MethodChannel that will the communication between Flutter and native Android
     ///
     /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -25,20 +28,20 @@ class ChargerStatusPlugin : MethodCallHandler {
     private lateinit var eventChannel: EventChannel
     private var context: Context? = null
 
-    fun onAttachedToEngine(flutterEngine: FlutterEngine) {
-        channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.bexsoluciones.bexdeliveries:method_channel")
+    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        context = flutterPluginBinding.applicationContext
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "com.bexsoluciones.charger_status:method_channel")
         channel.setMethodCallHandler(this)
-        eventChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, "com.bexsoluciones.bexdeliveries:event_channel")
+        eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "com.bexsoluciones.charger_status/event_channel")
         eventChannel.setStreamHandler(PluginEventEmitter)
     }
 
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         when (call.method) {
             "getBatteryLevel" -> {
                 val intent: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
                     context?.registerReceiver(null, ifilter)
                 }
-                Log.d("Intent", intent.toString());
                 val batteryLevel = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
                 val scale: Int = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
                 batteryLevel * 100 / scale.toFloat()
@@ -84,4 +87,8 @@ class ChargerStatusPlugin : MethodCallHandler {
         }
     }
 
+    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        channel.setMethodCallHandler(null)
+        context = null
+    }
 }

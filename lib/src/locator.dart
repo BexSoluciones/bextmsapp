@@ -7,7 +7,7 @@ import '../core/cache/cache_manager.dart';
 import '../core/cache/storage/cache_storage.dart';
 
 //plugins
-import '../plugins/charge_status.dart';
+import '../plugins/charger_status.dart';
 
 import 'data/datasources/local/app_database.dart';
 import 'data/datasources/remote/api_service.dart';

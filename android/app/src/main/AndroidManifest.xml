@@ -21,10 +21,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
 
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
-
    <application
         tools:replace="android:label"
         android:label="bexdeliveries"
@@ -64,22 +60,6 @@
            android:name="com.google.firebase.messaging.default_notification_channel_id"
            android:value="high_importance_channel" />
 
-        <receiver android:name="plugin_receivers.BootCompleteReceiver"
-           android:exported="true">
-           <intent-filter>
-               <action android:name="android.intent.action.BOOT_COMPLETED"/>
-           </intent-filter>
-        </receiver>
-
-        <provider
-           android:name="androidx.startup.InitializationProvider"
-           android:authorities="${applicationId}.androidx-startup"
-           android:exported="false"
-           tools:node="merge">
-           <meta-data
-               android:name="initializer.AppStartup"
-               android:value="androidx.startup" />
-        </provider>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

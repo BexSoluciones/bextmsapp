@@ -6,8 +6,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 import android.util.Log
-import com.bexsoluciones.bexdeliveries.PluginEvent
-import com.bexsoluciones.bexdeliveries.PluginEventEmitter
+
+import com.bexsoluciones.charger_status.PluginEvent
+import com.bexsoluciones.charger_status.PluginEventEmitter
 
 class PowerStatusReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent) {

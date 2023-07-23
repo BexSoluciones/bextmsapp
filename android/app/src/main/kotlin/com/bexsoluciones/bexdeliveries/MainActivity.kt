@@ -9,8 +9,6 @@ import io.flutter.embedding.engine.FlutterEngine
 
 class MainActivity: FlutterActivity() {
 
-    private  lateinit var chargerStatusPlugin: ChargerStatusPlugin
-
     override fun onCreate(savedInstanceState: Bundle?) {
         // Aligns the Flutter view vertically with the window.
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false)
