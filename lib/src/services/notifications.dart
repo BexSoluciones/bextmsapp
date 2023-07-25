@@ -6,7 +6,7 @@ import 'package:overlay_support/overlay_support.dart';
 import '../../src/domain/models/notification.dart';
 
 //widgets
-import '../presentation/widgets/custom_notification_badge.dart';
+import '../utils/constants/colors.dart';
 
 Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Got a message whilst in the background!');
@@ -14,8 +14,6 @@ Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     print('Notification Title: ${message.notification!.title}');
     print('Notification Body: ${message.notification!.body}');
     print('Notification data: ${message.data}');
-
-
   }
 }
 
@@ -50,7 +48,6 @@ class NotificationService {
     }
   }
 
-
   Future<void> setupInteractedMessage() async {
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
@@ -59,7 +56,20 @@ class NotificationService {
       _handleMessage(initialMessage);
     }
 
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
+    FirebaseMessaging.onMessage.listen(_handleMessage);
+  }
+
+  void _handleMessageOpenedApp(RemoteMessage message) {
+    print('Got a message whilst in the foreground!');
+    print('Message data: ${message.data}');
+    print(message.notification);
+
+    if (message.notification != null) {
+      print('Message also contained a notification: ${message.notification}');
+
+
+    }
   }
 
   void _handleMessage(RemoteMessage message) {
@@ -70,16 +80,13 @@ class NotificationService {
     if (message.notification != null) {
       print('Message also contained a notification: ${message.notification}');
 
-
-
-      PushNotification notification = PushNotification(
-        title: message.notification?.title,
-        body: message.notification?.body,
-        // dataTitle: message.data['title'],
-        // dataBody: message.data['body'],
+      showSimpleNotification(
+        const Text('Hola'),
+        leading: const Icon(Icons.notification_important_outlined),
+        subtitle: Text(message.notification!.title!),
+        background: kPrimaryColor,
+        duration: const Duration(seconds: 2),
       );
-
-
     }
   }
 }

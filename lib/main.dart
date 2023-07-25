@@ -4,11 +4,9 @@ import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:location/location.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
@@ -75,8 +73,6 @@ import 'src/config/router/index.dart' as router;
 import 'src/presentation/views/global/undefined_view.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
-final LocationService _locationService = locator<LocationService>();
-final TimerService _timerService = locator<TimerService>();
 final NotificationService _notificationService = locator<NotificationService>();
 final LoggerService _loggerService = locator<LoggerService>();
 
