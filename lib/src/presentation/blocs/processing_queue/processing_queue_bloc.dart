@@ -28,19 +28,24 @@ import '../../../domain/abstracts/format_abstract.dart';
 part 'processing_queue_event.dart';
 part 'processing_queue_state.dart';
 
-class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueState> with FormatDate {
-
+class ProcessingQueueBloc
+    extends Bloc<ProcessingQueueEvent, ProcessingQueueState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ApiRepository _apiRepository;
 
-  final _processingQueueController = StreamController<List<ProcessingQueue>>.broadcast();
-  final _addProcessingQueueController = StreamController<ProcessingQueue>.broadcast();
+  final _processingQueueController =
+      StreamController<List<ProcessingQueue>>.broadcast();
+  final _addProcessingQueueController =
+      StreamController<ProcessingQueue>.broadcast();
 
-  Stream<List<ProcessingQueue>> get processingQueue => _processingQueueController.stream;
-  StreamSink<List<ProcessingQueue>> get _inProcessingQueue => _processingQueueController.sink;
+  Stream<List<ProcessingQueue>> get processingQueue =>
+      _processingQueueController.stream;
+  StreamSink<List<ProcessingQueue>> get _inProcessingQueue =>
+      _processingQueueController.sink;
   StreamSink<ProcessingQueue> get inAddPq => _addProcessingQueueController.sink;
 
-  ProcessingQueueBloc(this._databaseRepository, this._apiRepository) : super(ProcessingQueueInitial()) {
+  ProcessingQueueBloc(this._databaseRepository, this._apiRepository)
+      : super(ProcessingQueueInitial()) {
     on<ProcessingQueueAdd>(_add);
     on<ProcessingQueueObserve>(_observe);
     on<ProcessingQueueSender>(_sender);
@@ -57,7 +62,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
         print('error');
         print(error);
       }
-
     }, onDone: () {
       if (kDebugMode) {
         print('done');
@@ -96,17 +100,17 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
     emit(ProcessingQueueSuccess());
   }
 
-  void _observe(event, emit){
+  void _observe(event, emit) {
     _getProcessingQueue();
     emit(ProcessingQueueSuccess());
   }
 
-  void _sender(event, emit){
+  void _sender(event, emit) {
     emit(ProcessingQueueSending());
     _getProcessingQueue().then((_) => emit(ProcessingQueueSuccess()));
   }
 
-  void _cancel(event, emit){
+  void _cancel(event, emit) {
     emit(ProcessingQueueSuccess());
   }
 
@@ -117,7 +121,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
 
   void sendProcessingQueue(List<ProcessingQueue> queues) async {
     await Future.forEach(queues, (queue) async {
-
       queue.updatedAt = now();
 
       switch (queue.code) {
@@ -126,8 +129,9 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            final response =  await _apiRepository.start(request: TransactionRequest(Transaction.fromJson(body)));
-            if(response is DataSuccess) {
+            final response = await _apiRepository.start(
+                request: TransactionRequest(Transaction.fromJson(body)));
+            if (response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
@@ -145,8 +149,9 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            final response =  await _apiRepository.arrived(request: TransactionRequest(Transaction.fromJson(body)));
-            if(response is DataSuccess) {
+            final response = await _apiRepository.arrived(
+                request: TransactionRequest(Transaction.fromJson(body)));
+            if (response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
@@ -165,8 +170,9 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            final response =  await _apiRepository.summary(request: TransactionRequest(Transaction.fromJson(body)));
-            if(response is DataSuccess) {
+            final response = await _apiRepository.summary(
+                request: TransactionRequest(Transaction.fromJson(body)));
+            if (response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
@@ -184,8 +190,9 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            final response =  await _apiRepository.index(request: TransactionRequest(Transaction.fromJson(body)));
-            if(response is DataSuccess) {
+            final response = await _apiRepository.index(
+                request: TransactionRequest(Transaction.fromJson(body)));
+            if (response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
@@ -203,11 +210,15 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            final res =  await _apiRepository.transaction(request: TransactionSummaryRequest(TransactionSummary.fromJson(body)));
-            if(res is DataSuccess) {
+            final res = await _apiRepository.transaction(
+                request: TransactionSummaryRequest(
+                    TransactionSummary.fromJson(body)));
+            if (res is DataSuccess) {
               body['transaction_id'] = res.data!.transaction.id;
-              final response =  await _apiRepository.product(request: TransactionSummaryRequest(TransactionSummary.fromJson(body)));
-              if(response is DataSuccess) {
+              final response = await _apiRepository.product(
+                  request: TransactionSummaryRequest(
+                      TransactionSummary.fromJson(body)));
+              if (response is DataSuccess) {
                 queue.task = 'done';
               } else {
                 queue.task = 'error';
@@ -241,8 +252,9 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            final response =  await _apiRepository.status(request: StatusRequest(body['workcode'], body['status']));
-            if(response is DataSuccess) {
+            final response = await _apiRepository.status(
+                request: StatusRequest(body['workcode'], body['status']));
+            if (response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
@@ -272,9 +284,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
-
-
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();
@@ -287,9 +296,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
-
-
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();
@@ -303,9 +309,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
-
-
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();
@@ -317,8 +320,9 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            final response =  await _apiRepository.georeference(request: ClientRequest(Client.fromJson(body)));
-            if(response is DataSuccess) {
+            final response = await _apiRepository.georeference(
+                request: ClientRequest(Client.fromJson(body)));
+            if (response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
@@ -338,9 +342,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
-
-
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();
@@ -353,9 +354,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
-
-
           } catch (e) {
             queue.task = 'error';
             queue.error = e.toString();
@@ -365,13 +363,13 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
           break;
         case 'ASJBVKJDFS':
           try {
-
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
 
-            var response = await _apiRepository.logout(request: LogoutRequest());
+            var response =
+                await _apiRepository.logout(request: LogoutRequest());
 
-            if(response is DataSuccess){
+            if (response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
@@ -389,8 +387,6 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
         default:
       }
     });
-
-
   }
 
   Future<void> validateIfServiceIsCompleted(ProcessingQueue p) async {
@@ -400,11 +396,11 @@ class ProcessingQueueBloc extends Bloc<ProcessingQueueEvent, ProcessingQueueStat
         var isLast = await _databaseRepository.checkLastTransaction(workcode);
         if (isLast) {
           var processingQueue = ProcessingQueue(
-              body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
-              task: 'incomplete',
-              code: 'EBSVAEKRJB',
-              createdAt: now(),
-              updatedAt: now(),
+            body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
+            task: 'incomplete',
+            code: 'EBSVAEKRJB',
+            createdAt: now(),
+            updatedAt: now(),
           );
           await _databaseRepository.insertProcessingQueue(processingQueue);
         }
