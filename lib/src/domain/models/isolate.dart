@@ -2,5 +2,12 @@ class IsolateModel {
   IsolateModel(this.iteration, this.functions);
 
   final int iteration;
-  final List<Future<void>> functions;
+  final List<Function> functions;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'functions': functions.toString(),
+      'iteration': iteration,
+    };
+  }
 }

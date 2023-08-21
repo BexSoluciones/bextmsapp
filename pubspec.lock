@@ -256,6 +256,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
+  cryptography:
+    dependency: transitive
+    description:
+      name: cryptography
+      sha256: df156c5109286340817d21fa7b62f9140f17915077127dd70f8bd7a2a0997a35
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.5.0"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -675,10 +683,19 @@ packages:
     dependency: "direct main"
     description:
       name: hive
-      sha256: "8dcf6db979d7933da8217edcec84e9df1bdb4e4edc7fc77dbd5aa74356d6d941"
+      sha256: "00806ba9fd0e725804c7c524e79a0f979bf562e71ada0d69ba7299d0d34d1a37"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.3"
+    version: "3.0.0-dev"
+  hive_flutter:
+    dependency: "direct main"
+    description:
+      path: hive_flutter
+      ref: HEAD
+      resolved-ref: "19744f58dae372cd501e6afa315cece3be68234b"
+      url: "https://github.com/hivedb/hive"
+    source: git
+    version: "2.0.0-dev"
   http:
     dependency: transitive
     description:

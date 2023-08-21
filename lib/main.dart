@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:bexdeliveries/src/data/datasources/local/hive/core/hive_database_manager.dart';
 import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -95,6 +96,7 @@ Future<void> main() async {
 
   await Firebase.initializeApp();
   await initializeDependencies();
+  await HiveDatabaseManager().start();
 
   ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
