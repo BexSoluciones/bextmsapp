@@ -5,6 +5,8 @@ import 'package:hive/hive.dart';
 import '../../data/datasources/local/hive/core/hive_types.dart';
 import '../../data/datasources/local/hive/core/model/hive_model.dart';
 
+part 'user.g.dart';
+
 @HiveType(typeId: HiveTypes.userModelId)
 class User with EquatableMixin, HiveModelMixin {
   static const String userKey = 'user';

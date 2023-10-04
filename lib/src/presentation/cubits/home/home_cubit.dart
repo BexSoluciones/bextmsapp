@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bexdeliveries/src/domain/models/requests/account_request.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
@@ -34,10 +33,11 @@ import '../../../domain/abstracts/format_abstract.dart';
 
 import '../../../domain/models/requests/login_request.dart';
 import '../../../domain/models/requests/work_request.dart';
-import '../../../domain/models/responses/enterprise_config_response.dart';
-import '../../../domain/models/responses/reason_response.dart';
 import '../../../domain/models/requests/enterprise_config_request.dart';
 import '../../../domain/models/requests/reason_request.dart';
+import '../../../domain/models/requests/account_request.dart';
+import '../../../domain/models/responses/enterprise_config_response.dart';
+import '../../../domain/models/responses/reason_response.dart';
 
 //service
 import '../../../locator.dart';
@@ -242,6 +242,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
         } else {
           emit(HomeFailed(error: responseWorks.error, user: user));
         }
+
+
       } else if (response is DataFailed) {
         emit(HomeFailed(error: response.error, user: user));
       }

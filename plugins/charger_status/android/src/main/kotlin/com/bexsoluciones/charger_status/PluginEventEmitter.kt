@@ -28,6 +28,7 @@ object PluginEventEmitter : StreamHandler {
         eventSink = null
     }
 
+
     //Emit events from native to dart
     fun emitEvent(event: PluginEvent) {
         Log.i("PluginEventEmitter", "about to emit event: $event")

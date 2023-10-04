@@ -16,6 +16,7 @@ class WorkDao {
 
   Future<List<Work>> getAllWorks() async {
     final db = await _appDatabase.streamDatabase;
+
     final workList = await db!.rawQuery(
         '''
         SELECT works.*, 

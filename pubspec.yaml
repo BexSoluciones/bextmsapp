@@ -69,7 +69,6 @@ dependencies:
   version: ^3.0.2
   flutter_speed_dial: ^6.2.0
   badges: ^3.0.3
-  hive: ^3.0.0-dev
   path: ^1.8.2
   stream_transform: ^2.1.0
   flutter_svg: ^2.0.5
@@ -94,12 +93,18 @@ dependencies:
 dependency_overrides:
   isar: 3.0.6-dev.0
   isar_flutter_libs: 3.0.6-dev.0
+  hive: ^3.0.0-dev
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
   flutter_launcher_icons: ^0.11.0
+  build_runner: ^2.4.6
+  hive_generator:
+    git:
+      url: https://github.com/hivedb/hive
+      path: hive_generator
 
 flutter_icons:
   ios: true

@@ -35,7 +35,7 @@ class HiveDatabaseManager implements IDatabaseManager {
 
   /// Register your generic model or make your operation before start
   void initialOperation() {
-    Hive.registerAdapter(User());
+    Hive.registerAdapter(UserAdapter());
   }
 }
 
