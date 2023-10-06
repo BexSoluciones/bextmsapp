@@ -51,7 +51,7 @@ class SubItemWorkState extends State<SubItemWork> {
         child: Material(
             child: Ink(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+                    color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: ListTile(
@@ -59,8 +59,8 @@ class SubItemWorkState extends State<SubItemWork> {
                   leading: GestureDetector(
                       onTap: null,
                       child: CircleAvatar(
-                          backgroundColor: Colors.primaries[widget.work.color ?? 1],
-                          child: Text('${widget.work.order ?? 0 + 1}'))),
+                          backgroundColor: Colors.primaries[widget.work.color ?? 5],
+                          child: Text('${widget.work.order ?? 0 + 1}',style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),))),
                   onTap: () => _navigationService.goTo(summaryRoute,
                       arguments: SummaryArgument(work: widget.work)),
                   shape: RoundedRectangleBorder(
@@ -80,13 +80,13 @@ class SubItemWorkState extends State<SubItemWork> {
                         widget.work.address!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
                       )),
                       Row(
                         children: [
-                          Icon(Icons.move_to_inbox, color: Colors.brown[300]),
+                          const Icon(Icons.move_to_inbox, color: Colors.brown),
                           Text(widget.work.count.toString(),
-                              style: const TextStyle(fontSize: 14))
+                              style: TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim))
                         ],
                       )
                     ],

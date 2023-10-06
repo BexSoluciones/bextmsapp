@@ -69,6 +69,13 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
     emit(await _getAllWorks());
   }
 
+  void getUser()  {
+    final user = _storageService.getObject('user') != null
+        ? User.fromMap(_storageService.getObject('user')!)
+        : null;
+    updateUser(user!);
+  }
+
   Future<HomeState> _getAllWorks() async {
     final works = await _databaseRepository.getAllWorks();
     final user = _storageService.getObject('user') != null
@@ -76,6 +83,10 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
         : null;
 
     return HomeSuccess(works: works, user: user);
+  }
+
+  void updateUser(User user) {
+    emit(UpdateUser(user));
   }
 
   Future<void> differenceWorks(

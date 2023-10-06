@@ -28,17 +28,17 @@ class HeaderSummary extends StatelessWidget {
                 Text.rich(
                   TextSpan(
                     children: [
-                      const TextSpan(
+                      TextSpan(
                         text: 'SERVICIO: ',
                         style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                       ),
                       TextSpan(
                           text: arguments.work.workcode,
-                          style: const TextStyle(
+                          style:  TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.normal)),
+                              fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                     ],
                   ),
                 ),
@@ -46,42 +46,42 @@ class HeaderSummary extends StatelessWidget {
                 Text.rich(
                   TextSpan(
                     children: [
-                      const TextSpan(
+                      TextSpan(
                         text: 'NIT: ',
                         style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                       ),
                       TextSpan(
                           text: arguments.work.numberCustomer,
-                          style: const TextStyle(
+                          style:  TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.normal)),
+                              fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                     ],
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   arguments.work.customer!,
-                  style: const TextStyle(
+                  style:  TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.normal),
+                      fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer),
                 ),
                 const SizedBox(height: 10),
                 Text.rich(
                   TextSpan(
                     children: [
-                      const TextSpan(
+                       TextSpan(
                         text: 'DIR: ',
                         style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                       ),
                       TextSpan(
                           text: ' ${arguments.work.address}',
-                          style: const TextStyle(
+                          style:  TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.normal)),
+                              fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                     ],
                   ),
                 ),
@@ -90,17 +90,17 @@ class HeaderSummary extends StatelessWidget {
                     ? Text.rich(
                         TextSpan(
                           children: [
-                            const TextSpan(
+                             TextSpan(
                               text: 'CEL: ',
                               style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.bold),
+                                  fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                             ),
                             TextSpan(
                                 text: arguments.work.cellphone,
-                                style: const TextStyle(
+                                style:  TextStyle(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.normal)),
+                                    fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                           ],
                         ),
                       )

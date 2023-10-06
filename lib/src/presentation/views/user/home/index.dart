@@ -46,6 +46,7 @@ class HomeViewState extends State<HomeView>
     startHomeWidget();
     homeCubit = BlocProvider.of<HomeCubit>(context);
     homeCubit.getAllWorks();
+    homeCubit.getUser();
     super.initState();
   }
 
@@ -77,6 +78,7 @@ class HomeViewState extends State<HomeView>
         child: Scaffold(
           drawer: drawer(context, homeCubit.state.user),
           appBar: AppBar(
+            iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
             actions: [
               StatusBar(one: one),
               const VerticalDivider(

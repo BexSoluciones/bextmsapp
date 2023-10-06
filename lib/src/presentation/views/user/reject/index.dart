@@ -59,8 +59,9 @@ class _RejectViewState extends State<RejectView> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
+          icon:  Icon(Icons.arrow_back_ios_new,color:Theme.of(context).colorScheme.secondaryContainer),
           onPressed: () => _navigationService.goBack(),
         ),
       ),
@@ -69,7 +70,7 @@ class _RejectViewState extends State<RejectView> {
           SizedBox(
             height: size.height * 0.25,
             width: size.width,
-            child: HeaderReject(arguments: widget.arguments),
+            child: Container(color:Theme.of(context).colorScheme.primary,child: HeaderReject(arguments: widget.arguments)),
           ),
           BlocBuilder<RejectCubit, RejectState>(builder: (context, state) {
             switch (state.runtimeType) {
@@ -99,7 +100,7 @@ class _RejectViewState extends State<RejectView> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: const ListTile(
@@ -109,6 +110,7 @@ class _RejectViewState extends State<RejectView> {
                 ),
               ),
             ),
+            const SizedBox( height: 100.0),
             ReasonsGlobal(
               reasons: state.reasons,
               context: context,

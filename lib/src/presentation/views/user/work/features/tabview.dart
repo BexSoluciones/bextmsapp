@@ -29,15 +29,26 @@ class _TabViewWorkState extends State<TabViewWork> {
           labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
           tabs: [
             Tab(
-                text: 'NO VISITADOS (${state.notVisited.length.toString()})',
-                icon: const Icon(Icons.emoji_people)),
+                icon: Icon(Icons.emoji_people,
+                    color: Theme.of(context).colorScheme.shadow),
+                child: Text(
+                  'NO VISITADOS (${state.notVisited.length.toString()})',
+                  style: TextStyle(color: Theme.of(context).colorScheme.shadow),
+                )),
             Tab(
-                text: 'VISITADOS (${state.visited.length.toString()})',
-                icon:
-                const Icon(Icons.nature_people_outlined)),
+                icon: Icon(Icons.nature_people_outlined,
+                    color: Theme.of(context).colorScheme.shadow),
+                child: Text(
+                  'VISITADOS (${state.visited.length.toString()})',
+                  style: TextStyle(color: Theme.of(context).colorScheme.shadow),
+                )),
             Tab(
-                text: 'NO GEOREFERENCIADOS (${state.notGeoreferenced.length.toString()})',
-                icon: const Icon(Icons.location_off))
+                icon: Icon(Icons.location_off,
+                    color: Theme.of(context).colorScheme.shadow),
+                child: Text(
+                  'NO GEOREFERENCIADOS (${state.notGeoreferenced.length.toString()})',
+                  style: TextStyle(color: Theme.of(context).colorScheme.shadow),
+                ))
 
           ],
         );

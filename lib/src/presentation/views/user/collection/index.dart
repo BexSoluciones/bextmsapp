@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:bexdeliveries/src/presentation/blocs/account/account_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 
 //cubit
@@ -50,6 +52,9 @@ class CollectionViewState extends State<CollectionView>
   static const _locale = 'en';
   String message = '';
   final allowInsetsBelow = _storageService.getBool('allow_insets_below');
+  bool showDropdownError = false;
+  List<String> options = [];
+  List<String> formattedAccountList = [];
 
   String get _currency =>
       '  ${NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol}';
@@ -64,6 +69,7 @@ class CollectionViewState extends State<CollectionView>
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    context.read<AccountBloc>().add(LoadAccountListEvent());
 
     collectionCubit = BlocProvider.of<CollectionCubit>(context);
     collectionCubit.getCollection(
@@ -155,7 +161,10 @@ class CollectionViewState extends State<CollectionView>
               builder: (_, state) {
                 switch (state.runtimeType) {
                   case CollectionLoading:
-                    return const Center(child: CupertinoActivityIndicator());
+                    return  Center(child:  SpinKitCircle(
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 100.0,
+                    ));
                   case CollectionSuccess:
                     return _buildCollection(
                       size,
@@ -175,25 +184,28 @@ class CollectionViewState extends State<CollectionView>
         height: size.height,
         width: size.width,
         child: ListView(children: [
-          SizedBox(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  left: kDefaultPadding, right: kDefaultPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  Text(
-                      'TOTAL A RECAUDAR: \$${formatter.format(state.totalSummary)}',
-                      textAlign: TextAlign.start,
-                      style: const TextStyle(
-                          fontSize: 25, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 3),
-                  Text(widget.arguments.typeOfCharge,
-                      textAlign: TextAlign.start,
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold))
-                ],
+          Container(
+            color:Theme.of(context).colorScheme.primary,
+            child: SizedBox(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: kDefaultPadding, right: kDefaultPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    Text(
+                        'TOTAL A RECAUDAR: \$${formatter.format(state.totalSummary)}',
+                        textAlign: TextAlign.start,
+                        style:  TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer)),
+                    const SizedBox(height: 3),
+                    Text(widget.arguments.typeOfCharge,
+                        textAlign: TextAlign.start,
+                        style:  TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer))
+                  ],
+                ),
               ),
             ),
           ),
@@ -334,29 +346,35 @@ class CollectionViewState extends State<CollectionView>
                             )
                           : Container(),
                       state.enterpriseConfig != null && state.enterpriseConfig!.specifiedAccountTransfer == true
-                          ? DropdownButtonFormField<String>(
+                          ? BlocBuilder<AccountBloc, AccountState>(
+                        builder: (context, state) {
+                          if (state is AccountLoadingState) {
+                            return const CircularProgressIndicator();
+                          } else if (state is AccountLoadedState) {
+                            final formattedAccountLists = state.formattedAccountList;
+                            return DropdownButtonFormField<String>(
                               isExpanded: true,
-                              value: null,
+                              value: state.formattedAccountList.first ,
                               onChanged: (String? newValue) {
-                                // setState(() {
-                                //   selectedOption = newValue;
-                                //   showDropdownError = false;
-                                // });
+                                setState(() {
+                                  //selectedOption = newValue;
+                                  showDropdownError = false;
+                                });
                               },
                               decoration: const InputDecoration(
                                 contentPadding: EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 12),
                                 focusedBorder: OutlineInputBorder(
-                                  borderSide:
-                                  BorderSide(color: Colors.grey, width: 2.0),
+                                  borderSide: BorderSide(
+                                      color: Colors.grey, width: 2.0),
                                 ),
                                 enabledBorder: OutlineInputBorder(
-                                  borderSide:
-                                  BorderSide(color: kPrimaryColor, width: 2.0),
+                                  borderSide: BorderSide(
+                                      color: kPrimaryColor, width: 2.0),
                                 ),
                                 errorBorder: OutlineInputBorder(
-                                  borderSide:
-                                  BorderSide(color: kPrimaryColor, width: 2.0),
+                                  borderSide: BorderSide(
+                                      color: kPrimaryColor, width: 2.0),
                                 ),
                                 hintStyle: TextStyle(
                                   color: Colors.orange,
@@ -367,28 +385,36 @@ class CollectionViewState extends State<CollectionView>
                               ),
                               dropdownColor: Colors.white,
                               validator: (value) {
-                                // if (showDropdownError &&
-                                //     (value == null ||
-                                //         value.isEmpty ||
-                                //         value == options[0])) {
-                                //   return 'Selecciona una opción válida';
-                                // }
+                                if (showDropdownError &&
+                                    (value == null ||
+                                        value.isEmpty ||
+                                        value == options[0])) {
+                                  return 'Selecciona una opción válida';
+                                }
                                 return null;
                               },
-                              items: [
-                                'cuenta 1'
-                              ].map<DropdownMenuItem<String>>((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(
-                                    value.contains('-')
-                                        ? '${value.split('-')[0]} - ${value.split('-')[1]}'
-                                        : 'Selecciona una cuenta',
-                                    style: const TextStyle(color: Colors.black),
-                                  ),
-                                );
-                              }).toList(),
-                            )
+                              items: formattedAccountLists
+                                  .map<DropdownMenuItem<String>>(
+                                      (String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        value.contains('-')
+                                            ? '${value.split('-')[0]} - ${value.split('-')[1]}'
+                                            : 'Seleccionar cuenta',
+                                        style: const TextStyle(
+                                            color: Colors.black),
+                                      ),
+                                    );
+                                  }).toList(),
+                            );
+                          } else if (state is AccountErrorState) {
+                            return Text('Error: ${state.error}');
+                          } else {
+                            return const Text('No se han cargado datos aún.');
+                          }
+                        },
+                      )
                           : Container(),
                       const SizedBox(height: 50),
                       Row(
