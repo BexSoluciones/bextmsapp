@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/presentation/cubits/login/login_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,6 +28,7 @@ class InitialView extends StatefulWidget {
 
 class InitialViewState extends State<InitialView> {
   late InitialCubit initialCubit;
+  late LoginCubit loginCubit;
   bool isLoading = false;
   bool showSuffix = true;
   final FocusNode _focus = FocusNode();
@@ -60,6 +62,7 @@ class InitialViewState extends State<InitialView> {
     final Size size = MediaQuery.of(context).size;
 
     initialCubit = BlocProvider.of<InitialCubit>(context);
+    loginCubit = BlocProvider.of<LoginCubit>(context);
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
@@ -157,7 +160,7 @@ class InitialViewState extends State<InitialView> {
                               fontSize: 16,
                               fontWeight: FontWeight.normal)),
                   press: () async {
-                    initialCubit.getEnterprise(companyNameController);
+                    initialCubit.getEnterprise(companyNameController, loginCubit);
                   }),
             ),
             gapH12,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bexdeliveries/src/presentation/cubits/login/login_cubit.dart';
 import 'package:bexdeliveries/src/services/notifications.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -42,7 +43,7 @@ class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
             null);
 
   Future<void> getEnterprise(
-      TextEditingController companyNameController) async {
+      TextEditingController companyNameController, LoginCubit loginCubit) async {
     if (isBusy) return;
 
     await run(() async {
@@ -57,6 +58,7 @@ class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
       if (response is DataSuccess) {
         final enterprise = response.data!.enterprise;
         _storageService.setObject('enterprise', enterprise.toMap());
+        loginCubit.updateEnterpriseState(enterprise);
 
         var token = _notificationService.token;
         print('token from initial');

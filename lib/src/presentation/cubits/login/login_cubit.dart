@@ -75,6 +75,10 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
                     : null),
             null);
 
+  void updateEnterpriseState(Enterprise enterprise) {
+    emit(UpdateEnterprise(enterprise));
+  }
+
   Future<void> getConfigEnterprise() async {
     var response = await _apiRepository.getConfigEnterprise(
         request: EnterpriseConfigRequest());

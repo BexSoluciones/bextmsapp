@@ -8,17 +8,19 @@ class DefaultButton extends StatelessWidget  {
     Key? key,
     required this.widget,
     required this.press,
-    this.color
+    this.color,
+    this.login
 
   }) : super(key: key);
   final Widget widget;
   final Color? color;
+  final bool? login;
   final void Function() press;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
+      width: login == true ? 260 : double.infinity,
       height: 56,
       child: TextButton(
           style: TextButton.styleFrom(
