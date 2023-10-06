@@ -26,3 +26,10 @@ class LoginSuccess extends LoginState {
 class LoginFailed extends LoginState {
   const LoginFailed({super.error, super.enterprise});
 }
+
+class UpdateEnterprise extends LoginState {
+  final Enterprise enterprise;
+
+  const UpdateEnterprise(this.enterprise);
+
+}

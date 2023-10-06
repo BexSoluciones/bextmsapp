@@ -4,7 +4,6 @@ import 'package:bexdeliveries/src/data/datasources/local/hive/core/hive_database
 import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -61,8 +60,6 @@ import 'src/utils/constants/strings.dart';
 import 'src/locator.dart';
 import 'src/services/navigation.dart';
 import 'src/services/storage.dart';
-import 'src/services/location.dart';
-import 'src/services/timer.dart';
 import 'src/services/analytics.dart';
 import 'src/services/notifications.dart';
 import 'src/services/logger.dart';
@@ -304,12 +301,12 @@ class MyApp extends StatelessWidget {
 
                     theme: ThemeData(
                       useMaterial3: true,
-                      colorScheme: lightScheme,
+                      colorScheme: state.isDarkTheme ? lightScheme : darkScheme,
                       // extensions: [lightCustomColors],
                     ),
                     darkTheme: ThemeData(
                       useMaterial3: true,
-                      colorScheme: darkScheme,
+                      colorScheme: state.isDarkTheme ? lightScheme : darkScheme,
                       // extensions: [darkCustomColors],
                     ),
                     themeMode: ThemeMode.system,
