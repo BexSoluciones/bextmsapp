@@ -25,35 +25,35 @@ class HeaderReject extends StatelessWidget {
                     Text.rich(
                       TextSpan(
                         children: [
-                          const TextSpan(
+                           TextSpan(
                             text: 'EXPEDICIÓN: ',
                             style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                                fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                           ),
                           TextSpan(
                               text: arguments.expedition,
-                              style: const TextStyle(
+                              style:  TextStyle(
                                   fontSize: 16,
                                   fontWeight:
-                                  FontWeight.normal)),
+                                  FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                         ],
                       ),
                     ),
                   Text.rich(
                     TextSpan(
                       children: [
-                        const TextSpan(
+                         TextSpan(
                           text: 'DOCUMENTO: ',
                           style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold),
+                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                         ),
                         TextSpan(
                             text: '${arguments.work.type}-${arguments.orderNumber}',
-                            style: const TextStyle(
+                            style:  TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.normal)),
+                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                       ],
                     ),
                   ),
@@ -61,42 +61,42 @@ class HeaderReject extends StatelessWidget {
                   Text.rich(
                     TextSpan(
                       children: [
-                        const TextSpan(
+                         TextSpan(
                           text: 'NIT: ',
                           style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold),
+                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                         ),
                         TextSpan(
                             text: arguments.work.numberCustomer,
-                            style: const TextStyle(
+                            style:  TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.normal)),
+                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     arguments.work.customer!,
-                    style: const TextStyle(
+                    style:  TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.normal),
+                        fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer),
                   ),
                   const SizedBox(height: 10),
                   Text.rich(
                     TextSpan(
                       children: [
-                        const TextSpan(
+                        TextSpan(
                           text: 'DIR: ',
                           style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold),
+                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                         ),
                         TextSpan(
                             text: arguments.work.address,
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.normal)),
+                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                       ],
                     ),
                   ),
@@ -105,20 +105,20 @@ class HeaderReject extends StatelessWidget {
                       ? Text.rich(
                     TextSpan(
                       children: [
-                        const TextSpan(
+                         TextSpan(
                           text: 'CEL: ',
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight:
-                              FontWeight.bold),
+                              FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                         ),
                         TextSpan(
                             text:
                             arguments.work.cellphone,
-                            style: const TextStyle(
+                            style:  TextStyle(
                                 fontSize: 16,
                                 fontWeight:
-                                FontWeight.normal)),
+                                FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                       ],
                     ),
                   )

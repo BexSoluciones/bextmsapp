@@ -78,7 +78,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
             child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: ListTile(
@@ -116,7 +116,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                     widget.summary.idPacking != null
                                 ? Row(
                                     children: [
-                                      const Icon(Icons.info),
+                                      Icon(Icons.info,color: Colors.grey[500]),
                                       Text('(${widget.summary.count})')
                                     ],
                                   )
@@ -156,8 +156,8 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                                       Future.wait(
                                                           [vibrate(), minus()]);
                                                     },
-                                                    icon: const Icon(
-                                                      Icons.exposure_minus_1,
+                                                    icon:  Icon(
+                                                      Icons.exposure_minus_1,color: Colors.grey[500]
                                                     )))
                                             : Container(),
                                         GestureDetector(
@@ -193,8 +193,8 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                                         increment()
                                                       ]);
                                                     },
-                                                    icon: const Icon(
-                                                        Icons.exposure_plus_1)))
+                                                    icon:  Icon(
+                                                        Icons.exposure_plus_1,color: Colors.grey[500])))
                                             : Container()
                                       ])),
                               Text(

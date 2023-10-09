@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:lottie/lottie.dart';
 
 //utils
@@ -50,7 +51,10 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
         child: BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
       switch (state.runtimeType) {
         case WorkLoading:
-          return const Center(child: CupertinoActivityIndicator());
+          return Center(child: SpinKitCircle(
+            color: Theme.of(context).colorScheme.primary,
+            size: 100.0,
+          ),);
         case WorkSuccess:
           return _buildWork(scrollController, widget.workcode, state.notVisited,
               state.noMoreData, state.started);
@@ -76,8 +80,8 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
               width: double.infinity,
               child: Center(
                   child: Text('SERVICIO: ${widget.workcode}',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold))),
+                      style:  TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary))),
             ),
             Flexible(flex: 16, child: buildStaticBody(works, scrollController, isStarted)),
             if (!noMoreData)

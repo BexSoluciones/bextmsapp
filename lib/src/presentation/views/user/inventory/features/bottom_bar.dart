@@ -128,16 +128,16 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                               break;
                           }
                         },
-                        items: const [
+                        items:  [
                           BottomNavigationBarItem(
                               label: 'Entrega',
-                              icon: Icon(Icons.delivery_dining_outlined)),
+                              icon: Icon(Icons.delivery_dining_outlined,color: Theme.of(context).colorScheme.primary)),
                           BottomNavigationBarItem(
                               label: 'Rechazado',
-                              icon: Icon(Icons.cancel_outlined)),
+                              icon: Icon(Icons.cancel_outlined,color: Theme.of(context).colorScheme.primary)),
                           BottomNavigationBarItem(
                               label: 'Redespacho',
-                              icon: Icon(Icons.receipt_long))
+                              icon: Icon(Icons.receipt_long,color: Theme.of(context).colorScheme.primary))
                         ])));
   }
 }

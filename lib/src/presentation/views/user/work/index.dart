@@ -125,7 +125,7 @@ class WorkViewState extends State<WorkView>
               key: Key(state.key.toString()),
               appBar: AppBar(
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new),
+                  icon:  Icon(Icons.arrow_back_ios_new, color: Theme.of(context).colorScheme.primary),
                   onPressed: () => _navigationService.replaceTo(homeRoute),
                 ),
                 actions: [

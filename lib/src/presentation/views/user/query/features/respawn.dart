@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 //cubit
 import '../../../../cubits/query/query_cubit.dart';
@@ -45,7 +46,10 @@ class _RespawnQueryViewState extends State<RespawnQueryView> with FormatNumber {
               builder: (_, state) {
                 switch (state.runtimeType) {
                   case QueryLoading:
-                    return const Center(child: CupertinoActivityIndicator());
+                    return Center(child: SpinKitCircle(
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 100.0,
+                    ));
                   case QuerySuccess:
                     return _buildHome(
                       state.respawns!,

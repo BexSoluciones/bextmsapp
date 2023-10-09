@@ -146,7 +146,7 @@ Widget _createDrawerItem(
   return ListTile(
     title: Row(
       children: <Widget>[
-        Icon(icon),
+        Icon(icon,color: Theme.of(context).colorScheme.outline,),
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Text(text),

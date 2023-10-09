@@ -56,8 +56,8 @@ class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
               width: double.infinity,
               child: Center(
                   child: Text('SERVICIO: ${widget.workcode}',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold))),
+                      style: TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold,color: Theme.of(context).colorScheme.primary))),
             ),
             Flexible(flex: 16, child: buildStaticBody(state.notGeoreferenced))
           ],

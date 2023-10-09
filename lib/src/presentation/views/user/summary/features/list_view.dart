@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -65,9 +66,12 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
     return BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
       switch (state.runtimeType) {
         case SummaryLoading:
-          return const Align(
+          return  Align(
             alignment: Alignment.center,
-            child: CupertinoActivityIndicator(),
+            child: SpinKitCircle(
+              color: Theme.of(context).colorScheme.primary,
+              size: 100.0,
+            ),
           );
         case SummarySuccess:
           return _buildSummary(state, size);

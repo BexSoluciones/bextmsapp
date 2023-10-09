@@ -100,6 +100,7 @@ class SummaryViewState extends State<SummaryView> {
           return Scaffold(
             resizeToAvoidBottomInset: true,
             appBar: AppBar(
+              backgroundColor: Theme.of(context).colorScheme.primary,
               leading: IconButton(
                   onPressed: () {
                     if (widget.arguments.origin != null &&
@@ -110,7 +111,7 @@ class SummaryViewState extends State<SummaryView> {
                           arguments: WorkArgument(work: widget.arguments.work));
                     }
                   },
-                  icon: const Icon(Icons.arrow_back_ios_new)),
+                  icon:  Icon(Icons.arrow_back_ios_new,color:Theme.of(context).colorScheme.secondaryContainer)),
               actions: [
                 const Padding(
                   padding: EdgeInsets.all(8.0),
@@ -121,7 +122,7 @@ class SummaryViewState extends State<SummaryView> {
                         onTap: () async => await summaryCubit
                             .getDiffTime(widget.arguments.work.id!),
                         child: Text('Tiempo ${state.time}',
-                            style: const TextStyle(fontSize: 18)))
+                            style:  TextStyle(fontSize: 18,color:Theme.of(context).colorScheme.secondaryContainer)))
                     : Container(),
               ],
               shadowColor: Theme.of(context).colorScheme.shadow,
@@ -139,7 +140,7 @@ class SummaryViewState extends State<SummaryView> {
         child: Center(
           child: ListView(
             children: [
-              HeaderSummary(arguments: widget.arguments),
+              Container(color:Theme.of(context).colorScheme.primary,child: HeaderSummary(arguments: widget.arguments)),
               ListViewSummary(
                   arguments: widget.arguments,
                   one: one,

@@ -259,6 +259,7 @@ class AppDatabase {
     '''
        CREATE TABLE $tableAccount (
         ${AccountFields.id} INTEGER PRIMARY KEY,
+        ${AccountFields.idAccount} INTEGER NOT NULL ,
         ${AccountFields.accountId} INTEGER DEFAULT NULL,
         ${AccountFields.name} TEXT DEFAULT NULL,
         ${AccountFields.bankId} INTEGER DEFAULT NULL,
