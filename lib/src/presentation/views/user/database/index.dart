@@ -46,13 +46,34 @@ class DatabaseViewState extends State<DatabaseView> {
 
   Widget _buildBody(Size size, state) {
     if (state.runtimeType == DatabaseLoading) {
-      return const Center(child: CupertinoActivityIndicator());
+      return _buildLoading(size, state.tables, state.error);
     } else if (state.runtimeType == DatabaseSuccess ||
         state.runtimeType == DatabaseFailed) {
       return _buildDatabase(size, state.dbPath, state.error);
     } else {
       return const SizedBox();
     }
+  }
+
+  Widget _buildLoading(Size size, List<String>? tables, String? error) {
+    return SizedBox(
+      height: size.height,
+      width: size.width,
+      child: Column(
+        children: [
+          const CupertinoActivityIndicator(),
+          Expanded(
+            child: ListView.builder(
+                itemCount: tables?.length ?? 0,
+                itemBuilder: (BuildContext context, int index) => ListTile(
+                  title: Text(tables![index]),
+                  subtitle: const LinearProgressIndicator(),
+                ),
+            ),
+          ),
+        ],
+      )
+    );
   }
 
   Widget _buildDatabase(Size size, String? path, String? error) {
@@ -64,9 +85,7 @@ class DatabaseViewState extends State<DatabaseView> {
         children: [
           IconButton(
             icon: const Icon(Icons.upload_file, size: 50),
-            onPressed: () {
-              databaseCubit.sendDatabase(path);
-            },
+            onPressed: () => databaseCubit.exportDatabase(),
           ),
           if (path != null) Text(path, textAlign: TextAlign.center),
           if (error != null) Text(error, textAlign: TextAlign.center)

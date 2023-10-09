@@ -1,3 +1,5 @@
+import 'package:sqflite/sqflite.dart' as sqflite;
+
 import '../models/processing_queue.dart';
 import '../models/transaction_summary.dart';
 import '../models/work.dart';
@@ -101,7 +103,10 @@ abstract class DatabaseRepository {
   Future<int> updateClient(Client client);
   Future<void> emptyClients();
 
-
   //HISTORY ORDER
   Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId);
+
+
+  //ROOT
+  Future<sqflite.Database?> get();
 }

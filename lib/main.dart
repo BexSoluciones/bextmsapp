@@ -106,7 +106,8 @@ Future<void> main() async {
     await _notificationService.init();
     logDebugFine(headerLogger, 'Notification already done');
   } catch (error) {
-    logErrorObject(headerLogger, error, 'Caught an error in the async operation!');
+    logErrorObject(
+        headerLogger, error, 'Caught an error in the async operation!');
   }
 
   bool damagedDatabaseDeleted = false;
@@ -251,7 +252,8 @@ class MyApp extends StatelessWidget {
                 locator<DatabaseRepository>(), locator<LocationRepository>()),
           ),
           BlocProvider(
-            create: (context) => DatabaseCubit(locator<ApiRepository>()),
+            create: (context) => DatabaseCubit(
+                locator<ApiRepository>(), locator<DatabaseRepository>()),
           ),
           BlocProvider(
             create: (context) => GeneralCubit(),
@@ -263,9 +265,11 @@ class MyApp extends StatelessWidget {
             create: (context) => QueryCubit(locator<DatabaseRepository>()),
           ),
           BlocProvider(
-            create: (context) => IssuesBloc(locator<DatabaseRepository>()),     ),
+            create: (context) => IssuesBloc(locator<DatabaseRepository>()),
+          ),
           BlocProvider(
-            create: (context) => AccountBloc(locator<DatabaseRepository>()),     ),
+            create: (context) => AccountBloc(locator<DatabaseRepository>()),
+          ),
         ],
         child: BlocProvider(
             create: (context) => ThemeBloc(),

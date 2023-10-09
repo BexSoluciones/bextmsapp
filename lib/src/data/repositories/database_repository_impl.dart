@@ -1,3 +1,5 @@
+import 'package:sqflite/sqflite.dart' as sqflite;
+
 import '../../domain/repositories/database_repository.dart';
 import '../datasources/local/app_database.dart';
 
@@ -405,5 +407,10 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   void close() {
     _appDatabase.close();
+  }
+
+  @override
+  Future<sqflite.Database?> get() async {
+    return await _appDatabase.database;
   }
 }
