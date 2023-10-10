@@ -151,7 +151,7 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
         final file = File('$outputPath.$i.sql');
         await file.writeAsString(sql.toString().substring(0, sql.length - 2));
 
-        sendDatabase(outputPath, tableName);
+        sendDatabase(file.path, tableName);
       }
     }
     return true;
