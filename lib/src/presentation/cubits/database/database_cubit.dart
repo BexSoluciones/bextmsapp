@@ -1,16 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart' hide Table;
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 //domain
 import '../../../domain/models/requests/database_request.dart';
+import '../../../domain/models/table.dart';
 import '../../../domain/repositories/api_repository.dart';
 import '../../../domain/repositories/database_repository.dart';
 
 //base
-
 import '../base/base_cubit.dart';
 
 //services
@@ -27,6 +29,31 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
 
   DatabaseCubit(this._apiRepository, this._databaseRepository)
       : super(const DatabaseLoading(), null);
+
+  Timer? _timer;
+
+  onTick(Timer timer, List<Table>? tables, int? currentIndex) {
+    if (state is DatabaseInProgress) {
+      DatabaseInProgress wip = state as DatabaseInProgress;
+      if (wip.elapsed! <= 100) {
+        emit(DatabaseInProgress(wip.elapsed! + 1,
+            tables: tables, currentIndex: currentIndex));
+      } else {
+        _timer!.cancel();
+        emit(const DatabaseInitial());
+      }
+    }
+  }
+
+  startWorkout([int? index, List<Table>? tables, int? currentIndex]) {
+    if (index != null) {
+      emit(DatabaseInProgress(0, tables: tables, currentIndex: currentIndex));
+    } else {
+      emit(DatabaseInProgress(0, tables: tables, currentIndex: currentIndex));
+    }
+    _timer = Timer.periodic(const Duration(seconds: 1),
+        (timer) => onTick(timer, tables, currentIndex));
+  }
 
   Future<void> getDatabase() async {
     emit(await _getDatabase());
@@ -91,10 +118,6 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
 
       await file.writeAsString(sql.toString().substring(0, sql.length - 2));
 
-      // Actualiza el contador de archivos enviados en el proveedor de datos
-      // dataHomeProvider.changeSendedFiles(
-      //     newSendedFiles: dataHomeProvider.getSendedFiles + 1);
-
       sendDatabase(outputPath, tableName);
 
       return true;
@@ -133,60 +156,62 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
         final file = File('$outputPath.$i.sql');
         await file.writeAsString(sql.toString().substring(0, sql.length - 2));
 
-        // dataHomeProvider.changeSendedFiles(
-        //     newSendedFiles: dataHomeProvider.getSendedFiles + 1);
-
         sendDatabase(outputPath, tableName);
       }
     }
     return true;
   }
 
-  Future<void> exportDatabase() async {
+  Future<void> exportDatabase(BuildContext context) async {
     if (isBusy) return;
 
     await run(() async {
       Database? database = await _databaseRepository.get();
 
-      final script = await database
-          !.rawQuery('SELECT name FROM sqlite_master WHERE type="table"');
+      final script = await database!
+          .rawQuery('SELECT name FROM sqlite_master WHERE type="table"');
 
-      final tableNames = script.map((e) => e['name'] as String).toList();
+      final tables = script
+          .map((e) => Table(
+                name: e['name'] as String,
+              ))
+          .toList();
+
       final files = <String>[];
 
-      emit(DatabaseLoading(tables: tableNames));
+      for (final table in tables) {
+        final fileName = '${table.name?.toLowerCase()}.sql';
+        final filePath = join(await getDatabasesPath(), fileName);
+        bool? r;
+        var index = tables.indexOf(table);
 
-      Future.delayed(const Duration(seconds: 30),
-          () => emit(DatabaseSuccess(dbPath: state.dbPath)));
+        startWorkout(0, tables, index);
 
-      // for (final tableName in tableNames) {
-      //   final result = await database.rawQuery('SELECT * FROM $tableName');
-      //
-      //   if (result.isNotEmpty) {
-      //     // dataHomeProvider.changeTotalFiles(
-      //     //     newTotalFiles: dataHomeProvider.getTotalFiles + 1);
-      //   }
-      // }
-      //
-      // for (final tableName in tableNames) {
-      //   final fileName = '${tableName.toLowerCase()}.sql';
-      //   final filePath = join(await getDatabasesPath(), fileName);
-      //
-      //   if (tableName == 'summaries' ||
-      //       tableName == 'transactions' ||
-      //       tableName == 'locations') {
-      //
-      //     await exportTableInBatches(database, tableName, filePath);
-      //     files.add(fileName);
-      //
-      //   } else {
-      //     await exportTable(database, tableName, filePath);
-      //     files.add(fileName);
-      //   }
-      // }
-      //
-      // final combinedFile = File(join(await getDatabasesPath(), 'all_tables.sql'));
-      // await combinedFile.writeAsString(files.map((f) => 'source $f;\n').join());
+        if (table.name == 'summaries' ||
+            table.name == 'transactions' ||
+            table.name == 'locations') {
+          r = await exportTableInBatches(database, table.name!, filePath);
+          files.add(fileName);
+          table.done = r;
+        } else {
+          r = await exportTable(database, table.name!, filePath);
+          files.add(fileName);
+          table.done = r;
+        }
+
+        if(r == false) break;
+      }
+
+      if (tables
+              .where((element) => element.done == false || element.done == null)
+              .isNotEmpty &&
+          context.mounted) {
+
+      }
+
+      final combinedFile =
+          File(join(await getDatabasesPath(), 'all_tables.sql'));
+      await combinedFile.writeAsString(files.map((f) => 'source $f;\n').join());
     });
   }
 }
