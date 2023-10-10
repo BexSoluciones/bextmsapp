@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class DatabaseResponse extends Equatable {
   final String message;
-  final String error;
+  final String? error;
 
   const DatabaseResponse({
     required this.message,
@@ -10,6 +10,7 @@ class DatabaseResponse extends Equatable {
   });
 
   factory DatabaseResponse.fromMap(Map<String, dynamic> map) {
+
     return DatabaseResponse(
       message: map['message'],
       error: map['error']
@@ -20,5 +21,5 @@ class DatabaseResponse extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props => [message, error];
+  List<Object> get props => [message, error!];
 }

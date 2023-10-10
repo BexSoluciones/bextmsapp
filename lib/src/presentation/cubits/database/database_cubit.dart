@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart' hide Table;
+import 'package:flutter/material.dart' hide Table;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -60,21 +61,15 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
   }
 
   Future<void> sendDatabase(String dbPath, String tableName) async {
-    if (isBusy) return;
+    final response = await _apiRepository.database(
+      request: DatabaseRequest(path: dbPath, tableName: tableName),
+    );
 
-    await run(() async {
-      emit(const DatabaseLoading());
-
-      final response = await _apiRepository.database(
-        request: DatabaseRequest(path: dbPath, tableName: tableName),
-      );
-
-      if (response is DatabaseSuccess) {
-        emit(const DatabaseSuccess());
-      } else {
-        emit(DatabaseFailed(error: response.error));
-      }
-    });
+    if (response is DatabaseSuccess) {
+      emit(const DatabaseSuccess());
+    } else {
+      emit(DatabaseFailed(error: response.error));
+    }
   }
 
   Future<DatabaseState> _getDatabase() async {
@@ -167,6 +162,7 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
 
     await run(() async {
       Database? database = await _databaseRepository.get();
+      SnackBar? snackbar;
 
       final script = await database!
           .rawQuery('SELECT name FROM sqlite_master WHERE type="table"');
@@ -199,14 +195,40 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
           table.done = r;
         }
 
-        if(r == false) break;
+        if (r == false) break;
       }
 
       if (tables
               .where((element) => element.done == false || element.done == null)
               .isNotEmpty &&
           context.mounted) {
+        snackbar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Error',
+            message: state.error!,
+            contentType: ContentType.failure,
+          ),
+        );
+      } else {
+        snackbar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Perfecto!',
+            message: 'La base de datos se subió con éxito 🥳🥳🥳',
+            contentType: ContentType.success,
+          ),
+        );
+      }
 
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackbar);
       }
 
       final combinedFile =
