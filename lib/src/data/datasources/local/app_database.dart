@@ -1,3 +1,5 @@
+import 'package:bexdeliveries/src/domain/models/summary_report.dart';
+import 'package:bexdeliveries/src/domain/models/transaction.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
