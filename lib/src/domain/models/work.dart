@@ -83,14 +83,22 @@ class WorkAdditional {
     required this.orderNumber,
     required this.totalSummary,
     required this.totalPayment,
-    this.status
+    this.summary,
+    this.status,
+    this.type,
+    this.latitude,
+    this.longitude
   });
 
   final Work work;
   final String orderNumber;
+  final Summary? summary;
   final double totalSummary;
   final double totalPayment;
   final String? status;
+  final String? type;
+  final double? latitude;
+  final double? longitude;
 }
 
 class WorkTypes {

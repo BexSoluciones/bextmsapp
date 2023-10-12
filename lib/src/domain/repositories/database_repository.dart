@@ -1,4 +1,5 @@
 import 'package:sqflite/sqflite.dart' as sqflite;
+import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 
 import '../models/processing_queue.dart';
 import '../models/transaction_summary.dart';
@@ -25,6 +26,12 @@ abstract class DatabaseRepository {
   Future<void> insertWorks(List<Work> works);
   Future<void> emptyWorks();
 
+  //WORKTYPE
+  Future<WorkTypes?> getWorkTypesFromWorkcode(String workcode);
+
+  //DELIVER
+  Future<List<WorkAdditional>> getClientsResJetDel(String workcode,String reason);
+
   //WAREHOUSES
   Future<Warehouse?> findWarehouse(Warehouse warehouse);
   Future<int> insertWarehouse(Warehouse warehouse);
@@ -37,6 +44,10 @@ abstract class DatabaseRepository {
   Future<List<Summary>> getAllInventoryByOrderNumber(int workId, String orderNumber);
   Future<List<Summary>> getAllPackageByOrderNumber(int workId, String orderNumber);
   Future<List<Summary>> getAllSummariesByOrderNumberMoved(int workId, String orderNumber);
+  Future<List<SummaryReport>> getSummaryReportsWithReasonOrRedelivery(String orderNumber);
+  Future<List<SummaryReport>> getSummaryReportsWithReturnOrRedelivery(String orderNumber);
+  Future<List<SummaryReport>> getSummaryReportsWithDelivery(String orderNumber);
+  Future<double> countTotalRespawnWorksByWorkcode(String workcode,String reason);
   Future<bool> resetCantSummaries(int workId, String orderNumber);
   Future<double> getTotalSummaries(int workId, String orderNumber);
   Future<int> insertSummary(Summary summary);

@@ -23,13 +23,12 @@ class QueryView extends StatefulWidget {
 }
 
 class _QueryViewState extends State<QueryView> {
-
   late QueryCubit queryCubit;
 
   @override
   void initState() {
     queryCubit = BlocProvider.of(context);
-    queryCubit.getWorks();
+    queryCubit.getWorks('');
     super.initState();
   }
 
@@ -93,17 +92,23 @@ class _QueryViewState extends State<QueryView> {
                     motion: const ScrollMotion(),
                     children: [
                       SlidableAction(
-                        onPressed: (_) => context
-                            .read<QueryCubit>()
-                            .goTo(collectionQueryRoute, works[index].workcode),
+                        onPressed: (_) {
+                          context.read<QueryCubit>().goTo(
+                              collectionQueryRoute, works[index].workcode);
+                          queryCubit
+                              .getWorks(works[index].workcode.toString());
+                        },
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
                         icon: Icons.monetization_on_outlined,
                       ),
                       SlidableAction(
-                        onPressed: (_) => context
-                            .read<QueryCubit>()
-                            .goTo(devolutionQueryRoute, works[index].workcode),
+                        onPressed: (_) {
+                          context.read<QueryCubit>().goTo(
+                              devolutionQueryRoute, works[index].workcode);
+                          queryCubit
+                              .getWorks(works[index].workcode.toString());
+                        },
                         backgroundColor: Colors.deepOrange,
                         foregroundColor: Colors.white,
                         icon: Icons.back_hand_outlined,
@@ -113,9 +118,13 @@ class _QueryViewState extends State<QueryView> {
                   endActionPane:
                       ActionPane(motion: const ScrollMotion(), children: [
                     SlidableAction(
-                      onPressed: (_) => context
-                          .read<QueryCubit>()
-                          .goTo(respawnQueryRoute, works[index].workcode),
+                      onPressed: (_) {
+                        context
+                            .read<QueryCubit>()
+                            .goTo(respawnQueryRoute, works[index].workcode);
+                        queryCubit
+                            .getWorks(works[index].workcode.toString());
+                      },
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
                       icon: Icons.restore_page,

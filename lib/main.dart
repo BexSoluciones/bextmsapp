@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/src/data/datasources/local/hive/core/hive_database_manager.dart';
 import 'package:bexdeliveries/src/presentation/blocs/account/account_bloc.dart';
+import 'package:bexdeliveries/src/presentation/cubits/ordersummaryreasons/ordersummaryreasons_cubit.dart';
+import 'package:bexdeliveries/src/presentation/cubits/type/work_type_cubit.dart';
 import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -268,7 +270,12 @@ class MyApp extends StatelessWidget {
             create: (context) => IssuesBloc(locator<DatabaseRepository>()),
           ),
           BlocProvider(
-            create: (context) => AccountBloc(locator<DatabaseRepository>()),
+            create: (context) => AccountBloc(locator<DatabaseRepository>()),     ),
+          BlocProvider(
+            create: (context) =>  WorkTypeCubit(locator<DatabaseRepository>()),
+          ),
+          BlocProvider(
+            create: (context) => OrdersummaryreasonsCubit(locator<DatabaseRepository>()),
           ),
         ],
         child: BlocProvider(

@@ -1,80 +1,89 @@
+import 'package:bexdeliveries/src/presentation/cubits/type/work_type_cubit.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 //domain
 import '../../../../../domain/models/work.dart';
 
-class ItemQuery extends StatelessWidget {
+class ItemQuery extends StatefulWidget {
   const ItemQuery({Key? key, required this.work }) : super(key: key);
 
   final Work work;
 
   @override
+  State<ItemQuery> createState() => _ItemQueryState();
+}
+
+class _ItemQueryState extends State<ItemQuery> {
+  late WorkTypeCubit workTypeCubit;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    workTypeCubit = BlocProvider.of(context);
+    workTypeCubit.getWorkTypesFromWork(widget.work.workcode!);
+    super.initState();
+  }
+  @override
   Widget build(BuildContext context) {
     return Material(
       child: Ink(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: ListTile(
           title: Text(
-            'Servicio: ${work.workcode}',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            'Servicio: ${widget.work.workcode}',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          // subtitle: Row(
-          //   children: [
-          //     FutureBuilder<WorkTypes?>(
-          //         future: database.getWorkTypesFromWorkcode(work.workcode),
-          //         builder:
-          //             (BuildContext context, AsyncSnapshot snapshot) {
-          //           if (snapshot.hasData) {
-          //             return Flexible(
-          //                 child: Column(
-          //                   crossAxisAlignment: CrossAxisAlignment.start,
-          //                   children: [
-          //                     Text(
-          //                       ' Entregas: ${snapshot.data.delivery} Parciales: ${snapshot.data.partial}',
-          //                       textScaleFactor: textScaleFactor(context),
-          //                       style: TextStyle(
-          //                           fontSize: getProportionateScreenHeight(14),
-          //                           fontWeight: FontWeight.normal),
-          //                     ),
-          //                     Text(
-          //                       ' Redespachos: ${snapshot.data.respawn} Devoluciones total: ${snapshot.data.rejects}',
-          //                       textScaleFactor: textScaleFactor(context),
-          //                       style: TextStyle(
-          //                           fontSize: getProportionateScreenHeight(14),
-          //                           fontWeight: FontWeight.normal),
-          //                     ),
-          //                   ],
-          //                 ));
-          //           } else {
-          //             return Flexible(
-          //                 child: Column(
-          //                   crossAxisAlignment: CrossAxisAlignment.start,
-          //                   children: [
-          //                     Text(
-          //                       ' Entregas: 0 Parciales: 0',
-          //                       textScaleFactor: textScaleFactor(context),
-          //                       style: TextStyle(
-          //                           fontSize: getProportionateScreenHeight(14),
-          //                           fontWeight: FontWeight.normal),
-          //                     ),
-          //                     Text(
-          //                       ' Redespachos: 0 Devoluciones total: 0',
-          //                       textScaleFactor: textScaleFactor(context),
-          //                       style: TextStyle(
-          //                           fontSize: getProportionateScreenHeight(14),
-          //                           fontWeight: FontWeight.normal),
-          //                     ),
-          //                   ],
-          //                 ));
-          //           }
-          //         })
-          //   ],
-          // ),
+
+          subtitle: BlocBuilder<WorkTypeCubit, WorkTypeState>(
+            builder: (_, state) {
+              switch (state.runtimeType) {
+                case WorkTypeCubitLoading:
+                  return const Center(child: CupertinoActivityIndicator());
+                case WorkTypeCubitSuccess:
+                  return _buildHome(
+                      state.workTypes!
+                  );
+                case WorkTypeCubitFailed:
+                  return Center(
+                    child: Text(state.error!),
+                  );
+                default:
+                  return const SizedBox();
+              }
+            },
+          ),
         ),
       ),
     );
+  }
+  Widget _buildHome(WorkTypes workTypes){
+    return Row(
+      children: [
+        Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ' Entregas: ${workTypes.delivery} Parciales: ${workTypes.partial}',
+                  style:  TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal, color: Theme.of(context).colorScheme.scrim),
+                ),
+                Text(
+                  'Redespachos: ${workTypes.respawn} Devoluciones total: ${workTypes.rejects}',
+                  style:  TextStyle(
+                      fontSize:14,
+                      fontWeight: FontWeight.normal, color: Theme.of(context).colorScheme.scrim),
+                ),
+              ],
+            )),
+      ],
+    );
+
   }
 }

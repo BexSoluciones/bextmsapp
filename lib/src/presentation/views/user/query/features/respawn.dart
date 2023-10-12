@@ -1,3 +1,5 @@
+import 'package:bexdeliveries/src/presentation/views/user/query/features/respawn_description.dart';
+import 'package:bexdeliveries/src/utils/constants/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -53,6 +55,7 @@ class _RespawnQueryViewState extends State<RespawnQueryView> with FormatNumber {
                   case QuerySuccess:
                     return _buildHome(
                       state.respawns!,
+                      state.totalRespawn!
                     );
                   case QueryFailed:
                     return Center(
@@ -67,46 +70,50 @@ class _RespawnQueryViewState extends State<RespawnQueryView> with FormatNumber {
         ));
   }
 
-  Widget _buildHome(List<WorkAdditional> data) {
-           return Column(
-              children: [
-                Expanded(
-                    flex: 11,
-                    child: ListView.separated(
-                      itemCount: data.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 16.0),
-                      itemBuilder: (context, index) {
-                        return ItemRespawn(data: data[index]);
-                      },
-                    )),
-                const Spacer(),
-                // StreamBuilder<double>(
-                //   stream: database.countTotalRespawnWorksByWorkcode(widget.workcode),
-                //   builder: (BuildContext context, AsyncSnapshot snapshot) {
-                //     if (snapshot.connectionState == ConnectionState.waiting) {
-                //       return LinearProgressIndicator(
-                //         valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
-                //       );
-                //     } else {
-                //       return Container(
-                //         width: double.infinity,
-                //         decoration: BoxDecoration(
-                //             borderRadius: BorderRadius.circular(20),
-                //             color: kPrimaryColor),
-                //         height: 60,
-                //         child: Center(
-                //           child: Text(
-                //               'Total: ${formatter.format(snapshot.data)}',
-                //               textScaleFactor: textScaleFactor(context),
-                //               style: TextStyle(
-                //                   color: Colors.white, fontSize: getProportionateScreenHeight(18))),
-                //         ),
-                //       );
-                //     }
-                //   },
-                // ),
-              ],
-            );
+  Widget _buildHome(List<WorkAdditional>? data, double totalRespawn) {
+    return Column(
+      children: [
+        Expanded(
+            flex: 11,
+            child: ListView.separated(
+              itemCount: data!.length,
+              separatorBuilder: (context, index) =>
+              const SizedBox(height: 16.0),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                    onTap: ()async{
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          transitionDuration: const Duration(milliseconds: 500),
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 1),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: RespawnDescription(data: data[index]),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: ItemRespawn(data: data[index],reason:'Redespachos')
+                );
+              },
+            )),
+        const Spacer(),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20), color: kPrimaryColor),
+          height: 60,
+          child: Center(
+            child: Text('Total: ${formatter.format(totalRespawn)}',
+                style: const TextStyle(color: Colors.white, fontSize: 18)),
+          ),
+        )
+      ],
+    );
   }
 }
