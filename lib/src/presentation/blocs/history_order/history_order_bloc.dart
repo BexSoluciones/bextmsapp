@@ -57,7 +57,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
     emit(HistoryOrderLoading());
 
     historyOrder = await _databaseRepository.getHistoryOrder(
-        event.work.workcode!, event.work.zoneId!);
+        event.work.workcode!, event.work.zoneId ?? 0);
 
     if (historyOrder != null) {
       emit(HistoryOrderShow(historyOrder: historyOrder));

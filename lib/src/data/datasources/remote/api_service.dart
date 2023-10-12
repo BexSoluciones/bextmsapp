@@ -163,20 +163,19 @@ class ApiService {
   }
 
   Future<Response<LogoutResponse>> logout() async {
-
     final headers = <String, dynamic>{
       HttpHeaders.contentTypeHeader: 'application/json'
     };
 
     final result = await dio.fetch<Map<String, dynamic>>(
         _setStreamType<Response<LogoutResponse>>(Options(
-          method: 'POST',
-          headers: headers,
-        )
+      method: 'POST',
+      headers: headers,
+    )
             .compose(
-          dio.options,
-          '/auth/logout',
-        )
+              dio.options,
+              '/auth/logout',
+            )
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = LogoutResponse(message: result.data!['message']);
@@ -241,17 +240,17 @@ class ApiService {
     };
 
     final result =
-    await dio.fetch(_setStreamType<Response<AccountResponse>>(Options(
+        await dio.fetch(_setStreamType<Response<AccountResponse>>(Options(
       method: 'GET',
       headers: headers,
       extra: extra,
     )
-        .compose(
-      dio.options,
-      '/bank-accounts',
-      queryParameters: queryParameters,
-    )
-        .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+            .compose(
+              dio.options,
+              '/bank-accounts',
+              queryParameters: queryParameters,
+            )
+            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = AccountResponse(
         accounts: List<Account>.from(
@@ -323,12 +322,15 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<DatabaseResponse>> database({path}) async {
+  Future<Response<DatabaseResponse>> database({path, tableName}) async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
 
-    final data = <String, dynamic>{'path': path};
+    final data = FormData.fromMap({
+      'user_id' : _storageService.getInt('user_id'),
+      '$tableName': await MultipartFile.fromFile(path, filename: tableName)
+    });
 
     final headers = <String, dynamic>{
       HttpHeaders.contentTypeHeader: 'application/json',
@@ -340,7 +342,7 @@ class ApiService {
       headers: headers,
       extra: extra,
     )
-            .compose(dio.options, '/database/send',
+            .compose(dio.options, '/database/file',
                 queryParameters: queryParameters, data: data)
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
@@ -357,7 +359,8 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<StatusResponse>> status(String workcode, String status) async {
+  Future<Response<StatusResponse>> status(
+      String workcode, String status) async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
@@ -366,19 +369,16 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    final data = <String, dynamic>{
-      r'workcode': workcode,
-      r'status' : status
-    };
+    final data = <String, dynamic>{r'workcode': workcode, r'status': status};
 
-    final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
-        Options(
-          method: 'POST',
-          headers: headers,
-          extra: extra,
-        )
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionResponse>>(Options(
+      method: 'POST',
+      headers: headers,
+      extra: extra,
+    )
             .compose(dio.options, '/works/status',
-            queryParameters: queryParameters, data: data)
+                queryParameters: queryParameters, data: data)
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = StatusResponse.fromMap(result.data!);
@@ -403,8 +403,8 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
-        Options(
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionResponse>>(Options(
       method: 'POST',
       headers: headers,
       extra: extra,
@@ -436,8 +436,8 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
-        Options(
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionResponse>>(Options(
       method: 'POST',
       headers: headers,
       extra: extra,
@@ -469,8 +469,8 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
-        Options(
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionResponse>>(Options(
       method: 'POST',
       headers: headers,
       extra: extra,
@@ -502,8 +502,8 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
-        Options(
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionResponse>>(Options(
       method: 'POST',
       headers: headers,
       extra: extra,
@@ -526,7 +526,8 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<TransactionResponse>> transaction(TransactionSummary transactionSummary) async {
+  Future<Response<TransactionResponse>> transaction(
+      TransactionSummary transactionSummary) async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
@@ -542,18 +543,18 @@ class ApiService {
 
     data.removeWhere((k, v) => v == null);
 
-    final result = await dio.fetch(_setStreamType<Response<TransactionResponse>>(
-        Options(
-          method: 'GET',
-          headers: headers,
-          extra: extra,
-        )
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionResponse>>(Options(
+      method: 'GET',
+      headers: headers,
+      extra: extra,
+    )
             .compose(dio.options, '/works/transactions/index',
-            queryParameters: queryParameters, data: data)
+                queryParameters: queryParameters, data: data)
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value =
-    TransactionResponse(transaction: Transaction.fromJson(result.data!));
+        TransactionResponse(transaction: Transaction.fromJson(result.data!));
 
     return Response(
         data: value,
@@ -566,7 +567,8 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<TransactionSummaryResponse>> product(TransactionSummary transactionSummary) async {
+  Future<Response<TransactionSummaryResponse>> product(
+      TransactionSummary transactionSummary) async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
@@ -586,18 +588,18 @@ class ApiService {
 
     data.removeWhere((k, v) => v == null);
 
-    final result = await dio.fetch(_setStreamType<Response<TransactionSummaryResponse>>(
-        Options(
-          method: 'POST',
-          headers: headers,
-          extra: extra,
-        )
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionSummaryResponse>>(Options(
+      method: 'POST',
+      headers: headers,
+      extra: extra,
+    )
             .compose(dio.options, '/works/transactions/work-sumaries',
-            queryParameters: queryParameters, data: data)
+                queryParameters: queryParameters, data: data)
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
-    final value =
-    TransactionSummaryResponse(transactionSummary: TransactionSummary.fromJson(result.data!));
+    final value = TransactionSummaryResponse(
+        transactionSummary: TransactionSummary.fromJson(result.data!));
 
     return Response(
         data: value,
@@ -619,14 +621,14 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    final result = await dio.fetch(_setStreamType<Response<TransactionSummaryResponse>>(
-        Options(
-          method: 'POST',
-          headers: headers,
-          extra: extra,
-        )
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionSummaryResponse>>(Options(
+      method: 'POST',
+      headers: headers,
+      extra: extra,
+    )
             .compose(dio.options, '/client/location/save',
-            queryParameters: queryParameters, data: client.toJson())
+                queryParameters: queryParameters, data: client.toJson())
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = StatusResponse.fromMap(result.data!);

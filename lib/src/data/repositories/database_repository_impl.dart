@@ -1,3 +1,4 @@
+import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 
 import '../../domain/repositories/database_repository.dart';
@@ -440,5 +441,10 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   void close() {
     _appDatabase.close();
+  }
+
+  @override
+  Future<sqflite.Database?> get() async {
+    return await _appDatabase.database;
   }
 }
