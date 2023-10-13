@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bexdeliveries/src/domain/models/photo.dart';
 import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
@@ -6,6 +7,11 @@ import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 //utils
 import '../../../utils/resources/camera.dart';
@@ -36,6 +42,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }) : super(CameraInitial()) {
     on<CameraInitialized>(_mapCameraInitializedToState);
     on<CameraCaptured>(_mapCameraCapturedToState);
+    on<CameraGallery>(_mapCameraGalleryToState);
     on<CameraStopped>(_mapCameraStoppedToState);
     on<CameraFolder>(_mapCameraFolderToState);
     on<CameraChange>(_mapCameraChangeToState);
@@ -64,10 +71,15 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       emit(CameraCaptureInProgress());
       try {
         final path = await cameraUtils.getPath();
-        var picture = await _controller.takePicture();
-        var photo = Photo(name: picture.name, path: picture.path);
-        await databaseRepository.insertPhoto(photo);
-        emit(CameraCaptureSuccess(path));
+        final imageCount = await  countImagesInCache();
+        if (imageCount >= 2) {
+          emit(CameraCaptureFailure(error: 'Solo se permiten 2 fotos'));
+        } else {
+          var picture = await _controller.takePicture();
+          var photo = Photo(name: picture.name, path: picture.path);
+          await databaseRepository.insertPhoto(photo);
+          emit(CameraCaptureSuccess(path));
+        }
       } on CameraException catch (error) {
         emit(CameraCaptureFailure(error: error.description!));
       } catch (error) {
@@ -75,6 +87,62 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       }
     } else {
       emit(const CameraFailure(error: 'Camera is not ready'));
+    }
+  }
+
+
+  _mapCameraGalleryToState(CameraGallery event, emit) async {
+    try {
+      final picker = ImagePicker();
+      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedImage != null) {
+        final cacheDirectory = await getTemporaryDirectory();
+        final imageCount = await countImagesInCache();
+        if (imageCount >= 2) {
+          emit(CameraCaptureFailure(error: 'Solo se permiten 2 fotos'));
+        } else {
+          final imageFile = File(pickedImage.path);
+          final fileFormat = imageFile.path.split('.').last.toLowerCase();
+
+          if (fileFormat == 'jpg' || fileFormat == 'png') {
+            var picture = await _controller.takePicture();
+            final fileName = picture.name;
+            final filePathInCache = '${cacheDirectory.path}/$fileName';
+            await imageFile.copy(filePathInCache);
+
+            var photo = Photo(name: fileName, path: filePathInCache);
+            await databaseRepository.insertPhoto(photo);
+            emit(CameraCaptureSuccess(filePathInCache));
+          } else {
+            emit(CameraCaptureFailure(error: 'El formato de archivo no es compatible'));
+          }
+        }
+      } else {
+        emit(const CameraFailure(error: 'Selección de imagen cancelada'));
+      }
+    } catch (error) {
+      emit(CameraCaptureFailure(error: error.toString()));
+    }
+  }
+
+  Future<int> countImagesInCache() async {
+    try {
+      final cacheDirectory = await getTemporaryDirectory();
+      final files = cacheDirectory.listSync();
+
+      int imageCount = 0;
+      for (final file in files) {
+        if (file is File) {
+          final extension = file.path.split('.').last.toLowerCase();
+          if (extension == 'jpg' || extension == 'png') {
+            imageCount++;
+          }
+        }
+      }
+      return imageCount;
+    } catch (error) {
+      return -1;
     }
   }
 

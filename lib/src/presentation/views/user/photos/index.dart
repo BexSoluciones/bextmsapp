@@ -25,6 +25,13 @@ class PhotoView extends StatefulWidget {
 
 class PhotoViewState extends State<PhotoView> {
   @override
+  void initState() {
+    BlocProvider.of<PhotosBloc>(context).add(PhotosLoaded());
+    super.initState();
+
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -57,9 +64,10 @@ class PhotoViewState extends State<PhotoView> {
         }
       }),
       floatingActionButton: FloatingActionButton(
+        backgroundColor:  Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
         onPressed: () => Navigator.pushNamed(context, cameraRoute),
         tooltip: 'Añadir',
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add,),
       ),
     );
   }
