@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 //domain
 import '../../../domain/models/photo.dart';
@@ -43,18 +46,31 @@ class PhotosBloc extends Bloc<PhotosEvent, PhotosState> {
     }
   }
 
+
   _mapPhotosDeletedToState(PhotosDeleted event, emit) async {
     if (state is PhotosLoadSuccess) {
-      final photos = List<Photo>.from((state as PhotosLoadSuccess).photos)
-        ..remove(event.photo);
-
+      final photos = List<Photo>.from((state as PhotosLoadSuccess).photos)..remove(event.photo);
       emit(PhotosLoadInProgress());
       try {
         await photoProvider.deletePhoto(event.photo);
+        _deleteImages(event.photo.path);
         emit(PhotosLoadSuccess(photos: photos));
       } on Exception catch (error) {
         emit(PhotosLoadFailure(error: error.toString()));
       }
     }
   }
+
+
+  Future<void> _deleteImages(folder) async {
+    var file = File(folder);
+    if (file.existsSync()) {
+      await file.delete();
+    }
+    var fileToDelete = await DefaultCacheManager().getFileFromCache(folder);
+    if (fileToDelete != null) {
+      await fileToDelete.file.delete();
+    }
+  }
+
 }

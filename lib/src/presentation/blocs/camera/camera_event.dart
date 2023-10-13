@@ -13,6 +13,10 @@ class CameraStopped extends CameraEvent{}
 
 class CameraCaptured extends CameraEvent{}
 
+class CameraGallery extends CameraEvent{}
+
+class CameraTrim extends CameraEvent{}
+
 class CameraChange extends CameraEvent {
   final String len;
   const CameraChange(this.len);

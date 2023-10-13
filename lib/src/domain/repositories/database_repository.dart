@@ -104,6 +104,7 @@ abstract class DatabaseRepository {
   Future<Photo?> findPhoto(String path);
   Future<int> insertPhoto(Photo photo);
   Future<int> updatePhoto(Photo photo);
+  Future<int> deletePhoto(Photo photo);
   Future<void> insertPhotos(List<Photo> photos);
   Future<void> emptyPhotos();
 

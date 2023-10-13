@@ -24,6 +24,6 @@ class PhotoProvider {
   }
 
   Future<int> deletePhoto(Photo photo) async {
-    return await databaseRepository.updatePhoto(photo);
+    return await databaseRepository.deletePhoto(photo);
   }
 }
