@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -43,6 +44,8 @@ class AppBarInventory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(16);
     return SliverAppBar(
       backgroundColor: Theme.of(context).colorScheme.primary,
       leading: IconButton(
@@ -91,7 +94,7 @@ class AppBarInventory extends StatelessWidget {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 40),
+                       SizedBox(height: getProportionateScreenHeight(25)),
                       Expanded(
                         child: Padding(
                             padding: const EdgeInsets.all(kDefaultPadding),
@@ -106,7 +109,7 @@ class AppBarInventory extends StatelessWidget {
                                           TextSpan(
                                             text: 'EXPEDICIÓN: ',
                                             style: TextStyle(
-                                                fontSize: 16,
+                                                fontSize: calculatedFon,
                                                 fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                                           ),
                                           TextSpan(
@@ -124,14 +127,14 @@ class AppBarInventory extends StatelessWidget {
                                          TextSpan(
                                           text: 'DOCUMENTO: ',
                                           style: TextStyle(
-                                              fontSize: 16,
+                                              fontSize: calculatedFon,
                                               fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                                         ),
                                         TextSpan(
                                             text:
                                                 '${arguments.work.type}-${arguments.orderNumber}',
                                             style:  TextStyle(
-                                                fontSize: 16,
+                                                fontSize: calculatedFon,
                                                 fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                                       ],
                                     ),
@@ -143,13 +146,13 @@ class AppBarInventory extends StatelessWidget {
                                         TextSpan(
                                           text: 'NIT: ',
                                           style: TextStyle(
-                                              fontSize: 16,
+                                              fontSize: calculatedFon,
                                               fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                                         ),
                                         TextSpan(
                                             text: arguments.work.numberCustomer,
                                             style: TextStyle(
-                                                fontSize: 16,
+                                                fontSize: calculatedFon,
                                                 fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                                       ],
                                     ),
@@ -158,7 +161,7 @@ class AppBarInventory extends StatelessWidget {
                                   Text(
                                     arguments.work.customer!,
                                     style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: calculatedFon,
                                         fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer),
                                   ),
                                   const SizedBox(height: 10),
@@ -168,13 +171,13 @@ class AppBarInventory extends StatelessWidget {
                                          TextSpan(
                                           text: 'DIR: ',
                                           style: TextStyle(
-                                              fontSize: 16,
+                                              fontSize: calculatedFon,
                                               fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                                         ),
                                         TextSpan(
                                             text: arguments.work.address,
                                             style:  TextStyle(
-                                                fontSize: 16,
+                                                fontSize: calculatedFon,
                                                 fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                                       ],
                                     ),
@@ -187,7 +190,7 @@ class AppBarInventory extends StatelessWidget {
                                                TextSpan(
                                                 text: 'CEL: ',
                                                 style: TextStyle(
-                                                    fontSize: 16,
+                                                    fontSize: calculatedFon,
                                                     fontWeight:
                                                         FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                                               ),
@@ -195,7 +198,7 @@ class AppBarInventory extends StatelessWidget {
                                                   text:
                                                       arguments.work.cellphone,
                                                   style:  TextStyle(
-                                                      fontSize: 16,
+                                                      fontSize: calculatedFon,
                                                       fontWeight:
                                                           FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                                             ],
@@ -209,8 +212,9 @@ class AppBarInventory extends StatelessWidget {
                     ])),
           )),
       title: Text(arguments.work.workcode!,
+          textScaleFactor: calculatedTextScaleFactor,
           textAlign: TextAlign.center,
-          style:  TextStyle(fontSize: 16, fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+          style:  TextStyle(fontSize: calculatedFon, fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
     );
   }
 }

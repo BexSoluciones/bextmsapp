@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:bexdeliveries/src/presentation/widgets/confirm_dialog.dart';
 import 'package:bexdeliveries/src/presentation/widgets/custom_dialog.dart';
 import 'package:bexdeliveries/src/utils/constants/colors.dart';
@@ -63,6 +64,9 @@ class _ItemWorkState extends State<ItemWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(14);
+
     return Material(
       child: BlocConsumer<HistoryOrderBloc, HistoryOrderState>(
         listener: (context, state) {
@@ -182,21 +186,24 @@ class _ItemWorkState extends State<ItemWork> {
                       onTap: () => _onTap(context, widget.work),
                       title: Text(
                         'Servicio: ${widget.work.workcode}',
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
+                       textScaleFactor: calculatedTextScaleFactor,
+                        style:  TextStyle(
+                            fontSize: calculatedFon, fontWeight: FontWeight.w500),
                       ),
                       subtitle: Row(
                         children: [
                           Text(
                             'Clientes: ${widget.work.count}',
+                            textScaleFactor:  calculatedTextScaleFactor,
                             style:  TextStyle(
-                                fontWeight: FontWeight.normal, fontSize: 14,color: Theme.of(context).colorScheme.scrim),
+                                fontWeight: FontWeight.normal, fontSize: calculatedFon,color: Theme.of(context).colorScheme.scrim),
                           ),
                           Flexible(
                               child: Text(
                                 ' Atendidos: ${widget.work.right ?? '0'} Pendientes: ${widget.work.left! - widget.work.right!}',
+                                textScaleFactor:  calculatedTextScaleFactor,
                                 style:  TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.normal,color: Theme.of(context).colorScheme.scrim),
+                                    fontSize: calculatedFon, fontWeight: FontWeight.normal,color: Theme.of(context).colorScheme.scrim),
                                 textAlign: TextAlign.center,
                               ))
                         ],

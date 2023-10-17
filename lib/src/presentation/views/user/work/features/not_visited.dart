@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,6 +41,7 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
     final workCubit = BlocProvider.of<WorkCubit>(context);
     final scrollController = ScrollController();
 
@@ -57,7 +59,7 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
           ),);
         case WorkSuccess:
           return _buildWork(scrollController, widget.workcode, state.notVisited,
-              state.noMoreData, state.started);
+              state.noMoreData, state.started,calculatedTextScaleFactor);
         default:
           return const SizedBox();
       }
@@ -70,6 +72,7 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
       List<Work> works,
       bool noMoreData,
       bool isStarted,
+      double calculatedTextScaleFactor
       ) {
     return Padding(
         padding: const EdgeInsets.only(left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
@@ -80,6 +83,7 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
               width: double.infinity,
               child: Center(
                   child: Text('SERVICIO: ${widget.workcode}',
+                      textScaleFactor: calculatedTextScaleFactor,
                       style:  TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary))),
             ),

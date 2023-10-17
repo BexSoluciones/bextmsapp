@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:bexdeliveries/src/presentation/views/user/query/features/respawn_description.dart';
 import 'package:bexdeliveries/src/utils/constants/colors.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,7 +15,6 @@ import '../../../../../domain/abstracts/format_abstract.dart';
 
 //widgets
 import 'item_respawn.dart';
-import 'package:lottie/lottie.dart';
 
 class RespawnQueryView extends StatefulWidget {
   const RespawnQueryView({Key? key, required this.workcode}) : super(key: key);
@@ -29,6 +29,8 @@ class _RespawnQueryViewState extends State<RespawnQueryView> with FormatNumber {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(18);
     return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -55,7 +57,8 @@ class _RespawnQueryViewState extends State<RespawnQueryView> with FormatNumber {
                   case QuerySuccess:
                     return _buildHome(
                       state.respawns!,
-                      state.totalRespawn!
+                      state.totalRespawn!,
+                        calculatedTextScaleFactor,calculatedFon
                     );
                   case QueryFailed:
                     return Center(
@@ -70,7 +73,7 @@ class _RespawnQueryViewState extends State<RespawnQueryView> with FormatNumber {
         ));
   }
 
-  Widget _buildHome(List<WorkAdditional>? data, double totalRespawn) {
+  Widget _buildHome(List<WorkAdditional>? data, double totalRespawn, double calculatedTextScaleFactor, double calculatedFon) {
     return Column(
       children: [
         Expanded(
@@ -110,7 +113,8 @@ class _RespawnQueryViewState extends State<RespawnQueryView> with FormatNumber {
           height: 60,
           child: Center(
             child: Text('Total: ${formatter.format(totalRespawn)}',
-                style: const TextStyle(color: Colors.white, fontSize: 18)),
+                textScaleFactor: calculatedTextScaleFactor,
+                style:  TextStyle(color: Colors.white, fontSize: calculatedFon)),
           ),
         )
       ],

@@ -24,7 +24,6 @@ import '../../../../../../domain/models/enterprise_config.dart';
 //widgets
 import '../../../../../widgets/loading_indicator_widget.dart';
 import '../../../../../widgets/lottie_widget.dart';
-import '../../../../../widgets/location_error_widget.dart';
 import '../../features/carousel_card.dart';
 
 //services

@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -45,6 +46,7 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
     return Material(
       child: Ink(
         decoration: BoxDecoration(
@@ -66,6 +68,7 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                 children: [
                   Text(
                     '${widget.summary.type} - ${widget.summary.orderNumber} - ${widget.summary.id}',
+                    textScaleFactor: calculatedTextScaleFactor,
                     style: const TextStyle(fontSize: 16),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -73,6 +76,7 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                   if (widget.summary.expedition != null)
                     Text(
                       'Expedición: ${widget.summary.expedition}',
+                      textScaleFactor: calculatedTextScaleFactor,
                       style: TextStyle(fontSize: 16,color: Theme.of(context).colorScheme.scrim),
                     ),
                 ],
@@ -85,6 +89,7 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text(
                   'Items: ${widget.summary.count.toString()}',
+                  textScaleFactor: calculatedTextScaleFactor,
                   style: TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
                 ),
               ]),
@@ -93,10 +98,12 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                 children: [
                   Text(
                     'Total:  ${formatter.format(widget.summary.grandTotalCopy)}',
+                    textScaleFactor: calculatedTextScaleFactor,
                     style:  TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
                   ),
                   Text(
                     'Tipo: ${widget.summary.typeOfCharge}',
+                    textScaleFactor: calculatedTextScaleFactor,
                     style:  TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
                   ),
                 ],

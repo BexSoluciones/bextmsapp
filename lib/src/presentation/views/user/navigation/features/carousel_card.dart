@@ -33,29 +33,31 @@ Widget carouselCard(Work work, int index, num distance, num duration, BuildConte
               const SizedBox(width: 10),
               Expanded(
                 flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      work.customer!,
-                      style: const TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Text(work.address!,
-                        overflow: TextOverflow.ellipsis,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        work.customer!,
                         style: const TextStyle(
                             fontSize: 8,
-                            fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 5),
-                    Text(
-                      '${distance > 0.1000 ? '${distance.toStringAsFixed(2)}kms' : '${(distance * 1000).toStringAsFixed(2)}ms' } , ${ duration > 0.60 ? '${duration.toStringAsFixed(2)}mins' : '${(duration * 60).toStringAsFixed(2)}secs' }',
-                      style: const TextStyle(
-                          fontSize: 8
+                            fontWeight: FontWeight.bold),
                       ),
-                      maxLines: 3,
-                    ),
-                  ],
+                      Text(work.address!,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 5),
+                      Text(
+                        '${distance > 0.1000 ? '${distance.toStringAsFixed(2)}kms' : '${(distance * 1000).toStringAsFixed(2)}ms' } , ${ duration > 0.60 ? '${duration.toStringAsFixed(2)}mins' : '${(duration * 60).toStringAsFixed(2)}secs' }',
+                        style: const TextStyle(
+                            fontSize: 8
+                        ),
+                        maxLines: 3,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

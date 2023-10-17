@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,11 +22,13 @@ class _TabViewWorkState extends State<TabViewWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
     return BlocBuilder<WorkCubit, WorkState>(
       builder: (context, state) {
         return TabBar(
           controller: widget.tabController,
           isScrollable: true,
+          labelStyle: TextStyle(fontSize:(calculatedTextScaleFactor> 0 && calculatedTextScaleFactor  < 2) ? 10 : 5),
           labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
           tabs: [
             Tab(

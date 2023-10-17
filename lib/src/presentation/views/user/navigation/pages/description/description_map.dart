@@ -131,7 +131,7 @@ class _ItemDescriptionState extends State<ItemDescription> {
                       DataCell(Text(widget.summary.codeWarehouse!)),
                       DataCell(Text('${widget.summary.price}')),
                       DataCell(Text('${widget.summary.grandTotalCopy}')),
-                      DataCell(Text('${widget.summary.amount}')),
+                      DataCell(Text(widget.summary.amount)),
                       DataCell(Text('$difference')),
                       DataCell(Text('${widget.summary.reason}')),
                     ],

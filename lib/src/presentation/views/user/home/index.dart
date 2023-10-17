@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -71,6 +72,8 @@ class HomeViewState extends State<HomeView>
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(16);
     return WillPopScope(
         onWillPop: () async {
           return false;
@@ -89,9 +92,10 @@ class HomeViewState extends State<HomeView>
               SearchBar(three: three),
               LogoutBar(four: four)
             ],
-            title: const Text(
+            title:  Text(
               'Servicios',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textScaleFactor: calculatedTextScaleFactor ,
+              style: TextStyle(fontSize: calculatedFon, fontWeight: FontWeight.bold),
             ),
             notificationPredicate: (ScrollNotification notification) {
               return notification.depth == 1;
