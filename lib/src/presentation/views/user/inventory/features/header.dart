@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
 
@@ -19,6 +20,8 @@ class HeaderInventory extends StatelessWidget with FormatNumber {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(16);
     return SliverPersistentHeader(
         pinned: true,
         delegate: _SliverAppBarDelegate(
@@ -35,9 +38,9 @@ class HeaderInventory extends StatelessWidget with FormatNumber {
                       child: Text(
                           'TOTAL A RECAUDAR: \$${formatter.format(totalSummaries ?? 0.0)}',
                           textAlign: TextAlign.start,
-                          // textScaleFactor: textScaleFactor(context),
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
+                          textScaleFactor: calculatedTextScaleFactor,
+                          style:  TextStyle(
+                              fontSize: calculatedFon, fontWeight: FontWeight.bold)),
                     )),
               )),
         ));

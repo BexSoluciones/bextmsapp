@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -45,6 +46,7 @@ class ItemWorkState extends State<ItemWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
     return BlocBuilder<WorkCubit, WorkState>(
         key: ValueKey(widget.work.id),
         builder: (context, state) {
@@ -92,6 +94,7 @@ class ItemWorkState extends State<ItemWork> {
                         children: [
                           Icon(Icons.move_to_inbox, color: Colors.brown[300]),
                           Text(widget.work.count.toString(),
+                              textScaleFactor: calculatedTextScaleFactor,
                               style: const TextStyle(fontSize: 14))
                         ],
                       )

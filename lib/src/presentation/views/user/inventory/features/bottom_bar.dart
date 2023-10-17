@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
 
@@ -60,6 +61,8 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(14);
 
     return widget.isArrived == false
         ? SizedBox(
@@ -72,12 +75,12 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                 child: InkWell(
                   onTap: () => _navigationService.goTo(rejectRoute,
                       arguments: widget.arguments),
-                  child: const Padding(
-                    padding: EdgeInsets.only(top: 8.0),
+                  child:  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
                     child: Column(
                       children: <Widget>[
-                        Icon(Icons.cancel_outlined, color: kPrimaryColor),
-                        Text('Rechazado', style: TextStyle(fontSize: 14)),
+                        const Icon(Icons.cancel_outlined, color: kPrimaryColor),
+                        Text('Rechazado',textScaleFactor: calculatedTextScaleFactor, style: TextStyle(fontSize:calculatedFon)),
                       ],
                     ),
                   ),
@@ -88,13 +91,15 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                     child: InkWell(
                       onTap: () => _navigationService.goTo(partialRoute,
                           arguments: widget.arguments),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
+                      child:  Padding(
+                        padding: const EdgeInsets.all(8.0),
                         child: Column(
                           children: <Widget>[
-                            Icon(Icons.all_inbox_outlined,
+                            const Icon(Icons.all_inbox_outlined,
                                 color: kPrimaryColor),
-                            Text('Parcial', style: TextStyle(fontSize: 14)),
+                            Text('Parcial',
+                                textScaleFactor: calculatedTextScaleFactor,
+                                style: const TextStyle(fontSize: 14)),
                           ],
                         ),
                       ),

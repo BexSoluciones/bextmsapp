@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 
 //helpers
@@ -45,6 +46,8 @@ class SubItemWorkState extends State<SubItemWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(14);
     return Padding(
         key: ValueKey(widget.work.id),
         padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -60,7 +63,7 @@ class SubItemWorkState extends State<SubItemWork> {
                       onTap: null,
                       child: CircleAvatar(
                           backgroundColor: Colors.primaries[widget.work.color ?? 5],
-                          child: Text('${widget.work.order ?? 0 + 1}',style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),))),
+                          child: Text('${widget.work.order ?? 0 + 1}',textScaleFactor: calculatedTextScaleFactor,style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),))),
                   onTap: () => _navigationService.goTo(summaryRoute,
                       arguments: SummaryArgument(work: widget.work)),
                   shape: RoundedRectangleBorder(
@@ -68,6 +71,7 @@ class SubItemWorkState extends State<SubItemWork> {
                   ),
                   title: Text(
                     widget.work.customer!,
+                    textScaleFactor: calculatedTextScaleFactor,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 16),
@@ -78,6 +82,7 @@ class SubItemWorkState extends State<SubItemWork> {
                       Flexible(
                           child: Text(
                         widget.work.address!,
+                        textScaleFactor: calculatedTextScaleFactor,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                             style: TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
@@ -86,7 +91,8 @@ class SubItemWorkState extends State<SubItemWork> {
                         children: [
                           const Icon(Icons.move_to_inbox, color: Colors.brown),
                           Text(widget.work.count.toString(),
-                              style: TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim))
+                              textScaleFactor: calculatedTextScaleFactor,
+                              style: TextStyle(fontSize: calculatedFon,color: Theme.of(context).colorScheme.scrim))
                         ],
                       )
                     ],

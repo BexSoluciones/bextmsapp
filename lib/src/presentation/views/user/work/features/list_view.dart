@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -58,6 +59,8 @@ class ListViewWorkState extends State<ListViewWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(18);
     final workCubit = BlocProvider.of<WorkCubit>(context);
     final scrollController = ScrollController();
 
@@ -71,7 +74,7 @@ class ListViewWorkState extends State<ListViewWork> {
           return const SkeletonLoading(cant: 10);
         case WorkSuccess:
           return _buildWork(scrollController, widget.workcode, state.works,
-              state.noMoreData);
+              state.noMoreData,calculatedTextScaleFactor,calculatedFon);
         default:
           return const SizedBox();
       }
@@ -83,6 +86,8 @@ class ListViewWorkState extends State<ListViewWork> {
     String workcode,
     List<Work> works,
     bool noMoreData,
+      double calculatedTextScaleFactor,
+      double calculatedFon
   ) {
     return Padding(
       padding: const EdgeInsets.all(kDefaultPadding),
@@ -96,8 +101,9 @@ class ListViewWorkState extends State<ListViewWork> {
                   width: double.infinity,
                   child: Center(
                       child: Text('SERVICIO: $workcode',
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold))))),
+                          textScaleFactor: calculatedTextScaleFactor,
+                          style: TextStyle(
+                              fontSize: calculatedFon, fontWeight: FontWeight.bold))))),
           buildStaticBody(works),
           if (!noMoreData)
             const SliverToBoxAdapter(

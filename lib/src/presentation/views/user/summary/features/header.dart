@@ -22,94 +22,96 @@ class HeaderSummary extends StatelessWidget {
       height: size.height / 3.8,
       child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: kDefaultPadding),
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'SERVICIO: ',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
-                      ),
-                      TextSpan(
-                          text: arguments.work.workcode,
-                          style:  TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'NIT: ',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
-                      ),
-                      TextSpan(
-                          text: arguments.work.numberCustomer,
-                          style:  TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  arguments.work.customer!,
-                  style:  TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer),
-                ),
-                const SizedBox(height: 10),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                       TextSpan(
-                        text: 'DIR: ',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
-                      ),
-                      TextSpan(
-                          text: ' ${arguments.work.address}',
-                          style:  TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                arguments.work.cellphone != null
-                    ? Text.rich(
+          child: SingleChildScrollView(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text.rich(
+                    TextSpan(
+                      children: [
                         TextSpan(
-                          children: [
-                             TextSpan(
-                              text: 'CEL: ',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
-                            ),
-                            TextSpan(
-                                text: arguments.work.cellphone,
-                                style:  TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
-                          ],
+                          text: 'SERVICIO: ',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                         ),
-                      )
-                    : Container(),
-                arguments.work.cellphone != null
-                    ? const SizedBox(height: 10)
-                    : Container(),
-              ],
-            ),
+                        TextSpan(
+                            text: arguments.work.workcode,
+                            style:  TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'NIT: ',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                        ),
+                        TextSpan(
+                            text: arguments.work.numberCustomer,
+                            style:  TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    arguments.work.customer!,
+                    style:  TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer),
+                  ),
+                  const SizedBox(height: 10),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                         TextSpan(
+                          text: 'DIR: ',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                        ),
+                        TextSpan(
+                            text: ' ${arguments.work.address}',
+                            style:  TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  arguments.work.cellphone != null
+                      ? Text.rich(
+                          TextSpan(
+                            children: [
+                               TextSpan(
+                                text: 'CEL: ',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                              ),
+                              TextSpan(
+                                  text: arguments.work.cellphone,
+                                  style:  TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                            ],
+                          ),
+                        )
+                      : Container(),
+                  arguments.work.cellphone != null
+                      ? const SizedBox(height: 10)
+                      : Container(),
+                ],
+              ),
+          ),
           ),
     );
   }

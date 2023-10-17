@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibration/vibration.dart';
@@ -73,6 +74,8 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(14);
     return Material(
         child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -104,11 +107,13 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                         widget.summary.packing != null
                                     ? Text(
                                         '${widget.summary.packing} - ${widget.summary.idPacking}',
+                                        textScaleFactor: calculatedTextScaleFactor,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       )
                                     : Text(
                                         '${widget.summary.coditem} - ${widget.summary.nameItem}',
+                                        textScaleFactor: calculatedTextScaleFactor,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       )),
@@ -128,6 +133,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                             ? Container()
                             : Text(
                                 'U.M. ${double.parse(widget.summary.unitOfMeasurement).toStringAsFixed(2)} - N.M ${widget.summary.nameOfMeasurement}',
+                                textScaleFactor: calculatedTextScaleFactor,
                                 style: TextStyle(color: Colors.grey[500]),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -174,6 +180,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                             child: Text(
                                               widget.summary.cant
                                                   .toStringAsFixed(0),
+                                              textScaleFactor: calculatedTextScaleFactor,
                                             )),
                                         widget.summary.minus != 0 &&
                                                 widget.enterpriseConfig
@@ -199,9 +206,9 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                       ])),
                               Text(
                                 'TOTAL: \$${formatter.format(widget.summary.grandTotal)}',
-                                // textScaleFactor: textScaleFactor(context),
-                                style: const TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold),
+                                textScaleFactor: calculatedTextScaleFactor,
+                                style:  TextStyle(
+                                    fontSize: calculatedFon, fontWeight: FontWeight.bold),
                               )
                             ]),
                       ],

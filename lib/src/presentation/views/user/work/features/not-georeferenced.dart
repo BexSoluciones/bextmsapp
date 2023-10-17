@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,20 +34,22 @@ class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(18);
     return SafeArea(
         child: BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
           switch (state.runtimeType) {
             case WorkLoading:
               return const Center(child: CupertinoActivityIndicator());
             case WorkSuccess:
-              return _buildWork(state);
+              return _buildWork(state,calculatedTextScaleFactor,calculatedFon);
             default:
               return const SizedBox();
           }
         }));
   }
 
-  Widget _buildWork(state) {
+  Widget _buildWork(state,double calculatedTextScaleFactor, double calculatedFon) {
     return Padding(
         padding: const EdgeInsets.only(left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
         child: Column(
@@ -56,8 +59,9 @@ class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
               width: double.infinity,
               child: Center(
                   child: Text('SERVICIO: ${widget.workcode}',
+                      textScaleFactor: calculatedTextScaleFactor,
                       style: TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold,color: Theme.of(context).colorScheme.primary))),
+                          fontSize: calculatedFon, fontWeight: FontWeight.bold,color: Theme.of(context).colorScheme.primary))),
             ),
             Flexible(flex: 16, child: buildStaticBody(state.notGeoreferenced))
           ],
@@ -66,9 +70,9 @@ class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
 
   Widget buildStaticBody(works) {
     if (works.isEmpty) {
-      return Column(
+      return const Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
+        children: [
           Text('No hay clientes sin georeferenciación.', style: TextStyle(fontWeight: FontWeight.w600))
         ],
       );
