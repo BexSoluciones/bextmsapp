@@ -54,16 +54,16 @@ class _PartialViewState extends State<PartialView> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
+          icon: Icon(Icons.arrow_back_ios_new,color:Theme.of(context).colorScheme.secondaryContainer),
           onPressed: () => _navigationService.goBack(),
         ),
       ),
       body: ListView(
         children: [
           Container(
-            color: Theme.of(context).colorScheme.primaryContainer,
+            color: Theme.of(context).colorScheme.primary,
             height: size.height * 0.25,
             width: size.width,
             child: HeaderPartial(arguments: widget.arguments),
@@ -96,7 +96,10 @@ class _PartialViewState extends State<PartialView> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: Colors.deepOrange.withOpacity(0.1),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: const ListTile(
@@ -119,7 +122,7 @@ class _PartialViewState extends State<PartialView> {
                   maxLines: 2,
                   style: const TextStyle(color: Colors.red, fontSize: 16)),
             DefaultButton(
-                widget: const Text('Confirmar', style: TextStyle(fontSize: 20)),
+                widget: const Text('Confirmar', style: TextStyle(fontSize: 20,color: Colors.white,)),
                 press: () {
                   BlocProvider.of<PartialCubit>(context).goToCollection(widget.arguments);
                 })

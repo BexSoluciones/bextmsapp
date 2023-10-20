@@ -30,6 +30,7 @@ class _CollectionQueryViewState extends State<CollectionQueryView> with FormatNu
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
           title: Text(
             'Recaudos ${widget.workcode}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),

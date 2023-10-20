@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:bexdeliveries/src/config/size.dart';
+import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
+import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
+import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 import 'package:bexdeliveries/src/presentation/widgets/confirm_dialog.dart';
 import 'package:bexdeliveries/src/presentation/widgets/custom_dialog.dart';
 import 'package:bexdeliveries/src/utils/constants/colors.dart';
@@ -7,6 +12,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:intl/intl.dart';
 
 //blocs
 import '../../../../blocs/history_order/history_order_bloc.dart';
@@ -26,6 +32,7 @@ import '../../../../../services/storage.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
+final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 
 class ItemWork extends StatefulWidget {
   const ItemWork({Key? key, required this.work}) : super(key: key);
@@ -36,7 +43,7 @@ class ItemWork extends StatefulWidget {
   State<ItemWork> createState() => _ItemWorkState();
 }
 
-class _ItemWorkState extends State<ItemWork> {
+class _ItemWorkState extends State<ItemWork>{
   late HistoryOrderBloc historyOrderBloc;
   int left = 0;
   bool isLoading = true;
@@ -75,56 +82,6 @@ class _ItemWorkState extends State<ItemWork> {
         builder: (context, state) {
           return Slidable(
             key: const ValueKey(0),
-            startActionPane: ActionPane(
-              motion: const ScrollMotion(),
-              children: [
-                SlidableAction(
-                  onPressed: (_) async {
-                    var network = await connectivity.checkConnectivity();
-                    setState(() {
-                      loading = true;
-                    });
-
-                    try {
-                      if (network == ConnectivityResult.wifi ||
-                          network == ConnectivityResult.mobile) {
-                        if (widget.work.count! == left) {
-                          /*var queues = await database
-                      .findAllProcesingQueue(widget.work.workcode);
-                  await helperFunctions.procesingQueue(queues);*/
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            backgroundColor: Colors.red,
-                            content: Text('Termina toda las planilla'),
-                          ));
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          backgroundColor: Colors.green,
-                          content: Text('No esta conectado a internet'),
-                        ));
-                      }
-                    } catch (e) {
-                      print('Error marcar como completada:$e');
-                    } finally {
-                      setState(() {
-                        loading = false;
-                      });
-                    }
-                  },
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(15),
-                    bottomLeft: Radius.circular(15),
-                  ),
-                  backgroundColor: kPrimaryColor,
-                  foregroundColor: Colors.white,
-                  icon: loading
-                      ? const Icon(Icons.send).icon
-                      : Icons.cloud_upload_rounded,
-                  label: loading ? 'Enviando...' : 'Marcar como completa',
-                )
-              ],
-            ),
             endActionPane: ActionPane(motion: const ScrollMotion(), children: [
               SlidableAction(
                 borderRadius: const BorderRadius.only(
@@ -172,15 +129,6 @@ class _ItemWorkState extends State<ItemWork> {
               ),
               child: Row(
                 children: [
-                  const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Icon(
-                          Icons.arrow_back_ios,
-                          color: Colors.deepOrange,
-                          size: 15,
-                        ),
-                      )),
                   Expanded(
                     child: ListTile(
                       onTap: () => _onTap(context, widget.work),
@@ -214,11 +162,11 @@ class _ItemWorkState extends State<ItemWork> {
                   true
                       ? const Center(
                       child: Padding(
-                        padding: EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(20.0),
                         child: Icon(
-                            size: 15,
+                            size: 25,
                             color: Colors.deepOrange,
-                            Icons.arrow_forward_ios_rounded),
+                            Icons.swipe_left_outlined),
                       ))
                       : Container(),
                   Container(),
@@ -233,17 +181,15 @@ class _ItemWorkState extends State<ItemWork> {
 
 
   Future<void> _handleNavigation(Work work, BuildContext context) async {
-    /*final queueBloc = BlocProvider.of<QueueBloc>(context);
     try {
-      /*    var currentLocation = await _locationService.getLocation(); */
       String baseURL;
       baseURL = 'https://';
       String apiURL;
-      apiURL = '.bexdeliveries.com/api/v1/works/transactions/history-order';
+      apiURL = '.history-order';
       String url;
-      url = "${baseURL + _storageService.getString('company')! + apiURL}";
+      url = baseURL + _storageService.getString('company')! + apiURL;
 
-      var processingQueue = ProcesingQueueService(
+     /* var processingQueue = ProcesingQueueService(
         url: url,
         body: jsonEncode({'work_id': work.id}),
         task: 'incomplete',
@@ -251,10 +197,18 @@ class _ItemWorkState extends State<ItemWork> {
         created_at: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
         location:
         null /* '${currentLocation.latitude}-${currentLocation.longitude}' */,
-      );
+      );*/
+
+      var processingQueue= ProcessingQueue(
+          body: jsonEncode({'work_id': work.id}),
+          task: 'incomplete',
+          code: 'AS65C41656',
+          createdAt: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+          updatedAt:DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
 
       //_procesingQueueBloc.inAddPq.add(processingQueue);
-      queueBloc.add(AddTaskEvent(processingQueue));
+      //queueBloc.add(AddTaskEvent(processingQueue));
+      _databaseRepository.insertProcessingQueue(processingQueue);
 
       setState(() {
         success = true;
@@ -263,13 +217,13 @@ class _ItemWorkState extends State<ItemWork> {
       setState(() {
         success = false;
       });
-      await helperFunctions.handleException(e, stackTrace);
+      //await helperFunctions.handleException(e, stackTrace);
     }
 
     if (success) {
       // Show success message to user
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
             'Historico guardado.',
             style: TextStyle(color: Colors.white),
@@ -280,7 +234,7 @@ class _ItemWorkState extends State<ItemWork> {
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
             'Algo inesperado sucedió',
             style: TextStyle(color: Colors.white),
@@ -288,7 +242,7 @@ class _ItemWorkState extends State<ItemWork> {
           backgroundColor: Colors.red,
         ),
       );
-    }*/
+    }
   }
 
   void _onTap(BuildContext context, Work work) {

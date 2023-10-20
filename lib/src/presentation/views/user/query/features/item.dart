@@ -4,10 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //domain
+import '../../../../../config/size.dart';
 import '../../../../../domain/models/work.dart';
+import '../../../../../domain/repositories/database_repository.dart';
+import '../../../../../locator.dart';
+
+final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 
 class ItemQuery extends StatefulWidget {
-  const ItemQuery({Key? key, required this.work }) : super(key: key);
+  const ItemQuery({Key? key, required this.work}) : super(key: key);
 
   final Work work;
 
@@ -16,17 +21,15 @@ class ItemQuery extends StatefulWidget {
 }
 
 class _ItemQueryState extends State<ItemQuery> {
-  late WorkTypeCubit workTypeCubit;
 
   @override
   void initState() {
-    // TODO: implement initState
-    workTypeCubit = BlocProvider.of(context);
-    workTypeCubit.getWorkTypesFromWork(widget.work.workcode!);
     super.initState();
   }
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(14);
     return Material(
       child: Ink(
         decoration: BoxDecoration(
@@ -38,52 +41,59 @@ class _ItemQueryState extends State<ItemQuery> {
             'Servicio: ${widget.work.workcode}',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-
-          subtitle: BlocBuilder<WorkTypeCubit, WorkTypeState>(
-            builder: (_, state) {
-              switch (state.runtimeType) {
-                case WorkTypeCubitLoading:
-                  return const Center(child: CupertinoActivityIndicator());
-                case WorkTypeCubitSuccess:
-                  return _buildHome(
-                      state.workTypes!
-                  );
-                case WorkTypeCubitFailed:
-                  return Center(
-                    child: Text(state.error!),
-                  );
-                default:
-                  return const SizedBox();
-              }
-            },
+          subtitle: Row(
+            children: [
+              FutureBuilder<WorkTypes?>(
+                  future: _databaseRepository.getWorkTypesFromWorkcode(widget.work.workcode!),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData) {
+                      return Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ' Entregas: ${snapshot.data.delivery} Parciales: ${snapshot.data.partial}',
+                                textScaleFactor: calculatedTextScaleFactor ,
+                                style: TextStyle(
+                                    fontSize: calculatedFon,
+                                    fontWeight: FontWeight.normal,color: Theme.of(context).colorScheme.scrim),
+                              ),
+                              Text(
+                                ' Redespachos: ${snapshot.data.respawn} Devoluciones total: ${snapshot.data.rejects}',
+                                textScaleFactor: calculatedTextScaleFactor ,
+                                style: TextStyle(
+                                    fontSize: calculatedFon,
+                                    fontWeight: FontWeight.normal,color: Theme.of(context).colorScheme.scrim),
+                              ),
+                            ],
+                          ));
+                    } else {
+                      return Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ' Entregas: 0 Parciales: 0',
+                                textScaleFactor: calculatedTextScaleFactor ,
+                                style: TextStyle(
+                                    fontSize: calculatedFon,
+                                    fontWeight: FontWeight.normal,color: Theme.of(context).colorScheme.scrim),
+                              ),
+                              Text(
+                                ' Redespachos: 0 Devoluciones total: 0',
+                                textScaleFactor: calculatedTextScaleFactor,
+                                style: TextStyle(
+                                    fontSize: calculatedFon,
+                                    fontWeight: FontWeight.normal,color: Theme.of(context).colorScheme.scrim),
+                              ),
+                            ],
+                          ));
+                    }
+                  })
+            ],
           ),
         ),
       ),
     );
-  }
-  Widget _buildHome(WorkTypes workTypes){
-    return Row(
-      children: [
-        Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ' Entregas: ${workTypes.delivery} Parciales: ${workTypes.partial}',
-                  style:  TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal, color: Theme.of(context).colorScheme.scrim),
-                ),
-                Text(
-                  'Redespachos: ${workTypes.respawn} Devoluciones total: ${workTypes.rejects}',
-                  style:  TextStyle(
-                      fontSize:14,
-                      fontWeight: FontWeight.normal, color: Theme.of(context).colorScheme.scrim),
-                ),
-              ],
-            )),
-      ],
-    );
-
   }
 }

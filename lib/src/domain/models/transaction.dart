@@ -128,7 +128,7 @@ class Transaction {
     reason = json['reason'];
     if(json['payments'] != null){
       payments = [];
-      if(json['payments'] is String && json['payments'].contains('[]')){
+      if(json['payments'] is String && json['payments'] != 'null'){
         jsonDecode(json['payments']).forEach((payment) => payments?.add(Payment.fromJson(payment)));
       } else if(json['payments'] is List) {
         json['payments'].forEach((payment) => payments?.add(Payment.fromJson(payment)));
