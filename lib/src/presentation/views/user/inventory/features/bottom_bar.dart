@@ -75,35 +75,43 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                 child: InkWell(
                   onTap: () => _navigationService.goTo(rejectRoute,
                       arguments: widget.arguments),
-                  child:  Padding(
+                  child: Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Column(
                       children: <Widget>[
                         const Icon(Icons.cancel_outlined, color: kPrimaryColor),
-                        Text('Rechazado',textScaleFactor: calculatedTextScaleFactor, style: TextStyle(fontSize:calculatedFon)),
+                        Text('Rechazado',
+                            textScaleFactor: calculatedTextScaleFactor,
+                            style: TextStyle(fontSize: calculatedFon)),
                       ],
                     ),
                   ),
                 ))
             : widget.isPartial
                 ? SizedBox(
-                    height: 65,
+                    height: hasNavigationBar()
+                        ? MediaQuery.of(context).size.height * 0.1
+                        : MediaQuery.of(context).size.height * 0.06,
                     child: InkWell(
                       onTap: () => _navigationService.goTo(partialRoute,
                           arguments: widget.arguments),
-                      child:  Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      child: Padding(
+                        padding: EdgeInsets.all(
+                            MediaQuery.of(context).size.width * 0.01),
                         child: Column(
                           children: <Widget>[
                             const Icon(Icons.all_inbox_outlined,
                                 color: kPrimaryColor),
-                            Text('Parcial',
-                                textScaleFactor: calculatedTextScaleFactor,
-                                style: const TextStyle(fontSize: 14)),
+                            Text(
+                              'Parcial',
+                              textScaleFactor: calculatedTextScaleFactor,
+                              style: const TextStyle(fontSize: 14),
+                            ),
                           ],
                         ),
                       ),
-                    ))
+                    ),
+                  )
                 : Showcase(
                     key: widget.four,
                     disableMovingAnimation: true,
@@ -133,16 +141,31 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                               break;
                           }
                         },
-                        items:  [
+                        items: [
                           BottomNavigationBarItem(
                               label: 'Entrega',
-                              icon: Icon(Icons.delivery_dining_outlined,color: Theme.of(context).colorScheme.primary)),
+                              icon: Icon(Icons.delivery_dining_outlined,
+                                  color:
+                                      Theme.of(context).colorScheme.primary)),
                           BottomNavigationBarItem(
                               label: 'Rechazado',
-                              icon: Icon(Icons.cancel_outlined,color: Theme.of(context).colorScheme.primary)),
+                              icon: Icon(Icons.cancel_outlined,
+                                  color:
+                                      Theme.of(context).colorScheme.primary)),
                           BottomNavigationBarItem(
                               label: 'Redespacho',
-                              icon: Icon(Icons.receipt_long,color: Theme.of(context).colorScheme.primary))
+                              icon: Icon(Icons.receipt_long,
+                                  color: Theme.of(context).colorScheme.primary))
                         ])));
+  }
+
+  bool hasNavigationBar() {
+    var window = WidgetsBinding.instance.window;
+
+    if (window != null) {
+      var padding = window.viewPadding;
+      return padding.bottom > 0;
+    }
+    return false;
   }
 }

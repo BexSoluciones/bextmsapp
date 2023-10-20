@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/src/domain/models/requests/account_request.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -68,12 +69,12 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   LoginCubit(this._apiRepository, this._databaseRepository,
       this._locationRepository, this._processingQueueBloc)
       : super(
-            LoginSuccess(
-                enterprise: _storageService.getObject('enterprise') != null
-                    ? Enterprise.fromMap(
-                        _storageService.getObject('enterprise')!)
-                    : null),
-            null);
+      LoginSuccess(
+          enterprise: _storageService.getObject('enterprise') != null
+              ? Enterprise.fromMap(
+              _storageService.getObject('enterprise')!)
+              : null),
+      null);
 
   void updateEnterpriseState(Enterprise enterprise) {
     emit(UpdateEnterprise(enterprise));
@@ -96,10 +97,17 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
     }
   }
 
+  Future<void> getAccounts() async {
+    var response = await _apiRepository.accounts(request: AccountRequest());
+    if (response is DataSuccess) {
+      _databaseRepository.insertAccounts(response.data!.accounts);
+    }
+  }
+
   Future<void> differenceWorks(
       List<String?> localWorks, List<String?> externalWorks) async {
     var difference =
-        localWorks.toSet().difference(externalWorks.toSet()).toList();
+    localWorks.toSet().difference(externalWorks.toSet()).toList();
     if (difference.isNotEmpty) {
       for (var key in difference) {
         await _databaseRepository.updateStatusWork(key!, 'complete');
@@ -119,7 +127,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
 
       currentLocation = await _locationRepository.getCurrentLocation();
 
-      Future.wait([getConfigEnterprise(), getReasons()]);
+
 
       final response = await _apiRepository.login(
         request: LoginRequest(usernameController.text, passwordController.text),
@@ -136,6 +144,8 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         _storageService.setString('token', response.data!.login.token);
         _storageService.setObject('user', response.data!.login.user!.toMap());
         _storageService.setInt('user_id', response.data!.login.user!.id);
+
+        Future.wait([getConfigEnterprise(), getReasons(),getAccounts()]);
 
         var device = await helperFunctions.getDevice();
 
@@ -159,20 +169,20 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
             works.add(work);
             if (work.summaries != null) {
               await Future.forEach(work.summaries as Iterable<Object?>,
-                  (element) {
-                var summary = element as Summary;
-                summary.cant = ((double.parse(summary.amount) *
-                            100.0 /
-                            double.parse(summary.unitOfMeasurement))
+                      (element) {
+                    var summary = element as Summary;
+                    summary.cant = ((double.parse(summary.amount) *
+                        100.0 /
+                        double.parse(summary.unitOfMeasurement))
                         .round() /
-                    100);
+                        100);
 
-                summary.grandTotalCopy = summary.grandTotal;
-                if (summary.transaction != null) {
-                  transactions.add(summary.transaction!);
-                }
-                summaries.add(summary);
-              });
+                    summary.grandTotalCopy = summary.grandTotal;
+                    if (summary.transaction != null) {
+                      transactions.add(summary.transaction!);
+                    }
+                    summaries.add(summary);
+                  });
 
               var found = work.summaries!
                   .where((element) => element.transaction != null);

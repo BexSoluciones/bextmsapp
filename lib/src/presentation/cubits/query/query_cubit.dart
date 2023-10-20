@@ -39,6 +39,8 @@ class QueryCubit extends BaseCubit<QueryState, List<Work>?> {
 
         final deliveryList = await _databaseRepository.getClientsResJetDel(workcode,'delivery');
         final countTotalReturnDelivery  = await _databaseRepository.countTotalRespawnWorksByWorkcode(workcode,'delivery');
+
+        final countTotalCollectionWork = await  _databaseRepository.countTotalCollectionWorks();
         data = [];
 
         await Future.forEach(works, (work) async {
@@ -54,7 +56,7 @@ class QueryCubit extends BaseCubit<QueryState, List<Work>?> {
           // }
 
           data?.add(work);
-        }).then((value) => emit(QuerySuccess(works: data,respawns: respawnList,totalRespawn:countTotalReturnRespawn,rejects: rejectList ,totalRejects: countTotalReturnReject,delivery: deliveryList,totalDelivery: countTotalReturnDelivery)));
+        }).then((value) => emit(QuerySuccess(works: data,respawns: respawnList,totalRespawn:countTotalReturnRespawn,rejects: rejectList ,totalRejects: countTotalReturnReject,delivery: deliveryList,totalDelivery: countTotalReturnDelivery,countTotalCollectionWorks: countTotalCollectionWork)));
 
 
       } catch (e) {

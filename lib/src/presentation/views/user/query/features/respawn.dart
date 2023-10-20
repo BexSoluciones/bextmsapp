@@ -33,6 +33,7 @@ class _RespawnQueryViewState extends State<RespawnQueryView> with FormatNumber {
     final calculatedFon = getProportionateScreenHeight(18);
     return Scaffold(
         appBar: AppBar(
+          iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
           title: Text(
             'Redespachos ${widget.workcode}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),

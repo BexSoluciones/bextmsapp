@@ -1,9 +1,13 @@
+import 'package:bexdeliveries/src/domain/abstracts/format_abstract.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:intl/intl.dart';
 
 //utils
+import '../../../../config/size.dart';
+import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/strings.dart';
 
 //cubit
@@ -24,6 +28,9 @@ class QueryView extends StatefulWidget {
 
 class _QueryViewState extends State<QueryView> {
   late QueryCubit queryCubit;
+  final FormatNumber formatNumber = FormatNumber();
+  List<String> workCodes = [];
+
 
   @override
   void initState() {
@@ -39,8 +46,11 @@ class _QueryViewState extends State<QueryView> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(18);
     return Scaffold(
         appBar: AppBar(
+          iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
           title: const Text(
             'Consultas',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -62,6 +72,9 @@ class _QueryViewState extends State<QueryView> {
                   case QuerySuccess:
                     return _buildHome(
                       state.works!,
+                      state.countTotalCollectionWorks,
+                      calculatedTextScaleFactor,
+                      calculatedFon
                     );
                   case QueryFailed:
                     return Center(
@@ -76,7 +89,7 @@ class _QueryViewState extends State<QueryView> {
         ));
   }
 
-  Widget _buildHome(List<Work> works) {
+  Widget _buildHome(List<Work> works, double? countWorks,double calculatedTextScaleFactor, double  calculatedFon) {
     return Column(
       children: [
         Expanded(
@@ -135,35 +148,23 @@ class _QueryViewState extends State<QueryView> {
               },
             )),
         const Spacer(),
-        // FutureBuilder<double>(
-        //   future: database.countTotalCollectionWorks(),
-        //   builder:
-        //       (BuildContext context, AsyncSnapshot snapshot) {
-        //     if (snapshot.connectionState ==
-        //         ConnectionState.waiting) {
-        //       return LinearProgressIndicator(
-        //         valueColor: AlwaysStoppedAnimation<Color>(
-        //             kPrimaryColor),
-        //       );
-        //     } else {
-        //       return Container(
-        //         width: double.infinity,
-        //         decoration: BoxDecoration(
-        //             borderRadius: BorderRadius.circular(20),
-        //             color: kPrimaryColor),
-        //         height: getProportionateScreenHeight(60),
-        //         child: Center(
-        //           child: Text(
-        //               'Total recaudado: ${formatter.format(snapshot.data ?? 0.0)}',
-        //               textScaleFactor: textScaleFactor(context),
-        //               style: TextStyle(
-        //                   color: Colors.white, fontSize: getProportionateScreenHeight(18))),
-        //         ),
-        //       );
-        //     }
-        //   },
-        // ),
+        Container(
+                 width: double.infinity,
+                 decoration: BoxDecoration(
+                     borderRadius: BorderRadius.circular(20),
+                     color: kPrimaryColor),
+               height: 60,
+                 child: Center(
+                   child: Text(
+                       'Total recaudado: ${FormatNumber().formatter.format(countWorks)}',
+                       textScaleFactor: calculatedTextScaleFactor,
+                       style: TextStyle(
+                           color: Colors.white, fontSize: calculatedFon)),
+                ),
+          )
+
       ],
     );
   }
 }
+

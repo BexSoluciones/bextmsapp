@@ -19,7 +19,7 @@ class HeaderSummary extends StatelessWidget {
     return SizedBox(
       // color: Theme.of(context).colorScheme.primary,
       width: size.width,
-      height: size.height / 3.8,
+      height: size.height / 4.5,
       child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: kDefaultPadding),
           child: SingleChildScrollView(

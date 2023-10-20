@@ -14,7 +14,7 @@ class TransactionDao {
     return transactions;
   }
 
-  Future<WorkTypes?> getWorkTypesFromWorkcode(String workcode) async {
+  Future<WorkTypes> getWorkTypesFromWorkcode(String workcode) async {
     final db = await _appDatabase.streamDatabase;
 
     var deliveryList = await db!.query(t.tableTransactions,
@@ -115,6 +115,30 @@ class TransactionDao {
 
     return worksList;
   }
+
+  Future<double> countTotalCollectionWorks() async {
+    final db = await _appDatabase.streamDatabase;
+
+    var transactionList = await db!.query(t.tableTransactions,
+        where: 'status = ? OR status = ?', whereArgs: ['delivery', 'partial']);
+    var transactions = parseTransactions(transactionList);
+
+    var sum = 0.0;
+    for (var value in transactions) {
+      if (value.payments != null) {
+        for (var element in value.payments!) {
+          try {
+            sum += double.parse(element.paid.toString());
+          } catch (e) {
+            print('Error paid:$e');
+          }
+                }
+      }
+    }
+    return sum;
+  }
+
+
 
   Future<double> getTotalSummariesWork(String orderNumber) async {
     final db = await _appDatabase.streamDatabase;

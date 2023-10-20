@@ -13,6 +13,8 @@ abstract class QueryState extends Equatable {
   final List<WorkAdditional>? delivery;
   final double? totalDelivery;
 
+  final double? countTotalCollectionWorks;
+
 
 
   final String? error;
@@ -26,6 +28,7 @@ abstract class QueryState extends Equatable {
     this.totalReject,
     this.delivery,
     this.totalDelivery,
+    this.countTotalCollectionWorks,
     this.error,
   });
 
@@ -39,6 +42,7 @@ abstract class QueryState extends Equatable {
     totalReject,
     delivery,
     totalDelivery,
+    countTotalCollectionWorks,
     error,
   ];
 }
@@ -48,14 +52,8 @@ class QueryLoading extends QueryState {
 }
 
 class QuerySuccess extends QueryState {
-  const QuerySuccess({List<Work>? works,List<WorkAdditional>? respawns,double? totalRespawn, List<WorkAdditional>? rejects,double? totalRejects, List<WorkAdditional>? delivery,double? totalDelivery} ) : super(works: works,respawns: respawns,totalRespawn:totalRespawn,rejects: rejects,totalReject: totalRejects, delivery: delivery,totalDelivery: totalDelivery);
+  const QuerySuccess({List<Work>? works,List<WorkAdditional>? respawns,double? totalRespawn, List<WorkAdditional>? rejects,double? totalRejects, List<WorkAdditional>? delivery,double? totalDelivery, double? countTotalCollectionWorks} ) : super(works: works,respawns: respawns,totalRespawn:totalRespawn,rejects: rejects,totalReject: totalRejects, delivery: delivery,totalDelivery: totalDelivery,countTotalCollectionWorks: countTotalCollectionWorks);
 }
-
-class QuerySuccessCollection extends QueryState {
-  const QuerySuccessCollection({List<Work>? works, double? totalCollection,List<WorkAdditional>? respawns,double? totalRespawn,List<WorkAdditional>? rejects,double? totalRejects,List<WorkAdditional>? delivery,double? totalDelivery })
-      : super(works: works, totalCollection: totalCollection,respawns: respawns,totalRespawn: totalRespawn,rejects: rejects,totalReject: totalRejects, delivery: delivery,totalDelivery: totalDelivery);
-}
-
 
 class QueryFailed extends QueryState {
   const QueryFailed({String? error}) : super(error: error);

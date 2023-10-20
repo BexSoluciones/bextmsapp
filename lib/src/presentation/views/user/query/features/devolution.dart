@@ -31,6 +31,7 @@ class _DevolutionQueryViewState extends State<DevolutionQueryView> with FormatNu
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
           title: Text(
             'Devoluciones ${widget.workcode}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),

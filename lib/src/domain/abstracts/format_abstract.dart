@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-abstract class FormatNumber {
+ class FormatNumber {
   final NumberFormat formatter = NumberFormat('#,##0.00', 'es_CO');
 }
 
