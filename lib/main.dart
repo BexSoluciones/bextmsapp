@@ -1,14 +1,18 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/src/data/datasources/local/hive/core/hive_database_manager.dart';
 import 'package:bexdeliveries/src/presentation/blocs/account/account_bloc.dart';
+import 'package:bexdeliveries/src/presentation/cubits/notification/notification_cubit.dart';
 import 'package:bexdeliveries/src/presentation/cubits/ordersummaryreasons/ordersummaryreasons_cubit.dart';
 import 'package:bexdeliveries/src/presentation/cubits/type/work_type_cubit.dart';
 import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
@@ -79,6 +83,10 @@ final LoggerService _loggerService = locator<LoggerService>();
 
 List<CameraDescription> cameras = [];
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
+
 @pragma('vm:entry-point')
 void callbackDispatcher() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -97,6 +105,9 @@ Future<void> main() async {
   await Firebase.initializeApp();
   await initializeDependencies();
   await HiveDatabaseManager().start();
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
 
   ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
@@ -142,9 +153,75 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Future<void> setupInteractedMessage(BuildContext context) async {
+    initialize(context);
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      debugPrint('Message also contained a notification: ${initialMessage.notification!.body}');
+    }
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('Got a message whilst in the foreground!');
+      debugPrint('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        debugPrint('Message data 1 : ${message.data}');
+        display(message);
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint('On message app');
+      debugPrint('Message data: ${message.data}');
+      if (message.notification != null) {
+        display(message);
+      }
+    });
+  }
+
+  Future<void> initialize(BuildContext context) async {
+    AndroidNotificationChannel channel = const AndroidNotificationChannel(
+      'high_importance_channel', // id
+      'High Importance Notifications', // title
+      importance: Importance.high,
+    );
+
+    await FlutterLocalNotificationsPlugin().resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
+  }
+
+  void display(RemoteMessage message) async {
+    print(message.notification!.title);
+    print(message.notification!.body);
+    try {
+      final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      const NotificationDetails notificationDetails = NotificationDetails(
+          android: AndroidNotificationDetails(
+            "01",
+            "Bex Deliveries",
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+          ));
+
+      await FlutterLocalNotificationsPlugin().show(
+        id,
+        message.notification!.title,
+        message.notification!.body,
+        notificationDetails,
+        payload: jsonEncode(message.data),
+      );
+    } on Exception catch (e) {
+      debugPrint(e.toString());
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -277,6 +354,8 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => OrdersummaryreasonsCubit(locator<DatabaseRepository>()),
           ),
+          BlocProvider(
+              create: (context) => NotificationCubit(locator<DatabaseRepository>())),
         ],
         child: BlocProvider(
             create: (context) => ThemeBloc(),
@@ -340,5 +419,11 @@ class MyApp extends StatelessWidget {
                 })),
               );
             })));
+  }
+
+  @override
+  void initState() {
+    setupInteractedMessage(context);
+    super.initState();
   }
 }
