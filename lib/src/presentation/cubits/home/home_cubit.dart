@@ -114,7 +114,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           ? User.fromMap(_storageService.getObject('user')!)
           : null;
 
-      final results = await Future.wait([
+     /* final results = await Future.wait([
         _apiRepository.getConfigEnterprise(request: EnterpriseConfigRequest()),
         _apiRepository.reasons(request: ReasonRequest()),
       ]);
@@ -136,7 +136,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           var data = results[1].data as ReasonResponse;
           _databaseRepository.insertReasons(data.reasons);
         }
-      }
+      }*/
 
       final response = await _apiRepository.login(
         request: LoginRequest(_storageService.getString('username')!,

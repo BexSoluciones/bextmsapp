@@ -1,6 +1,10 @@
+import 'package:bexdeliveries/src/presentation/cubits/notification/notification_cubit.dart';
+import 'package:bexdeliveries/src/presentation/widgets/notification_page.dart';
 import 'package:bexdeliveries/src/services/notifications.dart';
 import 'package:bexdeliveries/src/utils/constants/colors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 //domain
@@ -24,12 +28,12 @@ class NotificationsView extends StatefulWidget {
 }
 
 class _NotificationsViewState extends State<NotificationsView> {
-  late int _totalNotifications;
-  PushNotification? _notificationInfo;
+  late NotificationCubit notificationCubit;
 
   @override
   void initState() {
-    _totalNotifications = 0;
+    notificationCubit = BlocProvider.of<NotificationCubit>(context);
+    notificationCubit.getNotificationCubit();
     super.initState();
   }
 
@@ -47,50 +51,41 @@ class _NotificationsViewState extends State<NotificationsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new),
-            onPressed: () => _navigationService.goBack(),
-          ),
-          title: const Text('Notificaciones')),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'App for capturing Firebase Push Notifications',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-            ),
-          ),
-          const SizedBox(height: 16.0),
-          NotificationBadge(totalNotifications: _totalNotifications),
-          const SizedBox(height: 16.0),
-          _notificationInfo != null
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'TITLE: ${_notificationInfo!.dataTitle ?? _notificationInfo!.title}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Text(
-                      'BODY: ${_notificationInfo!.dataBody ?? _notificationInfo!.body}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
-                      ),
-                    ),
-                  ],
-                )
-              : Container(),
-          TextButton(onPressed: () => show(), child: const Text('mostrar'))
-        ],
+        title: const Text('Notificaciones'),
       ),
+      body: BlocBuilder<NotificationCubit, NotificationState>(
+        builder: (_, state) {
+          switch (state.runtimeType) {
+            case NotificationCubitLoading:
+              return const Center(child: CupertinoActivityIndicator());
+            case NotificationCubitSuccess:
+              return _buildHome(state.notification);
+            case NotificationCubitFailed:
+              return Center(
+                child: Text(state.error!),
+              );
+            default:
+              return const SizedBox();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildHome(List<PushNotification>? notification) {
+    return Column(
+      children: [
+        Expanded(
+            flex: 12,
+            child: ListView.separated(
+              itemCount: notification!.length,
+              separatorBuilder: (context, index) =>
+              const SizedBox(height: 16.0),
+              itemBuilder: (context, index) {
+                return BuildNotificationCard(notification: notification[index]);
+              },
+            )),
+      ],
     );
   }
 }

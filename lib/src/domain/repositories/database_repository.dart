@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 
@@ -58,6 +59,7 @@ abstract class DatabaseRepository {
   //TRANSACTIONS
   Future<List<Transaction>> getAllTransactions();
   Future<String?> getDiffTime(int workId);
+  Future<double?> countTotalCollectionWorks();
   Future<int> insertTransaction(Transaction transaction);
   Future<int> insertTransactionSummary(TransactionSummary transactionSummary);
   Future<bool> validateTransaction(int workId);
@@ -121,4 +123,10 @@ abstract class DatabaseRepository {
 
   //ROOT
   Future<sqflite.Database?> get();
+
+
+  //NOTIFICATIONS
+  Future<int> insertNotification(PushNotification notification);
+  Future<List<PushNotification>> getNotifications();
+  Future<void> updateNotification(int notificationId, String readAt);
 }

@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 
@@ -423,6 +424,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<double?> countTotalCollectionWorks() async {
+    return _appDatabase.transactionDao.countTotalCollectionWorks();
+  }
+
+  @override
   Future<double> countTotalRespawnWorksByWorkcode(String workcode,String reason) async {
     return _appDatabase.summaryDao.countTotalRespawnWorksByWorkcode(workcode,reason);
   }
@@ -435,6 +441,22 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<List<SummaryReport>> getSummaryReportsWithDelivery(String orderNumber){
     return _appDatabase.summaryDao.getSummaryReportsWithDelivery(orderNumber);
+  }
+
+  //NOTIFICATION
+  @override
+  Future<int> insertNotification(PushNotification notification) {
+    return _appDatabase.notificationDao.insert(tableNotifications, notification.toJson());
+  }
+
+  @override
+  Future<List<PushNotification>> getNotifications(){
+    return _appDatabase.notificationDao.getNotifications();
+  }
+
+  @override
+  Future<void> updateNotification(int notificationId, String readAt) {
+    return _appDatabase.notificationDao.updateNotification(notificationId, readAt);
   }
 
 

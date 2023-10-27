@@ -6,8 +6,10 @@ import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
 import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 import 'package:bexdeliveries/src/presentation/widgets/confirm_dialog.dart';
 import 'package:bexdeliveries/src/presentation/widgets/custom_dialog.dart';
+import 'package:bexdeliveries/src/services/pushnotification.dart';
 import 'package:bexdeliveries/src/utils/constants/colors.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,6 +47,7 @@ class ItemWork extends StatefulWidget {
 
 class _ItemWorkState extends State<ItemWork>{
   late HistoryOrderBloc historyOrderBloc;
+  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   int left = 0;
   bool isLoading = true;
   bool success = false;
@@ -61,6 +64,8 @@ class _ItemWorkState extends State<ItemWork>{
   @override
   void initState() {
     historyOrderBloc = BlocProvider.of<HistoryOrderBloc>(context);
+    final pushNotificationService = PushNotificationService(_firebaseMessaging);
+    pushNotificationService.initialise();
     super.initState();
   }
 

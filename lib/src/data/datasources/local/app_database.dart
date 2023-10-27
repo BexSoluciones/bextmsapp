@@ -1,3 +1,5 @@
+import 'package:bexdeliveries/src/data/datasources/local/dao/notification_dao.dart';
+import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 import 'package:bexdeliveries/src/domain/models/transaction.dart';
 import 'package:path_provider/path_provider.dart';
@@ -268,7 +270,19 @@ class AppDatabase {
         ${AccountFields.accountNumber} INTEGER DEFAULT NULL,
         ${AccountFields.createdAt} TEXT DEFAULT NULL
       )
+    ''',
     '''
+      CREATE TABLE $tableNotifications (
+         ${NotificationFields.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${NotificationFields.id_from_server} TEXT,
+        ${NotificationFields.title} TEXT,
+        ${NotificationFields.body} TEXT,
+        ${NotificationFields.date} TEXT,
+        ${NotificationFields.with_click_action} TEXT,
+        ${NotificationFields.read_at} TEXT 
+      )
+    '''
+
   ];
 
   Future<Database> _initDatabase(databaseName) async {
@@ -343,6 +357,8 @@ class AppDatabase {
   AccountDao get accountDao => AccountDao(instance);
 
   NewsDao get newsDao => NewsDao(instance);
+
+  NotificationDao get notificationDao => NotificationDao(instance);
 
   void close() {
     _database = null;
