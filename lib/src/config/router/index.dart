@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/presentation/views/user/codigoQr/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -248,6 +249,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) =>
               RespawnQueryView(workcode: settings.arguments as String));
+    case CodigoQRouteTransf:
+      return MaterialPageRoute(
+          builder: (context) => const CodigoQRTransferScreen());
     default:
       return MaterialPageRoute(
           builder: (context) => UndefinedView(

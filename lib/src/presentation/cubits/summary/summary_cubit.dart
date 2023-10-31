@@ -113,6 +113,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
             typeOfCharge: summary.typeOfCharge!,
             orderNumber: summary.orderNumber,
             operativeCenter: summary.operativeCenter!,
+           summaries: summaries
         ));
   }
 

@@ -78,17 +78,20 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     _navigationService.goTo(qrRoute);
   }
 
-  Future<void> confirmTransaction(InventoryArgument arguments, paymentEfectyController, paymentTransferController) async {
+  Future<void> confirmTransaction(InventoryArgument arguments,
+      paymentEfectyController, paymentTransferController, List<dynamic> data) async {
     if (isBusy) return;
 
     await run(() async {
-
       emit(const CollectionLoading());
 
-      var status = arguments.r != null && arguments.r!.isNotEmpty ? 'partial' : 'delivery';
+      var status = arguments.r != null && arguments.r!.isNotEmpty
+          ? 'partial'
+          : 'delivery';
 
       String? firm;
-      var firmApplication = await helperFunctions.getFirm('firm-${arguments.orderNumber}');
+      var firmApplication =
+          await helperFunctions.getFirm('firm-${arguments.orderNumber}');
 
       if (firmApplication != null) {
         var base64Firm = firmApplication.readAsBytesSync();
@@ -105,14 +108,24 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         }
       }
 
-      var totalSummary = await _databaseRepository.getTotalSummaries(arguments.work.id!, arguments.orderNumber);
+      var totalSummary = await _databaseRepository.getTotalSummaries(
+          arguments.work.id!, arguments.orderNumber);
 
       var payments = <Payment>[];
+      if (data.isEmpty) {
+        if (paymentEfectyController.text.isNotEmpty) {
+          payments.add(Payment(
+            method: 'cash',
+            paid: paymentEfectyController.text,
+          ));
+        }
+      }
 
-      if (paymentEfectyController.text.isNotEmpty) {
+      for(var i = 0; i<data.length;i++){
         payments.add(Payment(
-          method: 'cash',
-          paid: paymentEfectyController.text,
+            method: 'transfer $i',
+            paid: data[i][0].toString(),
+            id_account: data[i][1].toString()
         ));
       }
 
@@ -124,9 +137,10 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       }
 
       if (payments.isEmpty && (status == 'delivery' || status == 'partial')) {
-        emit(const CollectionFailed(error: 'No hay pagos para el recaudo que cumpla con las condiciones'));
+        emit(const CollectionFailed(
+            error:
+                'No hay pagos para el recaudo que cumpla con las condiciones'));
       } else {
-
         var currentLocation = await _locationRepository.getCurrentLocation();
 
         var transaction = Transaction(
@@ -154,7 +168,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             createdAt: now(),
             updatedAt: now());
 
-        _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue));
+        _processingQueueBloc
+            .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
         if (status == 'partial') {
           await Future.forEach(arguments.summaries!, (summary) async {
@@ -163,11 +178,14 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
                   .where((element) => element.summaryId == summary.id)
                   .toList();
 
-              var re = await _databaseRepository.findReason(reason[0].controller.text);
+              var re = await _databaseRepository
+                  .findReason(reason[0].controller.text);
 
               var transactionSummary = TransactionSummary(
                   productName: summary.nameItem,
-                  numItems: (summary.minus * double.parse(summary.unitOfMeasurement)).toString(),
+                  numItems:
+                      (summary.minus * double.parse(summary.unitOfMeasurement))
+                          .toString(),
                   summaryId: summary.id,
                   orderNumber: summary.orderNumber,
                   workId: arguments.work.id!,
@@ -176,17 +194,19 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
                   createdAt: DateTime.now().toString(),
                   updatedAt: DateTime.now().toString());
 
-              await _databaseRepository.insertTransactionSummary(transactionSummary);
+              await _databaseRepository
+                  .insertTransactionSummary(transactionSummary);
 
               var processingQueue = ProcessingQueue(
-                  body: jsonEncode(transactionSummary.toJson()),
-                  task: 'incomplete',
-                  code: 'LIALIVNRAA',
-                  createdAt: now(),
-                  updatedAt: now(),
+                body: jsonEncode(transactionSummary.toJson()),
+                task: 'incomplete',
+                code: 'LIALIVNRAA',
+                createdAt: now(),
+                updatedAt: now(),
               );
 
-              _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue));
+              _processingQueueBloc
+                  .add(ProcessingQueueAdd(processingQueue: processingQueue));
             }
           });
         }
