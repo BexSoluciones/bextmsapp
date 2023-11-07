@@ -8,16 +8,16 @@ import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
+import 'package:location/location.dart' as loc;
 
 //domain
-import '../../src/domain/models/isolate.dart';
 import '../../src/domain/models/work.dart';
 
 //widgets
 import '../../src/presentation/widgets/show_map_direction_widget.dart';
 
 class HelperFunctions {
-
+  loc.Location location = loc.Location();
   Future<Map<String, dynamic>?> getDevice() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     const storage = FlutterSecureStorage();
@@ -290,5 +290,41 @@ class HelperFunctions {
         return null;
       }
     }
+  }
+  Future<void> initLocationService() async {
+    final bool serviceEnabled = await checkAndEnableLocationService();
+    if (!serviceEnabled) {
+      print('Servicio de ubicación deshabilitado.');
+      await location.enableBackgroundMode(enable: false);
+      return;
+    }
+
+    final loc.PermissionStatus permissionStatus =
+    await checkAndRequestLocationPermission();
+    if (permissionStatus != loc.PermissionStatus.granted) {
+      print('Permisos de ubicación denegados.');
+      await location.enableBackgroundMode(enable: false);
+      return;
+    }
+
+    await location.enableBackgroundMode(enable: true);
+    print('Servicio de ubicación iniciado.');
+  }
+  Future<bool> checkAndEnableLocationService() async {
+    final bool serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      final bool requestedService = await location.requestService();
+      if (!requestedService) {
+        return false;
+      }
+    }
+    return true;
+  }
+  Future<loc.PermissionStatus> checkAndRequestLocationPermission() async {
+    loc.PermissionStatus permissionStatus = await location.hasPermission();
+    if (permissionStatus == loc.PermissionStatus.denied) {
+      permissionStatus = await location.requestPermission();
+    }
+    return permissionStatus;
   }
 }

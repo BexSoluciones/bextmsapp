@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/src/data/datasources/local/hive/core/hive_database_manager.dart';
 import 'package:bexdeliveries/src/presentation/blocs/account/account_bloc.dart';
+import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
 import 'package:bexdeliveries/src/presentation/cubits/notification/notification_cubit.dart';
 import 'package:bexdeliveries/src/presentation/cubits/ordersummaryreasons/ordersummaryreasons_cubit.dart';
 import 'package:bexdeliveries/src/presentation/cubits/type/work_type_cubit.dart';
@@ -14,12 +15,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
 
 //plugins
 import 'package:charger_status/charger_status.dart';
+import 'package:permission_handler/permission_handler.dart';
 //theme
 import 'src/config/theme/app.dart';
 
@@ -101,11 +104,10 @@ void callbackDispatcher() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await Permission.location.request();
   await Firebase.initializeApp();
   await initializeDependencies();
   await HiveDatabaseManager().start();
-
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
 
@@ -149,7 +151,6 @@ Future<void> main() async {
   if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
 
   // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-
   runApp(const MyApp());
 }
 
@@ -256,18 +257,19 @@ class _MyAppState extends State<MyApp> {
               create: (context) => InitialCubit(locator<ApiRepository>())),
           BlocProvider(create: (context) => PermissionCubit()),
           BlocProvider(create: (context) => PoliticsCubit()),
+          BlocProvider(create: (_) => GpsBloc()),
           BlocProvider(
               create: (context) => LoginCubit(
                   locator<ApiRepository>(),
                   locator<DatabaseRepository>(),
                   locator<LocationRepository>(),
-                  BlocProvider.of<ProcessingQueueBloc>(context))),
+                  BlocProvider.of<ProcessingQueueBloc>(context),BlocProvider.of<GpsBloc>(context))),
           BlocProvider(
               create: (context) => HomeCubit(
                   locator<DatabaseRepository>(),
                   locator<ApiRepository>(),
                   locator<LocationRepository>(),
-                  BlocProvider.of<ProcessingQueueBloc>(context))),
+                  BlocProvider.of<ProcessingQueueBloc>(context), BlocProvider.of<GpsBloc>(context))),
           BlocProvider(
             create: (context) => HistoryOrderBloc(locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context)),
@@ -282,19 +284,21 @@ class _MyAppState extends State<MyApp> {
             create: (context) => ConfirmCubit(
                 locator<DatabaseRepository>(),
                 locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+                BlocProvider.of<ProcessingQueueBloc>(context),BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => SummaryCubit(
                 locator<DatabaseRepository>(),
                 locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+                BlocProvider.of<ProcessingQueueBloc>(context),
+                BlocProvider.of<GpsBloc>(context)
+            ),
           ),
           BlocProvider(
             create: (context) => GeoreferenceCubit(
                 locator<DatabaseRepository>(),
                 locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+                BlocProvider.of<ProcessingQueueBloc>(context), BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => InventoryCubit(
@@ -324,11 +328,11 @@ class _MyAppState extends State<MyApp> {
             create: (context) => CollectionCubit(
                 locator<DatabaseRepository>(),
                 locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+                BlocProvider.of<ProcessingQueueBloc>(context),BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => NavigationCubit(
-                locator<DatabaseRepository>(), locator<LocationRepository>()),
+                locator<DatabaseRepository>(), locator<LocationRepository>(),BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => DatabaseCubit(

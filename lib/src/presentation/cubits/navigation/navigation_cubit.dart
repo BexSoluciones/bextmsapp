@@ -13,6 +13,7 @@ import 'package:map_launcher/map_launcher.dart';
 import 'package:bexdeliveries/core/helpers/index.dart';
 
 //cubits
+import '../../blocs/gps/gps_bloc.dart';
 import '../base/base_cubit.dart';
 
 //blocs
@@ -33,10 +34,11 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   final DatabaseRepository _databaseRepository;
   final LocationRepository _locationRepository;
   final helperFunctions = HelperFunctions();
+  final GpsBloc gpsBloc;
 
   CurrentUserLocationEntity? currentLocation;
 
-  NavigationCubit(this._databaseRepository, this._locationRepository)
+  NavigationCubit(this._databaseRepository, this._locationRepository, this.gpsBloc)
       : super(const NavigationLoading(), []);
 
   final mapController = MapController();
@@ -77,7 +79,8 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
       var works = <Work>[];
 
-      currentLocation = await _locationRepository.getCurrentLocation();
+      //currentLocation = await _locationRepository.getCurrentLocation();
+      var currentLocation = gpsBloc.state.lastKnownLocation;
 
       // var warehouse = await _databaseRepository.findWarehouse(works.first.warehouse);
 
@@ -104,7 +107,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
               height: 25,
               width: 25,
               point:
-              LatLng(currentLocation!.latitude, currentLocation!.longitude),
+              LatLng(currentLocation!.latitude, currentLocation.longitude),
               builder: (ctx) => GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   child: Stack(alignment: Alignment.center, children: <Widget>[
@@ -119,7 +122,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
               height: 25,
               width: 25,
               point:
-              LatLng(currentLocation!.latitude, currentLocation!.longitude),
+              LatLng(currentLocation.latitude, currentLocation.longitude),
               builder: (ctx) => GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   child: Stack(alignment: Alignment.center, children: <Widget>[
@@ -212,10 +215,12 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   }
 
   Future<void> getCurrentPosition(double zoom) async {
-    currentLocation = await _locationRepository.getCurrentLocation();
+    //currentLocation = await _locationRepository.getCurrentLocation();
+
+    var currentLocation = gpsBloc.state.lastKnownLocation;
 
     mapController.move(
-        LatLng(currentLocation!.latitude, currentLocation!.longitude), zoom);
+        LatLng(currentLocation!.latitude, currentLocation.longitude), zoom);
 
     emit(NavigationSuccess(
         works: data,

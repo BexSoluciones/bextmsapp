@@ -4,13 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 //cubit
 import '../../../../cubits/summary/summary_cubit.dart';
-
-//blocs
-import '../../../../blocs/issues/issues_bloc.dart';
 
 //domain
 import '../../../../../domain/models/arguments.dart';

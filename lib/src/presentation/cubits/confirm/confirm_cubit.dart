@@ -16,6 +16,7 @@ import '../../../domain/abstracts/format_abstract.dart';
 import '../../../domain/repositories/database_repository.dart';
 
 //base
+import '../../blocs/gps/gps_bloc.dart';
 import '../base/base_cubit.dart';
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
 
@@ -33,10 +34,10 @@ class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final LocationRepository _locationRepository;
-
+  final GpsBloc gpsBloc;
   CurrentUserLocationEntity? currentLocation;
 
-  ConfirmCubit(this._databaseRepository, this._locationRepository, this._processingQueueBloc) : super(const ConfirmLoading(), null);
+  ConfirmCubit(this._databaseRepository, this._locationRepository, this._processingQueueBloc, this.gpsBloc) : super(const ConfirmLoading(), null);
 
   Future<void> init(Work work) async {
     emit(await _getWork(work));
@@ -52,7 +53,8 @@ class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
     await run(() async {
       emit(const ConfirmLoading());
 
-      currentLocation = await _locationRepository.getCurrentLocation();
+      //currentLocation = await _locationRepository.getCurrentLocation();
+      var currentLocation = gpsBloc.state.lastKnownLocation;
 
       _storageService.setBool('${arguments.work.workcode}-started', true);
 

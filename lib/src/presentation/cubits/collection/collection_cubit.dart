@@ -11,6 +11,7 @@ import '../../../domain/models/transaction_summary.dart';
 import '../../../utils/constants/strings.dart';
 
 //base
+import '../../blocs/gps/gps_bloc.dart';
 import '../base/base_cubit.dart';
 
 //blocs
@@ -40,11 +41,12 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   final DatabaseRepository _databaseRepository;
   final LocationRepository _locationRepository;
   final ProcessingQueueBloc _processingQueueBloc;
+  final GpsBloc gpsBloc;
 
   final helperFunctions = HelperFunctions();
 
   CollectionCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc)
+      this._processingQueueBloc, this.gpsBloc)
       : super(const CollectionLoading(), null);
 
   Future<void> getCollection(int workId, String orderNumber) async {
@@ -141,7 +143,9 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             error:
                 'No hay pagos para el recaudo que cumpla con las condiciones'));
       } else {
-        var currentLocation = await _locationRepository.getCurrentLocation();
+        //var currentLocation = await _locationRepository.getCurrentLocation();
+
+        var currentLocation = gpsBloc.state.lastKnownLocation;
 
         var transaction = Transaction(
             workId: arguments.work.id!,
@@ -156,7 +160,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             delivery: totalSummary.toString(),
             start: now(),
             end: null,
-            latitude: currentLocation.latitude.toString(),
+            latitude: currentLocation!.latitude.toString(),
             longitude: currentLocation.longitude.toString());
 
         await _databaseRepository.insertTransaction(transaction);
