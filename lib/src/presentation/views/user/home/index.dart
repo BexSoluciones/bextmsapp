@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:bexdeliveries/src/config/size.dart';
+import 'package:bexdeliveries/src/domain/models/enterprise_config.dart';
+import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -41,13 +43,21 @@ class HomeViewState extends State<HomeView>
   final GlobalKey five = GlobalKey();
 
   late HomeCubit homeCubit;
+  late GpsBloc gpsBloc;
 
   @override
   void initState() {
+    var storedConfig = _storageService.getObject('config');
+    var enterpriseConfig = EnterpriseConfig.fromMap(storedConfig!);
     startHomeWidget();
     homeCubit = BlocProvider.of<HomeCubit>(context);
+    gpsBloc = BlocProvider.of<GpsBloc>(context);
     homeCubit.getAllWorks();
     homeCubit.getUser();
+    if (enterpriseConfig.background_location!) {
+      helperFunctions.initLocationService();
+      gpsBloc.startFollowingUser();
+    }
     super.initState();
   }
 

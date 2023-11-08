@@ -57,6 +57,7 @@ const transactionRoute = '/transaction';
 const locationsRoute = '/locations';
 const issueRoute = '/issues';
 const fillIssueRoute = '/fill-issue-route';
+const CodigoQRouteTransf = '/codigoQRTransf';
 
 const String buttonTextDefault = "Permitir";
 const String buttonTextSuccess = "Continuar";

@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:isolate';
 
-import 'package:flutter/foundation.dart';
+
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location/location.dart';
-import 'package:location_repository/location_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //domain
 import '../../src/domain/models/location.dart' as l;
@@ -21,37 +22,48 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class LocationService with FormatDate {
   static LocationService? _instance;
-  static Location? _location;
+  static Geolocator? _geolocator;
+  static SharedPreferences? _preferences;
 
   static Future<LocationService?> getInstance() async {
     _instance ??= LocationService();
-    _location ??= Location();
+    _geolocator ??= Geolocator();
+    _preferences ??= await SharedPreferences.getInstance();
     return _instance;
   }
 
   bool inBackground = false;
 
   // Keep track of current Location
-  LocationData? _currentLocation;
+  Position? _currentLocation;
 
-  // Continuously emit location updates
-  final StreamController<LocationData?> _locationController =
-      StreamController<LocationData?>.broadcast();
+  Future<bool> activateBackgroundMode() async {
 
-  // ignore: sort_constructors_first
-  LocationService() {
-    hasPermission().then((granted) {
-      if (granted != null && granted == PermissionStatus.granted) {
-        _location?.onLocationChanged.listen((locationData) {
-          _locationController.add(locationData);
-        });
-      }
-    });
+    var backgroundMode = _preferences?.getBool('backgroundMode') ?? false;
+
+    if (!backgroundMode) {
+      await _preferences?.setBool('backgroundMode', true);
+      await Geolocator.openAppSettings(); // Open app settings to enable background location permission
+
+    }
+    return backgroundMode;
+
   }
 
-  Future<PermissionStatus?> hasPermission() async {
-    if(_location == null) return null;
-    return await _location!.hasPermission();
+  // Continuously emit location updates
+  final StreamController<Position?> _locationController =
+  StreamController<Position?>.broadcast();
+
+  // ignore: sort_constructors_first
+  /*LocationService() {
+    Geolocator.getPositionStream().listen((position) {
+      _locationController.add(position);
+    });
+  }*/
+
+  Future<LocationPermission?> hasPermission() async {
+    if(_geolocator == null) return null;
+    return await Geolocator.checkPermission();
   }
 
   bool calculateRadiusBetweenTwoLatLng(
@@ -76,18 +88,34 @@ class LocationService with FormatDate {
     return date1.difference(date2).inSeconds;
   }
 
-  Stream<LocationData?> get locationStream => _locationController.stream;
+  Stream<Position?> get locationStream => _locationController.stream;
 
-  Future<LocationData> getLocation() async {
-    try {
-      _currentLocation = await getLocation();
-    } catch (e) {
-      if (kDebugMode) {
+  Future sendLocation(SendPort port, location) {
+    var response = ReceivePort();
+    port.send([location, response.sendPort]);
+    return response.first;
+  }
+
+  Future<Position?> getLocation() async {
+    Position? currentLocation;
+    var maxAttempts = 3;
+    var attempts = 0;
+
+    while (currentLocation == null && attempts < maxAttempts) {
+      try {
+        currentLocation = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        ).timeout(const Duration(seconds: 5));
+      } catch (e,stackTrace) {
         print('Could not get the location: $e');
+        //await helperFunctions.handleException(e,stackTrace);
+        attempts++;
+        await Future.delayed(
+            const Duration(seconds: 1));
       }
     }
 
-    return _currentLocation!;
+    return currentLocation;
   }
 
   Future<void> saveLocation(String type) async {
@@ -102,12 +130,12 @@ class LocationService with FormatDate {
       locationData ??= await getLocation();
 
       var location = l.Location(
-          latitude: locationData.latitude!,
-          longitude: locationData.longitude!,
+          latitude: locationData!.latitude,
+          longitude: locationData.longitude,
           accuracy: locationData.accuracy,
           altitude: locationData.altitude,
           heading: locationData.heading,
-          isMock: locationData.isMock,
+          isMock: locationData.isMocked,
           speed: locationData.speed,
           speedAccuracy: locationData.speedAccuracy,
           userId: _storageService.getInt('user_id') ?? 0,

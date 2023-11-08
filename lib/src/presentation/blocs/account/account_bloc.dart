@@ -26,8 +26,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           final formattedAccountList = accountList.map((account) =>
           '${account.name} - ${account.accountNumber} - (${account.idAccount})')
               .toList();
+          final account = await _databaseRepository.getAllAccounts();
           formattedAccountList.insert(0, 'Seleccionar cuenta');
-          emit(AccountLoadedState(formattedAccountList));
+          emit(AccountLoadedState(formattedAccountList,account));
         } catch (e) {
           emit(AccountErrorState('Error loading accounts: $e'));
         }

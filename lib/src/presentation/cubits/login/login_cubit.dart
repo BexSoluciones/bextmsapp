@@ -37,6 +37,7 @@ import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //bloc
+import '../../blocs/gps/gps_bloc.dart';
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
 
 //cubit
@@ -61,13 +62,14 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final LocationRepository _locationRepository;
   final ProcessingQueueBloc _processingQueueBloc;
+  final GpsBloc gpsBloc;
 
   CurrentUserLocationEntity? currentLocation;
 
   var helperFunctions = HelperFunctions();
 
   LoginCubit(this._apiRepository, this._databaseRepository,
-      this._locationRepository, this._processingQueueBloc)
+      this._locationRepository, this._processingQueueBloc, this.gpsBloc)
       : super(
       LoginSuccess(
           enterprise: _storageService.getObject('enterprise') != null
@@ -126,6 +128,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
               : null));
 
       currentLocation = await _locationRepository.getCurrentLocation();
+      //var currentLocation = gpsBloc.state.lastKnownLocation;
 
 
 

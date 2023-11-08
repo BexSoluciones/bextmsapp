@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:bexdeliveries/src/presentation/blocs/account/account_bloc.dart';
+import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +8,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 
 //cubit
+import '../../../../config/size.dart';
+import '../../../../services/navigation.dart';
 import '../../../cubits/collection/collection_cubit.dart';
 
 //utils
@@ -23,8 +26,10 @@ import '../../../../services/storage.dart';
 
 //widgets
 import '../../../widgets/default_button_widget.dart';
+import '../../../widgets/transaction_list.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
+final NavigationService _navigationService = locator<NavigationService>();
 
 class CollectionView extends StatefulWidget {
   const CollectionView({Key? key, required this.arguments}) : super(key: key);
@@ -55,6 +60,10 @@ class CollectionViewState extends State<CollectionView>
   bool showDropdownError = false;
   List<String> options = [];
   List<String> formattedAccountList = [];
+  List<dynamic> data = [];
+  String? selectedOption = 'Seleccionar cuenta';
+  var paymentTransferValue = 0.0;
+  var paymentEfectyValue = 0.0;
 
   String get _currency =>
       '  ${NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol}';
@@ -62,6 +71,8 @@ class CollectionViewState extends State<CollectionView>
   final TextEditingController _typeAheadController = TextEditingController();
   final TextEditingController paymentEfectyController = TextEditingController();
   final TextEditingController paymentTransferController =
+      TextEditingController();
+  final TextEditingController paymentTransferArrayController =
       TextEditingController();
 
   String? get firmS => null;
@@ -146,11 +157,10 @@ class CollectionViewState extends State<CollectionView>
         currentFocus.unfocus();
       }
     }
-
     return GestureDetector(
         onTap: unfocus,
         child: Scaffold(
-            resizeToAvoidBottomInset: false,
+            resizeToAvoidBottomInset: true,
             appBar: AppBar(
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
@@ -161,7 +171,8 @@ class CollectionViewState extends State<CollectionView>
               builder: (_, state) {
                 switch (state.runtimeType) {
                   case CollectionLoading:
-                    return  Center(child:  SpinKitCircle(
+                    return Center(
+                        child: SpinKitCircle(
                       color: Theme.of(context).colorScheme.primary,
                       size: 100.0,
                     ));
@@ -183,9 +194,10 @@ class CollectionViewState extends State<CollectionView>
       child: SizedBox(
         height: size.height,
         width: size.width,
-        child: ListView(children: [
+        child: Column(
+            children: [
           Container(
-            color:Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.primary,
             child: SizedBox(
               child: Padding(
                 padding: const EdgeInsets.only(
@@ -197,13 +209,21 @@ class CollectionViewState extends State<CollectionView>
                     Text(
                         'TOTAL A RECAUDAR: \$${formatter.format(state.totalSummary)}',
                         textAlign: TextAlign.start,
-                        style:  TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer)),
+                        style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer)),
                     const SizedBox(height: 3),
                     Text(widget.arguments.typeOfCharge,
                         textAlign: TextAlign.start,
-                        style:  TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer))
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer))
                   ],
                 ),
               ),
@@ -229,6 +249,17 @@ class CollectionViewState extends State<CollectionView>
                         keyboardType: TextInputType.number,
                         autofocus: false,
                         controller: paymentEfectyController,
+                        onChanged: data.isNotEmpty
+                            ? (newValue) {
+                                if (newValue.isEmpty) {
+                                  setState(() {
+                                    data.clear();
+                                    paymentTransferArrayController.clear();
+                                    paymentEfectyController.clear();
+                                  });
+                                }
+                              }
+                            : null,
                         decoration: InputDecoration(
                           prefixText: _currency,
                           focusedBorder: const OutlineInputBorder(
@@ -254,15 +285,16 @@ class CollectionViewState extends State<CollectionView>
                                           paymentEfectyController.text);
                                 });
                               }
-
+                              data.clear();
+                              paymentTransferArrayController.clear();
                               paymentEfectyController.clear();
                             },
                             icon: const Icon(Icons.clear),
                           ),
                         ),
                         validator: (value) {
-                          if (value!.contains(',')) {
-                            return '';
+                          if (value == null || value.isEmpty) {
+                            return 'El campo es requerido';
                           }
                           return null;
                         },
@@ -281,7 +313,8 @@ class CollectionViewState extends State<CollectionView>
                               onPressed: () => context
                                   .read<CollectionCubit>()
                                   .goToCamera(widget.arguments.orderNumber)),
-                          state.enterpriseConfig != null && state.enterpriseConfig!.codeQr != null
+                          state.enterpriseConfig != null &&
+                                  state.enterpriseConfig!.codeQr != null
                               ? IconButton(
                                   icon: const Icon(Icons.qr_code_2,
                                       size: 32, color: kPrimaryColor),
@@ -294,7 +327,9 @@ class CollectionViewState extends State<CollectionView>
                       TextFormField(
                         keyboardType: TextInputType.number,
                         autofocus: false,
-                        controller: paymentTransferController,
+                        controller: data.isEmpty
+                            ? paymentTransferController
+                            : paymentTransferArrayController,
                         decoration: InputDecoration(
                           prefixText: _currency,
                           focusedBorder: const OutlineInputBorder(
@@ -311,16 +346,13 @@ class CollectionViewState extends State<CollectionView>
                           ),
                           suffixIcon: IconButton(
                             onPressed: () {
-                              if (double.tryParse(
-                                      paymentTransferController.text) !=
-                                  null) {
-                                setState(() {
-                                  total = total -
-                                      double.parse(
-                                          paymentTransferController.text);
-                                });
+                              if (data.isEmpty) {
+                                if (double.tryParse(paymentTransferController.text) != null) {
+                                  setState(() {
+                                    total -=double.parse(paymentTransferController.text);
+                                  });
+                                }
                               }
-
                               paymentTransferController.clear();
                             },
                             icon: const Icon(Icons.clear),
@@ -333,88 +365,260 @@ class CollectionViewState extends State<CollectionView>
                           return null;
                         },
                       ),
-                      state.enterpriseConfig != null && state.enterpriseConfig!.specifiedAccountTransfer == true
-                          ? const Row(
+                      state.enterpriseConfig != null &&
+                              state.enterpriseConfig!
+                                      .specifiedAccountTransfer ==
+                                  true
+                          ? Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(children: [
+                                const Row(children: [
                                   Text('NÚMERO DE CUENTA',
                                       style: TextStyle(fontSize: 14)),
                                   Icon(Icons.account_balance_outlined)
                                 ]),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          if (data.isNotEmpty) {
+                                            paymentTransferController.text = '';
+                                          }
+
+                                          if (paymentTransferController
+                                              .text.isNotEmpty) {
+                                            if (double.tryParse(
+                                                    paymentTransferController
+                                                        .text) !=
+                                                null) {
+                                              paymentTransferValue =
+                                                  double.parse(
+                                                      paymentTransferController
+                                                          .text);
+                                              var parsedNumberString = '';
+                                              if (selectedOption != null) {
+                                                var parts = selectedOption!
+                                                    .split(' - ');
+                                                if (parts.length >= 3) {
+                                                  parsedNumberString = parts[2]
+                                                      .replaceAll(
+                                                          RegExp(r'[^\d]+'),
+                                                          '');
+                                                }
+                                              }
+                                              if (paymentEfectyController
+                                                  .text.isNotEmpty) {
+                                                paymentEfectyValue =
+                                                    double.parse(
+                                                        paymentEfectyController
+                                                            .text);
+                                              } else {
+                                                paymentEfectyValue = 0;
+                                              }
+                                              var parsedNumber =
+                                                  parsedNumberString.isNotEmpty
+                                                      ? int.parse(
+                                                          parsedNumberString)
+                                                      : null;
+                                              var count = 0.0;
+                                              data.add([
+                                                paymentTransferValue,
+                                                parsedNumber,
+                                                selectedOption
+                                              ]);
+
+                                              for (var i = 0;
+                                                  i < data.length;
+                                                  i++) {
+                                                count += double.parse(
+                                                    data[i][0].toString());
+                                              }
+                                              total =
+                                                  count + paymentEfectyValue;
+                                            }
+                                          } else {
+                                            if (double.tryParse(
+                                                    paymentTransferArrayController
+                                                        .text) !=
+                                                null) {
+                                              paymentTransferValue = double.parse(
+                                                  paymentTransferArrayController
+                                                      .text);
+                                              var parsedNumberString = '';
+                                              if (selectedOption != null) {
+                                                var parts = selectedOption!
+                                                    .split(' - ');
+                                                if (parts.length >= 3) {
+                                                  parsedNumberString = parts[2]
+                                                      .replaceAll(
+                                                          RegExp(r'[^\d]+'),
+                                                          '');
+                                                }
+                                              }
+                                              if (paymentEfectyController
+                                                  .text.isNotEmpty) {
+                                                paymentEfectyValue =
+                                                    double.parse(
+                                                        paymentEfectyController
+                                                            .text);
+                                              } else {
+                                                paymentEfectyValue = 0;
+                                              }
+                                              var parsedNumber =
+                                                  parsedNumberString.isNotEmpty
+                                                      ? int.parse(
+                                                          parsedNumberString)
+                                                      : null;
+                                              var count = 0.0;
+                                              data.add([
+                                                paymentTransferValue,
+                                                parsedNumber,
+                                                selectedOption
+                                              ]);
+
+                                              for (var i = 0;
+                                                  i < data.length;
+                                                  i++) {
+                                                count += double.parse(
+                                                    data[i][0].toString());
+                                              }
+                                              total =
+                                                  count + paymentEfectyValue;
+                                            }
+                                          }
+                                          for (var element in widget.arguments.summaries!) {
+                                            totalSummary = element.grandTotalCopy!;
+                                          }
+                                          if (total != totalSummary) {
+                                            message =
+                                                'el recaudo debe ser igual al total';
+                                            ScaffoldMessenger.of(context)
+                                                .hideCurrentSnackBar();
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                backgroundColor: Colors.red,
+                                                content: Text(
+                                                  message,
+                                                  style: const TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        });
+                                      },
+                                      icon: const Icon(Icons.add),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.qr_code_2),
+                                      onPressed: () {
+                                        _navigationService.goTo(
+                                            CodigoQRouteTransf,
+                                            arguments: _storageService
+                                                .getString('code_qr'));
+                                      },
+                                    ),
+                                  ],
+                                )
                               ],
                             )
                           : Container(),
-                      state.enterpriseConfig != null && state.enterpriseConfig!.specifiedAccountTransfer == true
+                      state.enterpriseConfig != null &&
+                              state.enterpriseConfig!
+                                      .specifiedAccountTransfer ==
+                                  true
                           ? BlocBuilder<AccountBloc, AccountState>(
-                        builder: (context, state) {
-                          if (state is AccountLoadingState) {
-                            return const CircularProgressIndicator();
-                          } else if (state is AccountLoadedState) {
-                            final formattedAccountLists = state.formattedAccountList;
-                            return DropdownButtonFormField<String>(
-                              isExpanded: true,
-                              value: state.formattedAccountList.first ,
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  //selectedOption = newValue;
-                                  showDropdownError = false;
-                                });
-                              },
-                              decoration: const InputDecoration(
-                                contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.grey, width: 2.0),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: kPrimaryColor, width: 2.0),
-                                ),
-                                errorBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: kPrimaryColor, width: 2.0),
-                                ),
-                                hintStyle: TextStyle(
-                                  color: Colors.orange,
-                                ),
-                              ),
-                              style: const TextStyle(
-                                color: kPrimaryColor,
-                              ),
-                              dropdownColor: Colors.white,
-                              validator: (value) {
-                                if (showDropdownError &&
-                                    (value == null ||
-                                        value.isEmpty ||
-                                        value == options[0])) {
-                                  return 'Selecciona una opción válida';
-                                }
-                                return null;
-                              },
-                              items: formattedAccountLists
-                                  .map<DropdownMenuItem<String>>(
-                                      (String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(
-                                        value.contains('-')
-                                            ? '${value.split('-')[0]} - ${value.split('-')[1]}'
-                                            : 'Seleccionar cuenta',
-                                        style: const TextStyle(
-                                            color: Colors.black),
+                              builder: (context, state) {
+                                if (state is AccountLoadingState) {
+                                  return const CircularProgressIndicator();
+                                } else if (state is AccountLoadedState) {
+                                  final formattedAccountLists =
+                                      state.formattedAccountList;
+                                  return DropdownButtonFormField<String>(
+                                    isExpanded: true,
+                                    value: state.formattedAccountList.first,
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        selectedOption = newValue;
+                                        showDropdownError = false;
+                                      });
+                                    },
+                                    decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 12),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.grey, width: 2.0),
                                       ),
-                                    );
-                                  }).toList(),
-                            );
-                          } else if (state is AccountErrorState) {
-                            return Text('Error: ${state.error}');
-                          } else {
-                            return const Text('No se han cargado datos aún.');
-                          }
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: kPrimaryColor, width: 2.0),
+                                      ),
+                                      errorBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: kPrimaryColor, width: 2.0),
+                                      ),
+                                      hintStyle: TextStyle(
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+                                    style: const TextStyle(
+                                      color: kPrimaryColor,
+                                    ),
+                                    dropdownColor: Colors.white,
+                                    validator: (value) {
+                                      if (showDropdownError &&
+                                          (value == null ||
+                                              value.isEmpty ||
+                                              value == options[0])) {
+                                        return 'Selecciona una opción válida';
+                                      }
+                                      return null;
+                                    },
+                                    items: formattedAccountLists
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          value.contains('-')
+                                              ? '${value.split('-')[0]} - ${value.split('-')[1]}'
+                                              : 'Seleccionar cuenta',
+                                          style: const TextStyle(
+                                              color: Colors.black),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  );
+                                } else if (state is AccountErrorState) {
+                                  return Text('Error: ${state.error}');
+                                } else {
+                                  return const Text(
+                                      'No se han cargado datos aún.');
+                                }
+                              },
+                            )
+                          : Container(),
+                      state.enterpriseConfig != null &&
+                              state.enterpriseConfig!
+                                      .specifiedAccountTransfer ==
+                                  true
+                          ? TransactionList(
+                        data: data,
+                        onTotalChange: (amount) {
+                          setState(() {
+                            total += amount;
+                          });
+                        },
+                        onDataRemove: (removedData) {
+                          setState(() {
+                            data.remove(removedData);
+                          });
                         },
                       )
+
                           : Container(),
                       const SizedBox(height: 50),
                       Row(
@@ -435,7 +639,7 @@ class CollectionViewState extends State<CollectionView>
                   press: () => context
                       .read<CollectionCubit>()
                       .goToFirm(widget.arguments.orderNumber))),
-          SizedBox(height: size.height * 0.12),
+          SizedBox(height: size.height * 0.10),
           isLoading
               ? const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
@@ -458,7 +662,9 @@ class CollectionViewState extends State<CollectionView>
                                     .confirmTransaction(
                                         widget.arguments,
                                         paymentEfectyController,
-                                        paymentTransferController);
+                                        paymentTransferController,
+                                       data
+                                );
                               } else if (total != state.totalSummary) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -473,7 +679,7 @@ class CollectionViewState extends State<CollectionView>
                                     .confirmTransaction(
                                         widget.arguments,
                                         paymentEfectyController,
-                                        paymentTransferController);
+                                        paymentTransferController,data);
                               }
                               break;
                             case true:
@@ -484,7 +690,7 @@ class CollectionViewState extends State<CollectionView>
                                     .confirmTransaction(
                                         widget.arguments,
                                         paymentEfectyController,
-                                        paymentTransferController);
+                                        paymentTransferController,data);
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -504,6 +710,7 @@ class CollectionViewState extends State<CollectionView>
                                   style: TextStyle(color: Colors.white))));
                         }
                       })),
+
         ]),
       ),
     ));

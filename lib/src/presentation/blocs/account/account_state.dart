@@ -7,8 +7,10 @@ class AccountLoadingState extends AccountState {}
 
 class AccountLoadedState extends AccountState {
   final List<String> formattedAccountList;
+  final List<Account> accounts;
 
-  AccountLoadedState(this.formattedAccountList);
+
+  AccountLoadedState(this.formattedAccountList, this.accounts);
 }
 
 class AccountErrorState extends AccountState {

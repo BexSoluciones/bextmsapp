@@ -10,6 +10,7 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/helpers/index.dart';
 
 //cubit
+import '../../blocs/gps/gps_bloc.dart';
 import '../base/base_cubit.dart';
 
 //blocs
@@ -57,12 +58,13 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final LocationRepository _locationRepository;
   final ProcessingQueueBloc _processingQueueBloc;
+  final GpsBloc gpsBloc;
 
   StreamSubscription? locationSubscription;
   CurrentUserLocationEntity? currentLocation;
 
   HomeCubit(this._databaseRepository, this._apiRepository,
-      this._locationRepository, this._processingQueueBloc)
+      this._locationRepository, this._processingQueueBloc,this.gpsBloc)
       : super(const HomeLoading(), null);
 
   Future<void> getAllWorks() async {
@@ -108,7 +110,9 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
 
       final timer0 = logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
 
-      currentLocation = await _locationRepository.getCurrentLocation();
+      //currentLocation = await _locationRepository.getCurrentLocation();
+      var currentLocation = gpsBloc.state.lastKnownLocation;
+
 
       final user = _storageService.getObject('user') != null
           ? User.fromMap(_storageService.getObject('user')!)
@@ -160,7 +164,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                 device != null ? device['model'] : null,
                 version,
                 currentLocation!.latitude.toString(),
-                currentLocation!.longitude.toString(),
+                currentLocation.longitude.toString(),
                 DateTime.now().toIso8601String(),
                 'sync'));
 

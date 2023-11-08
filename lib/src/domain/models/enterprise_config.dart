@@ -14,8 +14,9 @@ class EnterpriseConfig extends Equatable {
       skipUpdate;
   final String? mapbox;
   final String? codeQr;
-  final int? limitDaysWorks, ratio;
+  final int? limitDaysWorks, ratio,distance;
   final bool? blockPartial;
+  final bool? background_location;
 
   const EnterpriseConfig(
       {this.id,
@@ -33,7 +34,9 @@ class EnterpriseConfig extends Equatable {
       this.blockPartial,
       this.skipUpdate,
       this.limitDaysWorks,
-      this.ratio});
+      this.ratio,
+        this.background_location,this.distance,
+      });
 
   factory EnterpriseConfig.fromMap(Map<String, dynamic> map) {
     return EnterpriseConfig(
@@ -121,6 +124,14 @@ class EnterpriseConfig extends Equatable {
           ? map['limit_days_works'] as int
           : null,
       ratio: map['ratio'] != null ? map['ratio'] as int : null,
+        background_location:  map['block_partial'] != null
+            ? map['background_location'] is int
+            ? map['background_location'] == 1
+            ? true
+            : false
+            : map['background_location']
+            : null,
+      distance: map['distance'] != null ? map['distance'] as int : null,
     );
   }
 
@@ -141,7 +152,9 @@ class EnterpriseConfig extends Equatable {
       'had_reason_respawn': hadReasonRespawn,
       'fixed_delivery_distance': fixedDeliveryDistance,
       'ratio': ratio,
+      'distance':distance,
       'specified_account_transfer': specifiedAccountTransfer,
+      'background_location':background_location
     };
   }
 
@@ -165,6 +178,8 @@ class EnterpriseConfig extends Equatable {
         blockPartial,
         skipUpdate,
         limitDaysWorks,
-        ratio
+        ratio,
+        distance,
+        background_location
       ];
 }

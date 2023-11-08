@@ -10,6 +10,7 @@ import 'package:map_launcher/map_launcher.dart';
 import 'package:bexdeliveries/core/helpers/index.dart';
 
 //blocs
+import '../../blocs/gps/gps_bloc.dart';
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
 
 //utils
@@ -37,11 +38,13 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   final LocationRepository _locationRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final helperFunctions = HelperFunctions();
+  final GpsBloc gpsBloc;
+
 
   CurrentUserLocationEntity? currentLocation;
 
   SummaryCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc)
+      this._processingQueueBloc, this.gpsBloc)
       : super(const SummaryLoading());
 
   Future<void> getAllSummariesByOrderNumber(int workId) async {
@@ -80,10 +83,12 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     var isArrived = await _databaseRepository.validateTransactionArrived(transaction.workId, 'arrived');
 
     if(isArrived && vts == false){
-      currentLocation ??= await _locationRepository.getCurrentLocation();
+      //currentLocation ??= await _locationRepository.getCurrentLocation();
+
+      var currentLocation = gpsBloc.state.lastKnownLocation;
 
       transaction.latitude = currentLocation!.latitude.toString();
-      transaction.longitude = currentLocation!.longitude.toString();
+      transaction.longitude = currentLocation.longitude.toString();
 
       await _databaseRepository.insertTransaction(transaction);
 
@@ -113,6 +118,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
             typeOfCharge: summary.typeOfCharge!,
             orderNumber: summary.orderNumber,
             operativeCenter: summary.operativeCenter!,
+           summaries: summaries
         ));
   }
 
@@ -120,10 +126,17 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
       Work work, Transaction transaction) async {
     emit(const SummaryLoading());
 
-    currentLocation ??= await _locationRepository.getCurrentLocation();
+    //currentLocation ??= await _locationRepository.getCurrentLocation();
+
+   // var currentLocation = gpsBloc.state.lastKnownLocation;
+
+    //transaction.latitude = currentLocation!.latitude.toString();
+    //transaction.longitude = currentLocation.longitude.toString();
+
+    var currentLocation = gpsBloc.state.lastKnownLocation;
 
     transaction.latitude = currentLocation!.latitude.toString();
-    transaction.longitude = currentLocation!.longitude.toString();
+    transaction.longitude = currentLocation.longitude.toString();
 
     await _databaseRepository.insertTransaction(transaction);
 
