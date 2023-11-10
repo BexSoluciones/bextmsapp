@@ -3,6 +3,7 @@ import 'dart:convert';
 
 
 import 'package:bloc/bloc.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -116,8 +117,9 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
         print('StartFollowingUser');
       }
 
-    } catch (e) {
+    } catch (e,stackTrace) {
       print('Error GPS:${e.toString()}');
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
     }
   }
 
@@ -304,8 +306,9 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
         await _databaseRepository.insertLocation(location);
         await _databaseRepository.insertProcessingQueue(processingQueue);
       }
-    } catch (e) {
+    } catch (e,stackTrace) {
       print('error saving ---- $e');
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
     }
   }
 

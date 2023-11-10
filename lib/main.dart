@@ -10,12 +10,13 @@ import 'package:bexdeliveries/src/presentation/cubits/type/work_type_cubit.dart'
 import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:path/path.dart' as p;
@@ -109,6 +110,8 @@ Future<void> main() async {
   await initializeDependencies();
   await HiveDatabaseManager().start();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  final databaseCubit = DatabaseCubit(locator<ApiRepository>(), locator<DatabaseRepository>());
+  await databaseCubit.getDatabase();
 
 
   ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
@@ -151,17 +154,23 @@ Future<void> main() async {
   if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
 
   // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-  runApp(const MyApp());
+  runApp(MyApp(databaseCubit: databaseCubit));
+
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final DatabaseCubit databaseCubit;
+  const MyApp({super.key, required this.databaseCubit});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState(databaseCubit);
 }
 
 class _MyAppState extends State<MyApp> {
+  final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
+  final DatabaseCubit databaseCubit;
+
+  _MyAppState(this.databaseCubit);
   Future<void> setupInteractedMessage(BuildContext context) async {
     initialize(context);
     RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
@@ -219,8 +228,44 @@ class _MyAppState extends State<MyApp> {
         notificationDetails,
         payload: jsonEncode(message.data),
       );
-    } on Exception catch (e) {
+    } on Exception catch (e,stackTrace) {
       debugPrint(e.toString());
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+    }
+  }
+
+  Future<void> _fetchRemoteConfig() async {
+    while (true) {
+      try {
+        await _remoteConfig.setConfigSettings(RemoteConfigSettings(
+            fetchTimeout: const Duration(seconds: 1),
+            minimumFetchInterval: const Duration(seconds: 1)));
+        await _remoteConfig.fetchAndActivate();
+        //Firebase
+        var codeTransporter = _remoteConfig.getString('code_transporter');
+        var forceProcessingQueue = _remoteConfig.getBool('force_processing_queue');
+        var enterprise = _remoteConfig.getString('enterprise');
+        var forceDatabase = _remoteConfig.getBool('force_database_users');
+
+        if (forceDatabase &&
+            codeTransporter == _storageService.getString('username') &&
+            enterprise == _storageService.getString('company_name')) {
+          print('force Database');
+
+          databaseCubit.exportDatabase(context,false);
+        }
+        if (forceProcessingQueue &&
+            codeTransporter == _storageService.getString('username') &&
+            enterprise == _storageService.getString('company')) {
+          print('------------------\nENTRO A FORCE PROCESSING QUEUE');
+        }
+      } catch (e,stackTrace) {
+        print('Error fetching remote config: $e');
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
+      print(_storageService.getInt('time_to_callback'));
+      await Future.delayed(
+          Duration(minutes: _storageService.getInt('time_to_callback') ?? 10));
     }
   }
   @override
@@ -428,6 +473,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     setupInteractedMessage(context);
+    _fetchRemoteConfig();
+    widget.databaseCubit.getDatabase();
     super.initState();
   }
 }

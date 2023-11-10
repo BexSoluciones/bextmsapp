@@ -1,5 +1,6 @@
 
 import 'package:equatable/equatable.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 //utils
 import '../../../utils/constants/strings.dart';
@@ -34,8 +35,9 @@ class PoliticsCubit extends BaseCubit<PoliticsState, String?> {
         }
 
         emit(PoliticsSuccess(token: _storageService.getString('token'), route: route));
-      } catch (e) {
+      } catch (e,stackTrace) {
         emit(PoliticsFailed(error: e.toString()));
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
     });
   }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -138,9 +139,10 @@ class ProcessingQueueBloc
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
@@ -158,9 +160,10 @@ class ProcessingQueueBloc
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
 
@@ -179,9 +182,10 @@ class ProcessingQueueBloc
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
@@ -199,9 +203,10 @@ class ProcessingQueueBloc
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
@@ -229,9 +234,10 @@ class ProcessingQueueBloc
               queue.error = res.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
@@ -240,9 +246,10 @@ class ProcessingQueueBloc
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
 
@@ -261,9 +268,10 @@ class ProcessingQueueBloc
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
@@ -272,9 +280,10 @@ class ProcessingQueueBloc
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
@@ -284,9 +293,10 @@ class ProcessingQueueBloc
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
@@ -296,9 +306,10 @@ class ProcessingQueueBloc
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
 
@@ -309,9 +320,10 @@ class ProcessingQueueBloc
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
@@ -329,9 +341,10 @@ class ProcessingQueueBloc
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
 
@@ -342,9 +355,10 @@ class ProcessingQueueBloc
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
@@ -354,9 +368,10 @@ class ProcessingQueueBloc
 
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
 
@@ -377,9 +392,10 @@ class ProcessingQueueBloc
             }
 
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
@@ -405,7 +421,8 @@ class ProcessingQueueBloc
           await _databaseRepository.insertProcessingQueue(processingQueue);
         }
       }
-    } catch (e) {
+    } catch (e,stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       if (kDebugMode) {
         print(e);
       }

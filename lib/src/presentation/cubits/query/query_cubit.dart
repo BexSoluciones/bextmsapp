@@ -1,5 +1,6 @@
 
 import 'package:equatable/equatable.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 //domain
 import '../../../domain/models/work.dart';
@@ -59,8 +60,9 @@ class QueryCubit extends BaseCubit<QueryState, List<Work>?> {
         }).then((value) => emit(QuerySuccess(works: data,respawns: respawnList,totalRespawn:countTotalReturnRespawn,rejects: rejectList ,totalRejects: countTotalReturnReject,delivery: deliveryList,totalDelivery: countTotalReturnDelivery,countTotalCollectionWorks: countTotalCollectionWork)));
 
 
-      } catch (e) {
+      } catch (e,stackTrace) {
         emit(QueryFailed(error: e.toString()));
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
     });
   }
