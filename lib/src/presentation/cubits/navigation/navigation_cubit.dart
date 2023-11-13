@@ -291,4 +291,8 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
     emit(const NavigationLoading());
   }
+
+  Future<void> clean()async{
+    carouselData.clear();
+  }
 }

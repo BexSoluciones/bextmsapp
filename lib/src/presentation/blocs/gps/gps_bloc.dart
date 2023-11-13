@@ -119,7 +119,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
 
     } catch (e,stackTrace) {
       print('Error GPS:${e.toString()}');
-      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      //await FirebaseCrashlytics.instance.recordError(e, stackTrace);
     }
   }
 
