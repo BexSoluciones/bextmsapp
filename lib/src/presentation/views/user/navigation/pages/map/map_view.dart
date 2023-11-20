@@ -130,7 +130,10 @@ class _MapPageState extends State<MapPage> {
   AppBar get buildAppBar => AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => _navigationService.goBack(),
+          onPressed: () {
+            _navigationService.goBack();
+            context.read<NavigationCubit>().clean();
+          }
         ),
         title: Text('Cientes a visitar: ${navigationCubit.state.works.length}'),
         actions: [

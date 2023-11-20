@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:latlong2/latlong.dart';
@@ -174,8 +175,9 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
                 'geometry': geometry,
                 'polygon': polygon
               });
-            } on FormatException catch (e) {
+            } on FormatException catch (e,stackTrace) {
               emit(NavigationFailed(error: e.message));
+              await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             }
           }
         }
@@ -208,9 +210,11 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
             pageIndex: state.pageIndex,
             model: model);
       });
-    } catch(e){
+    } catch(e,stackTrace){
       print(e);
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       return NavigationFailed(error: e.toString());
+
     }
   }
 
@@ -286,5 +290,9 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     }
 
     emit(const NavigationLoading());
+  }
+
+  Future<void> clean()async{
+    carouselData.clear();
   }
 }

@@ -1,14 +1,18 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 import 'package:location/location.dart' as loc;
+import 'package:sqflite/sqflite.dart' as sqflite;
 
 //domain
 import '../../src/domain/models/work.dart';
@@ -216,7 +220,8 @@ class HelperFunctions {
       if (await file.exists()) {
         await file.delete();
       }
-    } catch (e) {
+    } catch (e,stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       return Future.value(null);
     }
   }
@@ -233,7 +238,8 @@ class HelperFunctions {
         text: message,
       );
       await FlutterWebBrowser.openWebPage(url: link.toString());
-    } catch (e) {
+    } catch (e,stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       return;
     }
   }
@@ -327,4 +333,5 @@ class HelperFunctions {
     }
     return permissionStatus;
   }
+
 }

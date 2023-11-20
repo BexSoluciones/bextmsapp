@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class PushNotificationService {
@@ -17,7 +18,8 @@ class PushNotificationService {
       try {
         print('onResume: $message');
         print(message.notification);
-      } catch (e) {
+      } catch (e, stackTrace) {
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace);
         print(e);
       }
     });

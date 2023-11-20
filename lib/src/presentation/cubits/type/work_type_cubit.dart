@@ -2,6 +2,7 @@ import 'package:bexdeliveries/src/domain/models/work.dart';
 import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
 import 'package:bexdeliveries/src/presentation/cubits/base/base_cubit.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:meta/meta.dart';
 
 part 'work_type_state.dart';
@@ -22,6 +23,7 @@ class WorkTypeCubit extends BaseCubit<WorkTypeState, List<WorkTypes>?> {
         emit(WorkTypeCubitSuccess(workTypes:workTypes));
       } catch (error, stackTrace) {
         print('Error getWorkTypesFromWork data: $error');
+        await FirebaseCrashlytics.instance.recordError(error, stackTrace);
         emit(WorkTypeCubitFailed(error: error.toString()));
       }
     });

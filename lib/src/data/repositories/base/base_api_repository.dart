@@ -1,6 +1,7 @@
 import 'dart:io' show HttpStatus;
 
 import 'package:dio/dio.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:meta/meta.dart';
 
 import '../../../utils/resources/data_state.dart';
@@ -21,8 +22,9 @@ abstract class BaseApiRepository {
           requestOptions: httpResponse.requestOptions,
         );
       }
-    } on DioError catch (error) {
+    } on DioError catch (error,stackTrace) {
       final errorMessage = DioExceptions.fromDioError(error, 'SM-A33G').toString();
+      await FirebaseCrashlytics.instance.recordError(error, stackTrace);
       return DataFailed(errorMessage);
     }
   }

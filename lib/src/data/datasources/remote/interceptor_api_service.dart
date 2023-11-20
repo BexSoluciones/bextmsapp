@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
 //services
@@ -56,8 +57,9 @@ class Logging extends Interceptor {
             .catchError((e) {
           handler.next(err);
         }));
-      } catch (e) {
+      } catch (e,stackTrace) {
         handler.next(err);
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
     } else {
       handler.next(err);

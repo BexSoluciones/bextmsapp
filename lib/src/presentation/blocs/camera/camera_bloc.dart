@@ -7,6 +7,7 @@ import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -61,8 +62,9 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     } on CameraException catch (error) {
       _controller.dispose();
       emit(CameraFailure(error: error.description!));
-    } catch (error) {
+    } catch (error,stackTrace) {
       emit(CameraFailure(error: error.toString()));
+      await FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }
   }
 
@@ -82,8 +84,9 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
         }
       } on CameraException catch (error) {
         emit(CameraCaptureFailure(error: error.description!));
-      } catch (error) {
+      } catch (error,stackTrace) {
         emit(CameraFailure(error: error.toString()));
+        await FirebaseCrashlytics.instance.recordError(error, stackTrace);
       }
     } else {
       emit(const CameraFailure(error: 'Camera is not ready'));
@@ -121,8 +124,9 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       } else {
         emit(const CameraFailure(error: 'Selección de imagen cancelada'));
       }
-    } catch (error) {
+    } catch (error,stackTrace) {
       emit(CameraCaptureFailure(error: error.toString()));
+      await FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }
   }
 

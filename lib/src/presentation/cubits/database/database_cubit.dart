@@ -157,7 +157,7 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
     return true;
   }
 
-  Future<void> exportDatabase(BuildContext context) async {
+  Future<void> exportDatabase(BuildContext context, bool main) async {
     if (isBusy) return;
 
     await run(() async {
@@ -202,18 +202,20 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
               .where((element) => element.done == false || element.done == null)
               .isNotEmpty &&
           context.mounted) {
-        snackbar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'Error',
-            message: state.error!,
-            contentType: ContentType.failure,
-          ),
-        );
+        main
+            ? snackbar = SnackBar(
+                elevation: 0,
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.transparent,
+                content: AwesomeSnackbarContent(
+                  title: 'Error',
+                  message: state.error!,
+                  contentType: ContentType.failure,
+                ),
+              )
+            : null;
       } else {
-        snackbar = SnackBar(
+        main? snackbar = SnackBar(
           elevation: 0,
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.transparent,
@@ -222,13 +224,13 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
             message: 'La base de datos se subió con éxito 🥳🥳🥳',
             contentType: ContentType.success,
           ),
-        );
+        ):null;
       }
 
-      if (context.mounted) {
+      if (context.mounted && main) {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
-          ..showSnackBar(snackbar);
+          ..showSnackBar(snackbar!);
       }
 
       final combinedFile =

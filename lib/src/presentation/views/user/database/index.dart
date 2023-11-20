@@ -105,7 +105,7 @@ class DatabaseViewState extends State<DatabaseView> {
         children: [
           IconButton(
             icon: const Icon(Icons.upload_file, size: 50),
-            onPressed: () => databaseCubit.exportDatabase(context),
+            onPressed: () => databaseCubit.exportDatabase(context,true),
           ),
           if (path != null) Text(path, textAlign: TextAlign.center),
           if (error != null) Text(error, textAlign: TextAlign.center)

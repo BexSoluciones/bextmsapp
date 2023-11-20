@@ -1,4 +1,6 @@
 
+import 'package:sqflite/sqflite.dart';
+
 import '../../../../domain/models/notification.dart';
 import '../app_database.dart';
 
@@ -45,6 +47,12 @@ class NotificationDao {
     final db = await _appDatabase.streamDatabase;
     return db!.update(tableNotifications, {'read_at': readAt},
         where: 'id = ?', whereArgs: [notificationid]);
+  }
+
+  Future<int?> countAllUnreadNotifications() async {
+    final db = await _appDatabase.streamDatabase;
+    return Sqflite.firstIntValue(await db!.rawQuery(
+        'SELECT COUNT(*) FROM $tableNotifications WHERE read_at IS NULL'));
   }
 
   Future<int> insertNotification(PushNotification notification) {

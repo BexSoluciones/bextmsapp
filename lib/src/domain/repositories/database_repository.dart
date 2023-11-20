@@ -129,4 +129,5 @@ abstract class DatabaseRepository {
   Future<int> insertNotification(PushNotification notification);
   Future<List<PushNotification>> getNotifications();
   Future<void> updateNotification(int notificationId, String readAt);
+  Future<int?> countAllUnreadNotifications();
 }
