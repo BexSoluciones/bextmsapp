@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'package:bexdeliveries/src/data/datasources/local/app_database.dart';
+import 'package:bexdeliveries/src/data/datasources/local/dao/notification_dao.dart';
 import 'package:bexdeliveries/src/data/datasources/local/hive/core/hive_database_manager.dart';
 import 'package:bexdeliveries/src/presentation/blocs/account/account_bloc.dart';
 import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
+import 'package:bexdeliveries/src/presentation/cubits/notification/count/count_cubit.dart';
 import 'package:bexdeliveries/src/presentation/cubits/notification/notification_cubit.dart';
 import 'package:bexdeliveries/src/presentation/cubits/ordersummaryreasons/ordersummaryreasons_cubit.dart';
 import 'package:bexdeliveries/src/presentation/cubits/type/work_type_cubit.dart';
@@ -30,6 +33,7 @@ import 'src/config/theme/app.dart';
 //domain
 import 'src/domain/repositories/api_repository.dart';
 import 'src/domain/repositories/database_repository.dart';
+import '../../src/domain/models/notification.dart'  as notificationModel;
 
 //cubits
 import 'src/presentation/blocs/theme/theme_bloc.dart';
@@ -89,6 +93,16 @@ List<CameraDescription> cameras = [];
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
+
+  final notificationDao = NotificationDao(AppDatabase.instance);
+  final pushNotification = (notificationModel.PushNotification(
+      id_from_server: message.data['notification_id'],
+      title: message.notification?.title,
+      body: message.notification?.body,
+      with_click_action: message.notification?.android?.clickAction,
+      date: message.data['date'],
+      read_at: null));
+  await notificationDao.insertNotification(pushNotification);
 }
 
 @pragma('vm:entry-point')
@@ -405,6 +419,8 @@ class _MyAppState extends State<MyApp> {
           ),
           BlocProvider(
               create: (context) => NotificationCubit(locator<DatabaseRepository>())),
+          BlocProvider(
+              create: (context) => CountCubit(locator<DatabaseRepository>())),
         ],
         child: BlocProvider(
             create: (context) => ThemeBloc(),

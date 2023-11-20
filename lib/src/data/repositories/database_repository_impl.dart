@@ -459,6 +459,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.notificationDao.updateNotification(notificationId, readAt);
   }
 
+  @override
+  Future<int?> countAllUnreadNotifications() {
+    return _appDatabase.notificationDao.countAllUnreadNotifications();
+  }
+
 
   // initialize and close methods go here
   Future init() async {
