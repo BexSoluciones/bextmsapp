@@ -12,6 +12,7 @@ import 'package:map_launcher/map_launcher.dart';
 
 //core
 import 'package:bexdeliveries/core/helpers/index.dart';
+import 'package:routing_client_dart/routing_client_dart.dart';
 
 //cubits
 import '../../blocs/gps/gps_bloc.dart';
@@ -142,6 +143,19 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
               var geometry = jsonDecode(works[index].geometry!);
 
               var layers = geometry['coordinates'] as List<dynamic>;
+
+              List<LngLat> waypoints = [
+                LngLat(lng: double.parse(works[0].longitude!), lat: double.parse(works[0].latitude!)),
+                LngLat(lng: double.parse(works[index].longitude!), lat: double.parse(works[index].latitude!)),
+              ];
+              final manager = OSRMManager();
+              final road = await manager.getRoad(
+                waypoints: waypoints,
+                geometries: Geometries.geojson,
+                steps: true,
+                language: Languages.en,
+              );
+              print("----${road.polyline}");
 
               markers.add(
                 Marker(

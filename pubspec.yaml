@@ -73,6 +73,7 @@ dependencies:
   image_picker: ^0.8.7+5
   image_cropper: ^4.0.1
   readmore: ^2.2.0
+  routing_client_dart: ^0.5.3
   #download regions
   better_open_file: ^3.6.4
   version: ^3.0.2
