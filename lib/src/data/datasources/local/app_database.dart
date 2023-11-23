@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:bexdeliveries/src/data/datasources/local/dao/notification_dao.dart';
 import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 import 'package:bexdeliveries/src/domain/models/transaction.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
@@ -85,7 +88,6 @@ class AppDatabase {
         ${WorkFields.active} BOOLEAN DEFAULT NULL,
         ${WorkFields.duration} TEXT DEFAULT NULL,
         ${WorkFields.distance} TEXT DEFAULT NULL,
-        ${WorkFields.geometry} TEXT DEFAULT NULL,
         ${WorkFields.zoneId} INTEGER DEFAULT NULL,
         ${WorkFields.warehouseId} INTEGER DEFAULT NULL,
         ${WorkFields.createdAt} TEXT DEFAULT NULL,
@@ -281,6 +283,13 @@ class AppDatabase {
         ${NotificationFields.date} TEXT,
         ${NotificationFields.with_click_action} TEXT,
         ${NotificationFields.read_at} TEXT 
+      )
+    ''',
+    '''
+      CREATE TABLE  polylines (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        workcode TEXT,
+        polylines TEXT
       )
     '''
 

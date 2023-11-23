@@ -1,3 +1,5 @@
+import 'package:bexdeliveries/src/domain/models/requests/send_token.dart';
+
 import '../../utils/resources/data_state.dart';
 
 import '../models/requests/enterprise_request.dart';
@@ -100,5 +102,9 @@ abstract class ApiRepository {
 
   Future<DataState<StatusResponse>> georeference({
     required ClientRequest request
+  });
+
+  Future<DataState<StatusResponse>> sendFCMToken({
+    required SendTokenRequest request
   });
 }

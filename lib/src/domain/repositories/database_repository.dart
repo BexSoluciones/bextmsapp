@@ -1,4 +1,5 @@
 import 'package:bexdeliveries/src/domain/models/notification.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 
@@ -130,4 +131,9 @@ abstract class DatabaseRepository {
   Future<List<PushNotification>> getNotifications();
   Future<void> updateNotification(int notificationId, String readAt);
   Future<int?> countAllUnreadNotifications();
+
+  //POLYLINES
+  Future<int> insertPolylines(String workcode,List<LatLng> data);
+  Future<List<LatLng>> getPolylines(String workcode);
+
 }

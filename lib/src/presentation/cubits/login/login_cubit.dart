@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:bexdeliveries/src/domain/models/requests/account_request.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_udid/flutter_udid.dart';
+import 'package:intl/intl.dart';
 import 'package:yaml/yaml.dart';
 import 'package:location_repository/location_repository.dart';
 
@@ -127,6 +129,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
               ? Enterprise.fromMap(_storageService.getObject('enterprise')!)
               : null));
 
+      
       currentLocation = await _locationRepository.getCurrentLocation();
       //var currentLocation = gpsBloc.state.lastKnownLocation;
 
@@ -141,16 +144,31 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
 
         var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
         var version = yaml['version'];
+        var token = await FirebaseMessaging.instance.getToken();
+
 
         _storageService.setString('username', usernameController.text);
         _storageService.setString('password', passwordController.text);
         _storageService.setString('token', response.data!.login.token);
         _storageService.setObject('user', response.data!.login.user!.toMap());
         _storageService.setInt('user_id', response.data!.login.user!.id);
+        _storageService.setString('fcm_token', token);
 
         Future.wait([getConfigEnterprise(), getReasons(),getAccounts()]);
 
         var device = await helperFunctions.getDevice();
+
+        var procesingQueue = ProcessingQueue(
+          body: jsonEncode({
+            'user_id': _storageService.getInt('user_id')!.toString(),
+            'fcm_token': '${_storageService.getString('fcm_token')}'
+          }),
+          task: 'incomplete',
+          code: 'HGHFJ52JSD',
+          createdAt:  DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()
+          ), updatedAt:  DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+        );
+        _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: procesingQueue));
 
         final responseWorks = await _apiRepository.works(
             request: WorkRequest(

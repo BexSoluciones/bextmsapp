@@ -33,7 +33,7 @@ class WorkFields {
     status,
     duration,
     distance,
-    geometry,
+    //geometry,
     zoneId,
     warehouseId,
     createdAt,
@@ -70,7 +70,7 @@ class WorkFields {
   static const String active = 'active';
   static const String duration = 'duration';
   static const String distance = 'distance';
-  static const String geometry = 'geometry';
+  //static const String geometry = 'geometry';
   static const String zoneId = 'zone_id';
   static const String warehouseId = 'warehouse_id';
   static const String createdAt = 'created_at';
@@ -148,7 +148,7 @@ class Work {
         this.status,
         this.distance,
         this.duration,
-        this.geometry,
+        //this.geometry,
         this.right,
         this.left,
         this.hasCompleted,
@@ -234,7 +234,7 @@ class Work {
   String? status;
   String? distance;
   String? duration;
-  String? geometry;
+  //String? geometry;
   String? createdAt;
   String? updatedAt;
   int? right;
@@ -282,7 +282,7 @@ class Work {
     status = json['status'];
     distance = json['distance'];
     duration = json['duration'];
-    geometry = json['geometry'];
+    //geometry = json['geometry'];
     right = json['right'];
     left = json['left'];
     hasCompleted = json['has_completed'];
@@ -328,7 +328,7 @@ class Work {
     data['active'] = active != null && active! ? 1 : 0;
     data['distance'] = distance;
     data['duration'] = duration;
-    data['geometry'] = geometry;
+    //data['geometry'] = geometry;
     data['zone_id'] = zoneId;
     data['warehouse_id'] = warehouseId;
     data['created_at'] = createdAt;

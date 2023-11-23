@@ -644,6 +644,44 @@ class ApiService {
         headers: result.headers);
   }
 
+  Future<Response<StatusResponse>> sendFCMToken(int idUser, String fmcToken) async {
+
+      const extra = <String, dynamic>{};
+      final queryParameters = <String, dynamic>{};
+      queryParameters.removeWhere((k, v) => v == null);
+
+      final headers = <String, dynamic>{
+        HttpHeaders.contentTypeHeader: 'application/json',
+      };
+
+      final data = <String, dynamic>{
+        'user_id': idUser,
+        'fcm_token': fmcToken,
+      };
+
+      final result = await dio.fetch(
+          _setStreamType<Response<TransactionSummaryResponse>>(Options(
+            method: 'POST',
+            headers: headers,
+            extra: extra,
+          )
+              .compose(dio.options, '/fcm/store',
+              queryParameters: queryParameters, data:data)
+              .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+
+      final value = StatusResponse.fromMap(result.data!);
+
+      return Response(
+          data: value,
+          requestOptions: result.requestOptions,
+          statusCode: result.statusCode,
+          statusMessage: result.statusMessage,
+          isRedirect: result.isRedirect,
+          redirects: result.redirects,
+          extra: result.extra,
+          headers: result.headers);
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||
