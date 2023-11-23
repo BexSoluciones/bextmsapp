@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/src/domain/models/requests/send_token.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -384,6 +385,29 @@ class ProcessingQueueBloc
             var response =
                 await _apiRepository.logout(request: LogoutRequest());
 
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e,stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+
+        case 'HGHFJ52JSD':
+          try {
+            var body = jsonDecode(queue.body);
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+
+            var response = await  _apiRepository.sendFCMToken(request:SendTokenRequest(int.parse(body['user_id']),body['fcm_token']));
             if (response is DataSuccess) {
               queue.task = 'done';
             } else {

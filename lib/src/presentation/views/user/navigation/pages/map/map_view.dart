@@ -286,9 +286,12 @@ class _MapPageState extends State<MapPage> {
                               )
                           : NetworkNoRetryTileProvider(),
                     ),
-                    ...state.layer,
+                    //...state.layer,
                     MarkerLayer(
                       markers: state.markers,
+                    ),
+                   PolylineLayer(
+                      polylines: state.Polylines,
                     ),
                   ],
                 ))

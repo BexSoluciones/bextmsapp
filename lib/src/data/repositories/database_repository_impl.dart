@@ -1,4 +1,5 @@
 import 'package:bexdeliveries/src/domain/models/notification.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 
@@ -69,6 +70,18 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyWorks() async {
     return _appDatabase.workDao.emptyWorks();
+  }
+
+  //POLYLINES
+
+  @override
+  Future<int> insertPolylines(String workcode,List<LatLng> data)async{
+    return _appDatabase.workDao.insertPolylines(workcode,data);
+  }
+
+  @override
+  Future<List<LatLng>> getPolylines(String workcode) async{
+    return _appDatabase.workDao.getPolylines(workcode);
   }
 
   //WAREHOUSES
@@ -463,7 +476,6 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   Future<int?> countAllUnreadNotifications() {
     return _appDatabase.notificationDao.countAllUnreadNotifications();
   }
-
 
   // initialize and close methods go here
   Future init() async {

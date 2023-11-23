@@ -1,6 +1,12 @@
+import 'dart:convert';
+
+import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
 import 'package:bexdeliveries/src/locator.dart';
+import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
+import 'package:bexdeliveries/src/services/storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 //domain
@@ -11,6 +17,8 @@ import '../domain/repositories/database_repository.dart';
 import '../utils/constants/colors.dart';
 
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
+final LocalStorageService _storageService = locator<LocalStorageService>();
+final ProcessingQueueBloc _processingQueueBloc = locator<ProcessingQueueBloc>();
 
 Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Got a message whilst in the background!');
@@ -47,6 +55,7 @@ class NotificationService {
       token = await _firebaseMessaging?.getToken();
       print(token);
       _initialized = true;
+
       FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
       await setupInteractedMessage();
     }

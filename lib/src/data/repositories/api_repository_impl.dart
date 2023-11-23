@@ -1,4 +1,5 @@
 //utils
+import '../../domain/models/requests/send_token.dart';
 import '../../utils/resources/data_state.dart';
 
 import '../../domain/models/requests/login_request.dart';
@@ -208,6 +209,15 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }) {
     return getStateOf<StatusResponse>(
       request: () => _apiService.georeference(request.client),
+    );
+  }
+
+  @override
+  Future<DataState<StatusResponse>> sendFCMToken({
+    required SendTokenRequest request,
+  }) {
+    return getStateOf<StatusResponse>(
+      request: () => _apiService.sendFCMToken(request.user_id,request.fcm_token),
     );
   }
 

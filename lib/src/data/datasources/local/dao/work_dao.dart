@@ -128,6 +128,49 @@ class WorkDao {
     return Future.value();
   }
 
+  Future<int> insertPolylines(String workcode, List<LatLng> data) async {
+    final db = await _appDatabase.streamDatabase;
+    var batch = db!.batch();
+    var existingData = await db.query('polylines', where: 'workcode = ?', whereArgs: [workcode]);
+    var parsedData = parseWorks(existingData);
+
+    if (parsedData.isEmpty) {
+      List<Map<String, dynamic>> coordinatesList = [];
+      if (data.isNotEmpty) {
+        data.forEach((latLng) {
+          coordinatesList.add(latLng.toJson());
+        });
+        String coordinatesString = jsonEncode(coordinatesList);
+        batch.insert('polylines', {'workcode': workcode, 'polylines': coordinatesString});
+      }
+    }
+    List<dynamic> results = await batch.commit();
+    return results.length;
+  }
+
+  Future<List<LatLng>> getPolylines(String workcode) async {
+    final db = await _appDatabase.streamDatabase;
+    var existingData = await db!.query('polylines', where: 'workcode = ?', whereArgs: [workcode]);
+
+    if (existingData.isNotEmpty) {
+      String polylinesString = existingData[0]['polylines'].toString();
+      List<dynamic> coordinatesList = jsonDecode(polylinesString);
+
+      List<LatLng> polylines = [];
+      coordinatesList.forEach((coordinate) {
+        List<double> coordinates = List<double>.from(coordinate['coordinates']);
+        LatLng latLng = LatLng(coordinates[1], coordinates[0]);
+        polylines.add(latLng);
+      });
+
+      return polylines;
+    } else {
+      return [];
+    }
+  }
+
+
+
   Future<void> emptyWorks() async {
     final db = await _appDatabase.streamDatabase;
     await db!.delete(tableWorks, where: 'id > 0');
