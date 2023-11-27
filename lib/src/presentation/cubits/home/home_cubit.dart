@@ -34,11 +34,6 @@ import '../../../domain/abstracts/format_abstract.dart';
 
 import '../../../domain/models/requests/login_request.dart';
 import '../../../domain/models/requests/work_request.dart';
-import '../../../domain/models/requests/enterprise_config_request.dart';
-import '../../../domain/models/requests/reason_request.dart';
-import '../../../domain/models/requests/account_request.dart';
-import '../../../domain/models/responses/enterprise_config_response.dart';
-import '../../../domain/models/responses/reason_response.dart';
 
 //service
 import '../../../locator.dart';
@@ -50,7 +45,6 @@ part 'home_state.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
-final LoggerService _loggerService = locator<LoggerService>();
 final helperFunctions = HelperFunctions();
 
 class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
@@ -64,14 +58,14 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   CurrentUserLocationEntity? currentLocation;
 
   HomeCubit(this._databaseRepository, this._apiRepository,
-      this._locationRepository, this._processingQueueBloc,this.gpsBloc)
+      this._locationRepository, this._processingQueueBloc, this.gpsBloc)
       : super(const HomeLoading(), null);
 
   Future<void> getAllWorks() async {
     emit(await _getAllWorks());
   }
 
-  void getUser()  {
+  void getUser() {
     final user = _storageService.getObject('user') != null
         ? User.fromMap(_storageService.getObject('user')!)
         : null;
@@ -108,17 +102,17 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
     await run(() async {
       emit(const HomeLoading());
 
-      final timer0 = logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
+      final timer0 =
+          logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
 
       //currentLocation = await _locationRepository.getCurrentLocation();
       var currentLocation = gpsBloc.state.lastKnownLocation;
-
 
       final user = _storageService.getObject('user') != null
           ? User.fromMap(_storageService.getObject('user')!)
           : null;
 
-     /* final results = await Future.wait([
+      /* final results = await Future.wait([
         _apiRepository.getConfigEnterprise(request: EnterpriseConfigRequest()),
         _apiRepository.reasons(request: ReasonRequest()),
       ]);
@@ -167,7 +161,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                 currentLocation.longitude.toString(),
                 DateTime.now().toIso8601String(),
                 'sync'));
-
         if (responseWorks is DataSuccess) {
           var works = <Work>[];
           var summaries = <Summary>[];
@@ -208,7 +201,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
 
           //TODO:: refactoring
           var workcodes = groupBy(works, (Work work) => work.workcode);
-
           if (workcodes.isNotEmpty) {
             var localWorks = await _databaseRepository.getAllWorks();
             var localWorkcode = groupBy(localWorks, (Work obj) => obj.workcode);
@@ -250,15 +242,22 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           await _databaseRepository.insertWorks(works);
           await _databaseRepository.insertSummaries(summaries);
           await _databaseRepository.insertTransactions(transactions);
+          //DELETE
+          await _databaseRepository.deleteProcessingQueueByDays();
+          await _databaseRepository.deleteLocationsByDays();
+          await _databaseRepository.deleteNotificationsByDays();
+          await _databaseRepository.deleteTransactionByDays();
 
-          logTimerStop(headerLogger, timer0, 'Initialization completed', level: LogLevel.success);
+          logTimerStop(headerLogger, timer0, 'Initialization completed',
+              level: LogLevel.success);
 
+          for (var work in works) {
+            await helperFunctions.deleteWorks(work);
+          }
           emit(await _getAllWorks());
         } else {
           emit(HomeFailed(error: responseWorks.error, user: user));
         }
-
-
       } else if (response is DataFailed) {
         emit(HomeFailed(error: response.error, user: user));
       }

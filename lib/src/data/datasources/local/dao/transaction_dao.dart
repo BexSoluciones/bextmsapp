@@ -323,4 +323,48 @@ class TransactionDao {
     await db!.delete(t.tableTransactions, where: 'id > 0');
     return Future.value();
   }
+
+  Future<int> deleteTransactionByDays() async {
+    final db = await _appDatabase.streamDatabase;
+    var today = DateTime.now();
+    var limitDaysWork = _storageService.getInt('limit_days_works') ?? 3;
+    var datesToValidate = today.subtract(Duration(days: limitDaysWork));
+    List<Map<String, dynamic>> transactionToDelete;
+
+    var formattedToday = DateTime(today.year, today.month, today.day);
+    var formattedDatesToValidate = DateTime(
+        datesToValidate.year, datesToValidate.month, datesToValidate.day);
+    var formattedTodayStr = formattedToday.toIso8601String().split('T')[0];
+    var formattedDatesToValidateStr =
+    formattedDatesToValidate.toIso8601String().split('T')[0];
+
+    transactionToDelete = await db!.query(
+      tableTransactions,
+      where: 'substr(end, 1, 10) <= ?',
+      whereArgs: [formattedDatesToValidateStr],
+    );
+
+    for (var task in transactionToDelete) {
+      var createdAt = DateTime.parse(task['end']);
+      var differenceInDays = formattedToday.difference(createdAt).inDays;
+      if (differenceInDays > limitDaysWork) {
+        await db.delete(
+          tableTransactions,
+          where: 'id = ?',
+          whereArgs: [task['id']],
+        );
+      }
+    }
+
+    return db.delete(
+      tableTransactions,
+      where: 'substr(end, 1, 10) <= ?',
+      whereArgs: [formattedDatesToValidateStr],
+    );
+  }
+  Future<int> deleteTransactionsByWorkcode(String workcode) async {
+    final db = await _appDatabase.streamDatabase;
+    return db!.delete(tableTransactions,
+        where: 'workcode = ?', whereArgs: [workcode]);
+  }
 }

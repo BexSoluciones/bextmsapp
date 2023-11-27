@@ -27,6 +27,7 @@ abstract class DatabaseRepository {
   Future<int> updateStatusWork(String workcode, String status);
   Future<void> insertWorks(List<Work> works);
   Future<void> emptyWorks();
+  Future<void> deleteWorksByWorkcode(String workcode);
 
   //WORKTYPE
   Future<WorkTypes?> getWorkTypesFromWorkcode(String workcode);
@@ -56,6 +57,7 @@ abstract class DatabaseRepository {
   Future<int> updateSummary(Summary summary);
   Future<void> insertSummaries(List<Summary> summaries);
   Future<void> emptySummaries();
+  Future<void> deleteSummariesByWorkcode(String workcode);
 
   //TRANSACTIONS
   Future<List<Transaction>> getAllTransactions();
@@ -70,6 +72,7 @@ abstract class DatabaseRepository {
   Future<int> updateTransaction(Transaction transaction);
   Future<void> insertTransactions(List<Transaction> transactions);
   Future<void> emptyTransactions();
+  Future<void> deleteTransactionsByWorkcode(String workcode);
 
   //REASONS
   Future<List<Reason>> getAllReasons();
@@ -135,5 +138,12 @@ abstract class DatabaseRepository {
   //POLYLINES
   Future<int> insertPolylines(String workcode,List<LatLng> data);
   Future<List<LatLng>> getPolylines(String workcode);
+
+  //DELETEBYDAYS
+  @override
+  Future<void> deleteProcessingQueueByDays();
+  Future<void> deleteLocationsByDays();
+  Future<void> deleteNotificationsByDays();
+  Future<void> deleteTransactionByDays();
 
 }

@@ -90,6 +90,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
     if (response is DataSuccess) {
       var data = response.data as EnterpriseConfigResponse;
       _storageService.setObject('config', data.enterpriseConfig.toMap());
+      _storageService.setInt('limit_days_works', data.enterpriseConfig.limitDaysWorks);
     }
   }
 
