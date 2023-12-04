@@ -1,14 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
-import 'package:bexdeliveries/src/data/datasources/local/app_database.dart';
-import 'package:bexdeliveries/src/data/datasources/local/dao/notification_dao.dart';
-import 'package:bexdeliveries/src/presentation/blocs/account/account_bloc.dart';
-import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
-import 'package:bexdeliveries/src/presentation/cubits/notification/count/count_cubit.dart';
-import 'package:bexdeliveries/src/presentation/cubits/notification/notification_cubit.dart';
-import 'package:bexdeliveries/src/presentation/cubits/ordersummaryreasons/ordersummaryreasons_cubit.dart';
-import 'package:bexdeliveries/src/presentation/cubits/type/work_type_cubit.dart';
+
+import 'package:bexdeliveries/src/services/remote_config.dart';
 import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -42,6 +36,7 @@ import 'src/presentation/cubits/politics/politics_cubit.dart';
 import 'src/presentation/cubits/login/login_cubit.dart';
 import 'src/presentation/cubits/home/home_cubit.dart';
 import 'src/presentation/cubits/work/work_cubit.dart';
+import 'src/presentation/cubits/type/work_type_cubit.dart';
 import 'src/presentation/cubits/confirm/confirm_cubit.dart';
 import 'src/presentation/cubits/summary/summary_cubit.dart';
 import 'src/presentation/cubits/georeference/georeference_cubit.dart';
@@ -56,6 +51,9 @@ import 'src/presentation/cubits/general/general_cubit.dart';
 import 'src/presentation/cubits/download/download_cubit.dart';
 import 'src/presentation/cubits/query/query_cubit.dart';
 import 'src/presentation/cubits/transaction/transaction_cubit.dart';
+import 'src/presentation/cubits/notification/count/count_cubit.dart';
+import 'src/presentation/cubits/notification/notification_cubit.dart';
+import 'src/presentation/cubits/ordersummaryreasons/ordersummaryreasons_cubit.dart';
 
 //blocs
 import 'src/presentation/blocs/network/network_bloc.dart';
@@ -64,6 +62,11 @@ import 'src/presentation/blocs/location/location_bloc.dart';
 import 'src/presentation/blocs/photo/photo_bloc.dart';
 import 'src/presentation/blocs/history_order/history_order_bloc.dart';
 import 'src/presentation/blocs/issues/issues_bloc.dart';
+import 'src/presentation/blocs/account/account_bloc.dart';
+import 'src/presentation/blocs/gps/gps_bloc.dart';
+
+//database
+import 'src/data/datasources/local/app_database.dart';
 
 //providers
 import 'src/presentation/providers/photo_provider.dart';
@@ -87,6 +90,7 @@ import 'src/presentation/views/global/undefined_view.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NotificationService _notificationService = locator<NotificationService>();
+final RemoteConfigService _remoteConfigService = locator<RemoteConfigService>();
 final LoggerService _loggerService = locator<LoggerService>();
 
 List<CameraDescription> cameras = [];
@@ -181,7 +185,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
   final DatabaseCubit databaseCubit;
 
   _MyAppState(this.databaseCubit);
@@ -249,15 +252,12 @@ class _MyAppState extends State<MyApp> {
   Future<void> _fetchRemoteConfig() async {
     while (true) {
       try {
-        await _remoteConfig.setConfigSettings(RemoteConfigSettings(
-            fetchTimeout: const Duration(seconds: 1),
-            minimumFetchInterval: const Duration(seconds: 1)));
-        await _remoteConfig.fetchAndActivate();
+
         //Firebase
-        var codeTransporter = _remoteConfig.getString('code_transporter');
-        var forceProcessingQueue = _remoteConfig.getBool('force_processing_queue');
-        var enterprise = _remoteConfig.getString('enterprise');
-        var forceDatabase = _remoteConfig.getBool('force_database_users');
+        var codeTransporter = _remoteConfigService.getString('code_transporter');
+        var forceProcessingQueue = _remoteConfigService.getBool('force_processing_queue');
+        var enterprise = _remoteConfigService.getString('enterprise');
+        var forceDatabase = _remoteConfigService.getBool('force_database_users');
 
         if (forceDatabase &&
             codeTransporter == _storageService.getString('username') &&
@@ -442,18 +442,6 @@ class _MyAppState extends State<MyApp> {
                   lightScheme = lightColorScheme;
                   darkScheme = darkColorScheme;
 
-                  // if (lightDynamic != null && darkDynamic != null) {
-                  //   lightScheme = lightDynamic.harmonized();
-                  //   lightCustomColors =
-                  //       lightCustomColors.harmonized(lightScheme);
-                  //
-                  //   // Repeat for the dark color scheme.
-                  //   darkScheme = darkDynamic.harmonized();
-                  //   darkCustomColors = darkCustomColors.harmonized(darkScheme);
-                  // } else {
-                  //   // Otherwise, use fallback schemes.
-
-                  // }
                   return MaterialApp(
                     debugShowCheckedModeBanner: false,
                     title: appTitle,

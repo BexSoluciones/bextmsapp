@@ -1,12 +1,5 @@
+part of '../app_database.dart';
 
-import 'package:sqflite/sqflite.dart';
-
-import '../../../../domain/models/notification.dart';
-import '../../../../locator.dart';
-import '../../../../services/storage.dart';
-import '../app_database.dart';
-
-final LocalStorageService _storageService = locator<LocalStorageService>();
 class NotificationDao {
   final AppDatabase _appDatabase;
 
@@ -16,10 +9,10 @@ class NotificationDao {
       List<Map<String, dynamic>> notificationsList) {
     final notifications = <PushNotification>[];
 
-    notificationsList.forEach((currentNotification) {
+    for (var currentNotification in notificationsList) {
       final notification = PushNotification.fromJson(currentNotification);
       notifications.add(notification);
-    });
+    }
 
     return notifications;
   }
@@ -36,15 +29,12 @@ class NotificationDao {
     }
   }
 
-
   Future<List<PushNotification>> getNotifications() async {
     final db = await _appDatabase.streamDatabase;
-    final notificationsList = await db!
-        .query(tableNotifications);
+    final notificationsList = await db!.query(tableNotifications);
     final notifications = parseNotifications(notificationsList);
     return notifications;
   }
-
 
   Future<int> updateNotification(int notificationid, String readAt) async {
     final db = await _appDatabase.streamDatabase;
@@ -74,7 +64,7 @@ class NotificationDao {
         datesToValidate.year, datesToValidate.month, datesToValidate.day);
     var formattedTodayStr = formattedToday.toIso8601String().split('T')[0];
     var formattedDatesToValidateStr =
-    formattedDatesToValidate.toIso8601String().split('T')[0];
+        formattedDatesToValidate.toIso8601String().split('T')[0];
 
     NotificationsToDelete = await db!.query(
       tableNotifications,
@@ -100,8 +90,4 @@ class NotificationDao {
       whereArgs: [formattedDatesToValidateStr],
     );
   }
-
-
-
-
 }

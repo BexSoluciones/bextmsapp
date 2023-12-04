@@ -1,9 +1,5 @@
 import 'dart:convert';
 
-import 'package:bexdeliveries/src/data/datasources/local/dao/notification_dao.dart';
-import 'package:bexdeliveries/src/domain/models/notification.dart';
-import 'package:bexdeliveries/src/domain/models/summary_report.dart';
-import 'package:bexdeliveries/src/domain/models/transaction.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -12,23 +8,27 @@ import 'package:sqlbrite/sqlbrite.dart';
 import 'package:synchronized/synchronized.dart';
 
 //utils
-import 'package:bexdeliveries/src/utils/constants/strings.dart';
+import '../../../utils/constants/strings.dart';
 
 //models
-import 'package:bexdeliveries/src/domain/models/work.dart';
-import 'package:bexdeliveries/src/domain/models/warehouse.dart';
-import 'package:bexdeliveries/src/domain/models/summary.dart';
-import 'package:bexdeliveries/src/domain/models/transaction.dart' as t;
-import 'package:bexdeliveries/src/domain/models/transaction_summary.dart';
-import 'package:bexdeliveries/src/domain/models/location.dart';
-import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
-import 'package:bexdeliveries/src/domain/models/reason.dart';
-import 'package:bexdeliveries/src/domain/models/history_order.dart';
-import 'package:bexdeliveries/src/domain/models/photo.dart';
-import 'package:bexdeliveries/src/domain/models/client.dart';
-import 'package:bexdeliveries/src/domain/models/account.dart';
-import 'package:bexdeliveries/src/domain/models/news.dart';
+import '../../../domain/models/work.dart';
+import '../../../domain/models/warehouse.dart';
+import '../../../domain/models/summary.dart';
+import '../../../domain/models/transaction.dart' as t;
+import '../../../domain/models/transaction_summary.dart';
+import '../../../domain/models/location.dart';
+import '../../../domain/models/processing_queue.dart';
+import '../../../domain/models/reason.dart';
+import '../../../domain/models/history_order.dart';
+import '../../../domain/models/photo.dart';
+import '../../../domain/models/client.dart';
+import '../../../domain/models/account.dart';
+import '../../../domain/models/news.dart';
+import '../../../domain/models/notification.dart';
+import '../../../domain/models/summary_report.dart';
+import '../../../domain/models/transaction.dart';
 
+//services
 import '../../../locator.dart';
 import '../../../services/storage.dart';
 
@@ -46,6 +46,9 @@ part '../local/dao/photo_dao.dart';
 part '../local/dao/client_dao.dart';
 part '../local/dao/account_dao.dart';
 part '../local/dao/news_dao.dart';
+part '../local/dao/notification_dao.dart';
+
+
 
 class AppDatabase {
   static BriteDatabase? _streamDatabase;
@@ -294,8 +297,13 @@ class AppDatabase {
         workcode TEXT,
         polylines TEXT
       )
+    ''',
     '''
-
+      ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relationId} INTEGER DEFAULT NULL
+    ''',
+    '''
+      ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL
+    '''
   ];
 
   Future<Database> _initDatabase(databaseName) async {
