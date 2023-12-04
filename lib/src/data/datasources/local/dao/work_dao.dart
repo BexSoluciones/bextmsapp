@@ -157,12 +157,11 @@ class WorkDao {
       List<dynamic> coordinatesList = jsonDecode(polylinesString);
 
       List<LatLng> polylines = [];
-      coordinatesList.forEach((coordinate) {
+      for (var coordinate in coordinatesList) {
         List<double> coordinates = List<double>.from(coordinate['coordinates']);
         LatLng latLng = LatLng(coordinates[1], coordinates[0]);
         polylines.add(latLng);
-      });
-
+      }
       return polylines;
     } else {
       return [];

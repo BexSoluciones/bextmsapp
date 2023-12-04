@@ -84,10 +84,8 @@ class HomeViewState extends State<HomeView>
   Widget build(BuildContext context) {
     final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(16);
-    return WillPopScope(
-        onWillPop: () async {
-          return false;
-        },
+    return PopScope(
+        canPop: false,
         child: Scaffold(
           drawer: drawer(context, homeCubit.state.user),
           appBar: AppBar(
@@ -104,7 +102,7 @@ class HomeViewState extends State<HomeView>
             ],
             title:  Text(
               'Servicios',
-              textScaleFactor: calculatedTextScaleFactor ,
+              textScaler: TextScaler.linear(calculatedTextScaleFactor),
               style: TextStyle(fontSize: calculatedFon, fontWeight: FontWeight.bold),
             ),
             notificationPredicate: (ScrollNotification notification) {

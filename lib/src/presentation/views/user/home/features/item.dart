@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:bexdeliveries/src/config/size.dart';
 import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
 import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
-import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 import 'package:bexdeliveries/src/presentation/widgets/confirm_dialog.dart';
 import 'package:bexdeliveries/src/presentation/widgets/custom_dialog.dart';
 import 'package:bexdeliveries/src/services/pushnotification.dart';
@@ -76,7 +75,6 @@ class _ItemWorkState extends State<ItemWork>{
 
   @override
   Widget build(BuildContext context) {
-    final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(14);
 
     return Material(
@@ -100,7 +98,6 @@ class _ItemWorkState extends State<ItemWork>{
                             title: 'Guardar historico',
                             message:
                             '¿Está seguro que desea guardar el historico?',
-                            //onConfirm: () => _handleNavigation(widget.work, context)
                             onConfirm: () =>
                                 _handleNavigation(widget.work, context)));
                   } else {
@@ -139,7 +136,6 @@ class _ItemWorkState extends State<ItemWork>{
                       onTap: () => _onTap(context, widget.work),
                       title: Text(
                         'Servicio: ${widget.work.workcode}',
-                       textScaleFactor: calculatedTextScaleFactor,
                         style:  TextStyle(
                             fontSize: calculatedFon, fontWeight: FontWeight.w500),
                       ),
@@ -147,14 +143,12 @@ class _ItemWorkState extends State<ItemWork>{
                         children: [
                           Text(
                             'Clientes: ${widget.work.count}',
-                            textScaleFactor:  calculatedTextScaleFactor,
                             style:  TextStyle(
                                 fontWeight: FontWeight.normal, fontSize: calculatedFon,color: Theme.of(context).colorScheme.scrim),
                           ),
                           Flexible(
                               child: Text(
                                 ' Atendidos: ${widget.work.right ?? '0'} Pendientes: ${widget.work.left! - widget.work.right!}',
-                                textScaleFactor:  calculatedTextScaleFactor,
                                 style:  TextStyle(
                                     fontSize: calculatedFon, fontWeight: FontWeight.normal,color: Theme.of(context).colorScheme.scrim),
                                 textAlign: TextAlign.center,
@@ -184,26 +178,8 @@ class _ItemWorkState extends State<ItemWork>{
     );
   }
 
-
   Future<void> _handleNavigation(Work work, BuildContext context) async {
     try {
-      String baseURL;
-      baseURL = 'https://';
-      String apiURL;
-      apiURL = '.history-order';
-      String url;
-      url = baseURL + _storageService.getString('company')! + apiURL;
-
-     /* var processingQueue = ProcesingQueueService(
-        url: url,
-        body: jsonEncode({'work_id': work.id}),
-        task: 'incomplete',
-        code: 'AS65C41656',
-        created_at: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-        location:
-        null /* '${currentLocation.latitude}-${currentLocation.longitude}' */,
-      );*/
-
       var processingQueue= ProcessingQueue(
           body: jsonEncode({'work_id': work.id}),
           task: 'incomplete',
@@ -211,8 +187,6 @@ class _ItemWorkState extends State<ItemWork>{
           createdAt: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
           updatedAt:DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
 
-      //_procesingQueueBloc.inAddPq.add(processingQueue);
-      //queueBloc.add(AddTaskEvent(processingQueue));
       _databaseRepository.insertProcessingQueue(processingQueue);
 
       setState(() {

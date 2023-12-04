@@ -105,7 +105,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       final timer0 =
           logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
 
-      //currentLocation = await _locationRepository.getCurrentLocation();
       var currentLocation = gpsBloc.state.lastKnownLocation;
 
       final user = _storageService.getObject('user') != null
@@ -157,10 +156,15 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                 device != null ? device['id'] : null,
                 device != null ? device['model'] : null,
                 version,
-                currentLocation!.latitude.toString(),
-                currentLocation.longitude.toString(),
+                currentLocation != null
+                    ? currentLocation.latitude.toString()
+                    : null,
+                currentLocation != null
+                    ? currentLocation.longitude.toString()
+                    : null,
                 DateTime.now().toIso8601String(),
                 'sync'));
+
         if (responseWorks is DataSuccess) {
           var works = <Work>[];
           var summaries = <Summary>[];

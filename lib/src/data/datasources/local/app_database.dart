@@ -273,7 +273,7 @@ class AppDatabase {
         ${AccountFields.name} TEXT DEFAULT NULL,
         ${AccountFields.bankId} INTEGER DEFAULT NULL,
         ${AccountFields.accountNumber} INTEGER DEFAULT NULL,
-         ${AccountFields.code_qr} TEXT DEFAULT NULL,
+        ${AccountFields.code_qr} TEXT DEFAULT NULL,
         ${AccountFields.createdAt} TEXT DEFAULT NULL
       )
     ''',
