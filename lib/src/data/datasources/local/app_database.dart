@@ -279,7 +279,7 @@ class AppDatabase {
     ''',
     '''
       CREATE TABLE $tableNotifications (
-         ${NotificationFields.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${NotificationFields.id} INTEGER PRIMARY KEY AUTOINCREMENT,
         ${NotificationFields.id_from_server} TEXT,
         ${NotificationFields.title} TEXT,
         ${NotificationFields.body} TEXT,

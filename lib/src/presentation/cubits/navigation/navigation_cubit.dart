@@ -131,6 +131,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         );
 
         List<LngLat> waypoints = [];
+
         for (var index = 0; index < works.length; index++) {
           if (works[index].latitude != null &&
               works[index].longitude != null &&
@@ -169,6 +170,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
             }
           }
         }
+
         final manager = OSRMManager()..generatePath("https://osrm.bexsoluciones.com", waypoints.toString());
         final road = await manager.getRoad(
           waypoints: waypoints,
@@ -198,14 +200,13 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           ];
         }
 
-
-
         if (carouselData.isNotEmpty) {
           kWorksList = List<LatLng>.generate(
               carouselData.length,
                   (index) =>
                   getLatLngFromWorksData(works, carouselData[index]['index']));
         }
+
         return NavigationSuccess(
             works: data,
             mapController: mapController,

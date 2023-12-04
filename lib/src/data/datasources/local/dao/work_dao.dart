@@ -137,9 +137,9 @@ class WorkDao {
     if (parsedData.isEmpty) {
       List<Map<String, dynamic>> coordinatesList = [];
       if (data.isNotEmpty) {
-        data.forEach((latLng) {
+        for (var latLng in data) {
           coordinatesList.add(latLng.toJson());
-        });
+        }
         String coordinatesString = jsonEncode(coordinatesList);
         batch.insert('polylines', {'workcode': workcode, 'polylines': coordinatesString});
       }
