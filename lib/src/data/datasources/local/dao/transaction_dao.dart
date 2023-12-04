@@ -158,7 +158,7 @@ class TransactionDao {
   Future<List<t.Transaction>> getAllTransactions() async {
     final db = await _appDatabase.streamDatabase;
     final transactionList = await db!.rawQuery(
-        'SELECT *, COUNT(DISTINCT number_customer || code_place) as count FROM ${t.tableTransactions} GROUP BY ${t.TransactionFields.id}');
+        'SELECT * FROM ${t.tableTransactions} GROUP BY ${t.TransactionFields.id}');
     return parseTransactions(transactionList);
   }
 
@@ -308,8 +308,11 @@ class TransactionDao {
             where: 'id = ?', whereArgs: [transaction.id]);
         var w = parseTransactions(d);
         if (w.isEmpty) {
+          print('inserting');
+          print(transaction.toJson());
           batch.insert(t.tableTransactions, transaction.toJson());
         } else {
+          print('updating');
           batch.update(t.tableTransactions, transaction.toJson(),
               where: 'id = ?', whereArgs: [transaction.id]);
         }

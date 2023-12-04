@@ -34,6 +34,10 @@ class WorkDao {
         GROUP BY $tableWorks.${WorkFields.workcode}
         '''
     );
+
+    for(var work in workList) {
+      print(work);
+    }
     return parseWorks(workList);
   }
 

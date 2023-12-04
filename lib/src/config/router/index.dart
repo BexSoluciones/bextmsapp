@@ -57,6 +57,7 @@ import '../../presentation/views/user/issues/pages/fill_issues.dart';
 import '../../presentation/views/developer/processing_queue/index.dart';
 import '../../presentation/views/developer/locations/index.dart';
 import '../../presentation/views/developer/notifications/index.dart';
+import '../../presentation/views/developer/transactions/index.dart';
 
 //locator
 import '../../locator.dart';
@@ -235,6 +236,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (context) => const NotificationsView());
     case transactionRoute:
       return MaterialPageRoute(builder: (context) => const TransactionView());
+    case transactionsRoute:
+      return MaterialPageRoute(builder: (context) => const TransactionsView());
     case queryRoute:
       return MaterialPageRoute(builder: (context) => const QueryView());
     case collectionQueryRoute:

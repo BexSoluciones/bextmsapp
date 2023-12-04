@@ -20,7 +20,6 @@ class Logging extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
-      print(options.baseUrl);
       print('REQUEST[${options.method}] => PATH: ${options.path}');
     }
     try {
@@ -38,8 +37,6 @@ class Logging extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-
-    print(response.statusCode);
     if (kDebugMode) {
       print(
         'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',

@@ -160,6 +160,7 @@ class Transaction {
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
+    data['id'] = id;
     data['work_id'] = workId;
     data['summary_id'] = summaryId;
     data['workcode'] = workcode;

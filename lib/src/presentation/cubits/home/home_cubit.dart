@@ -245,8 +245,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             }
           }
 
-          print(transactions.length);
-
           await _databaseRepository.insertWorks(works);
           await _databaseRepository.insertSummaries(summaries);
           await _databaseRepository.insertTransactions(transactions);

@@ -118,6 +118,11 @@ Drawer drawer(BuildContext context, User? user) {
               icon: Icons.notifications,
               text: 'Notificaciones.',
               onTap: () => _navigationService.goTo(notificationsRoute)),
+          createDrawerItem(
+              context: context,
+              icon: Icons.list_alt,
+              text: 'Transacciones.',
+              onTap: () => _navigationService.goTo(transactionsRoute)),
         ],
         const Divider(),
         FutureBuilder(

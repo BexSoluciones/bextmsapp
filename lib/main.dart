@@ -56,6 +56,7 @@ import 'src/presentation/cubits/navigation/navigation_cubit.dart';
 import 'src/presentation/cubits/general/general_cubit.dart';
 import 'src/presentation/cubits/download/download_cubit.dart';
 import 'src/presentation/cubits/query/query_cubit.dart';
+import 'src/presentation/cubits/transaction/transaction_cubit.dart';
 
 //blocs
 import 'src/presentation/blocs/network/network_bloc.dart';
@@ -222,8 +223,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   void display(RemoteMessage message) async {
-    print(message.notification!.title);
-    print(message.notification!.body);
     try {
       final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       const NotificationDetails notificationDetails = NotificationDetails(
@@ -396,6 +395,11 @@ class _MyAppState extends State<MyApp> {
           BlocProvider(
             create: (context) => DatabaseCubit(
                 locator<ApiRepository>(), locator<DatabaseRepository>()),
+          ),
+          BlocProvider(
+            create: (context) => TransactionCubit(
+                locator<DatabaseRepository>(),
+                locator<ApiRepository>())
           ),
           BlocProvider(
             create: (context) => GeneralCubit(),

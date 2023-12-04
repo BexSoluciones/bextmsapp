@@ -54,6 +54,7 @@ const databaseRoute = '/database';
 const processingQueueRoute = '/processing-queue';
 const notificationsRoute = '/notifications';
 const transactionRoute = '/transaction';
+const transactionsRoute = '/transactions';
 const locationsRoute = '/locations';
 const issueRoute = '/issues';
 const fillIssueRoute = '/fill-issue-route';
