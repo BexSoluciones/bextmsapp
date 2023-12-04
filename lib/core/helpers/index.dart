@@ -343,11 +343,6 @@ class HelperFunctions {
   Future<bool> deleteWorks(Work work) async {
     var dob = DateTime.parse(work.date!);
     var dur = DateTime.now().difference(dob);
-
-    print(dur.inDays);
-    print(work.status);
-    print(work.workcode);
-
     if (dur.inDays > _storageService.getInt('limit_days_works')! &&
         work.status == 'complete') {
       await _databaseRepository.deleteTransactionsByWorkcode(work.workcode!);

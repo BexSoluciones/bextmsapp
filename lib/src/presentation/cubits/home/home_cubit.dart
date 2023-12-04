@@ -186,6 +186,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                       100);
                 }
                 summary.grandTotalCopy = summary.grandTotal;
+
+                print(summary.transaction);
                 if (summary.transaction != null) {
                   transactions.add(summary.transaction!);
                 }
@@ -242,6 +244,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
               }
             }
           }
+
+          print(transactions.length);
 
           await _databaseRepository.insertWorks(works);
           await _databaseRepository.insertSummaries(summaries);

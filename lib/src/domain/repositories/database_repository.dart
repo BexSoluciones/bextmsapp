@@ -114,7 +114,7 @@ abstract class DatabaseRepository {
   Future<void> insertPhotos(List<Photo> photos);
   Future<void> emptyPhotos();
 
-  //PHOTOS
+  //CLIENTS
   Stream<List<Client>> watchAllClients();
   Future<List<Client>> getAllClients();
   Future<int> insertClient(Client client);
@@ -124,10 +124,8 @@ abstract class DatabaseRepository {
   //HISTORY ORDER
   Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId);
 
-
   //ROOT
   Future<sqflite.Database?> get();
-
 
   //NOTIFICATIONS
   Future<int> insertNotification(PushNotification notification);

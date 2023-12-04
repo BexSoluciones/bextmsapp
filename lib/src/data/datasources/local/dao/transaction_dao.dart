@@ -5,7 +5,8 @@ class TransactionDao {
 
   TransactionDao(this._appDatabase);
 
-  List<t.Transaction> parseTransactions(List<Map<String, dynamic>> transactionList) {
+  List<t.Transaction> parseTransactions(
+      List<Map<String, dynamic>> transactionList) {
     final transactions = <t.Transaction>[];
     for (var transactionMap in transactionList) {
       final transaction = t.Transaction.fromJson(transactionMap);
@@ -39,7 +40,8 @@ class TransactionDao {
         rejects: rejects.length);
   }
 
-  Future<List<WorkAdditional>> getClientsResJetDel(String workcode, String reanson) async {
+  Future<List<WorkAdditional>> getClientsResJetDel(
+      String workcode, String reanson) async {
     final db = await _appDatabase.streamDatabase;
     final transactionList = await db!.rawQuery('''
     SELECT
@@ -66,7 +68,7 @@ class TransactionDao {
     for (var row in transactionList) {
       final work = Work(
         id: int.parse(row[WorkFields.id].toString()),
-        workcode:row[WorkFields.workcode].toString(),
+        workcode: row[WorkFields.workcode].toString(),
         nameTransporter: row[WorkFields.nameTransporter].toString(),
         date: row[WorkFields.date].toString(),
         latitude: row[WorkFields.latitude].toString(),
@@ -87,16 +89,17 @@ class TransactionDao {
           codeWarehouse: row[SummaryFields.codeWarehouse].toString(),
           cant: double.parse(row[SummaryFields.cant].toString()),
           unitOfMeasurement: row[SummaryFields.unitOfMeasurement].toString(),
-          grandTotal: double.parse(row[SummaryFields.grandTotalCopy].toString()),
+          grandTotal:
+              double.parse(row[SummaryFields.grandTotalCopy].toString()),
           price: double.parse(row[SummaryFields.price].toString()),
           typeItem: row[SummaryFields.typeItem].toString(),
           typeTransaction: row[SummaryFields.typeTransaction].toString(),
           minus: 0,
           createdAt: '',
-          updatedAt: ''
-      );
+          updatedAt: '');
 
-      var totalSummary = await getTotalSummariesWork( row[TransactionFields.orderNumber].toString());
+      var totalSummary = await getTotalSummariesWork(
+          row[TransactionFields.orderNumber].toString());
 
       final workAdditional = WorkAdditional(
           work: work,
@@ -105,12 +108,10 @@ class TransactionDao {
           totalPayment: 0.0,
           status: row[SummaryFields.status].toString(),
           type: row[SummaryFields.type].toString(),
-          latitude:double.parse(row[TransactionFields.latitude].toString()),
-          longitude:double.parse(row[TransactionFields.longitude].toString()),
-          summary:summary
-      );
+          latitude: double.parse(row[TransactionFields.latitude].toString()),
+          longitude: double.parse(row[TransactionFields.longitude].toString()),
+          summary: summary);
       worksList.add(workAdditional);
-
     }
 
     return worksList;
@@ -132,13 +133,11 @@ class TransactionDao {
           } catch (e) {
             print('Error paid:$e');
           }
-                }
+        }
       }
     }
     return sum;
   }
-
-
 
   Future<double> getTotalSummariesWork(String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
@@ -289,11 +288,13 @@ class TransactionDao {
   }
 
   Future<int> insertTransactionSummary(TransactionSummary transactionSummary) {
-    return _appDatabase.insert(tableTransactionSummaries, transactionSummary.toJson());
+    return _appDatabase.insert(
+        tableTransactionSummaries, transactionSummary.toJson());
   }
 
   Future<int> updateTransaction(t.Transaction transaction) {
-    return _appDatabase.update(t.tableTransactions, transaction.toJson(), 'id', transaction.id!);
+    return _appDatabase.update(
+        t.tableTransactions, transaction.toJson(), 'id', transaction.id!);
   }
 
   Future<void> insertTransactions(List<t.Transaction> transactions) async {
@@ -303,12 +304,14 @@ class TransactionDao {
 
     if (transactions.isNotEmpty) {
       await Future.forEach(transactions, (transaction) async {
-        var d = await db.query(t.tableTransactions, where: 'id = ?', whereArgs: [transaction.id]);
+        var d = await db.query(t.tableTransactions,
+            where: 'id = ?', whereArgs: [transaction.id]);
         var w = parseTransactions(d);
         if (w.isEmpty) {
           batch.insert(t.tableTransactions, transaction.toJson());
         } else {
-          batch.update(t.tableTransactions, transaction.toJson(), where: 'id = ?', whereArgs: [transaction.id]);
+          batch.update(t.tableTransactions, transaction.toJson(),
+              where: 'id = ?', whereArgs: [transaction.id]);
         }
       });
     }
@@ -336,7 +339,7 @@ class TransactionDao {
         datesToValidate.year, datesToValidate.month, datesToValidate.day);
     var formattedTodayStr = formattedToday.toIso8601String().split('T')[0];
     var formattedDatesToValidateStr =
-    formattedDatesToValidate.toIso8601String().split('T')[0];
+        formattedDatesToValidate.toIso8601String().split('T')[0];
 
     transactionToDelete = await db!.query(
       tableTransactions,
@@ -362,6 +365,7 @@ class TransactionDao {
       whereArgs: [formattedDatesToValidateStr],
     );
   }
+
   Future<int> deleteTransactionsByWorkcode(String workcode) async {
     final db = await _appDatabase.streamDatabase;
     return db!.delete(tableTransactions,
