@@ -32,7 +32,7 @@ Drawer drawer(BuildContext context, User? user) {
       children: <Widget>[
         UserAccountsDrawerHeader(
           accountName: Text(
-            user != null ? '${user.username} - ${user.name}' : 'No User',
+            user != null ? '${user.name}' : 'No User',
           ),
           accountEmail: Text(
             user != null ? user.email! : 'no-repy@bexsoluciones.com',

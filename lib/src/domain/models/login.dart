@@ -13,7 +13,7 @@ class Login extends Equatable {
 
   factory Login.fromMap(Map<String, dynamic> map) {
     return Login(
-      user : map['user'] != null ? User.fromMap(map['user']) : null,
+      user : map['user'] != null ? User.fromJson(map['user']) : null,
       token : map['token'] != null ? map['token'] as String : null,
     );
   }

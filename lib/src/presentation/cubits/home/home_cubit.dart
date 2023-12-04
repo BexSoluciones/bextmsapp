@@ -67,7 +67,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
 
   void getUser() {
     final user = _storageService.getObject('user') != null
-        ? User.fromMap(_storageService.getObject('user')!)
+        ? User.fromJson(_storageService.getObject('user')!)
         : null;
     updateUser(user!);
   }
@@ -75,7 +75,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   Future<HomeState> _getAllWorks() async {
     final works = await _databaseRepository.getAllWorks();
     final user = _storageService.getObject('user') != null
-        ? User.fromMap(_storageService.getObject('user')!)
+        ? User.fromJson(_storageService.getObject('user')!)
         : null;
 
     return HomeSuccess(works: works, user: user);
@@ -108,7 +108,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       var currentLocation = gpsBloc.state.lastKnownLocation;
 
       final user = _storageService.getObject('user') != null
-          ? User.fromMap(_storageService.getObject('user')!)
+          ? User.fromJson(_storageService.getObject('user')!)
           : null;
 
       /* final results = await Future.wait([
@@ -145,7 +145,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
         var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
         var version = yaml['version'];
         _storageService.setString('token', response.data!.login.token);
-        _storageService.setObject('user', response.data!.login.user!.toMap());
+        _storageService.setObject('user', response.data!.login.user!.toJson());
         _storageService.setInt('user_id', response.data!.login.user!.id);
 
         var device = await helperFunctions.getDevice();

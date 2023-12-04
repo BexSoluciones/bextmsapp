@@ -151,7 +151,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         _storageService.setString('username', usernameController.text);
         _storageService.setString('password', passwordController.text);
         _storageService.setString('token', response.data!.login.token);
-        _storageService.setObject('user', response.data!.login.user!.toMap());
+        _storageService.setObject('user', response.data!.login.user!.toJson());
         _storageService.setInt('user_id', response.data!.login.user!.id);
         _storageService.setString('fcm_token', token);
 

@@ -100,7 +100,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
     var processingQueue = ProcessingQueue(
       body: jsonEncode({'workcode': workcode, 'history_id': historyId}),
       task: 'incomplete',
-      code: 'SDAJBVKJAD',
+      code: 'post_new_routing',
       createdAt: now(),
       updatedAt: now(),
     );
@@ -111,7 +111,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
     processingQueue = ProcessingQueue(
         body: jsonEncode({'workcode': workcode, 'count': 1}),
         task: 'incomplete',
-        code: '90QQOINCQW',
+        code: 'update_history_order',
         createdAt: now(),
         updatedAt: now());
 
