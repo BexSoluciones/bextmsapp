@@ -252,7 +252,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           await _databaseRepository.deleteProcessingQueueByDays();
           await _databaseRepository.deleteLocationsByDays();
           await _databaseRepository.deleteNotificationsByDays();
-          await _databaseRepository.deleteTransactionByDays();
 
           logTimerStop(headerLogger, timer0, 'Initialization completed',
               level: LogLevel.success);

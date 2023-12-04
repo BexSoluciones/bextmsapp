@@ -13,10 +13,8 @@ import 'features/item.dart';
 //services
 import '../../../../locator.dart';
 import '../../../../services/navigation.dart';
-import '../../../../services/location.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
-final LocationService _locationService = locator<LocationService>();
 
 class TransactionsView extends StatefulWidget {
   const TransactionsView({super.key});

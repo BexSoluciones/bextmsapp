@@ -19,12 +19,13 @@ class TransactionCard extends StatelessWidget {
       ),
       child: ListTile(
         title: Text(
-          '#:${transaction.orderNumber}',
+          '#:${transaction.id}',
           style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('Orden ${transaction.orderNumber}'),
             Text('Estado ${transaction.status}'),
             Text('Fecha Inicio ${transaction.start}'),
             Text('Fecha Final ${transaction.end}'),

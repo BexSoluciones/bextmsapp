@@ -157,8 +157,10 @@ class TransactionDao {
 
   Future<List<t.Transaction>> getAllTransactions() async {
     final db = await _appDatabase.streamDatabase;
-    final transactionList = await db!.rawQuery(
-        'SELECT * FROM ${t.tableTransactions} GROUP BY ${t.TransactionFields.id}');
+    final transactionList = await db!.rawQuery('''
+        SELECT * FROM ${t.tableTransactions} 
+        WHERE status != "start" and status != "arrived" and status != "summary" 
+    ''');
     return parseTransactions(transactionList);
   }
 
@@ -299,8 +301,9 @@ class TransactionDao {
 
   Future<void> insertTransactions(List<t.Transaction> transactions) async {
     final db = await _appDatabase.streamDatabase;
-
     var batch = db!.batch();
+
+    print(db.path);
 
     if (transactions.isNotEmpty) {
       await Future.forEach(transactions, (transaction) async {
@@ -319,7 +322,9 @@ class TransactionDao {
       });
     }
 
-    await batch.commit(noResult: true);
+    var results = await batch.commit(noResult: false, continueOnError: true);
+
+    print(results);
 
     return Future.value();
   }
