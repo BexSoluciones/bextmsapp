@@ -307,8 +307,8 @@ class AppDatabase {
   }
 
   Future<Database?> get database async {
-    // var company = _storageService.getString('company');
-    var dbName = databaseName;
+    var company = _storageService.getString('company');
+    var dbName = company ?? databaseName;
 
     if (_database != null) return _database;
     await lock.synchronized(() async {

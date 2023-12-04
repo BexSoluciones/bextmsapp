@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/src/data/datasources/local/app_database.dart';
 import 'package:bexdeliveries/src/data/datasources/local/dao/notification_dao.dart';
-import 'package:bexdeliveries/src/data/datasources/local/hive/core/hive_database_manager.dart';
 import 'package:bexdeliveries/src/presentation/blocs/account/account_bloc.dart';
 import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
 import 'package:bexdeliveries/src/presentation/cubits/notification/count/count_cubit.dart';
@@ -123,7 +122,7 @@ Future<void> main() async {
   await Permission.location.request();
   await Firebase.initializeApp();
   await initializeDependencies();
-  await HiveDatabaseManager().start();
+
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   final databaseCubit = DatabaseCubit(locator<ApiRepository>(), locator<DatabaseRepository>());
   await databaseCubit.getDatabase();
