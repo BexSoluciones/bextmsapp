@@ -163,12 +163,14 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             latitude: currentLocation!.latitude.toString(),
             longitude: currentLocation.longitude.toString());
 
-        await _databaseRepository.insertTransaction(transaction);
+        var id = await _databaseRepository.insertTransaction(transaction);
 
         var processingQueue = ProcessingQueue(
             body: jsonEncode(transaction.toJson()),
             task: 'incomplete',
             code: 'store_transaction',
+            relationId: id.toString(),
+            relation: 'transactions',
             createdAt: now(),
             updatedAt: now());
 
@@ -198,13 +200,15 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
                   createdAt: DateTime.now().toString(),
                   updatedAt: DateTime.now().toString());
 
-              await _databaseRepository
+              var id = await _databaseRepository
                   .insertTransactionSummary(transactionSummary);
 
               var processingQueue = ProcessingQueue(
                 body: jsonEncode(transactionSummary.toJson()),
                 task: 'incomplete',
                 code: 'store_transaction_product',
+                relationId: id.toString(),
+                relation: 'transaction_summaries',
                 createdAt: now(),
                 updatedAt: now(),
               );
