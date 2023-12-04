@@ -169,8 +169,10 @@ class WorkDao {
     }
   }
 
-
-
+  Future<int> deleteWorksByWorkcode(String workcode) async {
+    final db = await _appDatabase.streamDatabase;
+    return db!.delete(tableWorks, where: 'workcode = ?', whereArgs: [workcode]);
+  }
   Future<void> emptyWorks() async {
     final db = await _appDatabase.streamDatabase;
     await db!.delete(tableWorks, where: 'id > 0');

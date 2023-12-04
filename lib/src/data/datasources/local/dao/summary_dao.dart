@@ -232,6 +232,16 @@ class SummaryDao {
     return Future.value();
   }
 
+  Future<int> deleteSummariesByWorkcode(String workcode) async {
+    final db = await _appDatabase.streamDatabase;
+    return db!.rawDelete('''
+      DELETE FROM summaries WHERE id IN (
+        SELECT summaries.id FROM summaries INNER JOIN works ON works.id = summaries.work_id
+        and works.workcode = ?
+      )
+     ''', [workcode]);
+  }
+
   Future<void> emptySummaries() async {
     final db = await _appDatabase.streamDatabase;
     await db!.delete(tableSummaries, where: 'id > 0');

@@ -2,8 +2,11 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../domain/models/notification.dart';
+import '../../../../locator.dart';
+import '../../../../services/storage.dart';
 import '../app_database.dart';
 
+final LocalStorageService _storageService = locator<LocalStorageService>();
 class NotificationDao {
   final AppDatabase _appDatabase;
 
@@ -59,7 +62,44 @@ class NotificationDao {
     return insert(tableNotifications, notification.toJson());
   }
 
+  Future<int> deleteNotificationsByDays() async {
+    final db = await _appDatabase.streamDatabase;
+    var today = DateTime.now();
+    var limitDaysWork = _storageService.getInt('limit_days_works') ?? 3;
+    var datesToValidate = today.subtract(Duration(days: limitDaysWork));
+    List<Map<String, dynamic>> NotificationsToDelete;
 
+    var formattedToday = DateTime(today.year, today.month, today.day);
+    var formattedDatesToValidate = DateTime(
+        datesToValidate.year, datesToValidate.month, datesToValidate.day);
+    var formattedTodayStr = formattedToday.toIso8601String().split('T')[0];
+    var formattedDatesToValidateStr =
+    formattedDatesToValidate.toIso8601String().split('T')[0];
+
+    NotificationsToDelete = await db!.query(
+      tableNotifications,
+      where: 'substr(date, 1, 10) <= ?',
+      whereArgs: [formattedDatesToValidateStr],
+    );
+
+    for (var task in NotificationsToDelete) {
+      var createdAt = DateTime.parse(task['date']);
+      var differenceInDays = formattedToday.difference(createdAt).inDays;
+      if (differenceInDays > limitDaysWork) {
+        await db.delete(
+          tableNotifications,
+          where: 'id = ?',
+          whereArgs: [task['id']],
+        );
+      }
+    }
+
+    return db.delete(
+      tableNotifications,
+      where: 'substr(date, 1, 10) <= ?',
+      whereArgs: [formattedDatesToValidateStr],
+    );
+  }
 
 
 

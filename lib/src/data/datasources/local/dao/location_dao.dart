@@ -57,4 +57,43 @@ class LocationDao {
     await db!.delete(tableLocations);
     return Future.value();
   }
+
+  Future<int> deleteLocationsByDays() async {
+    final db = await _appDatabase.streamDatabase;
+    var today = DateTime.now();
+    var limitDaysWork = _storageService.getInt('limit_days_works') ?? 3;
+    var datesToValidate = today.subtract(Duration(days: limitDaysWork));
+    List<Map<String, dynamic>> locationToDelete;
+
+    var formattedToday = DateTime(today.year, today.month, today.day);
+    var formattedDatesToValidate = DateTime(
+        datesToValidate.year, datesToValidate.month, datesToValidate.day);
+    var formattedTodayStr = formattedToday.toIso8601String().split('T')[0];
+    var formattedDateString =
+    formattedDatesToValidate.toIso8601String().split('T')[0];
+
+    locationToDelete = await db!.query(
+      tableLocations,
+      where: 'substr("%Y-%m-%d", time) <= ?',
+      whereArgs: [formattedDateString],
+    );
+
+    for (var task in locationToDelete) {
+      var createdAt = DateTime.parse(task['time']);
+      var differenceInDays = formattedToday.difference(createdAt).inDays;
+      if (differenceInDays > limitDaysWork) {
+        await db.delete(
+          tableLocations,
+          where: 'id = ?',
+          whereArgs: [task['id']],
+        );
+      }
+    }
+
+    return db.delete(
+      tableLocations,
+      where: 'substr("%Y-%m-%d", time) <= ?',
+      whereArgs: [formattedDateString],
+    );
+  }
 }

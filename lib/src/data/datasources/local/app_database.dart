@@ -29,6 +29,9 @@ import 'package:bexdeliveries/src/domain/models/client.dart';
 import 'package:bexdeliveries/src/domain/models/account.dart';
 import 'package:bexdeliveries/src/domain/models/news.dart';
 
+import '../../../locator.dart';
+import '../../../services/storage.dart';
+
 //daos
 part '../local/dao/work_dao.dart';
 part '../local/dao/summary_dao.dart';

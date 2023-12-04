@@ -71,6 +71,10 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   Future<void> emptyWorks() async {
     return _appDatabase.workDao.emptyWorks();
   }
+  @override
+  Future<void> deleteWorksByWorkcode(String workcode)async {
+    _appDatabase.workDao.deleteWorksByWorkcode(workcode);
+  }
 
   //POLYLINES
 
@@ -172,6 +176,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.summaryDao.getSummaryReportsWithReasonOrRedelivery(orderNumber);
   }
 
+  @override
+  Future<void> deleteSummariesByWorkcode(String workcode) {
+    return _appDatabase.summaryDao.deleteSummariesByWorkcode(workcode);
+  }
+
   //TRANSACTIONS
   @override
   Future<List<Transaction>> getAllTransactions() async {
@@ -228,6 +237,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyTransactions() async {
     return _appDatabase.transactionDao.emptyTransactions();
+  }
+
+  @override
+  Future<void> deleteTransactionsByWorkcode(String workcode) {
+    return _appDatabase.transactionDao.deleteTransactionsByWorkcode(workcode);
   }
 
   //REASONS
@@ -475,6 +489,27 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<int?> countAllUnreadNotifications() {
     return _appDatabase.notificationDao.countAllUnreadNotifications();
+  }
+
+  //DELETEBYDAYS
+  @override
+  Future<void> deleteProcessingQueueByDays() {
+    return  _appDatabase.processingQueueDao.deleteProcessingQueueByDays();
+  }
+
+  @override
+  Future<void> deleteLocationsByDays() {
+    return _appDatabase.locationDao.deleteLocationsByDays();
+  }
+
+  @override
+  Future<void> deleteNotificationsByDays() {
+    return _appDatabase.notificationDao.deleteNotificationsByDays();
+  }
+
+  @override
+  Future<void> deleteTransactionByDays() {
+    return _appDatabase.transactionDao.deleteTransactionByDays();
   }
 
   // initialize and close methods go here

@@ -18,7 +18,13 @@ import 'package:sqflite/sqflite.dart' as sqflite;
 import '../../src/domain/models/work.dart';
 
 //widgets
+import '../../src/domain/repositories/database_repository.dart';
+import '../../src/locator.dart';
 import '../../src/presentation/widgets/show_map_direction_widget.dart';
+import '../../src/services/storage.dart';
+
+final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
+final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class HelperFunctions {
   loc.Location location = loc.Location();
@@ -332,6 +338,25 @@ class HelperFunctions {
       permissionStatus = await location.requestPermission();
     }
     return permissionStatus;
+  }
+
+  Future<bool> deleteWorks(Work work) async {
+    var dob = DateTime.parse(work.date!);
+    var dur = DateTime.now().difference(dob);
+
+    print(dur.inDays);
+    print(work.status);
+    print(work.workcode);
+
+    if (dur.inDays > _storageService.getInt('limit_days_works')! &&
+        work.status == 'complete') {
+      await _databaseRepository.deleteTransactionsByWorkcode(work.workcode!);
+      await _databaseRepository.deleteSummariesByWorkcode(work.workcode!);
+      await _databaseRepository.deleteWorksByWorkcode(work.workcode!);
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }

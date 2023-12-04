@@ -29,6 +29,7 @@ class _HomeListViewState extends State<HomeListView> {
   @override
   void initState() {
     homeCubit = BlocProvider.of<HomeCubit>(context);
+    homeCubit.getAllWorks();
     super.initState();
   }
   @override

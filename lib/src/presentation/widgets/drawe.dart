@@ -6,10 +6,6 @@ import 'package:badges/badges.dart' as badge;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../config/size.dart';
-import '../../domain/repositories/database_repository.dart';
-import '../../locator.dart';
-
-final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 
 class createDrawerItem extends StatefulWidget {
   BuildContext context;
@@ -47,7 +43,7 @@ class _createDrawerItemState extends State<createDrawerItem> {
               title: Row(
                 children: <Widget>[
                   (widget.text != 'Notificaciones.')
-                      ? Icon(widget.icon)
+                      ? Icon(widget.icon,color: Theme.of(context).colorScheme.scrim)
                       :
                   (state.count != 0)
                       ? badge.Badge(
@@ -61,9 +57,9 @@ class _createDrawerItemState extends State<createDrawerItem> {
                     badgeStyle: const badge.BadgeStyle(
                       badgeColor: Colors.red,
                     ),
-                    child: const Icon(Icons.notifications),
+                    child: Icon(Icons.notifications,color: Theme.of(context).colorScheme.scrim),
                   )
-                      : const Icon(Icons.notifications),
+                      :  Icon(Icons.notifications,color: Theme.of(context).colorScheme.scrim),
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Text(
