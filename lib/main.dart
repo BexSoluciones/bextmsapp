@@ -252,30 +252,25 @@ class _MyAppState extends State<MyApp> {
   Future<void> _fetchRemoteConfig() async {
     while (true) {
       try {
-
         //Firebase
         var codeTransporter = _remoteConfigService.getString('code_transporter');
         var forceProcessingQueue = _remoteConfigService.getBool('force_processing_queue');
         var enterprise = _remoteConfigService.getString('enterprise');
         var forceDatabase = _remoteConfigService.getBool('force_database_users');
 
-        if (forceDatabase &&
+        if (forceDatabase! &&
             codeTransporter == _storageService.getString('username') &&
             enterprise == _storageService.getString('company_name')) {
-          print('force Database');
-
-          databaseCubit.exportDatabase(context,false);
+          if(context.mounted) databaseCubit.exportDatabase(context,false);
         }
-        if (forceProcessingQueue &&
+        if (forceProcessingQueue! &&
             codeTransporter == _storageService.getString('username') &&
             enterprise == _storageService.getString('company')) {
-          print('------------------\nENTRO A FORCE PROCESSING QUEUE');
         }
       } catch (e,stackTrace) {
-        print('Error fetching remote config: $e');
         await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
-      print(_storageService.getInt('time_to_callback'));
+
       await Future.delayed(
           Duration(minutes: _storageService.getInt('time_to_callback') ?? 10));
     }

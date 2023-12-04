@@ -1,16 +1,5 @@
-import 'package:bexdeliveries/src/locator.dart';
-import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
-import 'package:bexdeliveries/src/services/storage.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
-
-//widgets
-import '../domain/repositories/database_repository.dart';
-
-final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final ProcessingQueueBloc _processingQueueBloc = locator<ProcessingQueueBloc>();
 
 class RemoteConfigService {
   static RemoteConfigService? _instance;
@@ -38,8 +27,12 @@ class RemoteConfigService {
     _initialized = true;
   }
 
+  String? getString(String value) {
+    return _remoteConfig?.getString(value);
+  }
 
-
-
+  bool? getBool(String value) {
+    return _remoteConfig?.getBool(value);
+  }
 
 }

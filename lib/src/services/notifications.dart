@@ -53,9 +53,7 @@ class NotificationService {
         sound: true,
       );
       token = await _firebaseMessaging?.getToken();
-      print(token);
       _initialized = true;
-
       FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
       await setupInteractedMessage();
     }
@@ -74,22 +72,12 @@ class NotificationService {
   }
 
   void _handleMessageOpenedApp(RemoteMessage message) {
-    print('Got a message whilst in the foreground!');
-    print('Message data: ${message.data}');
-    print(message.notification);
-
     if (message.notification != null) {
       print('Message also contained a notification: ${message.notification}');
-
-
     }
   }
 
   void _handleMessage(RemoteMessage message) {
-    print('Got a message whilst in the foreground!');
-    print('Message data: ${message.data}');
-    print(message.notification);
-
     if (message.notification != null) {
       print('Message also contained a notification: ${message.notification}');
 
