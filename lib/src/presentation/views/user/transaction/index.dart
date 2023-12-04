@@ -43,16 +43,14 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
     });
 
     subcription = stream.listen((event) async {
-      var int =  await event;
+      var int = await event;
       setState(() {
         computationCount = int;
       });
-
     });
 
     super.initState();
   }
-
 
   @override
   void dispose() {
@@ -120,26 +118,53 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                     child: ListView(
                       shrinkWrap: true,
                       children: [
-                        item('Transacciones', queues.where((queue) => queue.code == "Z8RPOZDTJB").length, null),
+                        item(
+                            'Transacciones de inicio de planilla',
+                            queues
+                                .where((queue) =>
+                                    queue.code == "store_transaction_start")
+                                .length,
+                            null),
                         const SizedBox(height: 16),
-                        item('Transacciones de inicio de planilla', queues.where((queue) => queue.code == "YDASBDCUDD").length, null),
+                        item(
+                            'Transacciones de llegada de cliente',
+                            queues
+                                .where((queue) =>
+                                    queue.code == "store_transaction_arrived")
+                                .length,
+                            null),
                         const SizedBox(height: 16),
-                        item('Transacciones de llegada de cliente', queues.where((queue) => queue.code == "LLKFNVLKNE").length, null),
+                        item(
+                            'Transacciones de facturas vistas',
+                            queues
+                                .where((queue) =>
+                                    queue.code == "store_transaction_summary")
+                                .length,
+                            null),
                         const SizedBox(height: 16),
-                        item('Transacciones de facturas vistas', queues.where((queue) => queue.code == "PISADJOFJO").length, null),
+                        item(
+                            'Transacciones pendientes',
+                            queues
+                                .where((queue) => queue.task == "pending")
+                                .length,
+                            Colors.blue),
                         const SizedBox(height: 16),
-                        item('Transacciones pendientes', queues.where((queue) => queue.task == "pending").length, Colors.blue),
-                        const SizedBox(height: 16),
-                        item('Transacciones con error', queues.where((queue) => queue.task == "error").length, Colors.red),
+                        item(
+                            'Transacciones con error',
+                            queues
+                                .where((queue) => queue.task == "error")
+                                .length,
+                            Colors.red),
                         const SizedBox(height: 20),
                         item('Total', queues.length, null),
                         const SizedBox(height: 20),
                         DefaultButton(
-                            widget: const Text(
-                                'Enviar transacciones',
+                            widget: const Text('Enviar transacciones',
                                 style: TextStyle(
                                     fontSize: 16, color: Colors.white)),
-                            press: () => context.read<ProcessingQueueBloc>().add(ProcessingQueueSender()))
+                            press: () => context
+                                .read<ProcessingQueueBloc>()
+                                .add(ProcessingQueueSender()))
                       ],
                     )));
           }
@@ -176,29 +201,29 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         children: [
-          Lottie.asset('assets/animations/111789-file-transfers-over-cloud.json'),
+          Lottie.asset(
+              'assets/animations/111789-file-transfers-over-cloud.json'),
           Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text('Enviando', style: TextStyle(fontSize: 16)),
-                Text('1 de $computationCount', style: const TextStyle(fontSize: 16))
-              ]
-          ),
+                Text('1 de $computationCount',
+                    style: const TextStyle(fontSize: 16))
+              ]),
           const Spacer(),
           DefaultButton(
               color: Colors.grey[600],
               widget: const Text('Cancelar',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14)),
+                  style: TextStyle(color: Colors.white, fontSize: 14)),
               press: () {
-                context.read<ProcessingQueueBloc>().add(ProcessingQueueCancel());
-                ScaffoldMessenger.of(
-                    _scaffoldKey.currentContext ?? context)
+                context
+                    .read<ProcessingQueueBloc>()
+                    .add(ProcessingQueueCancel());
+                ScaffoldMessenger.of(_scaffoldKey.currentContext ?? context)
                     .showSnackBar(const SnackBar(
-                    backgroundColor: Colors.green,
-                    content: Text('Todo se esta enviando exitosamente')));
+                        backgroundColor: Colors.green,
+                        content: Text('Todo se esta enviando exitosamente')));
               })
         ],
       ),

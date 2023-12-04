@@ -116,17 +116,12 @@ class ProcessingQueueBloc
     emit(ProcessingQueueSuccess());
   }
 
-  // void _handleAddProcessingQueue(ProcessingQueue processingQueue) async {
-  //   await _databaseRepository.insertProcessingQueue(processingQueue);
-  //   _getProcessingQueue();
-  // }
-
   void sendProcessingQueue(List<ProcessingQueue> queues) async {
     await Future.forEach(queues, (queue) async {
       queue.updatedAt = now();
 
       switch (queue.code) {
-        case 'YDASBDCUDD':
+        case 'store_transaction_start':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
@@ -147,7 +142,7 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'LLKFNVLKNE':
+        case 'store_transaction_arrived':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
@@ -169,7 +164,7 @@ class ProcessingQueueBloc
           }
 
           break;
-        case 'PISADJOFJO':
+        case 'store_transaction_summary':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
@@ -190,7 +185,7 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'Z8RPOZDTJB':
+        case 'store_transaction':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
@@ -211,9 +206,9 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'LIALIVNRAA':
+        case 'store_transaction_product':
+          var body = jsonDecode(queue.body);
           try {
-            var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final res = await _apiRepository.transaction(
@@ -238,6 +233,8 @@ class ProcessingQueueBloc
           } catch (e,stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            body['start'] = now();
+            queue.body = jsonEncode(body);
             await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
@@ -255,7 +252,7 @@ class ProcessingQueueBloc
           }
 
           break;
-        case 'EBSVAEKRJB':
+        case 'store_work_status':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
@@ -276,7 +273,7 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'A48NDIVKJF':
+        case 'store_history_order':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
@@ -288,34 +285,7 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case '90QQOINCQW':
-          try {
-            var body = jsonDecode(queue.body);
-
-            queue.task = 'processing';
-            await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e,stackTrace) {
-            queue.task = 'error';
-            queue.error = e.toString();
-            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
-            await _databaseRepository.updateProcessingQueue(queue);
-          }
-          break;
-        case 'AB5A8E10Y3':
-          try {
-            var body = jsonDecode(queue.body);
-
-            queue.task = 'processing';
-            await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e,stackTrace) {
-            queue.task = 'error';
-            queue.error = e.toString();
-            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
-            await _databaseRepository.updateProcessingQueue(queue);
-          }
-
-          break;
-        case 'SDAJBVKJAD':
+        case 'update_history_order':
           try {
             var body = jsonDecode(queue.body);
 
@@ -328,7 +298,34 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'UWEBBEVWDC':
+        case 'get_prediction':
+          try {
+            var body = jsonDecode(queue.body);
+
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e,stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+
+          break;
+        case 'post_new_routing':
+          try {
+            var body = jsonDecode(queue.body);
+
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e,stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'post_update_client':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
@@ -350,7 +347,7 @@ class ProcessingQueueBloc
           }
 
           break;
-        case 'OERINVOIEF':
+        case 'post_sync_works':
           try {
             var body = jsonDecode(queue.body);
 
@@ -363,7 +360,7 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'QWPJCPQKNE':
+        case 'get_work_start':
           try {
             var body = jsonDecode(queue.body);
 
@@ -377,7 +374,7 @@ class ProcessingQueueBloc
           }
 
           break;
-        case 'ASJBVKJDFS':
+        case 'post_logout':
           try {
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
@@ -401,7 +398,7 @@ class ProcessingQueueBloc
           }
           break;
 
-        case 'HGHFJ52JSD':
+        case 'post_firebase_token':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
@@ -431,7 +428,7 @@ class ProcessingQueueBloc
 
   Future<void> validateIfServiceIsCompleted(ProcessingQueue p) async {
     try {
-      if (p.code == 'Z8RPOZDTJB') {
+      if (p.code == 'store_transaction') {
         var workcode = jsonDecode(p.body)['workcode'];
         var isLast = await _databaseRepository.checkLastTransaction(workcode);
         if (isLast) {

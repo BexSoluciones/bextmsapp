@@ -168,7 +168,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         var processingQueue = ProcessingQueue(
             body: jsonEncode(transaction.toJson()),
             task: 'incomplete',
-            code: 'Z8RPOZDTJB',
+            code: 'store_transaction',
             createdAt: now(),
             updatedAt: now());
 
@@ -204,7 +204,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
               var processingQueue = ProcessingQueue(
                 body: jsonEncode(transactionSummary.toJson()),
                 task: 'incomplete',
-                code: 'LIALIVNRAA',
+                code: 'store_transaction_product',
                 createdAt: now(),
                 updatedAt: now(),
               );

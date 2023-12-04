@@ -86,7 +86,7 @@ class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
       var processingQueueTransaction = ProcessingQueue(
           body: jsonEncode(transaction.toJson()),
           task: 'incomplete',
-          code: 'YDASBDCUDD',
+          code: 'store_transaction_start',
           createdAt: now(),
           updatedAt: now()
        );

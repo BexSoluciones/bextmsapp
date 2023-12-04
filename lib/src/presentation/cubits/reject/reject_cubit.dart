@@ -87,7 +87,7 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
         var processingQueue = ProcessingQueue(
             body: jsonEncode(transaction.toJson()),
             task: 'incomplete',
-            code: 'Z8RPOZDTJB',
+            code: 'store_transaction',
             createdAt: now(),
             updatedAt: now());
 

@@ -40,7 +40,6 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   final helperFunctions = HelperFunctions();
   final GpsBloc gpsBloc;
 
-
   CurrentUserLocationEntity? currentLocation;
 
   SummaryCubit(this._databaseRepository, this._locationRepository,
@@ -76,33 +75,36 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         isGeoreference: state.isGeoreference));
   }
 
-  Future<void> sendTransactionSummary(Work work, Summary summary, Transaction transaction) async {
+  Future<void> sendTransactionSummary(
+      Work work, Summary summary, Transaction transaction) async {
     emit(const SummaryLoading());
 
-    var vts = await _databaseRepository.validateTransactionSummary(work.workcode!, summary.orderNumber, 'summary');
-    var isArrived = await _databaseRepository.validateTransactionArrived(transaction.workId, 'arrived');
+    var vts = await _databaseRepository.validateTransactionSummary(
+        work.workcode!, summary.orderNumber, 'summary');
+    var isArrived = await _databaseRepository.validateTransactionArrived(
+        transaction.workId, 'arrived');
 
-    if(isArrived && vts == false){
-      //currentLocation ??= await _locationRepository.getCurrentLocation();
-
+    if (isArrived && vts == false) {
       var currentLocation = gpsBloc.state.lastKnownLocation;
 
       transaction.latitude = currentLocation!.latitude.toString();
       transaction.longitude = currentLocation.longitude.toString();
 
-      await _databaseRepository.insertTransaction(transaction);
+      var id = await _databaseRepository.insertTransaction(transaction);
 
       var processingQueue = ProcessingQueue(
           body: jsonEncode(transaction.toJson()),
           task: 'incomplete',
-          code: 'PISADJOFJO',
+          code: 'store_transaction_summary',
           createdAt: now(),
           updatedAt: now());
 
-      _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue));
+      _processingQueueBloc
+          .add(ProcessingQueueAdd(processingQueue: processingQueue));
     }
 
-    final summaries = await _databaseRepository.getAllSummariesByOrderNumber(work.id!);
+    final summaries =
+        await _databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
     emit(SummarySuccess(
         summaries: summaries,
@@ -118,20 +120,12 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
             typeOfCharge: summary.typeOfCharge!,
             orderNumber: summary.orderNumber,
             operativeCenter: summary.operativeCenter!,
-           summaries: summaries
-        ));
+            summaries: summaries));
   }
 
   Future<void> sendTransactionArrived(
       Work work, Transaction transaction) async {
     emit(const SummaryLoading());
-
-    //currentLocation ??= await _locationRepository.getCurrentLocation();
-
-   // var currentLocation = gpsBloc.state.lastKnownLocation;
-
-    //transaction.latitude = currentLocation!.latitude.toString();
-    //transaction.longitude = currentLocation.longitude.toString();
 
     var currentLocation = gpsBloc.state.lastKnownLocation;
 
@@ -140,12 +134,13 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
     await _databaseRepository.insertTransaction(transaction);
 
-    var isArrived = await _databaseRepository.validateTransactionArrived(transaction.workId, 'arrived');
+    var isArrived = await _databaseRepository.validateTransactionArrived(
+        transaction.workId, 'arrived');
 
     var processingQueue = ProcessingQueue(
         body: jsonEncode(transaction.toJson()),
         task: 'incomplete',
-        code: 'LLKFNVLKNE',
+        code: 'store_transaction_arrived',
         createdAt: now(),
         updatedAt: now());
 
@@ -170,12 +165,10 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     emit(const SummaryLoadingMap());
     currentLocation ??= await _locationRepository.getCurrentLocation();
     if (context.mounted) {
-        helperFunctions.showMapDirection(context, arguments.work, currentLocation!);
+      helperFunctions.showMapDirection(
+          context, arguments.work, currentLocation!);
     }
 
     emit(const SummaryLoading());
   }
-
-
-
 }

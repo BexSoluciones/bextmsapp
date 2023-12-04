@@ -50,7 +50,7 @@ class GeoreferenceCubit extends Cubit<GeoreferenceState> with FormatDate {
     var processingQueue = ProcessingQueue(
         body: jsonEncode(client.toJson()),
         task: 'incomplete',
-        code: 'LLKFNVLKNE',
+        code: 'update_client',
         createdAt: now(),
         updatedAt: now());
 
