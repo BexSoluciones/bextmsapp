@@ -408,7 +408,7 @@ class ProcessingQueueBloc
           var processingQueue = ProcessingQueue(
             body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
             task: 'incomplete',
-            code: 'EBSVAEKRJB',
+            code: 'store_work_status',
             createdAt: now(),
             updatedAt: now(),
           );

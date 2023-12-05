@@ -8,19 +8,21 @@ extension SnackBarWidget on LoginViewState {
 }
 
 extension TextFieldWidget on LoginViewState {
-  Widget buildTextField(TextEditingController controller,String hintText) {
+  Widget buildTextField(TextEditingController controller, String hintText) {
     return SizedBox(
       width: 260,
       height: 60,
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
-            suffix:  Icon(Icons.email,color: context.theme.colorScheme.primary,),
+            suffix: Icon(
+              Icons.email,
+              color: context.theme.colorScheme.primary,
+            ),
             hintText: hintText,
             border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
-            )
-        ),
+            )),
         validator: validator,
       ),
     );
@@ -35,8 +37,7 @@ extension TextFieldWidget on LoginViewState {
   }
 }
 
-extension PasswordWidget on LoginViewState{
-
+extension PasswordWidget on LoginViewState {
   Widget buildPasswordFormField(TextEditingController controller) {
     return SizedBox(
       width: 260,
@@ -77,13 +78,12 @@ extension PasswordWidget on LoginViewState{
             ),
             border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
-            )
-        ),
+            )),
         autofillHints: const [AutofillHints.password],
       ),
-    )
-    ;
+    );
   }
+
   void removeError({required String error}) {
     if (errors.contains(error)) {
       setState(() {
@@ -99,38 +99,39 @@ extension PasswordWidget on LoginViewState{
       });
     }
   }
-
 }
 
-
 extension LoginButton on LoginViewState {
-
   Future<bool> isGpsEnabled() async {
     Location location = Location();
     return await location.serviceEnabled();
   }
 
   Widget buildButton(BuildContext context, LoginState state) {
-    return DefaultButton(widget: buildChild(state), press: () => buildOnPressed(context), login: true,);
+    return DefaultButton(
+      widget: buildChild(state),
+      press: () => buildOnPressed(context),
+      login: true,
+    );
   }
 
   Future<void> buildOnPressed(BuildContext context) async {
-
     if (formKey.currentState!.validate()) {
       Location location = Location();
-      var isGpsEnabled =await location.serviceEnabled();
-      if(isGpsEnabled){
+      var isGpsEnabled = await location.serviceEnabled();
+      if (isGpsEnabled) {
         context.read<LoginCubit>().onPressedLogin(username, password);
-      }else{
-        buildSnackBar(context, 'El GPS no está activado. Activa el GPS y vuelve a intentarlo.');
+      } else {
+        buildSnackBar(context,
+            'El GPS no está activado. Activa el GPS y vuelve a intentarlo.');
       }
-
     }
   }
 
   Widget buildChild(LoginState state) {
     return state is LoginLoading
-        ? const CircularProgressIndicator.adaptive(backgroundColor: Colors.white)
+        ? const CircularProgressIndicator.adaptive(
+            backgroundColor: Colors.white)
         : const Icon(Icons.arrow_forward_ios, color: Colors.white);
   }
 }

@@ -1,19 +1,21 @@
-import 'package:bexdeliveries/src/presentation/cubits/notification/count/count_cubit.dart';
-import 'package:bexdeliveries/src/presentation/cubits/notification/count/count_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badge;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+//cubit
+import '../cubits/notification/count/count_cubit.dart';
+
+//config
 import '../../config/size.dart';
 
 class createDrawerItem extends StatefulWidget {
-  BuildContext context;
-  IconData icon;
-  String text;
-  GestureTapCallback? onTap;
+  final BuildContext context;
+  final IconData icon;
+  final String text;
+  final GestureTapCallback? onTap;
 
-  createDrawerItem(
+  const createDrawerItem(
       {super.key,
       required this.context,
       required this.icon,

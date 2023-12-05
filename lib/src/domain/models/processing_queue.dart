@@ -40,7 +40,9 @@ class ProcessingQueue {
     body = json['body'];
     task = json['task'];
     code = json['code'];
-    relationId = json['relation_id'];
+    relationId = json['relation_id'] is int
+        ? json['relation_id'].toString()
+        : json['relation_id'];
     relation = json['relation'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];

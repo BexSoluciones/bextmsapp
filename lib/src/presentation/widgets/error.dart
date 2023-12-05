@@ -12,10 +12,7 @@ class Error extends StatelessWidget {
       width: double.infinity,
       child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error),
-            Center(child: Text(message))
-          ]),
+          children: [const Icon(Icons.error), Center(child: Text(message))]),
     );
   }
 }

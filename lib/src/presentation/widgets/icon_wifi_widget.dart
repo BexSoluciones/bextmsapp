@@ -11,11 +11,14 @@ class IconConnection extends StatelessWidget {
     return BlocBuilder<NetworkBloc, NetworkState>(
       builder: (context, state) {
         if (state is NetworkFailure) {
-          return  Icon(Icons.wifi_off,color:Theme.of(context).colorScheme.secondaryContainer);
+          return Icon(Icons.wifi_off,
+              color: Theme.of(context).colorScheme.secondaryContainer);
         } else if (state is NetworkSuccess) {
-          return  Icon(Icons.wifi,color:Theme.of(context).colorScheme.secondaryContainer);
+          return Icon(Icons.wifi,
+              color: Theme.of(context).colorScheme.secondaryContainer);
         } else {
-          return  Icon(Icons.e_mobiledata,color:Theme.of(context).colorScheme.secondaryContainer);
+          return Icon(Icons.e_mobiledata,
+              color: Theme.of(context).colorScheme.secondaryContainer);
         }
       },
     );
