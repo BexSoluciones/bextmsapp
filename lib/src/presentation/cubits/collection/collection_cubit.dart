@@ -143,8 +143,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             error:
                 'No hay pagos para el recaudo que cumpla con las condiciones'));
       } else {
-        //var currentLocation = await _locationRepository.getCurrentLocation();
-
         var currentLocation = gpsBloc.state.lastKnownLocation;
 
         var transaction = Transaction(
