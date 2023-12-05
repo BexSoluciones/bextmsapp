@@ -8,28 +8,31 @@ import 'package:meta/meta.dart';
 
 part 'ordersummaryreasons_state.dart';
 
-class OrdersummaryreasonsCubit extends BaseCubit<OrdersummaryreasonsState,List<Summary>?> {
+class OrdersummaryreasonsCubit
+    extends BaseCubit<OrdersummaryreasonsState, List<Summary>?> {
+  final DatabaseRepository _databaseRepository;
+  OrdersummaryreasonsCubit(this._databaseRepository)
+      : super(const OrdersummaryreasonsLoading(), []);
 
-   final DatabaseRepository _databaseRepository;
-  OrdersummaryreasonsCubit(this._databaseRepository) : super(const OrdersummaryreasonsLoading(),[]);
-
-   Future<void> OrdenSummary(String orderNumber) async {
-     if (isBusy) return;
-     await run(() async {
-
-     try {
-      final summaryRespawn = await _databaseRepository.getSummaryReportsWithReasonOrRedelivery(orderNumber);
-      final summaryReject  = await _databaseRepository.getSummaryReportsWithReturnOrRedelivery(orderNumber);
-      final sumarryDelivery =  await _databaseRepository.getSummaryReportsWithDelivery(orderNumber);
-       emit(OrdersummaryreasonsSuccess(summariesRespawn:summaryRespawn,summariesRejects: summaryReject, summariesDelivery: sumarryDelivery));
-     } catch (error, stackTrace) {
-       print('Error data: $error');
-       await FirebaseCrashlytics.instance.recordError(error, stackTrace);
-       emit(OrdersummaryreasonsFailed(error: error.toString()));
-     }
-   });
-
-     }
-   }
-
-
+  Future<void> OrdenSummary(String orderNumber) async {
+    if (isBusy) return;
+    await run(() async {
+      try {
+        final summaryRespawn = await _databaseRepository
+            .getSummaryReportsWithReasonOrRedelivery(orderNumber);
+        final summaryReject = await _databaseRepository
+            .getSummaryReportsWithReturnOrRedelivery(orderNumber);
+        final sumarryDelivery = await _databaseRepository
+            .getSummaryReportsWithDelivery(orderNumber);
+        emit(OrdersummaryreasonsSuccess(
+            summariesRespawn: summaryRespawn,
+            summariesRejects: summaryReject,
+            summariesDelivery: sumarryDelivery));
+      } catch (error, stackTrace) {
+        print('Error data: $error');
+        await FirebaseCrashlytics.instance.recordError(error, stackTrace);
+        emit(OrdersummaryreasonsFailed(error: error.toString()));
+      }
+    });
+  }
+}

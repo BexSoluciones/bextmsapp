@@ -1,14 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
-
-import 'package:bexdeliveries/src/services/remote_config.dart';
 import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -26,7 +23,7 @@ import 'src/config/theme/app.dart';
 //domain
 import 'src/domain/repositories/api_repository.dart';
 import 'src/domain/repositories/database_repository.dart';
-import '../../src/domain/models/notification.dart'  as notificationModel;
+import '../../src/domain/models/notification.dart';
 
 //cubits
 import 'src/presentation/blocs/theme/theme_bloc.dart';
@@ -80,6 +77,7 @@ import 'src/services/navigation.dart';
 import 'src/services/storage.dart';
 import 'src/services/analytics.dart';
 import 'src/services/notifications.dart';
+import 'src/services/remote_config.dart';
 import 'src/services/logger.dart';
 
 //router
@@ -99,7 +97,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
   final notificationDao = NotificationDao(AppDatabase.instance);
-  final pushNotification = (notificationModel.PushNotification(
+  final pushNotification = (PushNotification(
       id_from_server: message.data['notification_id'],
       title: message.notification?.title,
       body: message.notification?.body,

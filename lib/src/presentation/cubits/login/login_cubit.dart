@@ -73,12 +73,12 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   LoginCubit(this._apiRepository, this._databaseRepository,
       this._locationRepository, this._processingQueueBloc, this.gpsBloc)
       : super(
-      LoginSuccess(
-          enterprise: _storageService.getObject('enterprise') != null
-              ? Enterprise.fromMap(
-              _storageService.getObject('enterprise')!)
-              : null),
-      null);
+            LoginSuccess(
+                enterprise: _storageService.getObject('enterprise') != null
+                    ? Enterprise.fromMap(
+                        _storageService.getObject('enterprise')!)
+                    : null),
+            null);
 
   void updateEnterpriseState(Enterprise enterprise) {
     emit(UpdateEnterprise(enterprise));
@@ -90,7 +90,8 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
     if (response is DataSuccess) {
       var data = response.data as EnterpriseConfigResponse;
       _storageService.setObject('config', data.enterpriseConfig.toMap());
-      _storageService.setInt('limit_days_works', data.enterpriseConfig.limitDaysWorks);
+      _storageService.setInt(
+          'limit_days_works', data.enterpriseConfig.limitDaysWorks);
     }
   }
 
@@ -112,7 +113,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   Future<void> differenceWorks(
       List<String?> localWorks, List<String?> externalWorks) async {
     var difference =
-    localWorks.toSet().difference(externalWorks.toSet()).toList();
+        localWorks.toSet().difference(externalWorks.toSet()).toList();
     if (difference.isNotEmpty) {
       for (var key in difference) {
         await _databaseRepository.updateStatusWork(key!, 'complete');
@@ -130,11 +131,8 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
               ? Enterprise.fromMap(_storageService.getObject('enterprise')!)
               : null));
 
-      
       currentLocation = await _locationRepository.getCurrentLocation();
       //var currentLocation = gpsBloc.state.lastKnownLocation;
-
-
 
       final response = await _apiRepository.login(
         request: LoginRequest(usernameController.text, passwordController.text),
@@ -147,7 +145,6 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         var version = yaml['version'];
         var token = await FirebaseMessaging.instance.getToken();
 
-
         _storageService.setString('username', usernameController.text);
         _storageService.setString('password', passwordController.text);
         _storageService.setString('token', response.data!.login.token);
@@ -155,21 +152,23 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         _storageService.setInt('user_id', response.data!.login.user!.id);
         _storageService.setString('fcm_token', token);
 
-        Future.wait([getConfigEnterprise(), getReasons(),getAccounts()]);
+        Future.wait([getConfigEnterprise(), getReasons(), getAccounts()]);
 
         var device = await helperFunctions.getDevice();
 
-        var procesingQueue = ProcessingQueue(
+        var processingQueue = ProcessingQueue(
           body: jsonEncode({
             'user_id': _storageService.getInt('user_id')!.toString(),
             'fcm_token': '${_storageService.getString('fcm_token')}'
           }),
           task: 'incomplete',
-          code: 'HGHFJ52JSD',
-          createdAt:  DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()
-          ), updatedAt:  DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+          code: 'post_firebase_token',
+          createdAt: now(),
+          updatedAt: now(),
         );
-        _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: procesingQueue));
+
+        _processingQueueBloc
+            .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
         final responseWorks = await _apiRepository.works(
             request: WorkRequest(
@@ -191,20 +190,20 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
             works.add(work);
             if (work.summaries != null) {
               await Future.forEach(work.summaries as Iterable<Object?>,
-                      (element) {
-                    var summary = element as Summary;
-                    summary.cant = ((double.parse(summary.amount) *
-                        100.0 /
-                        double.parse(summary.unitOfMeasurement))
+                  (element) {
+                var summary = element as Summary;
+                summary.cant = ((double.parse(summary.amount) *
+                            100.0 /
+                            double.parse(summary.unitOfMeasurement))
                         .round() /
-                        100);
+                    100);
 
-                    summary.grandTotalCopy = summary.grandTotal;
-                    if (summary.transaction != null) {
-                      transactions.add(summary.transaction!);
-                    }
-                    summaries.add(summary);
-                  });
+                summary.grandTotalCopy = summary.grandTotal;
+                if (summary.transaction != null) {
+                  transactions.add(summary.transaction!);
+                }
+                summaries.add(summary);
+              });
 
               var found = work.summaries!
                   .where((element) => element.transaction != null);
@@ -234,7 +233,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
               var processingQueueWork = ProcessingQueue(
                   body: jsonEncode({'workcode': key, 'status': 'sync'}),
                   task: 'incomplete',
-                  code: 'EBSVAEKRJB',
+                  code: 'store_work_status',
                   createdAt: now(),
                   updatedAt: now());
 
@@ -248,7 +247,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
                       'workcode': worksF.first.workcode
                     }),
                     task: 'incomplete',
-                    code: 'AB5A8E10Y3',
+                    code: 'get_prediction',
                     createdAt: now(),
                     updatedAt: now());
 

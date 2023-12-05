@@ -90,42 +90,45 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
         builder: (context, state) {
           return Slidable(
             key: const ValueKey(0),
-            endActionPane: ActionPane(motion: const ScrollMotion(), children: [
-              SlidableAction(
-                borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(15),
-                    bottomRight: Radius.circular(15)),
-                onPressed: (_) {
-                  if (widget.work.count! == left) {
-                    showDialog(
-                        context: context,
-                        builder: (context) => ConfirmDialog(
-                            title: 'Guardar historico',
-                            message:
-                                '¿Está seguro que desea guardar el historico?',
-                            onConfirm: () =>
-                                _handleNavigation(widget.work, context)));
-                  } else {
-                    showDialog(
-                        context: context,
-                        builder: (context) => CustomDialog(
-                              title: 'Clientes pendientes por visitar',
-                              message: 'Cantidad :${widget.work.count! - left}',
-                              elevatedButton1: Colors.red,
-                              elevatedButton2: Colors.green,
-                              cancelarButtonText: '',
-                              completarButtonText: 'Aceptar',
-                              icon: Icons.warning,
-                              colorIcon: kPrimaryColor,
-                            ));
-                  }
-                },
-                backgroundColor: kPrimaryColor,
-                foregroundColor: Colors.white,
-                icon: Icons.save,
-                label: 'Guardar historico',
-              ),
-            ]),
+            endActionPane: _storageService.getBool('can_make_history') == true
+                ? ActionPane(motion: const ScrollMotion(), children: [
+                    SlidableAction(
+                      borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(15),
+                          bottomRight: Radius.circular(15)),
+                      onPressed: (_) {
+                        if (widget.work.count! == left) {
+                          showDialog(
+                              context: context,
+                              builder: (context) => ConfirmDialog(
+                                  title: 'Guardar historico',
+                                  message:
+                                      '¿Está seguro que desea guardar el historico?',
+                                  onConfirm: () =>
+                                      _handleNavigation(widget.work, context)));
+                        } else {
+                          showDialog(
+                              context: context,
+                              builder: (context) => CustomDialog(
+                                    title: 'Clientes pendientes por visitar',
+                                    message:
+                                        'Cantidad :${widget.work.count! - left}',
+                                    elevatedButton1: Colors.red,
+                                    elevatedButton2: Colors.green,
+                                    cancelarButtonText: '',
+                                    completarButtonText: 'Aceptar',
+                                    icon: Icons.warning,
+                                    colorIcon: kPrimaryColor,
+                                  ));
+                        }
+                      },
+                      backgroundColor: kPrimaryColor,
+                      foregroundColor: Colors.white,
+                      icon: Icons.save,
+                      label: 'Guardar historico',
+                    ),
+                  ])
+                : null,
             child: Container(
               decoration: BoxDecoration(
                 color: Theme.of(context)
@@ -145,7 +148,8 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                             fontSize: calculatedFon,
                             fontWeight: FontWeight.w500),
                       ),
-                      subtitle: Row(
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Clientes: ${widget.work.count}',
@@ -154,21 +158,30 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                                 fontSize: calculatedFon,
                                 color: Theme.of(context).colorScheme.scrim),
                           ),
-                          Flexible(
-                              child: Text(
-                            ' Atendidos: ${widget.work.right ?? '0'} Pendientes: ${widget.work.left! - widget.work.right!}',
-                            style: TextStyle(
-                                fontSize: calculatedFon,
-                                fontWeight: FontWeight.normal,
-                                color: Theme.of(context).colorScheme.scrim),
-                            textAlign: TextAlign.center,
-                          ))
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Atendidos: ${widget.work.right ?? '0'} ',
+                                style: TextStyle(
+                                    fontSize: calculatedFon,
+                                    fontWeight: FontWeight.normal,
+                                    color: Theme.of(context).colorScheme.scrim),
+                              ),
+                              Text(
+                                'Pendientes: ${widget.work.left! - widget.work.right!}',
+                                style: TextStyle(
+                                    fontSize: calculatedFon,
+                                    fontWeight: FontWeight.normal,
+                                    color: Theme.of(context).colorScheme.scrim),
+                              )
+                            ],
+                          ),
                         ],
                       ),
                     ),
                   ),
-                  //_storageService.getBool('can_make_history') == true
-                  true
+                  _storageService.getBool('can_make_history') == true
                       ? const Center(
                           child: Padding(
                           padding: EdgeInsets.all(20.0),
