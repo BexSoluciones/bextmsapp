@@ -1,19 +1,14 @@
 import 'dart:convert';
 
-import 'package:bexdeliveries/src/config/size.dart';
-import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
-import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
-import 'package:bexdeliveries/src/presentation/widgets/confirm_dialog.dart';
-import 'package:bexdeliveries/src/presentation/widgets/custom_dialog.dart';
-import 'package:bexdeliveries/src/services/pushnotification.dart';
-import 'package:bexdeliveries/src/utils/constants/colors.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:intl/intl.dart';
+
+//config
+import '../../../../../config/size.dart';
 
 //blocs
 import '../../../../blocs/history_order/history_order_bloc.dart';
@@ -22,14 +17,23 @@ import '../../../../blocs/history_order/history_order_bloc.dart';
 import '../../../../../domain/models/work.dart';
 import '../../../../../domain/models/arguments.dart';
 import '../../../../../domain/models/history_order.dart';
+import '../../../../../domain/models/processing_queue.dart';
+import '../../../../../domain/repositories/database_repository.dart';
+import '../../../../../domain/abstracts/format_abstract.dart';
 
 //utils
 import '../../../../../utils/constants/strings.dart';
+import '../../../../../utils/constants/colors.dart';
 
 //services
 import '../../../../../locator.dart';
+import '../../../../../services/pushnotification.dart';
 import '../../../../../services/navigation.dart';
 import '../../../../../services/storage.dart';
+
+//widget
+import '../../../../../presentation/widgets/confirm_dialog.dart';
+import '../../../../../presentation/widgets/custom_dialog.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
@@ -44,7 +48,7 @@ class ItemWork extends StatefulWidget {
   State<ItemWork> createState() => _ItemWorkState();
 }
 
-class _ItemWorkState extends State<ItemWork> {
+class _ItemWorkState extends State<ItemWork> with FormatDate {
   late HistoryOrderBloc historyOrderBloc;
   static final FirebaseMessaging _firebaseMessaging =
       FirebaseMessaging.instance;
@@ -189,9 +193,9 @@ class _ItemWorkState extends State<ItemWork> {
       var processingQueue = ProcessingQueue(
           body: jsonEncode({'work_id': work.id}),
           task: 'incomplete',
-          code: 'AS65C41656',
-          createdAt: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-          updatedAt: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
+          code: 'store_history_order',
+          createdAt: now(),
+          updatedAt: now());
 
       _databaseRepository.insertProcessingQueue(processingQueue);
 

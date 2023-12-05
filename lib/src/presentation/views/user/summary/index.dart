@@ -94,8 +94,8 @@ class SummaryViewState extends State<SummaryView> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async => false,
+    return PopScope(
+        canPop: false,
         child: BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
           return Scaffold(
             resizeToAvoidBottomInset: true,

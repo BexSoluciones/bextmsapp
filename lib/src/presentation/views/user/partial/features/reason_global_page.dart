@@ -58,8 +58,8 @@ class _ReasonsGlobalState extends State<ReasonsGlobal> {
                 useSafeArea: true,
                 isScrollControlled: true,
                 context: widget.context,
-                builder: (BuildContext context) => WillPopScope(
-                      onWillPop: () async => false,
+                builder: (BuildContext context) => PopScope(
+                      canPop: false,
                       child: RefusedOrder(
                           reasons: widget.reasons,
                           controllerMotiveItem: widget.r[index].controller,

@@ -164,8 +164,8 @@ class _MaxBoxScreenState extends State<MaxBoxScreen> {
   Widget build(BuildContext context) {
 
 
-    return WillPopScope(
-      onWillPop: () async => !isLoading,
+    return PopScope(
+      canPop: !isLoading,
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
