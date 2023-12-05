@@ -24,11 +24,9 @@ class PackageView extends StatefulWidget {
   PackageViewState createState() => PackageViewState();
 }
 
-class PackageViewState extends State<PackageView>
-    with WidgetsBindingObserver {
+class PackageViewState extends State<PackageView> with WidgetsBindingObserver {
   final GlobalKey one = GlobalKey();
   final GlobalKey two = GlobalKey();
-
 
   @override
   void setState(fn) {
@@ -64,25 +62,25 @@ class PackageViewState extends State<PackageView>
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async => false,
+    return PopScope(
+        canPop: false,
         child: Scaffold(
           body: SafeArea(
               child: CustomScrollView(
-                slivers: <Widget>[
-                  AppBarInventory(
-                    arguments: widget.arguments,
-                    one: one, isArrived: false,
-                  ),
-                  ListViewPackage(
-                    arguments: widget.arguments,
-                    two: two,
-                  )
-                ],
-              )),
+            slivers: <Widget>[
+              AppBarInventory(
+                arguments: widget.arguments,
+                one: one,
+                isArrived: false,
+              ),
+              ListViewPackage(
+                arguments: widget.arguments,
+                two: two,
+              )
+            ],
+          )),
         ));
   }
 }

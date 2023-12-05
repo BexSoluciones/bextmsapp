@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
@@ -8,10 +7,10 @@ import '../../utils/constants/colors.dart';
 
 errorGpsAlertDialog(
     {required BuildContext context,
-      required String error,
-      required IconData iconData,
-      required String buttonText,
-      required var onTap}) {
+    required String error,
+    required IconData iconData,
+    required String buttonText,
+    required var onTap}) {
   if (Platform.isAndroid) {
     return showDialog(
         barrierDismissible: false,
@@ -19,10 +18,8 @@ errorGpsAlertDialog(
         builder: (_) {
           Size size = MediaQuery.of(context).size;
           ThemeData theme = Theme.of(context);
-          return WillPopScope(
-            onWillPop: () async {
-              return false;
-            },
+          return PopScope(
+            canPop: false,
             child: Dialog(
               backgroundColor: theme.scaffoldBackgroundColor,
               shape: const RoundedRectangleBorder(
@@ -123,43 +120,43 @@ errorGpsAlertDialog(
     showCupertinoDialog(
         context: context,
         builder: (_) => CupertinoAlertDialog(
-          title: Column(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  iconData,
-                  color: Colors.red.shade900,
-                  size: 40,
+              title: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      iconData,
+                      color: Colors.red.shade900,
+                      size: 40,
+                    ),
+                  ),
+                  const Text("Oh no!\n something went wrong."),
+                ],
+              ),
+              content: Column(
+                children: [
+                  const Text(
+                    textAlign: TextAlign.center,
+                    "",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    textAlign: TextAlign.center,
+                    error,
+                    style: TextStyle(
+                      color: Colors.red.shade900,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                CupertinoDialogAction(
+                  child: Text(buttonText),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                 ),
-              ),
-              const Text("Oh no!\n something went wrong."),
-            ],
-          ),
-          content: Column(
-            children: [
-              const Text(
-                textAlign: TextAlign.center,
-                "",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                textAlign: TextAlign.center,
-                error,
-                style: TextStyle(
-                  color: Colors.red.shade900,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            CupertinoDialogAction(
-              child: Text(buttonText),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ));
+              ],
+            ));
   }
 }

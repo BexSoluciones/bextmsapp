@@ -15,8 +15,8 @@ class MapsSheet {
         useSafeArea: true,
         context: context,
         builder: (BuildContext context) {
-          return WillPopScope(
-            onWillPop: () async => true,
+          return PopScope(
+            canPop: true,
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -31,7 +31,8 @@ class MapsSheet {
                                 onTap: () => onMapTap(map),
                                 title: Text(map.mapName),
                                 subtitle: Text(map.mapType.name),
-                                leading: SvgPicture.asset(map.icon, height: 50, width: 50),
+                                leading: SvgPicture.asset(map.icon,
+                                    height: 50, width: 50),
                               ),
                           ],
                         ),

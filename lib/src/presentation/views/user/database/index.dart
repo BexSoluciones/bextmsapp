@@ -36,13 +36,13 @@ class DatabaseViewState extends State<DatabaseView> {
       listener: (context, state) {
         isLoading = state is DatabaseLoading;
 
-        if(state is DatabaseInitial){
+        if (state is DatabaseInitial) {
           databaseCubit.getDatabase();
         }
       },
       builder: (context, state) {
-        return WillPopScope(
-            onWillPop: () async => !isLoading,
+        return PopScope(
+            canPop: !isLoading,
             child: Scaffold(
                 appBar: AppBar(
                   title: const Text('Exportar base de datos'),
@@ -105,7 +105,7 @@ class DatabaseViewState extends State<DatabaseView> {
         children: [
           IconButton(
             icon: const Icon(Icons.upload_file, size: 50),
-            onPressed: () => databaseCubit.exportDatabase(context,true),
+            onPressed: () => databaseCubit.exportDatabase(context, true),
           ),
           if (path != null) Text(path, textAlign: TextAlign.center),
           if (error != null) Text(error, textAlign: TextAlign.center)
