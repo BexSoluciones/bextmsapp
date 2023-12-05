@@ -107,7 +107,7 @@ class _MaxBoxScreenState extends State<MaxBoxScreen> {
   }
 
   void initialize() async {
-    //TODO:: fix clients withput geolocation
+    //TODO:: fix clients without geolocation
     setState(() {
       isLoading = true;
     });

@@ -18,35 +18,40 @@ class _StoreSelectorState extends State<StoreSelector> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('CHOOSE A STORE'),
-          BlocBuilder<DownloadCubit, DownloadState>(builder: (context, downloadState) {
-            return BlocBuilder<GeneralCubit, GeneralState>(builder: (context, generalState) => FutureBuilder<List<StoreDirectory>>(
-              future: FMTC.instance.rootDirectory.stats.storesAvailableAsync,
-              builder: (context, snapshot) => DropdownButton<StoreDirectory>(
-                items: snapshot.data
-                    ?.map(
-                      (e) => DropdownMenuItem<StoreDirectory>(
-                    value: e,
-                    child: Text(e.storeName),
-                  ),
-                )
-                    .toList(),
-                onChanged: (store) => downloadState.selectedStore = store,
-                value: downloadState.selectedStore ??
-                    (generalState.currentStore == null
-                        ? null
-                        : FMTC.instance(generalState.currentStore!)),
-                isExpanded: true,
-                hint: Text(
-                  snapshot.data == null
-                      ? 'Loading...'
-                      : snapshot.data!.isEmpty
-                      ? 'None Available'
-                      : 'None Selected',
-                ),
-              ),
-            ));
+          BlocBuilder<DownloadCubit, DownloadState>(
+              builder: (context, downloadState) {
+            return BlocBuilder<GeneralCubit, GeneralState>(
+                builder: (context, generalState) =>
+                    FutureBuilder<List<StoreDirectory>>(
+                      future: FMTC
+                          .instance.rootDirectory.stats.storesAvailableAsync,
+                      builder: (context, snapshot) =>
+                          DropdownButton<StoreDirectory>(
+                        items: snapshot.data
+                            ?.map(
+                              (e) => DropdownMenuItem<StoreDirectory>(
+                                value: e,
+                                child: Text(e.storeName),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (store) =>
+                            downloadState.selectedStore = store,
+                        value: downloadState.selectedStore ??
+                            (generalState.currentStore == null
+                                ? null
+                                : FMTC.instance(generalState.currentStore!)),
+                        isExpanded: true,
+                        hint: Text(
+                          snapshot.data == null
+                              ? 'Loading...'
+                              : snapshot.data!.isEmpty
+                                  ? 'None Available'
+                                  : 'None Selected',
+                        ),
+                      ),
+                    ));
           })
-
         ],
       );
 }

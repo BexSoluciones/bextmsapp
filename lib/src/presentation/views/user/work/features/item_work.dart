@@ -56,7 +56,10 @@ class ItemWorkState extends State<ItemWork> {
               child: Material(
                   child: Ink(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: ListTile(
@@ -68,7 +71,14 @@ class ItemWorkState extends State<ItemWork> {
                       child: CircleAvatar(
                           backgroundColor:
                               Colors.primaries[widget.work.color ?? 5],
-                          child: Text('${widget.work.order != null ? widget.work.order! + 1 : 1 }',textScaleFactor: calculatedTextScaleFactor,style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),))),
+                          child: Text(
+                            '${widget.work.order != null ? widget.work.order! + 1 : 1}',
+                            textScaler:
+                                TextScaler.linear(calculatedTextScaleFactor),
+                            style: TextStyle(
+                                color:
+                                    Theme.of(context).colorScheme.onSecondary),
+                          ))),
                   onTap: () => _navigationService.goTo(summaryRoute,
                       arguments: SummaryArgument(work: widget.work)),
                   shape: RoundedRectangleBorder(
@@ -88,14 +98,19 @@ class ItemWorkState extends State<ItemWork> {
                         '${widget.work.address}',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.scrim),
                       )),
                       Row(
                         children: [
                           const Icon(Icons.move_to_inbox, color: Colors.brown),
                           Text(widget.work.count.toString(),
-                              textScaleFactor: calculatedTextScaleFactor,
-                              style:  TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim))
+                              textScaler:
+                                  TextScaler.linear(calculatedTextScaleFactor),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.scrim))
                         ],
                       )
                     ],

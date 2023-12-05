@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
+//cubits
 import '../../../../cubits/download/download_cubit.dart';
 import '../../../../cubits/general/general_cubit.dart';
+
+//features
 import '../features/store_editor.dart';
 
 AppBar buildHeader({
@@ -34,7 +37,6 @@ AppBar buildHeader({
               ),
             );
 
-            // Give the asynchronus validation a chance
             await Future.delayed(const Duration(seconds: 1));
             if (!mounted) return;
 
@@ -42,16 +44,18 @@ AppBar buildHeader({
               formKey.currentState!.save();
 
               final StoreDirectory? existingStore =
-              widget.existingStoreName == null
-                  ? null
-                  : FMTC.instance(widget.existingStoreName!);
+                  widget.existingStoreName == null
+                      ? null
+                      : FMTC.instance(widget.existingStoreName!);
               final StoreDirectory newStore = existingStore == null
                   ? FMTC.instance(newValues['storeName']!)
                   : await existingStore.manage.rename(newValues['storeName']!);
               if (!mounted) return;
 
-              final downloadCubit = BlocProvider.of<DownloadCubit>(context, listen: false);
-              if (existingStore != null && downloadCubit.selectedStore == existingStore) {
+              final downloadCubit =
+                  BlocProvider.of<DownloadCubit>(context, listen: false);
+              if (existingStore != null &&
+                  downloadCubit.selectedStore == existingStore) {
                 downloadCubit.selectedStore = newStore;
               }
 
@@ -79,7 +83,8 @@ AppBar buildHeader({
 
               if (!mounted) return;
               if (widget.isStoreInUse && widget.existingStoreName != null) {
-                BlocProvider.of<GeneralCubit>(context, listen: false).currentStore = newValues['storeName'];
+                BlocProvider.of<GeneralCubit>(context, listen: false)
+                    .currentStore = newValues['storeName'];
               }
               Navigator.of(context).pop();
 

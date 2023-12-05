@@ -1,9 +1,8 @@
-import 'package:bexdeliveries/src/domain/abstracts/format_abstract.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:intl/intl.dart';
 
 //utils
 import '../../../../config/size.dart';
@@ -15,6 +14,7 @@ import '../../../cubits/query/query_cubit.dart';
 
 //domain
 import '../../../../domain/models/work.dart';
+import '../../../../domain/abstracts/format_abstract.dart';
 
 //widgets
 import './features/item.dart';
@@ -157,7 +157,7 @@ class _QueryViewState extends State<QueryView> {
                  child: Center(
                    child: Text(
                        'Total recaudado: ${FormatNumber().formatter.format(countWorks)}',
-                       textScaleFactor: calculatedTextScaleFactor,
+                       textScaler: TextScaler.linear(calculatedTextScaleFactor),
                        style: TextStyle(
                            color: Colors.white, fontSize: calculatedFon)),
                 ),

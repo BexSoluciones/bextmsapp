@@ -13,11 +13,13 @@ import '../../../../../services/navigation.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
 
-Widget carouselCard(Work work, int index, num distance, num duration, BuildContext context) {
+Widget carouselCard(
+    Work work, int index, num distance, num duration, BuildContext context) {
   return GestureDetector(
       onTap: () async {
-        if(work.hasCompleted != null && work.hasCompleted == 0){
-          _navigationService.goTo(summaryRoute, arguments: SummaryArgument(work: work));
+        if (work.hasCompleted != null && work.hasCompleted == 0) {
+          _navigationService.goTo(summaryRoute,
+              arguments: SummaryArgument(work: work));
         }
       },
       child: Card(
@@ -40,20 +42,16 @@ Widget carouselCard(Work work, int index, num distance, num duration, BuildConte
                       Text(
                         work.customer!,
                         style: const TextStyle(
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold),
+                            fontSize: 8, fontWeight: FontWeight.bold),
                       ),
                       Text(work.address!,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold)),
+                              fontSize: 8, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 5),
                       Text(
-                        '${distance > 0.1000 ? '${distance.toStringAsFixed(2)}kms' : '${(distance * 1000).toStringAsFixed(2)}ms' } , ${ duration > 0.60 ? '${duration.toStringAsFixed(2)}mins' : '${(duration * 60).toStringAsFixed(2)}secs' }',
-                        style: const TextStyle(
-                            fontSize: 8
-                        ),
+                        '${distance > 0.1000 ? '${distance.toStringAsFixed(2)}kms' : '${(distance * 1000).toStringAsFixed(2)}ms'} , ${duration > 0.60 ? '${duration.toStringAsFixed(2)}mins' : '${(duration * 60).toStringAsFixed(2)}secs'}',
+                        style: const TextStyle(fontSize: 8),
                         maxLines: 3,
                       ),
                     ],

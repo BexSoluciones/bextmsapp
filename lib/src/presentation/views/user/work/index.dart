@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:showcaseview/showcaseview.dart';
 
 //blocs
@@ -127,7 +126,8 @@ class WorkViewState extends State<WorkView>
               key: Key(state.key.toString()),
               appBar: AppBar(
                 leading: IconButton(
-                  icon:  Icon(Icons.arrow_back_ios_new, color: Theme.of(context).colorScheme.primary),
+                  icon: Icon(Icons.arrow_back_ios_new,
+                      color: Theme.of(context).colorScheme.primary),
                   onPressed: () => _navigationService.replaceTo(homeRoute),
                 ),
                 actions: [

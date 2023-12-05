@@ -1,10 +1,11 @@
-
-import 'package:bexdeliveries/src/domain/models/summary.dart';
-import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 import 'package:flutter/material.dart';
+
+//domain
+import '../../../../../../domain/models/summary_report.dart';
 
 class ItemDescription extends StatefulWidget {
   const ItemDescription({
+    super.key,
     required this.summary,
     required this.onTap,
     required this.workcode,
@@ -25,7 +26,8 @@ class ItemDescription extends StatefulWidget {
 class _ItemDescriptionState extends State<ItemDescription> {
   @override
   Widget build(BuildContext context) {
-    final difference = double.parse(widget.summary.amount) - widget.summary.cant;
+    final difference =
+        double.parse(widget.summary.amount) - widget.summary.cant;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -113,7 +115,7 @@ class _ItemDescriptionState extends State<ItemDescription> {
                 rows: [
                   DataRow(
                     color: MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
+                      (Set<MaterialState> states) {
                         if (states.contains(MaterialState.selected)) {
                           return Colors.green;
                         }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,7 +15,6 @@ import '../../../widgets/error.dart';
 import 'features/item.dart';
 
 class PhotoView extends StatefulWidget {
-
   const PhotoView({Key? key}) : super(key: key);
 
   @override
@@ -28,7 +26,6 @@ class PhotoViewState extends State<PhotoView> {
   void initState() {
     BlocProvider.of<PhotosBloc>(context).add(PhotosLoaded());
     super.initState();
-
   }
 
   @override
@@ -51,12 +48,10 @@ class PhotoViewState extends State<PhotoView> {
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisSpacing: 10, mainAxisSpacing: 10, crossAxisCount: 2),
               itemBuilder: (_, index) => PhotoCard(
-                photo: state.photos[index],
-              ));
+                    photo: state.photos[index],
+                  ));
         } else if (state is PhotosLoadFailure) {
-          return Error(
-              key: MyPhotosKeys.errorScreen,
-              message: state.error);
+          return Error(key: MyPhotosKeys.errorScreen, message: state.error);
         } else {
           return Container(
             key: MyPhotosKeys.emptyContainerScreen,
@@ -64,10 +59,13 @@ class PhotoViewState extends State<PhotoView> {
         }
       }),
       floatingActionButton: FloatingActionButton(
-        backgroundColor:  Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+        backgroundColor:
+            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
         onPressed: () => Navigator.pushNamed(context, cameraRoute),
         tooltip: 'Añadir',
-        child: const Icon(Icons.add,),
+        child: const Icon(
+          Icons.add,
+        ),
       ),
     );
   }

@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'circular_progress.dart';
 
-
 class ConfirmDialog extends StatefulWidget {
-  ConfirmDialog(
-      {required this.title,
-        required this.message,
-        required this.onConfirm,
-      });
+  ConfirmDialog({
+    super.key,
+    required this.title,
+    required this.message,
+    required this.onConfirm,
+  });
   final String title;
   final String message;
   final Function onConfirm;
-
 
   @override
   State<ConfirmDialog> createState() => _ConfirmDialogState();
@@ -51,7 +50,7 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
                 children: [
                   TextButton(
                     onPressed: () =>
-                    saving ? null : Navigator.of(context).pop(),
+                        saving ? null : Navigator.of(context).pop(),
                     child: const Text('Cancelar'),
                   ),
                   const SizedBox(width: 10),

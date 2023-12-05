@@ -1,30 +1,22 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //blocs
-import '../../../../../utils/constants/colors.dart';
-import '../../../../../utils/constants/strings.dart';
-import '../../../../blocs/processing_queue/processing_queue_bloc.dart';
 import '../../../../blocs/issues/issues_bloc.dart';
 
-//domain
-import '../../../../../domain/models/news.dart';
+//utils
+import '../../../../../utils/constants/colors.dart';
+import '../../../../../utils/constants/strings.dart';
 
 //services
 import '../../../../../locator.dart';
 import '../../../../../services/navigation.dart';
-import '../../../../../services/location.dart';
 import '../../../../../services/storage.dart';
-import '../../../../../services/isolate.dart';
 
 //widgets
 import '../../../../widgets/default_button_widget.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
-final ProcessingQueueBloc _processingQueueBloc = locator<ProcessingQueueBloc>();
-final LocationService _locationService = locator<LocationService>();
-final IsolateService _isolateService = locator<IsolateService>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class FillIssueView extends StatefulWidget {

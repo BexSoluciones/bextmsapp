@@ -1,16 +1,16 @@
-
 import 'package:flutter/material.dart';
 
 class CustomDialog extends StatelessWidget {
-  CustomDialog(
-      {required this.title,
-        required this.message,
-        required this.elevatedButton1,
-        required this.elevatedButton2,
-        required this.cancelarButtonText,
-        required this.completarButtonText,
-        required this.icon,
-        required this.colorIcon});
+  const CustomDialog(
+      {super.key,
+      required this.title,
+      required this.message,
+      required this.elevatedButton1,
+      required this.elevatedButton2,
+      required this.cancelarButtonText,
+      required this.completarButtonText,
+      required this.icon,
+      required this.colorIcon});
   final String title;
   final String message;
   final Color elevatedButton1;
@@ -70,24 +70,9 @@ class CustomDialog extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    /*ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: elevatedButton1,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(
-                        cancelarButtonText,
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),*/
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        primary: elevatedButton2,
+                        backgroundColor: elevatedButton2,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),

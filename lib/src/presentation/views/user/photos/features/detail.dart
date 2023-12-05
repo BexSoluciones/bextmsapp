@@ -93,8 +93,8 @@ class _DetailPhotoViewState extends State<DetailPhotoView> {
             width: 520,
             height: 520,
           ),
-          viewPort: const CroppieViewPort(
-              width: 480, height: 480, type: 'circle'),
+          viewPort:
+              const CroppieViewPort(width: 480, height: 480, type: 'circle'),
           enableExif: true,
           enableZoom: true,
           showZoomer: true,
@@ -104,19 +104,18 @@ class _DetailPhotoViewState extends State<DetailPhotoView> {
 
     if (croppedFile != null) {
       final originalPhoto = _currentPhoto!;
-      final updatedPhoto = Photo(name: originalPhoto.name, path: croppedFile.path);
+      final updatedPhoto =
+          Photo(name: originalPhoto.name, path: croppedFile.path);
       final fileToDelete = File(originalPhoto.path);
       if (fileToDelete.existsSync()) {
         fileToDelete.delete();
       }
       setState(() {
         _currentPhoto = updatedPhoto;
-        BlocProvider.of<PhotosBloc>(context).add(PhotosAdded(photo: updatedPhoto));
+        BlocProvider.of<PhotosBloc>(context)
+            .add(PhotosAdded(photo: updatedPhoto));
       });
-
-
-
     }
     return null;
-}
+  }
 }

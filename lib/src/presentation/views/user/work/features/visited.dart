@@ -2,7 +2,6 @@ import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:lottie/lottie.dart';
 
 //utils
@@ -41,21 +40,20 @@ class VisitedViewWorkState extends State<VisitedViewWork> {
         child: BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
       switch (state.runtimeType) {
         case WorkLoading:
-          return  Center(child: SpinKitCircle(
-            color: Theme.of(context).colorScheme.primary,
-            size: 100.0,
-          ),);
+          return const Center(child: CupertinoActivityIndicator());
         case WorkSuccess:
-          return _buildWork(state,calculatedTextScaleFactor,calculatedFon);
+          return _buildWork(state, calculatedTextScaleFactor, calculatedFon);
         default:
           return const SizedBox();
       }
     }));
   }
 
-  Widget _buildWork(state,double calculatedTextScaleFactor,double calculatedFon) {
+  Widget _buildWork(
+      state, double calculatedTextScaleFactor, double calculatedFon) {
     return Padding(
-        padding: const EdgeInsets.only(left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
+        padding: const EdgeInsets.only(
+            left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
         child: Column(
           children: [
             SizedBox(
@@ -63,9 +61,12 @@ class VisitedViewWorkState extends State<VisitedViewWork> {
               width: double.infinity,
               child: Center(
                   child: Text('SERVICIO: ${widget.workcode}',
-                       textScaleFactor: calculatedTextScaleFactor,
-                      style:  TextStyle(
-                          fontSize: calculatedFon, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary,))),
+                      textScaleFactor: calculatedTextScaleFactor,
+                      style: TextStyle(
+                        fontSize: calculatedFon,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ))),
             ),
             Flexible(flex: 16, child: buildStaticBody(state.visited))
           ],

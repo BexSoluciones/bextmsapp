@@ -7,14 +7,8 @@ import '../../../../../domain/models/work.dart';
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/nums.dart';
 
-//services
-import '../../../../../locator.dart';
-import '../../../../../services/navigation.dart';
-
 //feature
 import 'item_work.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
 
 class SearchWorkDelegate extends SearchDelegate<Work?> {
   SearchWorkDelegate(this.works);

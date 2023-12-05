@@ -20,12 +20,6 @@ import '../../../../widgets/skeleton_loader_widget.dart';
 //extensions
 import '../../../../../utils/extensions/scroll_controller_extension.dart';
 
-//services
-import '../../../../../locator.dart';
-import '../../../../../services/storage.dart';
-
-final LocalStorageService _storageService = locator<LocalStorageService>();
-
 class ListViewWork extends StatefulWidget {
   const ListViewWork({Key? key, required this.workcode, required this.six})
       : super(key: key);
@@ -74,7 +68,7 @@ class ListViewWorkState extends State<ListViewWork> {
           return const SkeletonLoading(cant: 10);
         case WorkSuccess:
           return _buildWork(scrollController, widget.workcode, state.works,
-              state.noMoreData,calculatedTextScaleFactor,calculatedFon);
+              state.noMoreData, calculatedTextScaleFactor, calculatedFon);
         default:
           return const SizedBox();
       }
@@ -82,13 +76,12 @@ class ListViewWorkState extends State<ListViewWork> {
   }
 
   Widget _buildWork(
-    ScrollController scrollController,
-    String workcode,
-    List<Work> works,
-    bool noMoreData,
+      ScrollController scrollController,
+      String workcode,
+      List<Work> works,
+      bool noMoreData,
       double calculatedTextScaleFactor,
-      double calculatedFon
-  ) {
+      double calculatedFon) {
     return Padding(
       padding: const EdgeInsets.all(kDefaultPadding),
       child: CustomScrollView(
@@ -101,9 +94,11 @@ class ListViewWorkState extends State<ListViewWork> {
                   width: double.infinity,
                   child: Center(
                       child: Text('SERVICIO: $workcode',
-                          textScaleFactor: calculatedTextScaleFactor,
+                          textScaler:
+                              TextScaler.linear(calculatedTextScaleFactor),
                           style: TextStyle(
-                              fontSize: calculatedFon, fontWeight: FontWeight.bold))))),
+                              fontSize: calculatedFon,
+                              fontWeight: FontWeight.bold))))),
           buildStaticBody(works),
           if (!noMoreData)
             const SliverToBoxAdapter(

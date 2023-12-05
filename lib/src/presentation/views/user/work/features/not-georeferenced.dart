@@ -2,7 +2,6 @@ import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 
 //utils
 import '../../../../../utils/constants/nums.dart';
@@ -14,12 +13,14 @@ import '../../../../cubits/work/work_cubit.dart';
 import 'sub-item.dart';
 
 class NotGeoreferencedViewWork extends StatefulWidget {
-  const NotGeoreferencedViewWork({Key? key, required this.workcode}) : super(key: key);
+  const NotGeoreferencedViewWork({Key? key, required this.workcode})
+      : super(key: key);
 
   final String workcode;
 
   @override
-  NotGeoreferencedViewWorkState createState() => NotGeoreferencedViewWorkState();
+  NotGeoreferencedViewWorkState createState() =>
+      NotGeoreferencedViewWorkState();
 }
 
 class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
@@ -38,20 +39,22 @@ class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
     final calculatedFon = getProportionateScreenHeight(18);
     return SafeArea(
         child: BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
-          switch (state.runtimeType) {
-            case WorkLoading:
-              return const Center(child: CupertinoActivityIndicator());
-            case WorkSuccess:
-              return _buildWork(state,calculatedTextScaleFactor,calculatedFon);
-            default:
-              return const SizedBox();
-          }
-        }));
+      switch (state.runtimeType) {
+        case WorkLoading:
+          return const Center(child: CupertinoActivityIndicator());
+        case WorkSuccess:
+          return _buildWork(state, calculatedTextScaleFactor, calculatedFon);
+        default:
+          return const SizedBox();
+      }
+    }));
   }
 
-  Widget _buildWork(state,double calculatedTextScaleFactor, double calculatedFon) {
+  Widget _buildWork(
+      state, double calculatedTextScaleFactor, double calculatedFon) {
     return Padding(
-        padding: const EdgeInsets.only(left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
+        padding: const EdgeInsets.only(
+            left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
         child: Column(
           children: [
             SizedBox(
@@ -59,9 +62,11 @@ class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
               width: double.infinity,
               child: Center(
                   child: Text('SERVICIO: ${widget.workcode}',
-                      textScaleFactor: calculatedTextScaleFactor,
+                      textScaler: TextScaler.linear(calculatedTextScaleFactor),
                       style: TextStyle(
-                          fontSize: calculatedFon, fontWeight: FontWeight.bold,color: Theme.of(context).colorScheme.primary))),
+                          fontSize: calculatedFon,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary))),
             ),
             Flexible(flex: 16, child: buildStaticBody(state.notGeoreferenced))
           ],
@@ -73,7 +78,8 @@ class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
       return const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('No hay clientes sin georeferenciación.', style: TextStyle(fontWeight: FontWeight.w600))
+          Text('No hay clientes sin georeferenciación.',
+              style: TextStyle(fontWeight: FontWeight.w600))
         ],
       );
     } else {
