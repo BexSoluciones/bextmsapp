@@ -1,16 +1,19 @@
-import 'package:bexdeliveries/src/domain/models/work.dart';
-import 'package:bexdeliveries/src/presentation/cubits/query/query_cubit.dart';
-import 'package:bexdeliveries/src/utils/constants/colors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+//cubit
+import '../../../../../presentation/cubits/query/query_cubit.dart';
 
 //domain
 import '../../../../../domain/abstracts/format_abstract.dart';
+import '../../../../../domain/models/work.dart';
+
+//utils
+import '../../../../../utils/constants/colors.dart';
 
 //widgets
 import 'delivery_description.dart';
-
 
 import 'item_respawn.dart';
 
@@ -48,11 +51,7 @@ class _CollectionQueryViewState extends State<CollectionQueryView> with FormatNu
               builder: (_, state) {
                 switch (state.runtimeType) {
                   case QueryLoading:
-                    return Center(
-                        child: SpinKitCircle(
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 100.0,
-                        ));
+                    return const Center(child: CupertinoActivityIndicator());
                   case QuerySuccess:
                     return _buildHome(
                         state.delivery,

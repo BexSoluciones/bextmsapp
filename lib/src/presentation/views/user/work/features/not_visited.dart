@@ -21,7 +21,8 @@ import '../../../../../utils/extensions/scroll_controller_extension.dart';
 import 'sub-item.dart';
 
 class NotVisitedViewWork extends StatefulWidget {
-  const NotVisitedViewWork({Key? key, required this.workcode}) : super(key: key);
+  const NotVisitedViewWork({Key? key, required this.workcode})
+      : super(key: key);
 
   final String workcode;
 
@@ -53,13 +54,10 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
         child: BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
       switch (state.runtimeType) {
         case WorkLoading:
-          return Center(child: SpinKitCircle(
-            color: Theme.of(context).colorScheme.primary,
-            size: 100.0,
-          ),);
+          return const Center(child: CupertinoActivityIndicator());
         case WorkSuccess:
           return _buildWork(scrollController, widget.workcode, state.notVisited,
-              state.noMoreData, state.started,calculatedTextScaleFactor);
+              state.noMoreData, state.started, calculatedTextScaleFactor);
         default:
           return const SizedBox();
       }
@@ -72,10 +70,10 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
       List<Work> works,
       bool noMoreData,
       bool isStarted,
-      double calculatedTextScaleFactor
-      ) {
+      double calculatedTextScaleFactor) {
     return Padding(
-        padding: const EdgeInsets.only(left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
+        padding: const EdgeInsets.only(
+            left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
         child: Column(
           children: [
             SizedBox(
@@ -83,11 +81,15 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
               width: double.infinity,
               child: Center(
                   child: Text('SERVICIO: ${widget.workcode}',
-                      textScaleFactor: calculatedTextScaleFactor,
-                      style:  TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary))),
+                      textScaler: TextScaler.linear(calculatedTextScaleFactor),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary))),
             ),
-            Flexible(flex: 16, child: buildStaticBody(works, scrollController, isStarted)),
+            Flexible(
+                flex: 16,
+                child: buildStaticBody(works, scrollController, isStarted)),
             if (!noMoreData)
               const Padding(
                 padding: EdgeInsets.only(top: 14, bottom: 32),
@@ -97,7 +99,8 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
         ));
   }
 
-  Widget buildStaticBody(List<Work> works, ScrollController scrollController, bool isStarted) {
+  Widget buildStaticBody(
+      List<Work> works, ScrollController scrollController, bool isStarted) {
     if (works.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,

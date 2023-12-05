@@ -157,6 +157,7 @@ class CollectionViewState extends State<CollectionView>
         currentFocus.unfocus();
       }
     }
+
     return GestureDetector(
         onTap: unfocus,
         child: Scaffold(
@@ -171,11 +172,7 @@ class CollectionViewState extends State<CollectionView>
               builder: (_, state) {
                 switch (state.runtimeType) {
                   case CollectionLoading:
-                    return Center(
-                        child: SpinKitCircle(
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 100.0,
-                    ));
+                    return const Center(child: CupertinoActivityIndicator());
                   case CollectionSuccess:
                     return _buildCollection(
                       size,
@@ -194,8 +191,7 @@ class CollectionViewState extends State<CollectionView>
       child: SizedBox(
         height: size.height,
         width: size.width,
-        child: Column(
-            children: [
+        child: Column(children: [
           Container(
             color: Theme.of(context).colorScheme.primary,
             child: SizedBox(
@@ -347,9 +343,12 @@ class CollectionViewState extends State<CollectionView>
                           suffixIcon: IconButton(
                             onPressed: () {
                               if (data.isEmpty) {
-                                if (double.tryParse(paymentTransferController.text) != null) {
+                                if (double.tryParse(
+                                        paymentTransferController.text) !=
+                                    null) {
                                   setState(() {
-                                    total -=double.parse(paymentTransferController.text);
+                                    total -= double.parse(
+                                        paymentTransferController.text);
                                   });
                                 }
                               }
@@ -487,8 +486,10 @@ class CollectionViewState extends State<CollectionView>
                                                   count + paymentEfectyValue;
                                             }
                                           }
-                                          for (var element in widget.arguments.summaries!) {
-                                            totalSummary = element.grandTotalCopy!;
+                                          for (var element
+                                              in widget.arguments.summaries!) {
+                                            totalSummary =
+                                                element.grandTotalCopy!;
                                           }
                                           if (total != totalSummary) {
                                             message =
@@ -606,19 +607,18 @@ class CollectionViewState extends State<CollectionView>
                                       .specifiedAccountTransfer ==
                                   true
                           ? TransactionList(
-                        data: data,
-                        onTotalChange: (amount) {
-                          setState(() {
-                            total += amount;
-                          });
-                        },
-                        onDataRemove: (removedData) {
-                          setState(() {
-                            data.remove(removedData);
-                          });
-                        },
-                      )
-
+                              data: data,
+                              onTotalChange: (amount) {
+                                setState(() {
+                                  total += amount;
+                                });
+                              },
+                              onDataRemove: (removedData) {
+                                setState(() {
+                                  data.remove(removedData);
+                                });
+                              },
+                            )
                           : Container(),
                       const SizedBox(height: 50),
                       Row(
@@ -663,8 +663,7 @@ class CollectionViewState extends State<CollectionView>
                                         widget.arguments,
                                         paymentEfectyController,
                                         paymentTransferController,
-                                       data
-                                );
+                                        data);
                               } else if (total != state.totalSummary) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -679,7 +678,8 @@ class CollectionViewState extends State<CollectionView>
                                     .confirmTransaction(
                                         widget.arguments,
                                         paymentEfectyController,
-                                        paymentTransferController,data);
+                                        paymentTransferController,
+                                        data);
                               }
                               break;
                             case true:
@@ -690,7 +690,8 @@ class CollectionViewState extends State<CollectionView>
                                     .confirmTransaction(
                                         widget.arguments,
                                         paymentEfectyController,
-                                        paymentTransferController,data);
+                                        paymentTransferController,
+                                        data);
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -710,7 +711,6 @@ class CollectionViewState extends State<CollectionView>
                                   style: TextStyle(color: Colors.white))));
                         }
                       })),
-
         ]),
       ),
     ));

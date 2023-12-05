@@ -62,12 +62,9 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
     return BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
       switch (state.runtimeType) {
         case SummaryLoading:
-          return  Align(
+          return const Align(
             alignment: Alignment.center,
-            child: SpinKitCircle(
-              color: Theme.of(context).colorScheme.primary,
-              size: 100.0,
-            ),
+            child: CupertinoActivityIndicator(),
           );
         case SummarySuccess:
           return _buildSummary(state, size);
@@ -106,8 +103,6 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                   padding: const EdgeInsets.all(kDefaultPadding),
                   child: DefaultButton(
                       widget: const Text('¿Llegaste donde el cliente?',
-                          textScaleFactor:
-                          1.0,
                           style: TextStyle(color: Colors.white, fontSize: 18)),
                       press: () async {
                         var transaction = Transaction(
@@ -127,7 +122,6 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                   padding: const EdgeInsets.all(kDefaultPadding),
                   child: DefaultButton(
                       widget: const Text('¿Quieres georeferenciarlo?',
-                          textScaleFactor: 1.0,
                           style: TextStyle(color: Colors.white, fontSize: 18)),
                       press: () => _navigationService.goTo(
                           summaryGeoreferenceRoute,

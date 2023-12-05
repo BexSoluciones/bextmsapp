@@ -131,7 +131,6 @@ Future<void> main() async {
   final databaseCubit = DatabaseCubit(locator<ApiRepository>(), locator<DatabaseRepository>());
   await databaseCubit.getDatabase();
 
-
   ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
   _loggerService.setLogLevel(LogLevel.debugFinest);
@@ -440,9 +439,6 @@ class _MyAppState extends State<MyApp> {
                   return MaterialApp(
                     debugShowCheckedModeBanner: false,
                     title: appTitle,
-                    // theme: state.isDarkTheme ? AppTheme.light : AppTheme.dark,
-                    // darkTheme: AppTheme.dark,
-
                     theme: ThemeData(
                       useMaterial3: true,
                       colorScheme: state.isDarkTheme ? lightScheme : darkScheme,

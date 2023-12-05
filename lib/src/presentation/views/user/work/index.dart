@@ -1,8 +1,10 @@
-import 'package:bexdeliveries/src/presentation/blocs/issues/issues_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:showcaseview/showcaseview.dart';
+
+//blocs
+import '../../../blocs/issues/issues_bloc.dart';
 
 //cubit
 import '../../../cubits/work/work_cubit.dart';
@@ -118,8 +120,8 @@ class WorkViewState extends State<WorkView>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async => false,
+    return PopScope(
+        canPop: false,
         child: BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
           return Scaffold(
               key: Key(state.key.toString()),

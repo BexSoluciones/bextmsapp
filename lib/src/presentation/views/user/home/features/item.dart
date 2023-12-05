@@ -44,9 +44,10 @@ class ItemWork extends StatefulWidget {
   State<ItemWork> createState() => _ItemWorkState();
 }
 
-class _ItemWorkState extends State<ItemWork>{
+class _ItemWorkState extends State<ItemWork> {
   late HistoryOrderBloc historyOrderBloc;
-  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  static final FirebaseMessaging _firebaseMessaging =
+      FirebaseMessaging.instance;
   int left = 0;
   bool isLoading = true;
   bool success = false;
@@ -97,22 +98,22 @@ class _ItemWorkState extends State<ItemWork>{
                         builder: (context) => ConfirmDialog(
                             title: 'Guardar historico',
                             message:
-                            '¿Está seguro que desea guardar el historico?',
+                                '¿Está seguro que desea guardar el historico?',
                             onConfirm: () =>
                                 _handleNavigation(widget.work, context)));
                   } else {
                     showDialog(
                         context: context,
                         builder: (context) => CustomDialog(
-                          title: 'Clientes pendientes por visitar',
-                          message: 'Cantidad :${widget.work.count! - left}',
-                          elevatedButton1: Colors.red,
-                          elevatedButton2: Colors.green,
-                          cancelarButtonText: '',
-                          completarButtonText: 'Aceptar',
-                          icon: Icons.warning,
-                          colorIcon: kPrimaryColor,
-                        ));
+                              title: 'Clientes pendientes por visitar',
+                              message: 'Cantidad :${widget.work.count! - left}',
+                              elevatedButton1: Colors.red,
+                              elevatedButton2: Colors.green,
+                              cancelarButtonText: '',
+                              completarButtonText: 'Aceptar',
+                              icon: Icons.warning,
+                              colorIcon: kPrimaryColor,
+                            ));
                   }
                 },
                 backgroundColor: kPrimaryColor,
@@ -136,23 +137,28 @@ class _ItemWorkState extends State<ItemWork>{
                       onTap: () => _onTap(context, widget.work),
                       title: Text(
                         'Servicio: ${widget.work.workcode}',
-                        style:  TextStyle(
-                            fontSize: calculatedFon, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                            fontSize: calculatedFon,
+                            fontWeight: FontWeight.w500),
                       ),
                       subtitle: Row(
                         children: [
                           Text(
                             'Clientes: ${widget.work.count}',
-                            style:  TextStyle(
-                                fontWeight: FontWeight.normal, fontSize: calculatedFon,color: Theme.of(context).colorScheme.scrim),
+                            style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontSize: calculatedFon,
+                                color: Theme.of(context).colorScheme.scrim),
                           ),
                           Flexible(
                               child: Text(
-                                ' Atendidos: ${widget.work.right ?? '0'} Pendientes: ${widget.work.left! - widget.work.right!}',
-                                style:  TextStyle(
-                                    fontSize: calculatedFon, fontWeight: FontWeight.normal,color: Theme.of(context).colorScheme.scrim),
-                                textAlign: TextAlign.center,
-                              ))
+                            ' Atendidos: ${widget.work.right ?? '0'} Pendientes: ${widget.work.left! - widget.work.right!}',
+                            style: TextStyle(
+                                fontSize: calculatedFon,
+                                fontWeight: FontWeight.normal,
+                                color: Theme.of(context).colorScheme.scrim),
+                            textAlign: TextAlign.center,
+                          ))
                         ],
                       ),
                     ),
@@ -160,13 +166,13 @@ class _ItemWorkState extends State<ItemWork>{
                   //_storageService.getBool('can_make_history') == true
                   true
                       ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Icon(
-                            size: 25,
-                            color: Colors.deepOrange,
-                            Icons.swipe_left_outlined),
-                      ))
+                          child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: Icon(
+                              size: 25,
+                              color: Colors.deepOrange,
+                              Icons.swipe_left_outlined),
+                        ))
                       : Container(),
                   Container(),
                 ],
@@ -180,12 +186,12 @@ class _ItemWorkState extends State<ItemWork>{
 
   Future<void> _handleNavigation(Work work, BuildContext context) async {
     try {
-      var processingQueue= ProcessingQueue(
+      var processingQueue = ProcessingQueue(
           body: jsonEncode({'work_id': work.id}),
           task: 'incomplete',
           code: 'AS65C41656',
           createdAt: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-          updatedAt:DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
+          updatedAt: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
 
       _databaseRepository.insertProcessingQueue(processingQueue);
 

@@ -51,10 +51,7 @@ class _RespawnQueryViewState extends State<RespawnQueryView> with FormatNumber {
               builder: (_, state) {
                 switch (state.runtimeType) {
                   case QueryLoading:
-                    return Center(child: SpinKitCircle(
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 100.0,
-                    ));
+                    return const Center(child: CupertinoActivityIndicator());
                   case QuerySuccess:
                     return _buildHome(
                       state.respawns!,
