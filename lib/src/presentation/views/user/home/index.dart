@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bexdeliveries/src/config/size.dart';
 import 'package:bexdeliveries/src/domain/models/enterprise_config.dart';
 import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
