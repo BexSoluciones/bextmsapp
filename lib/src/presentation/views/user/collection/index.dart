@@ -1,18 +1,17 @@
 import 'dart:io';
-import 'package:bexdeliveries/src/presentation/blocs/account/account_bloc.dart';
-import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 
+//blocs
+import '../../../blocs/account/account_bloc.dart';
+
 //cubit
-import '../../../../config/size.dart';
-import '../../../../services/navigation.dart';
 import '../../../cubits/collection/collection_cubit.dart';
 
 //utils
+import '../../../../utils/constants/strings.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/nums.dart';
 
@@ -22,6 +21,7 @@ import '../../../../domain/abstracts/format_abstract.dart';
 
 //services
 import '../../../../locator.dart';
+import '../../../../services/navigation.dart';
 import '../../../../services/storage.dart';
 
 //widgets

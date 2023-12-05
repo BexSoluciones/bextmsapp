@@ -27,13 +27,14 @@ class CollectionQueryView extends StatefulWidget {
   State<CollectionQueryView> createState() => _CollectionQueryViewState();
 }
 
-class _CollectionQueryViewState extends State<CollectionQueryView> with FormatNumber {
-
+class _CollectionQueryViewState extends State<CollectionQueryView>
+    with FormatNumber {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
+          iconTheme:
+              IconThemeData(color: Theme.of(context).colorScheme.primary),
           title: Text(
             'Recaudos ${widget.workcode}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -53,10 +54,7 @@ class _CollectionQueryViewState extends State<CollectionQueryView> with FormatNu
                   case QueryLoading:
                     return const Center(child: CupertinoActivityIndicator());
                   case QuerySuccess:
-                    return _buildHome(
-                        state.delivery,
-                        state.totalDelivery!
-                    );
+                    return _buildHome(state.delivery, state.totalDelivery!);
                   case QueryFailed:
                     return Center(
                       child: Text(state.error!),
@@ -78,29 +76,28 @@ class _CollectionQueryViewState extends State<CollectionQueryView> with FormatNu
             child: ListView.separated(
               itemCount: data!.length,
               separatorBuilder: (context, index) =>
-              const SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
               itemBuilder: (context, index) {
                 return GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       Navigator.push(
                         context,
                         PageRouteBuilder(
                           transitionDuration: const Duration(milliseconds: 500),
-                          pageBuilder: (context, animation, secondaryAnimation) {
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) {
                             return SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: const Offset(0, 1),
-                                  end: Offset.zero,
-                                ).animate(animation),
-                                child:DeliveryDescription(data: data[index]),
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 1),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: DeliveryDescription(data: data[index]),
                             );
                           },
                         ),
                       );
-
                     },
-                    child:  ItemRespawn(data: data[index],reason:'Entregas')
-                );
+                    child: ItemRespawn(data: data[index], reason: 'Entregas'));
               },
             )),
         const Spacer(),
@@ -118,4 +115,3 @@ class _CollectionQueryViewState extends State<CollectionQueryView> with FormatNu
     );
   }
 }
-
