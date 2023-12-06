@@ -82,9 +82,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
   Future<void> confirmTransaction(InventoryArgument arguments,
       paymentEfectyController, paymentTransferController, List<dynamic> data) async {
-    if (isBusy) return;
 
-    await run(() async {
       emit(const CollectionLoading());
 
       var status = arguments.r != null && arguments.r!.isNotEmpty
@@ -237,6 +235,5 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
         emit(const CollectionSuccess());
       }
-    });
   }
 }
