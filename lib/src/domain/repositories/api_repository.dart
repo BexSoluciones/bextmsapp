@@ -1,3 +1,5 @@
+
+
 import '../../utils/resources/data_state.dart';
 
 import '../models/requests/enterprise_request.dart';
@@ -36,6 +38,12 @@ import '../models/responses/status_response.dart';
 
 import '../models/requests/account_request.dart';
 import '../models/responses/account_response.dart';
+
+import '../models/requests/history_order_saved_request.dart';
+import '../models/requests/history_order_updated_request.dart';
+
+import '../models/responses/history_order_saved_response.dart';
+import '../models/responses/history_order_updated_response.dart';
 
 import '../models/requests/client_request.dart';
 import '../models/requests/send_token.dart';
@@ -114,5 +122,13 @@ abstract class ApiRepository {
 
   Future<DataState<PredictionResponse>> prediction({
     required PredictionRequest request
+  });
+
+  Future<DataState<HistoryOrderSavedResponse>> historyOrderSaved({
+    required HistoryOrderSavedRequest request
+  });
+
+  Future<DataState<HistoryOrderUpdatedResponse>> historyOrderUpdated({
+    required HistoryOrderUpdatedRequest request
   });
 }

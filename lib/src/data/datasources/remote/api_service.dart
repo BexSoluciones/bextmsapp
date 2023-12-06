@@ -338,7 +338,7 @@ class ApiService {
     queryParameters.removeWhere((k, v) => v == null);
 
     final data = FormData.fromMap({
-      'user_id' : _storageService.getInt('user_id'),
+      'user_id': _storageService.getInt('user_id'),
       '$tableName': await MultipartFile.fromFile(path, filename: tableName)
     });
 
@@ -654,46 +654,46 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<StatusResponse>> sendFCMToken(int idUser, String fmcToken) async {
+  Future<Response<StatusResponse>> sendFCMToken(
+      int idUser, String fmcToken) async {
+    const extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
 
-      const extra = <String, dynamic>{};
-      final queryParameters = <String, dynamic>{};
-      queryParameters.removeWhere((k, v) => v == null);
+    final headers = <String, dynamic>{
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
 
-      final headers = <String, dynamic>{
-        HttpHeaders.contentTypeHeader: 'application/json',
-      };
+    final data = <String, dynamic>{
+      'user_id': idUser,
+      'fcm_token': fmcToken,
+    };
 
-      final data = <String, dynamic>{
-        'user_id': idUser,
-        'fcm_token': fmcToken,
-      };
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionSummaryResponse>>(Options(
+      method: 'POST',
+      headers: headers,
+      extra: extra,
+    )
+            .compose(dio.options, '/fcm/store',
+                queryParameters: queryParameters, data: data)
+            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
-      final result = await dio.fetch(
-          _setStreamType<Response<TransactionSummaryResponse>>(Options(
-            method: 'POST',
-            headers: headers,
-            extra: extra,
-          )
-              .compose(dio.options, '/fcm/store',
-              queryParameters: queryParameters, data:data)
-              .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+    final value = StatusResponse.fromMap(result.data!);
 
-      final value = StatusResponse.fromMap(result.data!);
-
-      return Response(
-          data: value,
-          requestOptions: result.requestOptions,
-          statusCode: result.statusCode,
-          statusMessage: result.statusMessage,
-          isRedirect: result.isRedirect,
-          redirects: result.redirects,
-          extra: result.extra,
-          headers: result.headers);
+    return Response(
+        data: value,
+        requestOptions: result.requestOptions,
+        statusCode: result.statusCode,
+        statusMessage: result.statusMessage,
+        isRedirect: result.isRedirect,
+        redirects: result.redirects,
+        extra: result.extra,
+        headers: result.headers);
   }
 
-  Future<Response<PredictionResponse>> prediction(PredictionRequest request) async {
-
+  Future<Response<PredictionResponse>> prediction(
+      PredictionRequest request) async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
@@ -709,12 +709,12 @@ class ApiService {
 
     final result = await dio.fetch(
         _setStreamType<Response<TransactionSummaryResponse>>(Options(
-          method: 'POST',
-          headers: headers,
-          extra: extra,
-        )
+      method: 'POST',
+      headers: headers,
+      extra: extra,
+    )
             .compose(dio.options, '/works/history-order/new-prediction',
-            queryParameters: queryParameters, data:data)
+                queryParameters: queryParameters, data: data)
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = PredictionResponse.fromMap(result.data!);
@@ -730,8 +730,8 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<PredictionResponse>> locations(PredictionRequest request) async {
-
+  Future<Response<PredictionResponse>> locations(
+      PredictionRequest request) async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
@@ -747,12 +747,12 @@ class ApiService {
 
     final result = await dio.fetch(
         _setStreamType<Response<TransactionSummaryResponse>>(Options(
-          method: 'POST',
-          headers: headers,
-          extra: extra,
-        )
+      method: 'POST',
+      headers: headers,
+      extra: extra,
+    )
             .compose(dio.options, '/works/history-order/new-prediction',
-            queryParameters: queryParameters, data:data)
+                queryParameters: queryParameters, data: data)
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = PredictionResponse.fromMap(result.data!);
@@ -768,8 +768,8 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<HistoryOrderSavedResponse>> historyOrderSave(PredictionRequest request) async {
-
+  Future<Response<HistoryOrderSavedResponse>> historyOrderSave(
+      HistoryOrderSavedRequest request) async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
@@ -779,18 +779,17 @@ class ApiService {
     };
 
     final data = <String, dynamic>{
-      'zone_id': request.zoneId,
-      'workcode': request.workcode,
+      'work_id': request.workId,
     };
 
     final result = await dio.fetch(
         _setStreamType<Response<TransactionSummaryResponse>>(Options(
-          method: 'POST',
-          headers: headers,
-          extra: extra,
-        )
+      method: 'POST',
+      headers: headers,
+      extra: extra,
+    )
             .compose(dio.options, '/works/history-order/save',
-            queryParameters: queryParameters, data:data)
+                queryParameters: queryParameters, data: data)
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = HistoryOrderSavedResponse.fromMap(result.data!);
@@ -806,8 +805,8 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<HistoryOrderUpdatedResponse>> historyOrderUpdate(PredictionRequest request) async {
-
+  Future<Response<HistoryOrderUpdatedResponse>> historyOrderUpdate(
+      HistoryOrderUpdatedRequest request) async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
@@ -817,18 +816,18 @@ class ApiService {
     };
 
     final data = <String, dynamic>{
-      'count': 1,
+      'count': request.count,
       'workcode': request.workcode,
     };
 
     final result = await dio.fetch(
         _setStreamType<Response<TransactionSummaryResponse>>(Options(
-          method: 'POST',
-          headers: headers,
-          extra: extra,
-        )
+      method: 'POST',
+      headers: headers,
+      extra: extra,
+    )
             .compose(dio.options, '/works/history-order/use',
-            queryParameters: queryParameters, data:data)
+                queryParameters: queryParameters, data: data)
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = HistoryOrderUpdatedResponse.fromMap(result.data!);
@@ -845,7 +844,6 @@ class ApiService {
   }
 
   Future<Response<RoutingResponse>> routing(RoutingRequest request) async {
-
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
@@ -861,12 +859,12 @@ class ApiService {
 
     final result = await dio.fetch(
         _setStreamType<Response<TransactionSummaryResponse>>(Options(
-          method: 'POST',
-          headers: headers,
-          extra: extra,
-        )
+      method: 'POST',
+      headers: headers,
+      extra: extra,
+    )
             .compose(dio.options, '/works/history-order/new-routing',
-            queryParameters: queryParameters, data:data)
+                queryParameters: queryParameters, data: data)
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = RoutingResponse.fromMap(result.data!);

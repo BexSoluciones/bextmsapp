@@ -1,4 +1,8 @@
 //utils
+import 'package:bexdeliveries/src/domain/models/requests/history_order_saved_request.dart';
+import 'package:bexdeliveries/src/domain/models/requests/history_order_updated_request.dart';
+import 'package:bexdeliveries/src/domain/models/responses/history_order_saved_response.dart';
+
 import '../../utils/resources/data_state.dart';
 
 import '../../domain/models/requests/login_request.dart';
@@ -37,11 +41,16 @@ import '../../domain/models/responses/account_response.dart';
 import '../../domain/models/requests/prediction_request.dart';
 import '../../domain/models/responses/prediction_response.dart';
 
+import '../../domain/models/requests/history_order_saved_request.dart';
+import '../../domain/models/responses/history_order_saved_response.dart';
+
+import '../../domain/models/requests/history_order_updated_request.dart';
+import '../../domain/models/responses/history_order_updated_response.dart';
+
 import '../../domain/models/requests/client_request.dart';
 import '../../domain/models/requests/send_token.dart';
 
 import '../../domain/repositories/api_repository.dart';
-
 import '../datasources/remote/api_service.dart';
 import 'base/base_api_repository.dart';
 
@@ -233,5 +242,22 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     );
   }
 
+  @override
+  Future<DataState<HistoryOrderSavedResponse>> historyOrderSaved({
+    required HistoryOrderSavedRequest request,
+  }) {
+    return getStateOf<HistoryOrderSavedResponse>(
+      request: () => _apiService.historyOrderSave(request),
+    );
+  }
+
+  @override
+  Future<DataState<HistoryOrderUpdatedResponse>> historyOrderUpdated({
+    required HistoryOrderUpdatedRequest request,
+  }) {
+    return getStateOf<HistoryOrderUpdatedResponse>(
+      request: () => _apiService.historyOrderUpdate(request),
+    );
+  }
 
 }
