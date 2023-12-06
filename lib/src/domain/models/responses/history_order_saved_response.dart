@@ -1,15 +1,18 @@
 import 'package:equatable/equatable.dart';
 
 class HistoryOrderSavedResponse extends Equatable {
-  final int workId;
+  final int status;
+  final String message;
 
   const HistoryOrderSavedResponse({
-    required this.workId,
+    required this.status,
+    required this.message,
   });
 
   factory HistoryOrderSavedResponse.fromMap(Map<String, dynamic> map) {
     return HistoryOrderSavedResponse(
-      workId: map['work_id'],
+      status: map['status'],
+      message: map['message'],
     );
   }
 
@@ -17,6 +20,6 @@ class HistoryOrderSavedResponse extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props => [workId];
+  List<Object> get props => [status, message];
 
 }

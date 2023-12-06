@@ -1,15 +1,16 @@
 import 'package:equatable/equatable.dart';
+import '../work.dart';
 
 class RoutingResponse extends Equatable {
-  final int workId;
+  final List<Work> works;
 
   const RoutingResponse({
-    required this.workId,
+    required this.works,
   });
 
   factory RoutingResponse.fromMap(Map<String, dynamic> map) {
     return RoutingResponse(
-      workId: map['work_id'],
+      works: map['works'],
     );
   }
 
@@ -17,6 +18,6 @@ class RoutingResponse extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props => [workId];
+  List<Object> get props => [works];
 
 }
