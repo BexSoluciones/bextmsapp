@@ -27,6 +27,16 @@ import '../../../domain/models/responses/transaction_response.dart';
 import '../../../domain/models/responses/transaction_summary_response.dart';
 import '../../../domain/models/responses/status_response.dart';
 import '../../../domain/models/responses/account_response.dart';
+import '../../../domain/models/responses/prediction_response.dart';
+import '../../../domain/models/responses/history_order_updated_response.dart';
+import '../../../domain/models/responses/history_order_saved_response.dart';
+import '../../../domain/models/responses/routing_response.dart';
+
+//request
+import '../../../domain/models/requests/prediction_request.dart';
+import '../../../domain/models/requests/history_order_saved_request.dart';
+import '../../../domain/models/requests/history_order_updated_request.dart';
+import '../../../domain/models/requests/routing_request.dart';
 
 //services
 import '../../../locator.dart';
@@ -680,6 +690,196 @@ class ApiService {
           redirects: result.redirects,
           extra: result.extra,
           headers: result.headers);
+  }
+
+  Future<Response<PredictionResponse>> prediction(PredictionRequest request) async {
+
+    const extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+
+    final headers = <String, dynamic>{
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    final data = <String, dynamic>{
+      'zone_id': request.zoneId,
+      'workcode': request.workcode,
+    };
+
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionSummaryResponse>>(Options(
+          method: 'POST',
+          headers: headers,
+          extra: extra,
+        )
+            .compose(dio.options, '/works/history-order/new-prediction',
+            queryParameters: queryParameters, data:data)
+            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+
+    final value = PredictionResponse.fromMap(result.data!);
+
+    return Response(
+        data: value,
+        requestOptions: result.requestOptions,
+        statusCode: result.statusCode,
+        statusMessage: result.statusMessage,
+        isRedirect: result.isRedirect,
+        redirects: result.redirects,
+        extra: result.extra,
+        headers: result.headers);
+  }
+
+  Future<Response<PredictionResponse>> locations(PredictionRequest request) async {
+
+    const extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+
+    final headers = <String, dynamic>{
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    final data = <String, dynamic>{
+      'zone_id': request.zoneId,
+      'workcode': request.workcode,
+    };
+
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionSummaryResponse>>(Options(
+          method: 'POST',
+          headers: headers,
+          extra: extra,
+        )
+            .compose(dio.options, '/works/history-order/new-prediction',
+            queryParameters: queryParameters, data:data)
+            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+
+    final value = PredictionResponse.fromMap(result.data!);
+
+    return Response(
+        data: value,
+        requestOptions: result.requestOptions,
+        statusCode: result.statusCode,
+        statusMessage: result.statusMessage,
+        isRedirect: result.isRedirect,
+        redirects: result.redirects,
+        extra: result.extra,
+        headers: result.headers);
+  }
+
+  Future<Response<HistoryOrderSavedResponse>> historyOrderSave(PredictionRequest request) async {
+
+    const extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+
+    final headers = <String, dynamic>{
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    final data = <String, dynamic>{
+      'zone_id': request.zoneId,
+      'workcode': request.workcode,
+    };
+
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionSummaryResponse>>(Options(
+          method: 'POST',
+          headers: headers,
+          extra: extra,
+        )
+            .compose(dio.options, '/works/history-order/save',
+            queryParameters: queryParameters, data:data)
+            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+
+    final value = HistoryOrderSavedResponse.fromMap(result.data!);
+
+    return Response(
+        data: value,
+        requestOptions: result.requestOptions,
+        statusCode: result.statusCode,
+        statusMessage: result.statusMessage,
+        isRedirect: result.isRedirect,
+        redirects: result.redirects,
+        extra: result.extra,
+        headers: result.headers);
+  }
+
+  Future<Response<HistoryOrderUpdatedResponse>> historyOrderUpdate(PredictionRequest request) async {
+
+    const extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+
+    final headers = <String, dynamic>{
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    final data = <String, dynamic>{
+      'count': 1,
+      'workcode': request.workcode,
+    };
+
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionSummaryResponse>>(Options(
+          method: 'POST',
+          headers: headers,
+          extra: extra,
+        )
+            .compose(dio.options, '/works/history-order/use',
+            queryParameters: queryParameters, data:data)
+            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+
+    final value = HistoryOrderUpdatedResponse.fromMap(result.data!);
+
+    return Response(
+        data: value,
+        requestOptions: result.requestOptions,
+        statusCode: result.statusCode,
+        statusMessage: result.statusMessage,
+        isRedirect: result.isRedirect,
+        redirects: result.redirects,
+        extra: result.extra,
+        headers: result.headers);
+  }
+
+  Future<Response<RoutingResponse>> routing(RoutingRequest request) async {
+
+    const extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+
+    final headers = <String, dynamic>{
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    final data = <String, dynamic>{
+      'history_id': request.historyId,
+      'workcode': request.workcode,
+    };
+
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionSummaryResponse>>(Options(
+          method: 'POST',
+          headers: headers,
+          extra: extra,
+        )
+            .compose(dio.options, '/works/history-order/new-routing',
+            queryParameters: queryParameters, data:data)
+            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+
+    final value = RoutingResponse.fromMap(result.data!);
+
+    return Response(
+        data: value,
+        requestOptions: result.requestOptions,
+        statusCode: result.statusCode,
+        statusMessage: result.statusMessage,
+        isRedirect: result.isRedirect,
+        redirects: result.redirects,
+        extra: result.extra,
+        headers: result.headers);
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

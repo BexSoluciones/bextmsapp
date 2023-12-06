@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //utils
+import '../../../domain/models/requests/prediction_request.dart';
 import '../../../utils/resources/data_state.dart';
 
 //domain
@@ -244,6 +245,7 @@ class ProcessingQueueBloc
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
+            //TODO:: [Heider Zapa ] do
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -278,7 +280,7 @@ class ProcessingQueueBloc
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
-
+            //TODO:: [Heider Zapa ] do
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -290,8 +292,8 @@ class ProcessingQueueBloc
         case 'update_history_order':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
+            //TODO:: [Heider Zapa ] do
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -303,8 +305,16 @@ class ProcessingQueueBloc
         case 'get_prediction':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
+            final response = await _apiRepository.prediction(
+                request: PredictionRequest(
+                    int.parse(body['zone_id']), body['workcode']));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -317,8 +327,8 @@ class ProcessingQueueBloc
         case 'post_new_routing':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
+            //TODO:: [Heider Zapa ] do
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';

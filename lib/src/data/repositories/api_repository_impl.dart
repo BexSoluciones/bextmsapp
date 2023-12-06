@@ -1,5 +1,4 @@
 //utils
-import '../../domain/models/requests/send_token.dart';
 import '../../utils/resources/data_state.dart';
 
 import '../../domain/models/requests/login_request.dart';
@@ -35,7 +34,11 @@ import '../../domain/models/responses/status_response.dart';
 import '../../domain/models/requests/account_request.dart';
 import '../../domain/models/responses/account_response.dart';
 
+import '../../domain/models/requests/prediction_request.dart';
+import '../../domain/models/responses/prediction_response.dart';
+
 import '../../domain/models/requests/client_request.dart';
+import '../../domain/models/requests/send_token.dart';
 
 import '../../domain/repositories/api_repository.dart';
 
@@ -218,6 +221,15 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }) {
     return getStateOf<StatusResponse>(
       request: () => _apiService.sendFCMToken(request.user_id,request.fcm_token),
+    );
+  }
+
+  @override
+  Future<DataState<PredictionResponse>> prediction({
+    required PredictionRequest request,
+  }) {
+    return getStateOf<PredictionResponse>(
+      request: () => _apiService.prediction(request),
     );
   }
 

@@ -1,5 +1,3 @@
-import 'package:bexdeliveries/src/domain/models/requests/send_token.dart';
-
 import '../../utils/resources/data_state.dart';
 
 import '../models/requests/enterprise_request.dart';
@@ -13,6 +11,10 @@ import '../models/responses/logout_response.dart';
 
 import '../models/requests/work_request.dart';
 import '../models/responses/work_response.dart';
+
+import '../models/requests/prediction_request.dart';
+import '../models/responses/prediction_response.dart';
+
 
 import '../models/requests/database_request.dart';
 import '../models/responses/database_response.dart';
@@ -36,6 +38,7 @@ import '../models/requests/account_request.dart';
 import '../models/responses/account_response.dart';
 
 import '../models/requests/client_request.dart';
+import '../models/requests/send_token.dart';
 
 abstract class ApiRepository {
   //SYNCHRONOUS
@@ -59,6 +62,7 @@ abstract class ApiRepository {
     required LoginRequest request,
   });
 
+  //ASYNCHRONOUS
   Future<DataState<LogoutResponse>> logout({
     required LogoutRequest request,
   });
@@ -106,5 +110,9 @@ abstract class ApiRepository {
 
   Future<DataState<StatusResponse>> sendFCMToken({
     required SendTokenRequest request
+  });
+
+  Future<DataState<PredictionResponse>> prediction({
+    required PredictionRequest request
   });
 }
