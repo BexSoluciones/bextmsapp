@@ -126,7 +126,8 @@ Future<void> main() async {
   await initializeDependencies();
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  final databaseCubit = DatabaseCubit(locator<ApiRepository>(), locator<DatabaseRepository>());
+  final databaseCubit =
+      DatabaseCubit(locator<ApiRepository>(), locator<DatabaseRepository>());
   await databaseCubit.getDatabase();
 
   ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
@@ -170,7 +171,6 @@ Future<void> main() async {
 
   // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   runApp(MyApp(databaseCubit: databaseCubit));
-
 }
 
 class MyApp extends StatefulWidget {
@@ -187,9 +187,11 @@ class _MyAppState extends State<MyApp> {
   _MyAppState(this.databaseCubit);
   Future<void> setupInteractedMessage(BuildContext context) async {
     initialize(context);
-    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
-      debugPrint('Message also contained a notification: ${initialMessage.notification!.body}');
+      debugPrint(
+          'Message also contained a notification: ${initialMessage.notification!.body}');
     }
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -218,7 +220,10 @@ class _MyAppState extends State<MyApp> {
       importance: Importance.high,
     );
 
-    await FlutterLocalNotificationsPlugin().resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
+    await FlutterLocalNotificationsPlugin()
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
   }
 
   void display(RemoteMessage message) async {
@@ -226,12 +231,12 @@ class _MyAppState extends State<MyApp> {
       final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       const NotificationDetails notificationDetails = NotificationDetails(
           android: AndroidNotificationDetails(
-            "01",
-            "Bex Deliveries",
-            importance: Importance.max,
-            priority: Priority.high,
-            icon: '@mipmap/ic_launcher',
-          ));
+        "01",
+        "Bex Deliveries",
+        importance: Importance.max,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
+      ));
 
       await FlutterLocalNotificationsPlugin().show(
         id,
@@ -240,7 +245,7 @@ class _MyAppState extends State<MyApp> {
         notificationDetails,
         payload: jsonEncode(message.data),
       );
-    } on Exception catch (e,stackTrace) {
+    } on Exception catch (e, stackTrace) {
       debugPrint(e.toString());
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);
     }
@@ -250,21 +255,23 @@ class _MyAppState extends State<MyApp> {
     while (true) {
       try {
         //Firebase
-        var codeTransporter = _remoteConfigService.getString('code_transporter');
-        var forceProcessingQueue = _remoteConfigService.getBool('force_processing_queue');
+        var codeTransporter =
+            _remoteConfigService.getString('code_transporter');
+        var forceProcessingQueue =
+            _remoteConfigService.getBool('force_processing_queue');
         var enterprise = _remoteConfigService.getString('enterprise');
-        var forceDatabase = _remoteConfigService.getBool('force_database_users');
+        var forceDatabase =
+            _remoteConfigService.getBool('force_database_users');
 
         if (forceDatabase! &&
             codeTransporter == _storageService.getString('username') &&
             enterprise == _storageService.getString('company_name')) {
-          if(context.mounted) databaseCubit.exportDatabase(context,false);
+          if (context.mounted) databaseCubit.exportDatabase(context, false);
         }
         if (forceProcessingQueue! &&
             codeTransporter == _storageService.getString('username') &&
-            enterprise == _storageService.getString('company')) {
-        }
-      } catch (e,stackTrace) {
+            enterprise == _storageService.getString('company')) {}
+      } catch (e, stackTrace) {
         await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
 
@@ -272,6 +279,7 @@ class _MyAppState extends State<MyApp> {
           Duration(minutes: _storageService.getInt('time_to_callback') ?? 10));
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -312,13 +320,15 @@ class _MyAppState extends State<MyApp> {
                   locator<ApiRepository>(),
                   locator<DatabaseRepository>(),
                   locator<LocationRepository>(),
-                  BlocProvider.of<ProcessingQueueBloc>(context),BlocProvider.of<GpsBloc>(context))),
+                  BlocProvider.of<ProcessingQueueBloc>(context),
+                  BlocProvider.of<GpsBloc>(context))),
           BlocProvider(
               create: (context) => HomeCubit(
                   locator<DatabaseRepository>(),
                   locator<ApiRepository>(),
                   locator<LocationRepository>(),
-                  BlocProvider.of<ProcessingQueueBloc>(context), BlocProvider.of<GpsBloc>(context))),
+                  BlocProvider.of<ProcessingQueueBloc>(context),
+                  BlocProvider.of<GpsBloc>(context))),
           BlocProvider(
             create: (context) => HistoryOrderBloc(locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context)),
@@ -333,21 +343,22 @@ class _MyAppState extends State<MyApp> {
             create: (context) => ConfirmCubit(
                 locator<DatabaseRepository>(),
                 locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context),BlocProvider.of<GpsBloc>(context)),
+                BlocProvider.of<ProcessingQueueBloc>(context),
+                BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => SummaryCubit(
                 locator<DatabaseRepository>(),
                 locator<LocationRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)
-            ),
+                BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => GeoreferenceCubit(
                 locator<DatabaseRepository>(),
                 locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context), BlocProvider.of<GpsBloc>(context)),
+                BlocProvider.of<ProcessingQueueBloc>(context),
+                BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => InventoryCubit(
@@ -377,21 +388,22 @@ class _MyAppState extends State<MyApp> {
             create: (context) => CollectionCubit(
                 locator<DatabaseRepository>(),
                 locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context),BlocProvider.of<GpsBloc>(context)),
+                BlocProvider.of<ProcessingQueueBloc>(context),
+                BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => NavigationCubit(
-                locator<DatabaseRepository>(), locator<LocationRepository>(),BlocProvider.of<GpsBloc>(context)),
+                locator<DatabaseRepository>(),
+                locator<LocationRepository>(),
+                BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => DatabaseCubit(
                 locator<ApiRepository>(), locator<DatabaseRepository>()),
           ),
           BlocProvider(
-            create: (context) => TransactionCubit(
-                locator<DatabaseRepository>(),
-                locator<ApiRepository>())
-          ),
+              create: (context) => TransactionCubit(
+                  locator<DatabaseRepository>(), locator<ApiRepository>())),
           BlocProvider(
             create: (context) => GeneralCubit(),
           ),
@@ -402,18 +414,24 @@ class _MyAppState extends State<MyApp> {
             create: (context) => QueryCubit(locator<DatabaseRepository>()),
           ),
           BlocProvider(
-            create: (context) => IssuesBloc(locator<DatabaseRepository>()),
+            create: (context) => IssuesBloc(
+                locator<DatabaseRepository>(),
+                BlocProvider.of<ProcessingQueueBloc>(context),
+                BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
-            create: (context) => AccountBloc(locator<DatabaseRepository>()),     ),
-          BlocProvider(
-            create: (context) =>  WorkTypeCubit(locator<DatabaseRepository>()),
+            create: (context) => AccountBloc(locator<DatabaseRepository>()),
           ),
           BlocProvider(
-            create: (context) => OrdersummaryreasonsCubit(locator<DatabaseRepository>()),
+            create: (context) => WorkTypeCubit(locator<DatabaseRepository>()),
           ),
           BlocProvider(
-              create: (context) => NotificationCubit(locator<DatabaseRepository>())),
+            create: (context) =>
+                OrdersummaryreasonsCubit(locator<DatabaseRepository>()),
+          ),
+          BlocProvider(
+              create: (context) =>
+                  NotificationCubit(locator<DatabaseRepository>())),
           BlocProvider(
               create: (context) => CountCubit(locator<DatabaseRepository>())),
         ],

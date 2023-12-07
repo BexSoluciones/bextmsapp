@@ -80,9 +80,14 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     _navigationService.goTo(qrRoute);
   }
 
-  Future<void> confirmTransaction(InventoryArgument arguments,
-      paymentEfectyController, paymentTransferController, List<dynamic> data) async {
+  Future<void> confirmTransaction(
+      InventoryArgument arguments,
+      paymentEfectyController,
+      paymentTransferController,
+      List<dynamic> data) async {
+    if (isBusy) return;
 
+    await run(() async {
       emit(const CollectionLoading());
 
       var status = arguments.r != null && arguments.r!.isNotEmpty
@@ -121,12 +126,11 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         }
       }
 
-      for(var i = 0; i<data.length;i++){
+      for (var i = 0; i < data.length; i++) {
         payments.add(Payment(
             method: 'transfer $i',
             paid: data[i][0].toString(),
-            id_account: data[i][1].toString()
-        ));
+            accountId: data[i][1].toString()));
       }
 
       if (paymentTransferController.text.isNotEmpty) {
@@ -235,5 +239,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
         emit(const CollectionSuccess());
       }
+    });
   }
 }

@@ -14,6 +14,7 @@ import '../../../../../services/navigation.dart';
 import '../../../../../services/storage.dart';
 
 //widgets
+import '../../../../widgets/confirm_dialog.dart';
 import '../../../../widgets/default_button_widget.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
@@ -175,81 +176,24 @@ class _FillIssueViewState extends State<FillIssueView> {
                               fontWeight: FontWeight.normal)),
                       press: () async {
                         if (await validateParameters(issuesBloc: issuesBloc)) {
-                          // var location = await _locationService.getLocation()
-                          //
-                          // var firmApplication = await helperFunctions.getFirm(
-                          //     'firm-${(issuesBloc.state.status == 'work') ? issuesBloc.state.workId.toString() + issuesBloc.state.codmotvis! : (issuesBloc.state.status == 'summary') ? issuesBloc.state.selectedSummaryId.toString() + issuesBloc.state.codmotvis! : _storageService.getInt('user_id')!.toString() + issuesBloc.state.codmotvis!}');
-                          //
-                          // var images = await helperFunctions.getImages(
-                          //     '${(issuesBloc.state.status == 'work') ? issuesBloc.state.workId.toString() + issuesBloc.state.codmotvis! : (issuesBloc.state.status == 'summary') ? issuesBloc.state.selectedSummaryId.toString() + issuesBloc.state.codmotvis! : _storageService.getInt('user_id')!.toString() + issuesBloc.state.codmotvis!}');
-                          //
-                          // var imagesPath = <String>[];
-                          // var firmApplicationPath = <String>[];
-                          //
-                          // if (firmApplication != null) {
-                          //   firmApplicationPath.add(firmApplication.path);
-                          // }
-                          //
-                          // if (images.isNotEmpty) {
-                          //   images.forEach((element) {
-                          //     List<int> imageBytes = element.readAsBytesSync();
-                          //     var base64Image = base64Encode(imageBytes);
-                          //     imagesPath.add(base64Image);
-                          //   });
-                          // }
-                          //
-                          // var news = News(
-                          //     status: state.status!,
-                          //     userId: _storageService.getInt('user_id')!,
-                          //     workId: (state.status == 'summary' ||
-                          //         state.status == 'general')
-                          //         ? null
-                          //         : state.workId,
-                          //     summaryId: (state.status == 'work' ||
-                          //         state.status == 'general')
-                          //         ? null
-                          //         : state.selectedSummaryId,
-                          //     nommotvis: state.nommotvis!,
-                          //     codmotvis: state.codmotvis!,
-                          //     latitude: location.latitude!.toString(),
-                          //     longitude: location.longitude!.toString(),
-                          //     images: imagesPath,
-                          //     firm: firmApplicationPath,
-                          //     observation: state.observations!.text);
-                          //
-                          // _processingQueueBloc.inAddPq
-                          //     .add(helperFunctions.addNews(news: news));
-                          //
-                          // if (news.firm != null) {
-                          //   news.firm = jsonEncode(firmApplicationPath);
-                          // }
-                          // if (news.images != null) {
-                          //   news.images = jsonEncode(imagesPath);
-                          // }
-                          //
-                          // await database.insertNews(news: news);
-                          //
-                          // if (state.selectedIssue?.tipocliente != null &&
-                          //     state.selectedIssue?.tipocliente.toLowerCase() ==
-                          //         'unlock' &&
-                          //     state.selectedIssue!.codmotvis == '01') {
-                          //   _storageService.setBool(
-                          //       '${state.selectedSummaryId}-distance_ignore',
-                          //       true);
-                          // }
-                          //
-                          // Navigator.pop(context);
-                          // Navigator.pop(context);
-                          //
-                          // await showDialog(
-                          //     context: context,
-                          //     builder: (context) => CustomConfirmDialog(
-                          //       title: 'Novedad Creada',
-                          //       message: 'Novedad reportada con exito !!',
-                          //       onConfirm: () => Navigator.pop(context),
-                          //       buttonText: 'Aceptar',
-                          //       cancelButtom: false,
-                          //     ));
+
+                          issuesBloc.add(DataIssue());
+
+                          if(context.mounted) {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+
+                            await showDialog(
+                                context: context,
+                                builder: (context) => CustomConfirmDialog(
+                                  title: 'Novedad Creada',
+                                  message: 'Novedad reportada con exito !!',
+                                  onConfirm: () => Navigator.pop(context),
+                                  buttonText: 'Aceptar',
+                                  cancelButtom: false,
+                                ));
+                          }
+
                         } else {
                           print('all is not ok :C');
                         }

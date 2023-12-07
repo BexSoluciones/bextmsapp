@@ -53,3 +53,7 @@ class GetUserId extends IssuesEvent {
   const GetUserId({required this.userId});
   final String userId;
 }
+
+class DataIssue extends IssuesEvent {
+
+}

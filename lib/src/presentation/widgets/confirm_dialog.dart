@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
+
 import 'circular_progress.dart';
 
-class ConfirmDialog extends StatefulWidget {
-  ConfirmDialog({
-    super.key,
-    required this.title,
-    required this.message,
-    required this.onConfirm,
-  });
+class CustomConfirmDialog extends StatefulWidget {
+  CustomConfirmDialog(
+      {required this.title,
+        required this.message,
+        required this.onConfirm,
+        required this.cancelButtom,
+        required this.buttonText});
   final String title;
   final String message;
   final Function onConfirm;
+  final bool? cancelButtom;
+  final String buttonText;
 
   @override
-  State<ConfirmDialog> createState() => _ConfirmDialogState();
+  State<CustomConfirmDialog> createState() => _CustomConfirmDialogState();
 }
 
-class _ConfirmDialogState extends State<ConfirmDialog> {
+class _CustomConfirmDialogState extends State<CustomConfirmDialog> {
   bool saving = false;
 
   @override
@@ -46,13 +49,16 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
               ),
               const SizedBox(height: 20),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                //crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(
+                  (widget.cancelButtom == true)
+                      ? TextButton(
                     onPressed: () =>
-                        saving ? null : Navigator.of(context).pop(),
+                    saving ? null : Navigator.of(context).pop(),
                     child: const Text('Cancelar'),
-                  ),
+                  )
+                      : Container(),
                   const SizedBox(width: 10),
                   Visibility(
                     visible: !saving,
@@ -64,7 +70,7 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
                         await widget.onConfirm();
                         //Navigator.of(context).pop();
                       },
-                      child: const Text('Guardar'),
+                      child: Text(widget.buttonText),
                     ),
                   ),
                   Visibility(

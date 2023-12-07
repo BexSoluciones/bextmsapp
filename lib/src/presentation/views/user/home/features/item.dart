@@ -100,10 +100,12 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                         if (widget.work.count! == left) {
                           showDialog(
                               context: context,
-                              builder: (context) => ConfirmDialog(
+                              builder: (context) => CustomConfirmDialog(
                                   title: 'Guardar historico',
                                   message:
                                       '¿Está seguro que desea guardar el historico?',
+                                  cancelButtom: false,
+                                  buttonText: 'Aceptar',
                                   onConfirm: () =>
                                       _handleNavigation(widget.work, context)));
                         } else {
