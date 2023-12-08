@@ -3,6 +3,7 @@ import 'package:bexdeliveries/src/domain/models/requests/history_order_saved_req
 import 'package:bexdeliveries/src/domain/models/requests/history_order_updated_request.dart';
 import 'package:bexdeliveries/src/domain/models/responses/history_order_saved_response.dart';
 
+import '../../domain/models/requests/submit_locations_request.dart';
 import '../../utils/resources/data_state.dart';
 
 import '../../domain/models/requests/login_request.dart';
@@ -259,5 +260,15 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
       request: () => _apiService.historyOrderUpdate(request),
     );
   }
+
+  @override
+  Future<DataState<StatusResponse>> SubmitLocations({
+    required SubmitLocationsRequest request,
+  }) {
+    return getStateOf<StatusResponse>(
+      request: () => _apiService.SubmitLocations(request.processingQueue),
+    );
+  }
+
 
 }

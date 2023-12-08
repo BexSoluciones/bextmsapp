@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:bexdeliveries/src/services/navigation.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:location_repository/location_repository.dart';
@@ -20,11 +22,13 @@ import '../../src/domain/models/work.dart';
 //widgets
 import '../../src/domain/repositories/database_repository.dart';
 import '../../src/locator.dart';
+import '../../src/presentation/blocs/photo/photo_bloc.dart';
 import '../../src/presentation/widgets/show_map_direction_widget.dart';
 import '../../src/services/storage.dart';
 
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
+final NavigationService _navigationService = locator<NavigationService>();
 
 class HelperFunctions {
   loc.Location location = loc.Location();
@@ -116,8 +120,8 @@ class HelperFunctions {
   Future<List<File>> getImages(orderNumber) async {
     var images = <File>[];
     var path = await _localPath;
-
-    var directory = Directory('$path/$orderNumber/');
+    path = path.replaceFirst('app_flutter', '');
+    var directory = Directory('$path/cache/');
     if (directory.existsSync()) {
       var imageList = directory
           .listSync()
@@ -185,20 +189,21 @@ class HelperFunctions {
 
   Future<void> deleteImages(folder) async {
     var path = await _localPath;
-
-    var directory = Directory('$path/$folder');
-
+    path = path.replaceFirst('app_flutter', '');
+    var directory = Directory('$path/cache');
     if (directory.existsSync()) {
       var imageList = directory
           .listSync()
           .map((item) => item.path)
-          .where((item) => item.endsWith('.jpg'))
+          .where((item) => item.endsWith('.jpg') || item.endsWith('.png'))
           .toList(growable: false);
-
-      for (var element in imageList) {
+      for (int index = 0; index < imageList.length; index++) {
+        var element = imageList[index];
         var file = File(element);
+        await _databaseRepository.deleteAll(index + 1);
         await file.delete();
       }
+
     }
   }
 

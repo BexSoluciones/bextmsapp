@@ -87,8 +87,8 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                        const SizedBox(width: 10),
-                        FloatingActionButton(
+                         const SizedBox(width: 10),
+                        /*FloatingActionButton(
                           backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
                           heroTag: 'changeCameraBtn',
                           child: Icon(state is CameraChangeLen
@@ -98,7 +98,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                               .add(CameraChange(
                                   state is CameraChangeLen ? "front" : "back")),
                         ),
-                        const SizedBox(width: 30),
+                        const SizedBox(width: 30),*/
                         FloatingActionButton(
                           backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
                           heroTag: 'takePhotoBtn',

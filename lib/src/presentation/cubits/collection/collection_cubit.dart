@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:location_repository/location_repository.dart';
 
 //core
@@ -12,6 +13,7 @@ import '../../../utils/constants/strings.dart';
 
 //base
 import '../../blocs/gps/gps_bloc.dart';
+import '../../blocs/photo/photo_bloc.dart';
 import '../base/base_cubit.dart';
 
 //blocs
@@ -97,7 +99,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       String? firm;
       var firmApplication =
           await helperFunctions.getFirm('firm-${arguments.orderNumber}');
-
       if (firmApplication != null) {
         var base64Firm = firmApplication.readAsBytesSync();
         firm = base64Encode(base64Firm);
@@ -146,7 +147,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
                 'No hay pagos para el recaudo que cumpla con las condiciones'));
       } else {
         var currentLocation = gpsBloc.state.lastKnownLocation;
-
         var transaction = Transaction(
             workId: arguments.work.id!,
             summaryId: arguments.summaryId,

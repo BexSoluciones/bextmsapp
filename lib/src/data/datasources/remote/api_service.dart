@@ -6,6 +6,7 @@ import '../../../domain/models/login.dart';
 import '../../../domain/models/enterprise.dart';
 import '../../../domain/models/client.dart';
 import '../../../domain/models/enterprise_config.dart';
+import '../../../domain/models/processing_queue.dart';
 import '../../../domain/models/work.dart';
 import '../../../domain/models/reason.dart';
 import '../../../domain/models/transaction.dart';
@@ -879,6 +880,44 @@ class ApiService {
         extra: result.extra,
         headers: result.headers);
   }
+
+  Future<Response<StatusResponse>> SubmitLocations(ProcessingQueue processingQueue) async {
+
+    const extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+
+    final headers = <String, dynamic>{
+      HttpHeaders.contentTypeHeader: 'application/json',
+    };
+
+    final data = <String, dynamic>{
+      'body': processingQueue.body
+    };
+
+    final result = await dio.fetch(
+        _setStreamType<Response<TransactionSummaryResponse>>(Options(
+          method: 'POST',
+          headers: headers,
+          extra: extra,
+        )
+            .compose(dio.options, '/location/newlocation',
+            queryParameters: queryParameters, data:data)
+            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
+
+    final value = StatusResponse.fromMap(result.data!);
+
+    return Response(
+        data: value,
+        requestOptions: result.requestOptions,
+        statusCode: result.statusCode,
+        statusMessage: result.statusMessage,
+        isRedirect: result.isRedirect,
+        redirects: result.redirects,
+        extra: result.extra,
+        headers: result.headers);
+  }
+
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&

@@ -32,12 +32,6 @@ class _DetailPhotoViewState extends State<DetailPhotoView> {
 
   @override
   Widget build(BuildContext context) {
-    deletePhoto() {
-      BlocProvider.of<PhotosBloc>(context)
-          .add(PhotosDeleted(photo: _currentPhoto!));
-      Navigator.of(context).pop();
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Text(_currentPhoto!.name),
@@ -68,6 +62,12 @@ class _DetailPhotoViewState extends State<DetailPhotoView> {
         ),
       ),
     );
+  }
+
+  deletePhoto() {
+    BlocProvider.of<PhotosBloc>(context)
+        .add(PhotosDeleted(photo: _currentPhoto!));
+    Navigator.of(context).pop();
   }
 
   Future<Photo?> _cropImage() async {

@@ -8,11 +8,9 @@ import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:image/image.dart' as img;
 
 //utils
 import '../../../utils/resources/camera.dart';
@@ -74,11 +72,12 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       try {
         final path = await cameraUtils.getPath();
         final imageCount = await  countImagesInCache();
-        if (imageCount >= 2) {
-          emit(CameraCaptureFailure(error: 'Solo se permiten 2 fotos'));
+        if (imageCount >= 3) {
+          emit(CameraCaptureFailure(error: 'Solo se permiten 3 fotos'));
         } else {
           var picture = await _controller.takePicture();
           var photo = Photo(name: picture.name, path: picture.path);
+          await compressAndSaveImage(photo.path);
           await databaseRepository.insertPhoto(photo);
           emit(CameraCaptureSuccess(path));
         }
@@ -95,38 +94,59 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
 
 
   _mapCameraGalleryToState(CameraGallery event, emit) async {
+    if (state is! CameraReady) {
+      emit(const CameraFailure(error: 'Camera is not ready'));
+      return;
+    }
     try {
       final picker = ImagePicker();
       final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-
       if (pickedImage != null) {
         final cacheDirectory = await getTemporaryDirectory();
         final imageCount = await countImagesInCache();
-        if (imageCount >= 2) {
-          emit(CameraCaptureFailure(error: 'Solo se permiten 2 fotos'));
+        if (imageCount >= 3) {
+          emit(CameraCaptureFailure(error: 'Solo se permiten 3 fotos'));
         } else {
           final imageFile = File(pickedImage.path);
           final fileFormat = imageFile.path.split('.').last.toLowerCase();
 
           if (fileFormat == 'jpg' || fileFormat == 'png') {
-            var picture = await _controller.takePicture();
-            final fileName = picture.name;
+
+
+            final fileName = imageFile.uri.pathSegments.last;
             final filePathInCache = '${cacheDirectory.path}/$fileName';
+            await compressAndSaveImage(filePathInCache);
+
             await imageFile.copy(filePathInCache);
 
             var photo = Photo(name: fileName, path: filePathInCache);
             await databaseRepository.insertPhoto(photo);
             emit(CameraCaptureSuccess(filePathInCache));
           } else {
-            emit(CameraCaptureFailure(error: 'El formato de archivo no es compatible'));
+            emit(CameraCaptureFailure(
+                error: 'El formato de archivo no es compatible'));
           }
         }
       } else {
         emit(const CameraFailure(error: 'Selección de imagen cancelada'));
       }
-    } catch (error,stackTrace) {
+    } catch (error, stackTrace) {
       emit(CameraCaptureFailure(error: error.toString()));
       await FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    }
+  }
+
+  Future<void> compressAndSaveImage(String imagePath) async {
+    try {
+      final File originalImage = File(imagePath);
+      final img.Image image = img.decodeImage(originalImage.readAsBytesSync())!;
+
+      final File compressedImage = File(imagePath)
+        ..writeAsBytesSync(img.encodeJpg(image, quality: 80));
+
+       originalImage.writeAsBytesSync(compressedImage.readAsBytesSync());
+    } catch (error) {
+      print('Error al comprimir la imagen: $error');
     }
   }
 

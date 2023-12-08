@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -41,6 +42,7 @@ class TouchControl extends StatefulWidget {
 List<OffsetDraw?> _points = [];
 
 class TouchControlState extends State<TouchControl> {
+  final helperFunctions = HelperFunctions();
   double xPos = 0.0;
   double yPos = 0.0;
   ByteData? imgBytes;
@@ -114,9 +116,9 @@ class TouchControlState extends State<TouchControl> {
                       imgBytes = null;
                     });
                   },
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: const [
+                    children: [
                       Text('LIMPIAR', style: TextStyle(fontSize: 20)),
                       Icon(
                         Icons.edit_off,
@@ -199,7 +201,7 @@ class TouchControlState extends State<TouchControl> {
   void saveImageFirm() async {
     await generateImage().then((_) {
       if (imgBytes != null) {
-        // helperFunctions.saveFirm('firm-${widget.orderNumber}', 'firm-${widget.orderNumber}', imgBytes!);
+        helperFunctions.saveFirm('firm-${widget.orderNumber}', 'firm-${widget.orderNumber}', imgBytes!);
       }
     }).catchError((onError) {
       if (kDebugMode) {
