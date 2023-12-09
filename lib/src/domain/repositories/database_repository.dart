@@ -111,6 +111,8 @@ abstract class DatabaseRepository {
   Future<int> insertPhoto(Photo photo);
   Future<int> updatePhoto(Photo photo);
   Future<int> deletePhoto(Photo photo);
+  Future<int> deleteAll(int photoId);
+
   Future<void> insertPhotos(List<Photo> photos);
   Future<void> emptyPhotos();
 

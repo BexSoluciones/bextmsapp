@@ -3,6 +3,7 @@
 import '../../utils/resources/data_state.dart';
 
 import '../models/requests/enterprise_request.dart';
+import '../models/requests/submit_locations_request.dart';
 import '../models/responses/enterprise_response.dart';
 
 import '../models/requests/login_request.dart';
@@ -130,5 +131,9 @@ abstract class ApiRepository {
 
   Future<DataState<HistoryOrderUpdatedResponse>> historyOrderUpdated({
     required HistoryOrderUpdatedRequest request
+  });
+
+  Future<DataState<StatusResponse>> SubmitLocations({
+    required SubmitLocationsRequest request
   });
 }

@@ -66,6 +66,7 @@ dependencies:
   shimmer: ^2.0.0
   validators: ^3.0.0
   camera: ^0.10.5
+  image: ^3.3.0
   image_picker: ^0.8.7+5
   image_cropper: ^4.0.1
   readmore: ^2.2.0

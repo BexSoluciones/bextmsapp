@@ -393,6 +393,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.photoDao.deletePhoto(photo);
   }
 
+ @override
+  Future<int> deleteAll(int photoId){
+    return _appDatabase.photoDao.deleteAll(photoId);
+  }
+
   @override
   Future<void> insertPhotos(List<Photo> photos) async {
     return _appDatabase.photoDao.insertPhotos(photos);
