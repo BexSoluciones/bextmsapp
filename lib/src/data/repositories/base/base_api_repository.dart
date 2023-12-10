@@ -17,12 +17,12 @@ abstract class BaseApiRepository {
       if (httpResponse.statusCode == HttpStatus.ok || httpResponse.statusCode == HttpStatus.created) {
         return DataSuccess(httpResponse.data as T);
       } else {
-        throw DioError(
+        throw DioException(
           response: httpResponse,
           requestOptions: httpResponse.requestOptions,
         );
       }
-    } on DioError catch (error,stackTrace) {
+    } on DioException catch (error,stackTrace) {
       final errorMessage = DioExceptions.fromDioError(error, 'SM-A33G').toString();
       await FirebaseCrashlytics.instance.recordError(error, stackTrace);
       return DataFailed(errorMessage);

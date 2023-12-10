@@ -20,8 +20,8 @@ class WorkDao {
     final workList = await db!.rawQuery('''
         SELECT works.*,
         COUNT(DISTINCT number_customer || code_place) as count,
-        COUNT(DISTINCT summaries.order_number) as left,
-        COUNT(DISTINCT transactions.order_number) as right
+        COUNT(DISTINCT summaries.order_number || works.number_customer || works.code_place) as left,
+        COUNT(DISTINCT transactions.order_number || works.number_customer || works.code_place) as right
         FROM $tableWorks
         INNER JOIN $tableSummaries ON $tableSummaries.${SummaryFields.workId} = $tableWorks.${WorkFields.id}
         LEFT JOIN ${t.tableTransactions} ON (
@@ -32,10 +32,6 @@ class WorkDao {
         )  
         GROUP BY $tableWorks.${WorkFields.workcode}
     ''');
-
-    for (var work in workList) {
-      print(work);
-    }
     return parseWorks(workList);
   }
 
