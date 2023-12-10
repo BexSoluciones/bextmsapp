@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
-import 'package:location_repository/location_repository.dart';
 
 //core
 import '../../../../core/helpers/index.dart';
@@ -40,14 +39,13 @@ final NavigationService _navigationService = locator<NavigationService>();
 class CollectionCubit extends BaseCubit<CollectionState, String?>
     with FormatDate {
   final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
 
   final helperFunctions = HelperFunctions();
 
-  CollectionCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc, this.gpsBloc)
+  CollectionCubit(
+      this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
       : super(const CollectionLoading(), null);
 
   Future<void> getCollection(int workId, String orderNumber) async {

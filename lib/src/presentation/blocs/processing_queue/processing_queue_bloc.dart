@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //utils
-import '../../../domain/models/requests/prediction_request.dart';
+import '../../../utils/constants/strings.dart';
 import '../../../utils/resources/data_state.dart';
 
 //domain
@@ -14,6 +14,7 @@ import '../../../domain/models/isolate.dart';
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/client.dart';
 import '../../../domain/models/transaction_summary.dart';
+import '../../../domain/models/requests/prediction_request.dart';
 
 //request
 import '../../../domain/models/requests/transaction_request.dart';
@@ -28,8 +29,14 @@ import '../../../domain/repositories/database_repository.dart';
 //abstract
 import '../../../domain/abstracts/format_abstract.dart';
 
+//service
+import '../../../locator.dart';
+import '../../../services/logger.dart';
+
 part 'processing_queue_event.dart';
 part 'processing_queue_state.dart';
+
+final LoggerService _loggerService = locator<LoggerService>();
 
 class ProcessingQueueBloc
     extends Bloc<ProcessingQueueEvent, ProcessingQueueState> with FormatDate {
@@ -73,8 +80,11 @@ class ProcessingQueueBloc
     _processingQueueController.stream.listen(sendProcessingQueue);
     
     Stream.periodic(const Duration(seconds: 30), (int value) async {
+      final timer0 = logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
       var result = await _databaseRepository.listenForTableChanges('works', 'status', 'complete');
       if(result) await _getProcessingQueue();
+      logTimerStop(headerLogger, timer0, 'Initialization completed',
+          level: LogLevel.success);
     });
   }
 
@@ -130,6 +140,8 @@ class ProcessingQueueBloc
         case 'store_transaction_start':
           try {
             var body = jsonDecode(queue.body);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final response = await _apiRepository.start(
@@ -151,6 +163,8 @@ class ProcessingQueueBloc
         case 'store_transaction_arrived':
           try {
             var body = jsonDecode(queue.body);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final response = await _apiRepository.arrived(
@@ -173,6 +187,8 @@ class ProcessingQueueBloc
         case 'store_transaction_summary':
           try {
             var body = jsonDecode(queue.body);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final response = await _apiRepository.summary(
@@ -194,6 +210,8 @@ class ProcessingQueueBloc
         case 'store_transaction':
           try {
             var body = jsonDecode(queue.body);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final response = await _apiRepository.index(
@@ -250,6 +268,7 @@ class ProcessingQueueBloc
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             //TODO:: [Heider Zapa ] do
+
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -398,7 +417,6 @@ class ProcessingQueueBloc
               queue.task = 'error';
               queue.error = response.error;
             }
-
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -407,7 +425,6 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-
         default:
       }
     });
@@ -427,13 +444,12 @@ class ProcessingQueueBloc
             updatedAt: now(),
           );
           await _databaseRepository.insertProcessingQueue(processingQueue);
+          //TODO:: [Heider Zapa] update works
+          await _databaseRepository.updateStatusWork(workcode, 'complete');
         }
       }
     } catch (e, stackTrace) {
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);
-      if (kDebugMode) {
-        print(e);
-      }
     }
   }
 }
