@@ -310,13 +310,11 @@ class _MyAppState extends State<MyApp> {
               ..add(NetworkObserve(
                   processingQueueBloc: context.read<ProcessingQueueBloc>())),
           ),
-          BlocProvider(
-              create: (_) => GpsBloc()),
+          BlocProvider(create: (_) => GpsBloc()),
           BlocProvider(
               create: (context) => InitialCubit(locator<ApiRepository>())),
           BlocProvider(create: (context) => PermissionCubit()),
           BlocProvider(create: (context) => PoliticsCubit()),
-
           BlocProvider(
               create: (context) => LoginCubit(
                   locator<ApiRepository>(),
@@ -453,32 +451,37 @@ class _MyAppState extends State<MyApp> {
                   lightScheme = lightColorScheme;
                   darkScheme = darkColorScheme;
 
-                  return MaterialApp(
-                    debugShowCheckedModeBanner: false,
-                    title: appTitle,
-                    theme: ThemeData(
-                      useMaterial3: true,
-                      colorScheme: state.isDarkTheme ? lightScheme : darkScheme,
-                      // extensions: [lightCustomColors],
+                  return StreamBuilder(
+                    stream: context.read<ProcessingQueueBloc>().resolve,
+                    builder: (context, snapshot) => MaterialApp(
+                      debugShowCheckedModeBanner: false,
+                      title: appTitle,
+                      theme: ThemeData(
+                        useMaterial3: true,
+                        colorScheme:
+                            state.isDarkTheme ? lightScheme : darkScheme,
+                        // extensions: [lightCustomColors],
+                      ),
+                      darkTheme: ThemeData(
+                        useMaterial3: true,
+                        colorScheme:
+                            state.isDarkTheme ? lightScheme : darkScheme,
+                        // extensions: [darkCustomColors],
+                      ),
+                      themeMode: ThemeMode.system,
+                      navigatorKey: locator<NavigationService>().navigatorKey,
+                      navigatorObservers: [
+                        locator<FirebaseAnalyticsService>()
+                            .appAnalyticsObserver(),
+                      ],
+                      onUnknownRoute: (RouteSettings settings) =>
+                          MaterialPageRoute(
+                              builder: (BuildContext context) => UndefinedView(
+                                    name: settings.name,
+                                  )),
+                      initialRoute: '/splash',
+                      onGenerateRoute: router.generateRoute,
                     ),
-                    darkTheme: ThemeData(
-                      useMaterial3: true,
-                      colorScheme: state.isDarkTheme ? lightScheme : darkScheme,
-                      // extensions: [darkCustomColors],
-                    ),
-                    themeMode: ThemeMode.system,
-                    navigatorKey: locator<NavigationService>().navigatorKey,
-                    navigatorObservers: [
-                      locator<FirebaseAnalyticsService>()
-                          .appAnalyticsObserver(),
-                    ],
-                    onUnknownRoute: (RouteSettings settings) =>
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => UndefinedView(
-                                  name: settings.name,
-                                )),
-                    initialRoute: '/splash',
-                    onGenerateRoute: router.generateRoute,
                   );
                 })),
               );

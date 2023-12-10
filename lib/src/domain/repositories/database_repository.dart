@@ -101,6 +101,9 @@ abstract class DatabaseRepository {
   Stream<List<Location>> watchAllLocations();
   Future<List<Location>> getAllLocations();
   Future<Location?> getLastLocation();
+  Future<bool> countLocationsManager();
+  Future<String> getLocationsToSend();
+  Future<int?> updateLocationsManager();
   Future<int> updateLocation(Location location);
   Future<void> insertLocation(Location location);
   Future<void> emptyLocations();

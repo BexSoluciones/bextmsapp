@@ -358,6 +358,21 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<bool> countLocationsManager() async {
+    return _appDatabase.locationDao.countLocationsManager();
+  }
+
+  @override
+  Future<String> getLocationsToSend() async {
+    return _appDatabase.locationDao.getLocationsToSend();
+  }
+
+  @override
+  Future<int?> updateLocationsManager() async {
+    return _appDatabase.locationDao.updateLocationsManager();
+  }
+
+  @override
   Future<int> updateLocation(Location location) async {
     return _appDatabase.locationDao.updateLocation(location);
   }
@@ -414,7 +429,6 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   //CLIENTS
-  //LOCATIONS
   @override
   Stream<List<Client>> watchAllClients() {
     return _appDatabase.clientDao.watchAllClients();
@@ -446,13 +460,13 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.historyOrderDao.getHistoryOrder(workcode, zoneId);
   }
 
-  //WORKTYPE
+  //WORK TYPE
   @override
   Future<WorkTypes?> getWorkTypesFromWorkcode(String workcode) async {
     return _appDatabase.transactionDao.getWorkTypesFromWorkcode(workcode);
   }
 
-  //DELIVER
+  //DELIVERY
   @override
   Future<List<WorkAdditional>> getClientsResJetDel(
       String workcode, String reason) async {
@@ -507,7 +521,7 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.notificationDao.countAllUnreadNotifications();
   }
 
-  //DELETEBYDAYS
+  //DELETE BY DAYS
   @override
   Future<void> deleteProcessingQueueByDays() {
     return _appDatabase.processingQueueDao.deleteProcessingQueueByDays();

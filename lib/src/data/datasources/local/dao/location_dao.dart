@@ -1,6 +1,6 @@
 part of '../app_database.dart';
 
-class LocationDao {
+class LocationDao with FormatDate {
   final AppDatabase _appDatabase;
 
   LocationDao(this._appDatabase);
@@ -58,6 +58,49 @@ class LocationDao {
     return Future.value();
   }
 
+  Future<String> getLocationsToSend() async {
+    final db = await _appDatabase.streamDatabase;
+    final List<Map<String, dynamic>> results = await db!.query(
+      tableLocations,
+      columns: ['user_id', 'latitude', 'longitude'],
+      where: 'send = 0',
+    );
+
+    final formattedResults = results.map((row) {
+      return {
+        'user_id': row['user_id'],
+        'latitude': row['latitude'],
+        'longitude': row['longitude'],
+      };
+    }).toList();
+
+    final formattedJson = jsonEncode(formattedResults);
+    return formattedJson;
+  }
+
+  Future<bool> countLocationsManager() async {
+    final db = await _appDatabase.streamDatabase;
+
+    var result = await db?.rawQuery('''
+      SELECT COUNT(*) FROM $tableLocations WHERE send = 0
+    ''');
+
+    if (result != null && result.isNotEmpty) {
+      var count = Sqflite.firstIntValue(result)!;
+      if (count >= 7) {
+        return true;
+      }
+      return false;
+    } else {
+      return false;
+    }
+  }
+
+  Future<int?> updateLocationsManager() async {
+    final db = await _appDatabase.streamDatabase;
+    return await db?.update(tableLocations, {'send': 1}, where: 'send = 0');
+  }
+
   Future<int> deleteLocationsByDays() async {
     final db = await _appDatabase.streamDatabase;
     var today = DateTime.now();
@@ -68,9 +111,8 @@ class LocationDao {
     var formattedToday = DateTime(today.year, today.month, today.day);
     var formattedDatesToValidate = DateTime(
         datesToValidate.year, datesToValidate.month, datesToValidate.day);
-    var formattedTodayStr = formattedToday.toIso8601String().split('T')[0];
     var formattedDateString =
-    formattedDatesToValidate.toIso8601String().split('T')[0];
+        formattedDatesToValidate.toIso8601String().split('T')[0];
 
     locationToDelete = await db!.query(
       tableLocations,

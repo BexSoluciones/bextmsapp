@@ -30,13 +30,10 @@ import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //service
-import '../../../locator.dart';
 import '../../../services/logger.dart';
 
 part 'processing_queue_event.dart';
 part 'processing_queue_state.dart';
-
-final LoggerService _loggerService = locator<LoggerService>();
 
 class ProcessingQueueBloc
     extends Bloc<ProcessingQueueEvent, ProcessingQueueState> with FormatDate {
@@ -78,20 +75,23 @@ class ProcessingQueueBloc
     });
 
     _processingQueueController.stream.listen(sendProcessingQueue);
-    
-    Stream.periodic(const Duration(seconds: 30), (int value) async {
-      final timer0 = logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
-      var result = await _databaseRepository.listenForTableChanges('works', 'status', 'complete');
-      if(result) await _getProcessingQueue();
-      logTimerStop(headerLogger, timer0, 'Initialization completed',
-          level: LogLevel.success);
-    });
   }
 
   static void heavyTask(IsolateModel model) {
     for (var i = 0; i < model.iteration; i++) {
       model.functions[i];
     }
+  }
+
+  Stream get resolve {
+    return Stream.periodic(const Duration(seconds: 30), (int value) async {
+      final timer0 = logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
+      var result = await _databaseRepository.listenForTableChanges('works', 'status', 'complete');
+      logDebugFine(headerLogger, result.toString());
+      if(result) await _getProcessingQueue();
+      logTimerStop(headerLogger, timer0, 'Initialization completed',
+          level: LogLevel.success);
+    });
   }
 
   Stream<List<ProcessingQueue>> get todos {
@@ -108,6 +108,7 @@ class ProcessingQueueBloc
   }
 
   Future<void> _getProcessingQueue() async {
+    logDebugFine(headerLogger, 'activating pq');
     final queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
     _inProcessingQueue.add(queues);
   }
@@ -433,6 +434,7 @@ class ProcessingQueueBloc
   Future<void> validateIfServiceIsCompleted(ProcessingQueue p) async {
     try {
       if (p.code == 'store_transaction') {
+        //TODO:: [Heider Zapa] check if partial
         var workcode = jsonDecode(p.body)['workcode'];
         var isLast = await _databaseRepository.checkLastTransaction(workcode);
         if (isLast) {
@@ -444,7 +446,7 @@ class ProcessingQueueBloc
             updatedAt: now(),
           );
           await _databaseRepository.insertProcessingQueue(processingQueue);
-          //TODO:: [Heider Zapa] update works
+
           await _databaseRepository.updateStatusWork(workcode, 'complete');
         }
       }

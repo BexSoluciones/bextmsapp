@@ -8,6 +8,7 @@ import 'package:sqlbrite/sqlbrite.dart';
 import 'package:synchronized/synchronized.dart';
 
 //utils
+import '../../../domain/abstracts/format_abstract.dart';
 import '../../../utils/constants/strings.dart';
 
 //models

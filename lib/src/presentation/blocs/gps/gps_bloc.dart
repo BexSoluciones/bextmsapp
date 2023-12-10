@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:bloc/bloc.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:latlong2/latlong.dart';
@@ -13,6 +14,7 @@ import '../../../domain/models/enterprise_config.dart';
 import '../../../domain/models/location.dart' as l;
 import '../../../domain/models/processing_queue.dart';
 import '../../../domain/repositories/database_repository.dart';
+import '../../../domain/abstracts/format_abstract.dart';
 
 //services
 import '../../../locator.dart';
@@ -31,7 +33,7 @@ final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 
 LatLng? lastRecordedLocation;
 
-class GpsBloc extends Bloc<GpsEvent, GpsState> {
+class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   StreamSubscription? gpsServiceSubscription;
   StreamSubscription? positionStream;
 
@@ -282,31 +284,29 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
           }
 
           await _databaseRepository.insertLocation(location);
-
-          var processingQueue = ProcessingQueue(
-            body: jsonEncode(location.toJson()),
-            task: 'incomplete',
-            code: 'VNAIANBTLM',
-            createdAt: DateTime.now().toString(),
-            updatedAt: DateTime.now().toString(),
-          );
-
-          await _databaseRepository.insertProcessingQueue(processingQueue);
         } else {
           print('no se ha movido');
         }
       } else {
-        var processingQueue = ProcessingQueue(
-          body: jsonEncode(location.toJson()),
-          task: 'incomplete',
-          code: 'VNAIANBTLM',
-          createdAt: DateTime.now().toString(),
-          updatedAt: DateTime.now().toString(),
-        );
-
         await _databaseRepository.insertLocation(location);
-        await _databaseRepository.insertProcessingQueue(processingQueue);
       }
+
+      var count = await _databaseRepository.countLocationsManager();
+
+      if(count){
+        var processingQueue = ProcessingQueue(
+            body: await _databaseRepository.getLocationsToSend(),
+            task: 'incomplete',
+            code: 'store_locations',
+            createdAt: now(),
+            updatedAt: now());
+
+        await _databaseRepository.insertProcessingQueue(processingQueue);
+        await _databaseRepository.updateLocationsManager();
+      }
+
+
+
     } catch (e, stackTrace) {
       print('error saving ---- $e');
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);
