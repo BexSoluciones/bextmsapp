@@ -58,7 +58,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     var totalSummary =
         await _databaseRepository.getTotalSummaries(workId, orderNumber);
 
-    return CollectionInitial(totalSummary: totalSummary,
+    return CollectionInitial(
+        totalSummary: totalSummary,
         enterpriseConfig: _storageService.getObject('config') != null
             ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
             : null);
@@ -237,7 +238,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         var v =
             await _databaseRepository.validateTransaction(arguments.work.id!);
 
-        emit(CollectionSuccess(arguments.work,
+        emit(CollectionSuccess(
+            work: arguments.work,
             validate: v,
             totalSummary: state.totalSummary,
             enterpriseConfig: state.enterpriseConfig));

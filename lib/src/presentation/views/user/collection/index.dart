@@ -174,9 +174,9 @@ class CollectionViewState extends State<CollectionView>
                   case CollectionLoading:
                     return const Center(child: CupertinoActivityIndicator());
                   case CollectionInitial:
-                     return _buildBlocConsumer(size);
+                    return _buildBlocConsumer(size);
                   case CollectionSuccess:
-                    return _buildSuccessTransaction(size);
+                    return _buildBlocConsumer(size);
                   default:
                     return const SizedBox();
                 }
@@ -184,16 +184,21 @@ class CollectionViewState extends State<CollectionView>
             )));
   }
 
-  void buildBlocListener(context, state) {
-    if (state is CollectionSuccess || state is CollectionFailed) {
+  void buildBlocListener(context, CollectionState state) {
+    if (state is CollectionSuccess ||
+        state is CollectionFailed ||
+        state is CollectionInitial) {
+      print(state.toString());
       if (state.error != null) {
       } else {
-        if(state.validate){
+        if (state.validate != null && state.validate == true) {
           collectionCubit.goToSummary(state.work);
-        } else {
+        } else if (state.validate != null && state.validate == false) {
           collectionCubit.goToWork(state.work);
         }
       }
+    } else {
+      print('failed');
     }
   }
 
@@ -201,10 +206,12 @@ class CollectionViewState extends State<CollectionView>
     return BlocConsumer<CollectionCubit, CollectionState>(
       listener: buildBlocListener,
       builder: (context, state) {
-        return _buildCollection(
-          size,
-          state,
-        );
+        return state is CollectionSuccess
+            ? _buildSuccessTransaction(size)
+            : _buildCollection(
+                size,
+                state,
+              );
       },
     );
   }
@@ -747,8 +754,10 @@ class CollectionViewState extends State<CollectionView>
         width: size.width,
         child: const Center(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(Icons.check),
+              Icon(Icons.check, size: 50, color: Colors.green),
               Text('Transación exitosa.')
             ],
           ),

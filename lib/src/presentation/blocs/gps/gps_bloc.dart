@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
-
 import 'package:bloc/bloc.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:latlong2/latlong.dart';
@@ -10,13 +8,21 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+//blocs
+import '../processing_queue/processing_queue_bloc.dart';
+
+//domain
 import '../../../domain/models/enterprise_config.dart';
 import '../../../domain/models/location.dart' as l;
 import '../../../domain/models/processing_queue.dart';
 import '../../../domain/repositories/database_repository.dart';
+
+//services
 import '../../../locator.dart';
 import '../../../services/navigation.dart';
 import '../../../services/storage.dart';
+
+//widgets
 import '../../widgets/error_alert_dialog.dart';
 
 part 'gps_event.dart';
@@ -28,23 +34,24 @@ final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 
 LatLng? lastRecordedLocation;
 
-
 class GpsBloc extends Bloc<GpsEvent, GpsState> {
   StreamSubscription? gpsServiceSubscription;
   StreamSubscription? positionStream;
 
-  GpsBloc()
+  final ProcessingQueueBloc processingQueueBloc;
+
+  GpsBloc(this.processingQueueBloc)
       : super(const GpsState(
-      isGpsEnabled: false, isGpsPermissionGranted: false)) {
+            isGpsEnabled: false, isGpsPermissionGranted: false)) {
     on<GpsAndPermissionEvent>((event, emit) => emit(state.copyWith(
         isGpsEnabled: event.isGpsEnabled,
         isGpsPermissionGranted: event.isGpsPermissionGranted)));
     on<ShowErrorDialog>(_showErrorDialog);
 
     on<OnStartFollowingUser>(
-            (event, emit) => emit(state.copyWith(followingUser: true)));
+        (event, emit) => emit(state.copyWith(followingUser: true)));
     on<OnStopFollowingUser>(
-            (event, emit) => emit(state.copyWith(followingUser: false)));
+        (event, emit) => emit(state.copyWith(followingUser: false)));
     on<OnNewUserLocationEvent>((event, emit) {
       emit(state.copyWith(
         lastKnownLocation: event.newLocation,
@@ -55,9 +62,8 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
   }
 
   Future<void> startFollowingUser() async {
-
     add(OnStartFollowingUser());
-    final isLocationEnabled =  await Geolocator.isLocationServiceEnabled();
+    final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
 
     final isPermissionGranted = await _isPermissionGranted();
     if (!isPermissionGranted) {
@@ -78,58 +84,58 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
               Geolocator.openLocationSettings();
             },
             context:
-            _navigationService.navigatorKey.currentState!.overlay!.context,
+                _navigationService.navigatorKey.currentState!.overlay!.context,
             error: 'error',
             iconData: Icons.error,
             buttonText: 'buttonText');
-      }else{
+      } else {
         positionStream =
             Geolocator.getPositionStream(locationSettings: locationSettings)
                 .listen((event) {
-              final position = event;
-              print(
-                  'Las known location :${state.lastKnownLocation?.latitude}${state.lastKnownLocation?.longitude}}');
-              print('position: ${position.latitude},${position.longitude}');
-              if (enterpriseConfig.background_location!) {
-                if (lastRecordedLocation != null) {
-                  final distance = Geolocator.distanceBetween(
-                    lastRecordedLocation!.latitude,
-                    lastRecordedLocation!.longitude,
-                    position.latitude,
-                    position.longitude,
-                  );
-                  if (distance >= distances) {
-                    lastRecordedLocation =
-                        LatLng(position.latitude, position.longitude);
-                    //HelperFunctions().processLocationData(position, lastRecordedLocation!);
-                    saveLocation('location',position,lastRecordedLocation!);
-                  }
-                } else {
-                  lastRecordedLocation =
-                      LatLng(position.latitude, position.longitude);
-                 // HelperFunctions().processLocationData(position, lastRecordedLocation!);
-                  saveLocation('location',position,lastRecordedLocation!);
-                }
+          final position = event;
+
+          print(
+              'Las known location :${state.lastKnownLocation?.latitude}${state.lastKnownLocation?.longitude}}');
+          print('position: ${position.latitude},${position.longitude}');
+          //TODO:: [Heider Zapa] activate processing queue
+
+          if (enterpriseConfig.background_location!) {
+            if (lastRecordedLocation != null) {
+              final distance = Geolocator.distanceBetween(
+                lastRecordedLocation!.latitude,
+                lastRecordedLocation!.longitude,
+                position.latitude,
+                position.longitude,
+              );
+              if (distance >= distances) {
+                lastRecordedLocation =
+                    LatLng(position.latitude, position.longitude);
+                saveLocation('location', position, lastRecordedLocation!);
               }
-              add(OnNewUserLocationEvent(
-                  LatLng(position.latitude, position.longitude)));
-            });
+            } else {
+              lastRecordedLocation =
+                  LatLng(position.latitude, position.longitude);
+              saveLocation('location', position, lastRecordedLocation!);
+            }
+          }
+          add(OnNewUserLocationEvent(
+              LatLng(position.latitude, position.longitude)));
+        });
         print('StartFollowingUser');
       }
-
-    } catch (e,stackTrace) {
+    } catch (e, stackTrace) {
       print('Error GPS:${e.toString()}');
       //await FirebaseCrashlytics.instance.recordError(e, stackTrace);
     }
   }
 
-
   Future getCurrentPosition() async {
-    try{
+    try {
       final position = await Geolocator.getCurrentPosition();
-      add(OnNewUserLocationEvent(LatLng(position.latitude, position.longitude)));
+      add(OnNewUserLocationEvent(
+          LatLng(position.latitude, position.longitude)));
       print('Position: ${position.latitude}-${position.longitude}');
-    }catch(e){
+    } catch (e) {
       print('Error getCurrentPosition: GPS:${e.toString()}');
     }
   }
@@ -162,7 +168,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
             Geolocator.openLocationSettings();
           },
           context:
-          _navigationService.navigatorKey.currentState!.overlay!.context,
+              _navigationService.navigatorKey.currentState!.overlay!.context,
           error: 'error',
           iconData: Icons.error,
           buttonText: 'buttonText');
@@ -174,29 +180,28 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
     return isGranted;
   }
 
-
   bool showingDialog = false;
   Future<bool> _checkGpsStatus() async {
     final isEnable = await Geolocator.isLocationServiceEnabled();
 
     gpsServiceSubscription =
         Geolocator.getServiceStatusStream().listen((event) {
-          final isEnabled = (event.index == 1) ? true : false;
-          if (isEnabled == false && showingDialog == false) {
-            add(const ShowErrorDialog());
-            showingDialog = true;
-          } else {
-            if (showingDialog) {
-              Navigator.pop(
-                  _navigationService.navigatorKey.currentState!.overlay!.context);
-              showingDialog = false;
-            }
-          }
-          add(GpsAndPermissionEvent(
-            isGpsEnabled: isEnabled,
-            isGpsPermissionGranted: state.isGpsPermissionGranted,
-          ));
-        });
+      final isEnabled = (event.index == 1) ? true : false;
+      if (isEnabled == false && showingDialog == false) {
+        add(const ShowErrorDialog());
+        showingDialog = true;
+      } else {
+        if (showingDialog) {
+          Navigator.pop(
+              _navigationService.navigatorKey.currentState!.overlay!.context);
+          showingDialog = false;
+        }
+      }
+      add(GpsAndPermissionEvent(
+        isGpsEnabled: isEnabled,
+        isGpsPermissionGranted: state.isGpsPermissionGranted,
+      ));
+    });
 
     return isEnable;
   }
@@ -234,7 +239,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
       LatLng currentPosition, LatLng radiusPosition, double radius) {
     var distance = const Distance();
     var haversineDistance =
-    distance.as(LengthUnit.Meter, currentPosition, radiusPosition);
+        distance.as(LengthUnit.Meter, currentPosition, radiusPosition);
     if (haversineDistance >= radius) {
       return true;
     } else {
@@ -242,11 +247,10 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
     }
   }
 
-
-  Future<void> saveLocation(String type,Position position, LatLng currentLocation) async {
+  Future<void> saveLocation(
+      String type, Position position, LatLng currentLocation) async {
     try {
       var lastLocation = await _databaseRepository.getLastLocation();
-
 
       var location = l.Location(
           latitude: position.latitude,
@@ -255,7 +259,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
           altitude: position.altitude,
           heading: position.heading,
           isMock: position.isMocked,
-          speed:position.speed,
+          speed: position.speed,
           speedAccuracy: position.speedAccuracy,
           userId: _storageService.getInt('user_id') ?? 0,
           time: DateTime.now());
@@ -263,15 +267,15 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
       if (lastLocation != null) {
         var currentPosition = LatLng(location.latitude, location.longitude);
         var radiusPosition =
-        LatLng(lastLocation.latitude, lastLocation.longitude);
+            LatLng(lastLocation.latitude, lastLocation.longitude);
 
         var diff = calculateRadiusBetweenTwoLatLng(
             currentPosition, radiusPosition, 30);
 
         var distance =
-        calculateDistanceBetweenTwoLatLng(currentPosition, radiusPosition);
+            calculateDistanceBetweenTwoLatLng(currentPosition, radiusPosition);
         var seconds =
-        calculateDateBetweenTwoLatLng(location.time, lastLocation.time);
+            calculateDateBetweenTwoLatLng(location.time, lastLocation.time);
 
         var speed = ((distance / seconds) * 18) / 5;
 
@@ -285,11 +289,12 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
           await _databaseRepository.insertLocation(location);
 
           var processingQueue = ProcessingQueue(
-              body: jsonEncode(location.toJson()),
-              task: 'incomplete',
-              code: 'VNAIANBTLM',
-              createdAt: DateTime.now().toString(),
-              updatedAt:  DateTime.now().toString(),);
+            body: jsonEncode(location.toJson()),
+            task: 'incomplete',
+            code: 'VNAIANBTLM',
+            createdAt: DateTime.now().toString(),
+            updatedAt: DateTime.now().toString(),
+          );
 
           await _databaseRepository.insertProcessingQueue(processingQueue);
         } else {
@@ -301,12 +306,13 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
           task: 'incomplete',
           code: 'VNAIANBTLM',
           createdAt: DateTime.now().toString(),
-          updatedAt:  DateTime.now().toString(),);
+          updatedAt: DateTime.now().toString(),
+        );
 
         await _databaseRepository.insertLocation(location);
         await _databaseRepository.insertProcessingQueue(processingQueue);
       }
-    } catch (e,stackTrace) {
+    } catch (e, stackTrace) {
       print('error saving ---- $e');
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);
     }

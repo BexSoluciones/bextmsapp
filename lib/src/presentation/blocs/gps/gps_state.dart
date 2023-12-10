@@ -14,8 +14,7 @@ class GpsState extends Equatable {
   const GpsState(
       {required this.isGpsEnabled,
         required this.isGpsPermissionGranted,
-
-        //PROPERTIES TO CONTROLL USER GPS ACTION
+        //PROPERTIES TO CONTROL USER GPS ACTION
         this.followingUser = false,
         this.lastKnownLocation,
         myLocationHistory})

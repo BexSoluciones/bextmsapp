@@ -4,17 +4,19 @@ abstract class CollectionState extends Equatable {
   final double? totalSummary;
   final EnterpriseConfig? enterpriseConfig;
   final bool? validate;
+  final Work? work;
   final String? error;
 
-  const CollectionState({
-    this.enterpriseConfig,
-    this.totalSummary,
-    this.validate,
-    this.error
-  });
+  const CollectionState(
+      {this.enterpriseConfig,
+      this.totalSummary,
+      this.work,
+      this.validate,
+      this.error});
 
   @override
-  List<Object?> get props => [totalSummary, enterpriseConfig, validate, error];
+  List<Object?> get props =>
+      [totalSummary, enterpriseConfig, validate, work, error];
 }
 
 class CollectionInitial extends CollectionState {
@@ -26,8 +28,8 @@ class CollectionLoading extends CollectionState {
 }
 
 class CollectionSuccess extends CollectionState {
-  final Work? work;
-  const CollectionSuccess(this.work, {super.validate, super.totalSummary, super.enterpriseConfig});
+  const CollectionSuccess(
+      {super.work, super.validate, super.totalSummary, super.enterpriseConfig});
 }
 
 class CollectionFailed extends CollectionState {
