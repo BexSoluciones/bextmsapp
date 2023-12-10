@@ -28,7 +28,12 @@ class ProcessingQueueDao {
     final db = await _appDatabase.streamDatabase;
     final processingQueueList = await db!.query(tableProcessingQueues,
         where: 'task != ? AND code != ? AND code != ? AND code != ?',
-        whereArgs: ['done', 'VNAIANBTLM', 'ASJBVKJDFS', 'AB5A8E10Y3']);
+        whereArgs: [
+          'done',
+          'store_locations',
+          'store_logout',
+          'get_prediction'
+        ]);
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues.length;
   }
@@ -46,7 +51,12 @@ class ProcessingQueueDao {
     final db = await _appDatabase.streamDatabase;
     final processingQueueList = await db!.query(tableProcessingQueues,
         where: 'task = ? AND code != ? AND code != ? AND code != ?',
-        whereArgs: ['incomplete', 'VNAIANBTLM', 'ASJBVKJDFS', 'AB5A8E10Y3']);
+        whereArgs: [
+          'incomplete',
+          'store_locations',
+          'store_logout',
+          'get_prediction'
+        ]);
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues.isNotEmpty;
   }

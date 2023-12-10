@@ -235,7 +235,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                       'workcode': worksF.first.workcode
                     }),
                     task: 'incomplete',
-                    code: 'AB5A8E10Y3',
+                    code: 'get_prediction',
                     createdAt: now(),
                     updatedAt: now());
 
