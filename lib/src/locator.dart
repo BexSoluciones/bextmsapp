@@ -45,12 +45,6 @@ Future<void> initializeDependencies() async {
   // final isolate = IsolateService();
   // locator.registerSingleton<IsolateService>(isolate);
 
-  final location = await LocationService.getInstance();
-  locator.registerSingleton<LocationService>(location!);
-
-  final timer = await TimerService.getInstance();
-  locator.registerSingleton<TimerService>(timer!);
-
   final logger = LoggerService();
   locator.registerSingleton<LoggerService>(logger);
 

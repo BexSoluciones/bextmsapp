@@ -21,7 +21,8 @@ class ShowErrorDialog extends GpsEvent {
 
 class OnNewUserLocationEvent extends GpsEvent {
   final LatLng newLocation;
-  const OnNewUserLocationEvent(this.newLocation);
+  final Position currentPosition;
+  const OnNewUserLocationEvent(this.currentPosition, this.newLocation);
 }
 
 class OnStartFollowingUser extends GpsEvent {}

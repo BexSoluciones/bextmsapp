@@ -14,6 +14,7 @@ class LocationFields {
   static const String isMock = 'is_mock';
   static const String userId = 'user_id';
   static const String type = 'type';
+  static const String send = 'send';
   static const String workcode = 'workcode';
   static const String time = 'time';
 }
@@ -31,6 +32,7 @@ class Location {
         required this.isMock,
         required this.userId,
         required this.time,
+        required this.send,
       });
 
   Location copy(
@@ -44,6 +46,7 @@ class Location {
         double? heading,
         bool? isMock,
         int? userId,
+        int? send,
         DateTime? time}) =>
       Location(
         id: id ?? this.id,
@@ -57,6 +60,7 @@ class Location {
         isMock: isMock ?? this.isMock,
         userId: userId ?? this.userId,
         time: time ?? this.time,
+        send: send ?? this.send,
       );
 
   // ignore: sort_constructors_first
@@ -71,6 +75,7 @@ class Location {
       heading: json[LocationFields.heading],
       isMock: json[LocationFields.isMock] == 1,
       userId: json[LocationFields.userId],
+      send: json[LocationFields.send],
       time: DateTime.parse(json[LocationFields.time] as String),
   );
 
@@ -84,6 +89,7 @@ class Location {
     'heading': heading,
     'is_mock': isMock != null && isMock == true ? 1 : 0,
     'user_id' : userId,
+    'send' : send,
     'time': time.toIso8601String(),
   };
 
@@ -97,5 +103,6 @@ class Location {
   double? heading;
   bool? isMock;
   int userId;
+  int send;
   DateTime time;
 }

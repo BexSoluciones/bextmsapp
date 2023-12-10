@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:charger_status/charger_status.dart';
@@ -15,17 +16,22 @@ import 'features/item.dart';
 //services
 import '../../../../locator.dart';
 import '../../../../services/navigation.dart';
-import '../../../../services/location.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
-final LocationService _locationService = locator<LocationService>();
 
-class LocationsView extends StatelessWidget {
+class LocationsView extends StatefulWidget {
   const LocationsView({super.key});
 
   @override
+  State<LocationsView> createState() => _LocationsViewState();
+}
+
+class _LocationsViewState extends State<LocationsView> {
+
+
+  @override
   Widget build(BuildContext context) {
-    final bloc = context.read<LocationBloc>();
+    final gpsBloc = context.read<GpsBloc>();
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -54,8 +60,8 @@ class LocationsView extends StatelessWidget {
           )
         ],
       ),
-      body: StreamBuilder<Position?>(
-        stream: _locationService.locationStream,
+      body: StreamBuilder<GpsState?>(
+        stream: gpsBloc.stream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

@@ -37,6 +37,8 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   StreamSubscription? gpsServiceSubscription;
   StreamSubscription? positionStream;
 
+  bool showingDialog = false;
+
   GpsBloc()
       : super(const GpsState(
             isGpsEnabled: false, isGpsPermissionGranted: false)) {
@@ -50,6 +52,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     on<OnStopFollowingUser>(
         (event, emit) => emit(state.copyWith(followingUser: false)));
     on<OnNewUserLocationEvent>((event, emit) {
+      saveLocation('location', event.currentPosition);
       emit(state.copyWith(
         lastKnownLocation: event.newLocation,
         myLocationHistory: [...state.myLocationHistory, event.newLocation],
@@ -97,6 +100,8 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
           //TODO:: [Heider Zapa] activate processing queue
 
           if (enterpriseConfig.background_location!) {
+
+            print('entro aqui');
             if (lastRecordedLocation != null) {
               final distance = Geolocator.distanceBetween(
                 lastRecordedLocation!.latitude,
@@ -105,17 +110,21 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
                 position.longitude,
               );
               if (distance >= distances) {
+                print('entro aqui2');
                 lastRecordedLocation =
                     LatLng(position.latitude, position.longitude);
-                saveLocation('location', position, lastRecordedLocation!);
+                saveLocation('location', position);
               }
             } else {
+              print('entro aqui3');
               lastRecordedLocation =
                   LatLng(position.latitude, position.longitude);
-              saveLocation('location', position, lastRecordedLocation!);
+              saveLocation('location', position);
             }
           }
-          add(OnNewUserLocationEvent(
+
+
+          add(OnNewUserLocationEvent(position,
               LatLng(position.latitude, position.longitude)));
         });
         print('StartFollowingUser');
@@ -129,7 +138,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   Future getCurrentPosition() async {
     try {
       final position = await Geolocator.getCurrentPosition();
-      add(OnNewUserLocationEvent(
+      add(OnNewUserLocationEvent(position,
           LatLng(position.latitude, position.longitude)));
       print('Position: ${position.latitude}-${position.longitude}');
     } catch (e) {
@@ -177,7 +186,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     return isGranted;
   }
 
-  bool showingDialog = false;
   Future<bool> _checkGpsStatus() async {
     final isEnable = await Geolocator.isLocationServiceEnabled();
 
@@ -211,14 +219,20 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
         add(GpsAndPermissionEvent(
             isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: true));
         break;
-
       case PermissionStatus.denied:
+        break;
       case PermissionStatus.restricted:
+        return;
       case PermissionStatus.limited:
+        break;
       case PermissionStatus.permanentlyDenied:
         add(GpsAndPermissionEvent(
             isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: false));
         openAppSettings();
+        break;
+      case PermissionStatus.provisional:
+        // TODO: Handle this case.
+        break;
     }
   }
 
@@ -245,8 +259,9 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   }
 
   Future<void> saveLocation(
-      String type, Position position, LatLng currentLocation) async {
+      String type, Position position) async {
     try {
+      print('********************************************');
       var lastLocation = await _databaseRepository.getLastLocation();
 
       var location = l.Location(
@@ -259,7 +274,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
           speed: position.speed,
           speedAccuracy: position.speedAccuracy,
           userId: _storageService.getInt('user_id') ?? 0,
-          time: DateTime.now());
+          time: DateTime.now(), send: 0);
 
       if (lastLocation != null) {
         var currentPosition = LatLng(location.latitude, location.longitude);

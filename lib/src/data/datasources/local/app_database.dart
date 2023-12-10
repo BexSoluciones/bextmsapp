@@ -302,6 +302,9 @@ class AppDatabase {
     ''',
     '''
       ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL
+    ''',
+    '''
+      ALTER TABLE $tableLocations ADD COLUMN ${LocationFields.send} INTEGER DEFAULT 0
     '''
   ];
 
