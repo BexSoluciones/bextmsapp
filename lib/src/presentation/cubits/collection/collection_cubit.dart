@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:location_repository/location_repository.dart';
 
 //core
@@ -12,15 +11,15 @@ import '../../../domain/models/transaction_summary.dart';
 import '../../../utils/constants/strings.dart';
 
 //base
-import '../../blocs/gps/gps_bloc.dart';
-import '../../blocs/photo/photo_bloc.dart';
 import '../base/base_cubit.dart';
 
 //blocs
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
+import '../../blocs/gps/gps_bloc.dart';
 
 //domain
 import '../../../domain/models/payment.dart';
+import '../../../domain/models/work.dart';
 import '../../../domain/models/arguments.dart';
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/processing_queue.dart';
@@ -59,8 +58,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     var totalSummary =
         await _databaseRepository.getTotalSummaries(workId, orderNumber);
 
-    return CollectionSuccess(
-        totalSummary: totalSummary,
+    return CollectionInitial(totalSummary: totalSummary,
         enterpriseConfig: _storageService.getObject('config') != null
             ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
             : null);
@@ -80,6 +78,20 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
   void goToCodeQR() {
     _navigationService.goTo(qrRoute);
+  }
+
+  void goToSummary(work) {
+    _navigationService.goTo(summaryRoute,
+        arguments: SummaryArgument(
+          work: work,
+        ));
+  }
+
+  void goToWork(work) {
+    _navigationService.goTo(workRoute,
+        arguments: WorkArgument(
+          work: work,
+        ));
   }
 
   Future<void> confirmTransaction(
@@ -222,22 +234,13 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         await helperFunctions.deleteImages(arguments.orderNumber);
         await helperFunctions.deleteFirm('firm-${arguments.orderNumber}');
 
-        var validateTx =
+        var v =
             await _databaseRepository.validateTransaction(arguments.work.id!);
 
-        if (validateTx == false) {
-          await _navigationService.goTo(summaryRoute,
-              arguments: SummaryArgument(
-                work: arguments.work,
-              ));
-        } else {
-          await _navigationService.goTo(workRoute,
-              arguments: WorkArgument(
-                work: arguments.work,
-              ));
-        }
-
-        emit(const CollectionSuccess());
+        emit(CollectionSuccess(arguments.work,
+            validate: v,
+            totalSummary: state.totalSummary,
+            enterpriseConfig: state.enterpriseConfig));
       }
     });
   }

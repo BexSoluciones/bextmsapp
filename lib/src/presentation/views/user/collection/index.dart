@@ -173,16 +173,40 @@ class CollectionViewState extends State<CollectionView>
                 switch (state.runtimeType) {
                   case CollectionLoading:
                     return const Center(child: CupertinoActivityIndicator());
+                  case CollectionInitial:
+                     return _buildBlocConsumer(size);
                   case CollectionSuccess:
-                    return _buildCollection(
-                      size,
-                      state,
-                    );
+                    return _buildSuccessTransaction(size);
                   default:
                     return const SizedBox();
                 }
               },
             )));
+  }
+
+  void buildBlocListener(context, state) {
+    if (state is CollectionSuccess || state is CollectionFailed) {
+      if (state.error != null) {
+      } else {
+        if(state.validate){
+          collectionCubit.goToSummary(state.work);
+        } else {
+          collectionCubit.goToWork(state.work);
+        }
+      }
+    }
+  }
+
+  Widget _buildBlocConsumer(Size size) {
+    return BlocConsumer<CollectionCubit, CollectionState>(
+      listener: buildBlocListener,
+      builder: (context, state) {
+        return _buildCollection(
+          size,
+          state,
+        );
+      },
+    );
   }
 
   Widget _buildCollection(Size size, CollectionState state) {
@@ -714,5 +738,22 @@ class CollectionViewState extends State<CollectionView>
         ]),
       ),
     ));
+  }
+
+  Widget _buildSuccessTransaction(Size size) {
+    return SafeArea(
+      child: SizedBox(
+        height: size.height,
+        width: size.width,
+        child: const Center(
+          child: Column(
+            children: [
+              Icon(Icons.check),
+              Text('Transación exitosa.')
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

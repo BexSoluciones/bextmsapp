@@ -221,7 +221,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
               var processingQueueWork = ProcessingQueue(
                   body: jsonEncode({'workcode': key, 'status': 'sync'}),
                   task: 'incomplete',
-                  code: 'EBSVAEKRJB',
+                  code: 'store_work_status',
                   createdAt: now(),
                   updatedAt: now());
 

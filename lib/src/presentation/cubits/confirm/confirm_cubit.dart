@@ -53,7 +53,6 @@ class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
     await run(() async {
       emit(const ConfirmLoading());
 
-      //currentLocation = await _locationRepository.getCurrentLocation();
       var currentLocation = gpsBloc.state.lastKnownLocation;
 
       _storageService.setBool('${arguments.work.workcode}-started', true);
@@ -64,7 +63,7 @@ class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
             'status': 'incomplete'
           }),
           task: 'incomplete',
-          code: 'EBSVAEKRJB',
+          code: 'store_work_status',
           createdAt: now(),
           updatedAt: now(),
       );
