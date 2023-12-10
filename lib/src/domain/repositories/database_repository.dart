@@ -127,6 +127,7 @@ abstract class DatabaseRepository {
   Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId);
 
   //ROOT
+  Future<bool> listenForTableChanges(String table, String column, String value);
   Future<sqflite.Database?> get();
 
   //NOTIFICATIONS

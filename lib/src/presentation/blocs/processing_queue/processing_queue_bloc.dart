@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bexdeliveries/src/domain/models/requests/work_request.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -72,6 +71,11 @@ class ProcessingQueueBloc
     });
 
     _processingQueueController.stream.listen(sendProcessingQueue);
+    
+    Stream.periodic(const Duration(seconds: 30), (int value) async {
+      var result = await _databaseRepository.listenForTableChanges('works', 'status', 'complete');
+      if(result) await _getProcessingQueue();
+    });
   }
 
   static void heavyTask(IsolateModel model) {

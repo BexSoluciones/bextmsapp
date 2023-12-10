@@ -310,13 +310,13 @@ class _MyAppState extends State<MyApp> {
               ..add(NetworkObserve(
                   processingQueueBloc: context.read<ProcessingQueueBloc>())),
           ),
-
+          BlocProvider(
+              create: (_) => GpsBloc()),
           BlocProvider(
               create: (context) => InitialCubit(locator<ApiRepository>())),
-          BlocProvider(
-              create: (_) => GpsBloc(BlocProvider.of<ProcessingQueueBloc>(context))),
           BlocProvider(create: (context) => PermissionCubit()),
           BlocProvider(create: (context) => PoliticsCubit()),
+
           BlocProvider(
               create: (context) => LoginCubit(
                   locator<ApiRepository>(),

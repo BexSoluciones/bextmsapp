@@ -48,8 +48,6 @@ part '../local/dao/account_dao.dart';
 part '../local/dao/news_dao.dart';
 part '../local/dao/notification_dao.dart';
 
-
-
 class AppDatabase {
   static BriteDatabase? _streamDatabase;
 
@@ -353,6 +351,16 @@ class AppDatabase {
   Future<int> delete(String table, String columnId, int id) async {
     final db = await instance.streamDatabase;
     return db!.delete(table, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  Future<bool> listenForTableChanges(
+      String table, String column, String value) async {
+    final db = await instance.streamDatabase;
+
+    var result = await db!
+        .query(table, where: '$column = ?', whereArgs: [value], limit: 1);
+
+    return result.isNotEmpty;
   }
 
   WorkDao get workDao => WorkDao(instance);

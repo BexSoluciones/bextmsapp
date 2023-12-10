@@ -8,9 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-//blocs
-import '../processing_queue/processing_queue_bloc.dart';
-
 //domain
 import '../../../domain/models/enterprise_config.dart';
 import '../../../domain/models/location.dart' as l;
@@ -38,9 +35,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
   StreamSubscription? gpsServiceSubscription;
   StreamSubscription? positionStream;
 
-  final ProcessingQueueBloc processingQueueBloc;
-
-  GpsBloc(this.processingQueueBloc)
+  GpsBloc()
       : super(const GpsState(
             isGpsEnabled: false, isGpsPermissionGranted: false)) {
     on<GpsAndPermissionEvent>((event, emit) => emit(state.copyWith(
