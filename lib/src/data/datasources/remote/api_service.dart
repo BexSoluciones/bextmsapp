@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:bexdeliveries/src/domain/models/requests/locations_request.dart';
 import 'package:dio/dio.dart';
 
 //models
@@ -731,44 +732,6 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<PredictionResponse>> locations(
-      PredictionRequest request) async {
-    const extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-
-    final headers = <String, dynamic>{
-      HttpHeaders.contentTypeHeader: 'application/json',
-    };
-
-    final data = <String, dynamic>{
-      'zone_id': request.zoneId,
-      'workcode': request.workcode,
-    };
-
-    final result = await dio.fetch(
-        _setStreamType<Response<TransactionSummaryResponse>>(Options(
-      method: 'POST',
-      headers: headers,
-      extra: extra,
-    )
-            .compose(dio.options, '/works/history-order/new-prediction',
-                queryParameters: queryParameters, data: data)
-            .copyWith(baseUrl: url ?? dio.options.baseUrl)));
-
-    final value = PredictionResponse.fromMap(result.data!);
-
-    return Response(
-        data: value,
-        requestOptions: result.requestOptions,
-        statusCode: result.statusCode,
-        statusMessage: result.statusMessage,
-        isRedirect: result.isRedirect,
-        redirects: result.redirects,
-        extra: result.extra,
-        headers: result.headers);
-  }
-
   Future<Response<HistoryOrderSavedResponse>> historyOrderSave(
       HistoryOrderSavedRequest request) async {
     const extra = <String, dynamic>{};
@@ -881,7 +844,7 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<StatusResponse>> SubmitLocations(ProcessingQueue processingQueue) async {
+  Future<Response<StatusResponse>> locations(LocationsRequest request) async {
 
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -892,7 +855,7 @@ class ApiService {
     };
 
     final data = <String, dynamic>{
-      'body': processingQueue.body
+      'body': request.body
     };
 
     final result = await dio.fetch(

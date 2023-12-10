@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //utils
+import '../../../domain/models/requests/locations_request.dart';
 import '../../../utils/constants/strings.dart';
 import '../../../utils/resources/data_state.dart';
 
@@ -85,10 +86,12 @@ class ProcessingQueueBloc
 
   Stream get resolve {
     return Stream.periodic(const Duration(seconds: 30), (int value) async {
-      final timer0 = logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
-      var result = await _databaseRepository.listenForTableChanges('works', 'status', 'complete');
+      final timer0 =
+          logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
+      var result = await _databaseRepository.listenForTableChanges(
+          'works', 'status', 'complete');
       logDebugFine(headerLogger, result.toString());
-      if(result) await _getProcessingQueue();
+      if (result) await _getProcessingQueue();
       logTimerStop(headerLogger, timer0, 'Initialization completed',
           level: LogLevel.success);
     });
@@ -266,10 +269,15 @@ class ProcessingQueueBloc
           break;
         case 'store_locations':
           try {
-            var body = jsonDecode(queue.body);
             queue.task = 'processing';
-            //TODO:: [Heider Zapa ] do
-
+            final response = await _apiRepository.locations(
+                request: LocationsRequest(queue.body));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -433,21 +441,31 @@ class ProcessingQueueBloc
 
   Future<void> validateIfServiceIsCompleted(ProcessingQueue p) async {
     try {
-      if (p.code == 'store_transaction') {
+      if (p.code == 'store_transaction' ||
+          p.code == 'store_transaction_product') {
         //TODO:: [Heider Zapa] check if partial
-        var workcode = jsonDecode(p.body)['workcode'];
+        var body = jsonDecode(p.body);
+        var workcode = body['workcode'];
+
         var isLast = await _databaseRepository.checkLastTransaction(workcode);
         if (isLast) {
-          var processingQueue = ProcessingQueue(
-            body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
-            task: 'incomplete',
-            code: 'store_work_status',
-            createdAt: now(),
-            updatedAt: now(),
-          );
-          await _databaseRepository.insertProcessingQueue(processingQueue);
+          var isPartial = body['status'] == 'partial';
+          if (isPartial) {
+            //TODO:: [Heider Zapa] determine when productos all send by server
+            var isLastProduct =
+                await _databaseRepository.checkLastTransaction(workcode);
+          } else {
+            var processingQueue = ProcessingQueue(
+              body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
+              task: 'incomplete',
+              code: 'store_work_status',
+              createdAt: now(),
+              updatedAt: now(),
+            );
+            await _databaseRepository.insertProcessingQueue(processingQueue);
 
-          await _databaseRepository.updateStatusWork(workcode, 'complete');
+            await _databaseRepository.updateStatusWork(workcode, 'complete');
+          }
         }
       }
     } catch (e, stackTrace) {
