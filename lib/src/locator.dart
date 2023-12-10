@@ -17,9 +17,6 @@ import 'domain/repositories/database_repository.dart';
 //services
 import 'services/storage.dart';
 import 'services/navigation.dart';
-import 'services/location.dart';
-import 'services/isolate.dart';
-import 'services/timer.dart';
 import 'services/notifications.dart';
 import 'services/analytics.dart';
 import 'services/logger.dart';

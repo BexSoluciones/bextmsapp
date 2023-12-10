@@ -1,7 +1,14 @@
 const String tableLocations = 'locations';
 
 class LocationFields {
-  static final List<String> values = [id, latitude, longitude, type, workcode, time];
+  static final List<String> values = [
+    id,
+    latitude,
+    longitude,
+    type,
+    workcode,
+    time
+  ];
 
   static const String id = 'id';
   static const String latitude = 'latitude';
@@ -20,34 +27,34 @@ class LocationFields {
 }
 
 class Location {
-  Location(
-      {this.id,
-        required this.latitude,
-        required this.longitude,
-        required this.accuracy,
-        required this.altitude,
-        required this.speed,
-        required this.speedAccuracy,
-        required this.heading,
-        required this.isMock,
-        required this.userId,
-        required this.time,
-        required this.send,
-      });
+  Location({
+    this.id,
+    required this.latitude,
+    required this.longitude,
+    required this.accuracy,
+    required this.altitude,
+    required this.speed,
+    required this.speedAccuracy,
+    required this.heading,
+    required this.isMock,
+    required this.userId,
+    required this.time,
+    this.send,
+  });
 
   Location copy(
-      {int? id,
-        double? latitude,
-        double? longitude,
-        double? accuracy,
-        double? altitude,
-        double? speed,
-        double? speedAccuracy,
-        double? heading,
-        bool? isMock,
-        int? userId,
-        int? send,
-        DateTime? time}) =>
+          {int? id,
+          double? latitude,
+          double? longitude,
+          double? accuracy,
+          double? altitude,
+          double? speed,
+          double? speedAccuracy,
+          double? heading,
+          bool? isMock,
+          int? userId,
+          int? send,
+          DateTime? time}) =>
       Location(
         id: id ?? this.id,
         latitude: latitude ?? this.latitude,
@@ -65,33 +72,38 @@ class Location {
 
   // ignore: sort_constructors_first
   factory Location.fromJson(Map<String, dynamic> json) => Location(
-      id: json[LocationFields.id] as int?,
-      latitude: json[LocationFields.latitude] is String ? double.parse(json[LocationFields.latitude]) : json[LocationFields.latitude],
-      longitude: json[LocationFields.longitude] is String ? double.parse(json[LocationFields.longitude]) : json[LocationFields.longitude],
-      accuracy: json[LocationFields.accuracy],
-      altitude: json[LocationFields.altitude],
-      speed: json[LocationFields.speed],
-      speedAccuracy: json[LocationFields.speedAccuracy] ?? json['speedAccuracy'],
-      heading: json[LocationFields.heading],
-      isMock: json[LocationFields.isMock] == 1,
-      userId: json[LocationFields.userId],
-      send: json[LocationFields.send],
-      time: DateTime.parse(json[LocationFields.time] as String),
-  );
+        id: json[LocationFields.id] as int?,
+        latitude: json[LocationFields.latitude] is String
+            ? double.parse(json[LocationFields.latitude])
+            : json[LocationFields.latitude],
+        longitude: json[LocationFields.longitude] is String
+            ? double.parse(json[LocationFields.longitude])
+            : json[LocationFields.longitude],
+        accuracy: json[LocationFields.accuracy],
+        altitude: json[LocationFields.altitude],
+        speed: json[LocationFields.speed],
+        speedAccuracy:
+            json[LocationFields.speedAccuracy] ?? json['speedAccuracy'],
+        heading: json[LocationFields.heading],
+        isMock: json[LocationFields.isMock] == 1,
+        userId: json[LocationFields.userId],
+        send: json[LocationFields.send],
+        time: DateTime.parse(json[LocationFields.time] as String),
+      );
 
   Map<String, dynamic> toJson() => {
-    'latitude': latitude,
-    'longitude': longitude,
-    'accuracy': accuracy,
-    'altitude': altitude,
-    'speed': speed,
-    'speed_accuracy': speedAccuracy,
-    'heading': heading,
-    'is_mock': isMock != null && isMock == true ? 1 : 0,
-    'user_id' : userId,
-    'send' : send,
-    'time': time.toIso8601String(),
-  };
+        'latitude': latitude,
+        'longitude': longitude,
+        'accuracy': accuracy,
+        'altitude': altitude,
+        'speed': speed,
+        'speed_accuracy': speedAccuracy,
+        'heading': heading,
+        'is_mock': isMock != null && isMock == true ? 1 : 0,
+        'user_id': userId,
+        'send': send,
+        'time': time.toIso8601String(),
+      };
 
   int? id;
   double latitude;
@@ -103,6 +115,6 @@ class Location {
   double? heading;
   bool? isMock;
   int userId;
-  int send;
+  int? send;
   DateTime time;
 }
