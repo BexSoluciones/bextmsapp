@@ -72,7 +72,8 @@ class ProcessingQueueDao {
 
   Future<void> emptyProcessingQueue() async {
     final db = await _appDatabase.streamDatabase;
-    await db!.delete(tableProcessingQueues, where: 'code = "VNAIANBTLM"');
+    await db!.delete(tableProcessingQueues, where: 'code = "store_locations"');
+    await db!.delete(tableProcessingQueues, where: 'code = "store_locations"');
     return Future.value();
   }
 

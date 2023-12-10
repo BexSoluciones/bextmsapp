@@ -303,6 +303,7 @@ class _MyAppState extends State<MyApp> {
             create: (context) => ProcessingQueueBloc(
               locator<DatabaseRepository>(),
               locator<ApiRepository>(),
+
             )..add(ProcessingQueueObserve()),
           ),
           BlocProvider(
