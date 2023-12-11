@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -56,7 +58,6 @@ class CollectionViewState extends State<CollectionView>
   bool isErrorCollection = false;
   static const _locale = 'en';
   String message = '';
-  final allowInsetsBelow = _storageService.getBool('allow_insets_below');
   bool showDropdownError = false;
   List<String> options = [];
   List<String> formattedAccountList = [];
@@ -133,6 +134,7 @@ class CollectionViewState extends State<CollectionView>
         });
       }
     });
+
     super.initState();
   }
 
@@ -174,9 +176,7 @@ class CollectionViewState extends State<CollectionView>
   }
 
   void buildBlocListener(context, CollectionState state) {
-    if (state is CollectionSuccess ||
-        state is CollectionFailed) {
-      print(state.toString());
+    if (state is CollectionSuccess || state is CollectionFailed) {
       if (state.error != null) {
       } else {
         if (state.validate != null && state.validate == true) {
@@ -295,13 +295,11 @@ class CollectionViewState extends State<CollectionView>
                           ),
                           suffixIcon: IconButton(
                             onPressed: () {
-                              if (double.tryParse(
-                                      paymentCashController.text) !=
+                              if (double.tryParse(paymentCashController.text) !=
                                   null) {
                                 setState(() {
                                   total = total -
-                                      double.parse(
-                                          paymentCashController.text);
+                                      double.parse(paymentCashController.text);
                                 });
                               }
                               data.clear();
@@ -312,7 +310,7 @@ class CollectionViewState extends State<CollectionView>
                           ),
                         ),
                         validator: (value) {
-                          if (paymentTransferController.text.isEmpty && (value == null || value.isEmpty)) {
+                          if (value == null || value.isEmpty) {
                             return 'El campo es requerido';
                           }
                           return null;
@@ -431,10 +429,8 @@ class CollectionViewState extends State<CollectionView>
                                               }
                                               if (paymentCashController
                                                   .text.isNotEmpty) {
-                                                paymentCashValue =
-                                                    double.parse(
-                                                        paymentCashController
-                                                            .text);
+                                                paymentCashValue = double.parse(
+                                                    paymentCashController.text);
                                               } else {
                                                 paymentCashValue = 0;
                                               }
@@ -456,8 +452,7 @@ class CollectionViewState extends State<CollectionView>
                                                 count += double.parse(
                                                     data[i][0].toString());
                                               }
-                                              total =
-                                                  count + paymentCashValue;
+                                              total = count + paymentCashValue;
                                             }
                                           } else {
                                             if (double.tryParse(
@@ -480,10 +475,8 @@ class CollectionViewState extends State<CollectionView>
                                               }
                                               if (paymentCashController
                                                   .text.isNotEmpty) {
-                                                paymentCashValue =
-                                                    double.parse(
-                                                        paymentCashController
-                                                            .text);
+                                                paymentCashValue = double.parse(
+                                                    paymentCashController.text);
                                               } else {
                                                 paymentCashValue = 0;
                                               }
@@ -505,8 +498,7 @@ class CollectionViewState extends State<CollectionView>
                                                 count += double.parse(
                                                     data[i][0].toString());
                                               }
-                                              total =
-                                                  count + paymentCashValue;
+                                              total = count + paymentCashValue;
                                             }
                                           }
                                           for (var element
@@ -676,55 +668,190 @@ class CollectionViewState extends State<CollectionView>
                       press: () async {
                         final form = _formKey.currentState;
                         if (form!.validate()) {
-                          switch (state.enterpriseConfig?.allowInsetsBelow) {
-                            case false:
-                              if (widget.arguments.typeOfCharge == 'CREDITO' &&
-                                  total == 0.0) {
-                                await context
-                                    .read<CollectionCubit>()
-                                    .confirmTransaction(
-                                        widget.arguments,
-                                        paymentCashController,
-                                        paymentTransferController,
-                                        data);
-                              } else if (total != state.totalSummary) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        backgroundColor: Colors.red,
-                                        content: Text(
-                                            'El valor a recaudar debe ser igual al total',
-                                            style: TextStyle(
-                                                color: Colors.white))));
-                              } else {
-                                await context
-                                    .read<CollectionCubit>()
-                                    .confirmTransaction(
-                                        widget.arguments,
-                                        paymentCashController,
-                                        paymentTransferController,
-                                        data);
-                              }
-                              break;
-                            case true:
-                              if (total <= state.totalSummary!.toDouble() ||
-                                  widget.arguments.typeOfCharge == 'CREDITO') {
-                                await context
-                                    .read<CollectionCubit>()
-                                    .confirmTransaction(
-                                        widget.arguments,
-                                        paymentCashController,
-                                        paymentTransferController,
-                                        data);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        backgroundColor: Colors.red,
-                                        content: Text(
-                                            'El recaudo no puede ser mayor al total',
-                                            style: TextStyle(
-                                                color: Colors.white))));
-                              }
-                              break;
+                          final allowInsetsBelow =
+                              state.enterpriseConfig!.allowInsetsBelow;
+                          final allowInsetsAbove =
+                              state.enterpriseConfig!.allowInsetsAbove;
+
+                          logDebugFine(
+                              headerLogger, allowInsetsBelow.toString());
+                          logDebugFine(
+                              headerLogger, allowInsetsAbove.toString());
+
+                          if (state.enterpriseConfig!
+                                      .specifiedAccountTransfer ==
+                                  true &&
+                              paymentTransferController.text.isNotEmpty) {
+                            if (selectedOption == 'Seleccionar cuenta') {
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    'Selecciona un numero de cuenta',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+                          }
+
+                          if (widget.arguments.typeOfCharge == 'CREDITO' &&
+                              total == 0) {
+                            _storageService.setBool('firmRequired', false);
+                            _storageService.setBool('photoRequired', false);
+                            await context
+                                .read<CollectionCubit>()
+                                .confirmTransaction(
+                                    widget.arguments,
+                                    paymentCashController,
+                                    paymentTransferController,
+                                    data);
+                            return;
+                          }
+
+                          if ((allowInsetsBelow == null ||
+                                  allowInsetsBelow == false) &&
+                              (allowInsetsAbove == null ||
+                                  allowInsetsAbove == false)) {
+                            if (total == state.totalSummary!.toDouble()) {
+                              _storageService.setBool('firmRequired', false);
+                              _storageService.setBool('photoRequired', false);
+                              await context
+                                  .read<CollectionCubit>()
+                                  .confirmTransaction(
+                                      widget.arguments,
+                                      paymentCashController,
+                                      paymentTransferController,
+                                      data);
+                              return;
+                            } else {
+                              message = 'el recaudo debe ser igual al total';
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    message,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              );
+                            }
+                          } else if ((allowInsetsBelow != null &&
+                                  allowInsetsBelow == true) &&
+                              (allowInsetsAbove != null &&
+                                  allowInsetsAbove == true)) {
+                            _storageService.setBool('firmRequired', false);
+                            _storageService.setBool('photoRequired', false);
+
+                            if (total <= state.totalSummary!.toDouble()) {
+                              await context
+                                  .read<CollectionCubit>()
+                                  .confirmTransaction(
+                                      widget.arguments,
+                                      paymentCashController,
+                                      paymentTransferController,
+                                      data);
+                            } else {
+                              await showDialog(
+                                  context: context,
+                                  builder: (_) {
+                                    return MyDialog(
+                                      total: total,
+                                      totalSummary:
+                                          state.totalSummary!.toDouble(),
+                                      confirmateTransaction: () => context
+                                          .read<CollectionCubit>()
+                                          .confirmTransaction(
+                                              widget.arguments,
+                                              paymentCashController,
+                                              paymentTransferController,
+                                              data),
+                                      context: context,
+                                    );
+                                  });
+                            }
+
+                            return;
+                          } else if ((allowInsetsBelow != null &&
+                                  allowInsetsBelow == true) &&
+                              (allowInsetsAbove == null ||
+                                  allowInsetsAbove == false)) {
+                            logDebugFine(headerLogger, total.toString());
+                            logDebugFine(headerLogger,
+                                state.totalSummary!.toDouble().toString());
+
+                            if (total <= state.totalSummary!.toDouble()) {
+                              _storageService.setBool('firmRequired', false);
+                              _storageService.setBool('photoRequired', false);
+                              await context
+                                  .read<CollectionCubit>()
+                                  .confirmTransaction(
+                                      widget.arguments,
+                                      paymentCashController,
+                                      paymentTransferController,
+                                      data);
+                            } else {
+                              message =
+                                  'el recaudo debe ser igual o menor al total';
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    message,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              );
+                            }
+                            return;
+                          } else if ((allowInsetsBelow == null ||
+                                  allowInsetsBelow == false) &&
+                              (allowInsetsAbove != null &&
+                                  allowInsetsAbove == true)) {
+                            if (total >= state.totalSummary!.toDouble()) {
+                              _storageService.setBool('firmRequired', false);
+                              _storageService.setBool('photoRequired', false);
+                              await showDialog(
+                                  context: context,
+                                  builder: (_) {
+                                    return MyDialog(
+                                      total: total,
+                                      totalSummary:
+                                          state.totalSummary!.toDouble(),
+                                      confirmateTransaction: () => context
+                                          .read<CollectionCubit>()
+                                          .confirmTransaction(
+                                              widget.arguments,
+                                              paymentCashController,
+                                              paymentTransferController,
+                                              data),
+                                      context: context,
+                                    );
+                                  });
+                            } else {
+                              message =
+                                  'el recaudo debe ser igual o mayor al total';
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    message,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return;
                           }
                         }
                       })),
@@ -749,6 +876,82 @@ class CollectionViewState extends State<CollectionView>
           ),
         ),
       ),
+    );
+  }
+}
+
+class MyDialog extends StatefulWidget {
+  const MyDialog(
+      {Key? key,
+      required this.totalSummary,
+      required this.total,
+      required this.confirmateTransaction,
+      required this.context})
+      : super(key: key);
+
+  final double totalSummary;
+  final double total;
+  final Function confirmateTransaction;
+  final BuildContext context;
+
+  @override
+  _MyDialogState createState() => _MyDialogState();
+}
+
+class _MyDialogState extends State<MyDialog> with FormatNumber {
+  var seconds = 5;
+  var showText = false;
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (Timer timer) {
+        if (seconds == 0) {
+          setState(() {
+            timer.cancel();
+            showText = true;
+          });
+        } else {
+          setState(() {
+            seconds--;
+            showText = false;
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Confirmar recaudo'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Text(
+                'Valor a recaudar: \$${formatter.format(widget.totalSummary)}'),
+            Text('Valor a guardar: por \$${formatter.format(widget.total)}'),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text('Cancelar'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: showText ? const Text('Si') : Text(seconds.toString()),
+          onPressed: () {
+            widget.confirmateTransaction(context);
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }

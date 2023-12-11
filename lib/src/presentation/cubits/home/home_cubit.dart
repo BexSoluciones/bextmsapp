@@ -10,6 +10,11 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/helpers/index.dart';
 
 //cubit
+import '../../../domain/models/requests/account_request.dart';
+import '../../../domain/models/requests/enterprise_config_request.dart';
+import '../../../domain/models/requests/reason_request.dart';
+import '../../../domain/models/responses/enterprise_config_response.dart';
+import '../../../domain/models/responses/reason_response.dart';
 import '../../blocs/gps/gps_bloc.dart';
 import '../base/base_cubit.dart';
 
@@ -111,7 +116,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           ? User.fromJson(_storageService.getObject('user')!)
           : null;
 
-      /* final results = await Future.wait([
+      final results = await Future.wait([
         _apiRepository.getConfigEnterprise(request: EnterpriseConfigRequest()),
         _apiRepository.reasons(request: ReasonRequest()),
       ]);
@@ -133,7 +138,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           var data = results[1].data as ReasonResponse;
           _databaseRepository.insertReasons(data.reasons);
         }
-      }*/
+      }
 
       final response = await _apiRepository.login(
         request: LoginRequest(_storageService.getString('username')!,
@@ -156,12 +161,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                 device != null ? device['id'] : null,
                 device != null ? device['model'] : null,
                 version,
-                currentLocation != null
-                    ? currentLocation.latitude.toString()
-                    : null,
-                currentLocation != null
-                    ? currentLocation.longitude.toString()
-                    : null,
+                currentLocation?.latitude.toString(),
+                currentLocation?.longitude.toString(),
                 DateTime.now().toIso8601String(),
                 'sync'));
 
