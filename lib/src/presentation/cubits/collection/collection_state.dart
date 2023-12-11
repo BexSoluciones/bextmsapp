@@ -29,7 +29,7 @@ class CollectionLoading extends CollectionState {
 
 class CollectionSuccess extends CollectionState {
   const CollectionSuccess(
-      {super.work, super.validate, super.totalSummary, super.enterpriseConfig});
+      {super.work, super.validate});
 }
 
 class CollectionFailed extends CollectionState {

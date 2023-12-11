@@ -64,7 +64,16 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   }
 
   void goBack() {
-    _navigationService.goBack();
+    if(state is CollectionSuccess){
+      if(state.validate != null && state.validate == true){
+        goToWork(state.work);
+      } else {
+        goToSummary(state.work);
+      }
+    } else {
+      _navigationService.goBack();
+    }
+
   }
 
   void goToFirm(String orderNumber) {
@@ -95,7 +104,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
   Future<void> confirmTransaction(
       InventoryArgument arguments,
-      paymentEfectyController,
+      paymentCashController,
       paymentTransferController,
       List<dynamic> data) async {
     if (isBusy) return;
@@ -130,10 +139,10 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
       var payments = <Payment>[];
       if (data.isEmpty) {
-        if (paymentEfectyController.text.isNotEmpty) {
+        if (paymentCashController.text.isNotEmpty) {
           payments.add(Payment(
             method: 'cash',
-            paid: paymentEfectyController.text,
+            paid: paymentCashController.text,
           ));
         }
       }
@@ -239,8 +248,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         emit(CollectionSuccess(
             work: arguments.work,
             validate: v,
-            totalSummary: state.totalSummary,
-            enterpriseConfig: state.enterpriseConfig));
+        ));
       }
     });
   }

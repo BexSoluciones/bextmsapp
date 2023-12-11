@@ -63,13 +63,13 @@ class CollectionViewState extends State<CollectionView>
   List<dynamic> data = [];
   String? selectedOption = 'Seleccionar cuenta';
   var paymentTransferValue = 0.0;
-  var paymentEfectyValue = 0.0;
+  var paymentCashValue = 0.0;
 
   String get _currency =>
       '  ${NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol}';
 
   final TextEditingController _typeAheadController = TextEditingController();
-  final TextEditingController paymentEfectyController = TextEditingController();
+  final TextEditingController paymentCashController = TextEditingController();
   final TextEditingController paymentTransferController =
       TextEditingController();
   final TextEditingController paymentTransferArrayController =
@@ -86,24 +86,24 @@ class CollectionViewState extends State<CollectionView>
     collectionCubit.getCollection(
         widget.arguments.work.id!, widget.arguments.orderNumber);
 
-    paymentEfectyController.addListener(() {
+    paymentCashController.addListener(() {
       if (paymentTransferController.text.isNotEmpty &&
-          paymentEfectyController.text.isNotEmpty) {
+          paymentCashController.text.isNotEmpty) {
         setState(() {
-          total = double.parse(paymentEfectyController.text) +
+          total = double.parse(paymentCashController.text) +
               double.parse(paymentTransferController.text);
         });
-      } else if (paymentEfectyController.text.isNotEmpty) {
+      } else if (paymentCashController.text.isNotEmpty) {
         setState(() {
-          total = double.parse(paymentEfectyController.text);
+          total = double.parse(paymentCashController.text);
         });
-      } else if (paymentEfectyController.text.isEmpty &&
+      } else if (paymentCashController.text.isEmpty &&
           paymentTransferController.text.isEmpty) {
         setState(() {
           total = 0;
         });
       } else if (paymentTransferController.text.isNotEmpty &&
-          paymentEfectyController.text.isEmpty) {
+          paymentCashController.text.isEmpty) {
         setState(() {
           total = double.parse(paymentTransferController.text);
         });
@@ -111,25 +111,25 @@ class CollectionViewState extends State<CollectionView>
     });
 
     paymentTransferController.addListener(() {
-      if (paymentEfectyController.text.isNotEmpty &&
+      if (paymentCashController.text.isNotEmpty &&
           paymentTransferController.text.isNotEmpty) {
         setState(() {
           total = double.parse(paymentTransferController.text) +
-              double.parse(paymentEfectyController.text);
+              double.parse(paymentCashController.text);
         });
       } else if (paymentTransferController.text.isNotEmpty) {
         setState(() {
           total = double.parse(paymentTransferController.text);
         });
-      } else if (paymentEfectyController.text.isEmpty &&
+      } else if (paymentCashController.text.isEmpty &&
           paymentTransferController.text.isEmpty) {
         setState(() {
           total = 0;
         });
-      } else if (paymentEfectyController.text.isNotEmpty &&
+      } else if (paymentCashController.text.isNotEmpty &&
           paymentTransferController.text.isEmpty) {
         setState(() {
-          total = double.parse(paymentEfectyController.text);
+          total = double.parse(paymentCashController.text);
         });
       }
     });
@@ -140,7 +140,7 @@ class CollectionViewState extends State<CollectionView>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     paymentTransferController.dispose();
-    paymentEfectyController.dispose();
+    paymentCashController.dispose();
     _typeAheadController.dispose();
     super.dispose();
   }
@@ -169,32 +169,20 @@ class CollectionViewState extends State<CollectionView>
               ),
             ),
             body: BlocBuilder<CollectionCubit, CollectionState>(
-              builder: (_, state) {
-                switch (state.runtimeType) {
-                  case CollectionLoading:
-                    return const Center(child: CupertinoActivityIndicator());
-                  case CollectionInitial:
-                    return _buildBlocConsumer(size);
-                  case CollectionSuccess:
-                    return _buildBlocConsumer(size);
-                  default:
-                    return const SizedBox();
-                }
-              },
+              builder: (_, state) => _buildBlocConsumer(size),
             )));
   }
 
   void buildBlocListener(context, CollectionState state) {
     if (state is CollectionSuccess ||
-        state is CollectionFailed ||
-        state is CollectionInitial) {
+        state is CollectionFailed) {
       print(state.toString());
       if (state.error != null) {
       } else {
         if (state.validate != null && state.validate == true) {
-          collectionCubit.goToSummary(state.work);
-        } else if (state.validate != null && state.validate == false) {
           collectionCubit.goToWork(state.work);
+        } else if (state.validate != null && state.validate == false) {
+          collectionCubit.goToSummary(state.work);
         }
       }
     } else {
@@ -206,12 +194,16 @@ class CollectionViewState extends State<CollectionView>
     return BlocConsumer<CollectionCubit, CollectionState>(
       listener: buildBlocListener,
       builder: (context, state) {
-        return state is CollectionSuccess
-            ? _buildSuccessTransaction(size)
-            : _buildCollection(
-                size,
-                state,
-              );
+        switch (state.runtimeType) {
+          case CollectionLoading:
+            return const Center(child: CupertinoActivityIndicator());
+          case CollectionInitial:
+            return _buildCollection(size, state);
+          case CollectionSuccess:
+            return _buildSuccessTransaction(size);
+          default:
+            return const SizedBox();
+        }
       },
     );
   }
@@ -275,14 +267,14 @@ class CollectionViewState extends State<CollectionView>
                       TextFormField(
                         keyboardType: TextInputType.number,
                         autofocus: false,
-                        controller: paymentEfectyController,
+                        controller: paymentCashController,
                         onChanged: data.isNotEmpty
                             ? (newValue) {
                                 if (newValue.isEmpty) {
                                   setState(() {
                                     data.clear();
                                     paymentTransferArrayController.clear();
-                                    paymentEfectyController.clear();
+                                    paymentCashController.clear();
                                   });
                                 }
                               }
@@ -304,17 +296,17 @@ class CollectionViewState extends State<CollectionView>
                           suffixIcon: IconButton(
                             onPressed: () {
                               if (double.tryParse(
-                                      paymentEfectyController.text) !=
+                                      paymentCashController.text) !=
                                   null) {
                                 setState(() {
                                   total = total -
                                       double.parse(
-                                          paymentEfectyController.text);
+                                          paymentCashController.text);
                                 });
                               }
                               data.clear();
                               paymentTransferArrayController.clear();
-                              paymentEfectyController.clear();
+                              paymentCashController.clear();
                             },
                             icon: const Icon(Icons.clear),
                           ),
@@ -437,14 +429,14 @@ class CollectionViewState extends State<CollectionView>
                                                           '');
                                                 }
                                               }
-                                              if (paymentEfectyController
+                                              if (paymentCashController
                                                   .text.isNotEmpty) {
-                                                paymentEfectyValue =
+                                                paymentCashValue =
                                                     double.parse(
-                                                        paymentEfectyController
+                                                        paymentCashController
                                                             .text);
                                               } else {
-                                                paymentEfectyValue = 0;
+                                                paymentCashValue = 0;
                                               }
                                               var parsedNumber =
                                                   parsedNumberString.isNotEmpty
@@ -465,7 +457,7 @@ class CollectionViewState extends State<CollectionView>
                                                     data[i][0].toString());
                                               }
                                               total =
-                                                  count + paymentEfectyValue;
+                                                  count + paymentCashValue;
                                             }
                                           } else {
                                             if (double.tryParse(
@@ -486,14 +478,14 @@ class CollectionViewState extends State<CollectionView>
                                                           '');
                                                 }
                                               }
-                                              if (paymentEfectyController
+                                              if (paymentCashController
                                                   .text.isNotEmpty) {
-                                                paymentEfectyValue =
+                                                paymentCashValue =
                                                     double.parse(
-                                                        paymentEfectyController
+                                                        paymentCashController
                                                             .text);
                                               } else {
-                                                paymentEfectyValue = 0;
+                                                paymentCashValue = 0;
                                               }
                                               var parsedNumber =
                                                   parsedNumberString.isNotEmpty
@@ -514,7 +506,7 @@ class CollectionViewState extends State<CollectionView>
                                                     data[i][0].toString());
                                               }
                                               total =
-                                                  count + paymentEfectyValue;
+                                                  count + paymentCashValue;
                                             }
                                           }
                                           for (var element
@@ -692,7 +684,7 @@ class CollectionViewState extends State<CollectionView>
                                     .read<CollectionCubit>()
                                     .confirmTransaction(
                                         widget.arguments,
-                                        paymentEfectyController,
+                                        paymentCashController,
                                         paymentTransferController,
                                         data);
                               } else if (total != state.totalSummary) {
@@ -708,7 +700,7 @@ class CollectionViewState extends State<CollectionView>
                                     .read<CollectionCubit>()
                                     .confirmTransaction(
                                         widget.arguments,
-                                        paymentEfectyController,
+                                        paymentCashController,
                                         paymentTransferController,
                                         data);
                               }
@@ -720,7 +712,7 @@ class CollectionViewState extends State<CollectionView>
                                     .read<CollectionCubit>()
                                     .confirmTransaction(
                                         widget.arguments,
-                                        paymentEfectyController,
+                                        paymentCashController,
                                         paymentTransferController,
                                         data);
                               } else {
