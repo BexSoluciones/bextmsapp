@@ -312,7 +312,7 @@ class CollectionViewState extends State<CollectionView>
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
+                          if (paymentTransferController.text.isEmpty && (value == null || value.isEmpty)) {
                             return 'El campo es requerido';
                           }
                           return null;
@@ -726,12 +726,6 @@ class CollectionViewState extends State<CollectionView>
                               }
                               break;
                           }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                              backgroundColor: Colors.orange,
-                              content: Text(
-                                  'El recaudo solo puede contener puntos y unicamente para los decimales, ejemplo: 127809.64',
-                                  style: TextStyle(color: Colors.white))));
                         }
                       })),
         ]),
