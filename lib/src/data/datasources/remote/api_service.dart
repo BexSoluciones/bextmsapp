@@ -858,6 +858,8 @@ class ApiService {
       'body': request.body
     };
 
+    print(data);
+
     final result = await dio.fetch(
         _setStreamType<Response<TransactionSummaryResponse>>(Options(
           method: 'POST',

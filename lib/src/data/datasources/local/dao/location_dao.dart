@@ -62,16 +62,11 @@ class LocationDao with FormatDate {
     final db = await _appDatabase.streamDatabase;
     final List<Map<String, dynamic>> results = await db!.query(
       tableLocations,
-      columns: ['user_id', 'latitude', 'longitude'],
       where: 'send = 0',
     );
 
     final formattedResults = results.map((row) {
-      return {
-        'user_id': row['user_id'],
-        'latitude': row['latitude'],
-        'longitude': row['longitude'],
-      };
+      return row;
     }).toList();
 
     final formattedJson = jsonEncode(formattedResults);
