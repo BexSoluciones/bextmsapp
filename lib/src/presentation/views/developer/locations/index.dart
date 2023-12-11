@@ -60,8 +60,8 @@ class _LocationsViewState extends State<LocationsView> {
           )
         ],
       ),
-      body: StreamBuilder<GpsState?>(
-        stream: gpsBloc.stream,
+      body: StreamBuilder<List<Location?>>(
+        stream: gpsBloc.locations,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

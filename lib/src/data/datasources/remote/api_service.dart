@@ -854,12 +854,6 @@ class ApiService {
       HttpHeaders.contentTypeHeader: 'application/json',
     };
 
-    final data = <String, dynamic>{
-      'body': request.body
-    };
-
-    print(data);
-
     final result = await dio.fetch(
         _setStreamType<Response<TransactionSummaryResponse>>(Options(
           method: 'POST',
@@ -867,7 +861,7 @@ class ApiService {
           extra: extra,
         )
             .compose(dio.options, '/location/newlocation',
-            queryParameters: queryParameters, data:data)
+            queryParameters: queryParameters, data: request.body)
             .copyWith(baseUrl: url ?? dio.options.baseUrl)));
 
     final value = StatusResponse.fromMap(result.data!);

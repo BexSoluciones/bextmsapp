@@ -61,6 +61,10 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     _init();
   }
 
+  Stream<List<l.Location>> get locations {
+    return _databaseRepository.watchAllLocations();
+}
+
   Future<void> startFollowingUser() async {
     add(OnStartFollowingUser());
     final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
@@ -261,7 +265,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   Future<void> saveLocation(
       String type, Position position) async {
     try {
-      print('********************************************');
       var lastLocation = await _databaseRepository.getLastLocation();
 
       var location = l.Location(
