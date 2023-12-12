@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 //cubits
 import '../../../../cubits/collection/collection_cubit.dart';
 //utils
@@ -7,13 +8,13 @@ import '../../../../../utils/constants/nums.dart';
 //domain
 import '../../../../../domain/abstracts/format_abstract.dart';
 
-class FormCollection extends StatelessWidget with FormatNumber {
+class FormCollection extends StatefulWidget {
   final GlobalKey formKey;
   final String orderNumber;
   final CollectionCubit collectionCubit;
   final CollectionState state;
 
-  FormCollection(
+  const FormCollection(
       {super.key,
       required this.formKey,
       required this.collectionCubit,
@@ -21,12 +22,17 @@ class FormCollection extends StatelessWidget with FormatNumber {
       required this.orderNumber});
 
   @override
+  State<FormCollection> createState() => _FormCollectionState();
+}
+
+class _FormCollectionState extends State<FormCollection> with FormatNumber {
+  @override
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.only(
             left: kDefaultPadding, right: kDefaultPadding),
         child: Form(
-            key: formKey,
+            key: widget.formKey,
             child: Column(
               children: [
                 const Row(
@@ -40,7 +46,7 @@ class FormCollection extends StatelessWidget with FormatNumber {
                 TextFormField(
                   keyboardType: TextInputType.number,
                   autofocus: false,
-                  controller: collectionCubit.cashController,
+                  controller: widget.collectionCubit.cashController,
                   // onChanged: data.isNotEmpty
                   //     ? (newValue) {
                   //         if (newValue.isEmpty) {
@@ -65,12 +71,12 @@ class FormCollection extends StatelessWidget with FormatNumber {
                     ),
                     suffixIcon: IconButton(
                       onPressed: () {
-                        if (double.tryParse(
-                                collectionCubit.transferController.text) !=
-                            null) {
-                          state.total = state.total! -
-                              double.parse(collectionCubit.cashController.text);
-                        }
+                        // if (double.tryParse(
+                        //         collectionCubit.transferController.text) !=
+                        //     null) {
+                        //   state.total = state.total! -
+                        //       double.parse(collectionCubit.cashController.text);
+                        // }
                         // data.clear();
                         // paymentTransferArrayController.clear();
                         // paymentCashController.clear();
@@ -96,199 +102,92 @@ class FormCollection extends StatelessWidget with FormatNumber {
                     IconButton(
                         icon: const Icon(Icons.camera_alt,
                             size: 32, color: kPrimaryColor),
-                        onPressed: () =>
-                            collectionCubit.goToCamera(orderNumber)),
-
-                    // state.enterpriseConfig != null &&
-                    //         state.enterpriseConfig!.codeQr != null
-                    //     ? IconButton(
-                    //         icon: const Icon(Icons.qr_code_2,
-                    //             size: 32, color: kPrimaryColor),
-                    //         onPressed: () => collectionCubit.goToCodeQR())
-                    //     : Container()
+                        onPressed: () => widget.collectionCubit
+                            .goToCamera(widget.orderNumber)),
+                    widget.state.enterpriseConfig != null &&
+                            widget.state.enterpriseConfig!.codeQr != null
+                        ? IconButton(
+                            icon: const Icon(Icons.qr_code_2,
+                                size: 32, color: kPrimaryColor),
+                            onPressed: () =>
+                                widget.collectionCubit.goToCodeQR())
+                        : Container()
                   ],
                 ),
-                // TextFormField(
-                //   keyboardType: TextInputType.number,
-                //   autofocus: false,
-                //   controller: data.isEmpty
-                //       ? paymentTransferController
-                //       : paymentTransferArrayController,
-                //   decoration: InputDecoration(
-                //     prefixText: _currency,
-                //     focusedBorder: const OutlineInputBorder(
-                //       borderSide: BorderSide(color: Colors.grey, width: 2.0),
-                //     ),
-                //     enabledBorder: const OutlineInputBorder(
-                //       borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-                //     ),
-                //     errorBorder: const OutlineInputBorder(
-                //       borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-                //     ),
-                //     suffixIcon: IconButton(
-                //       onPressed: () {
-                //         if (data.isEmpty) {
-                //           if (double.tryParse(paymentTransferController.text) !=
-                //               null) {
-                //             setState(() {
-                //               total -=
-                //                   double.parse(paymentTransferController.text);
-                //             });
-                //           }
-                //         }
-                //         paymentTransferController.clear();
-                //       },
-                //       icon: const Icon(Icons.clear),
-                //     ),
-                //   ),
-                //   validator: (value) {
-                //     if (value!.contains(',')) {
-                //       return '';
-                //     }
-                //     return null;
-                //   },
-                // ),
-                // state.enterpriseConfig != null &&
-                //         state.enterpriseConfig!.specifiedAccountTransfer == true
-                //     ? Row(
-                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //         children: [
-                //           const Row(children: [
-                //             Text('NÚMERO DE CUENTA',
-                //                 style: TextStyle(fontSize: 14)),
-                //             Icon(Icons.account_balance_outlined)
-                //           ]),
-                //           Row(
-                //             children: [
-                //               IconButton(
-                //                 onPressed: () {
-                //                   setState(() {
-                //                     if (data.isNotEmpty) {
-                //                       paymentTransferController.text = '';
-                //                     }
-                //
-                //                     if (paymentTransferController
-                //                         .text.isNotEmpty) {
-                //                       if (double.tryParse(
-                //                               paymentTransferController.text) !=
-                //                           null) {
-                //                         paymentTransferValue = double.parse(
-                //                             paymentTransferController.text);
-                //                         var parsedNumberString = '';
-                //                         if (selectedOption != null) {
-                //                           var parts =
-                //                               selectedOption!.split(' - ');
-                //                           if (parts.length >= 3) {
-                //                             parsedNumberString = parts[2]
-                //                                 .replaceAll(
-                //                                     RegExp(r'[^\d]+'), '');
-                //                           }
-                //                         }
-                //                         if (paymentCashController
-                //                             .text.isNotEmpty) {
-                //                           paymentCashValue = double.parse(
-                //                               paymentCashController.text);
-                //                         } else {
-                //                           paymentCashValue = 0;
-                //                         }
-                //                         var parsedNumber =
-                //                             parsedNumberString.isNotEmpty
-                //                                 ? int.parse(parsedNumberString)
-                //                                 : null;
-                //                         var count = 0.0;
-                //                         data.add([
-                //                           paymentTransferValue,
-                //                           parsedNumber,
-                //                           selectedOption
-                //                         ]);
-                //
-                //                         for (var i = 0; i < data.length; i++) {
-                //                           count += double.parse(
-                //                               data[i][0].toString());
-                //                         }
-                //                         total = count + paymentCashValue;
-                //                       }
-                //                     } else {
-                //                       if (double.tryParse(
-                //                               paymentTransferArrayController
-                //                                   .text) !=
-                //                           null) {
-                //                         paymentTransferValue = double.parse(
-                //                             paymentTransferArrayController
-                //                                 .text);
-                //                         var parsedNumberString = '';
-                //                         if (selectedOption != null) {
-                //                           var parts =
-                //                               selectedOption!.split(' - ');
-                //                           if (parts.length >= 3) {
-                //                             parsedNumberString = parts[2]
-                //                                 .replaceAll(
-                //                                     RegExp(r'[^\d]+'), '');
-                //                           }
-                //                         }
-                //                         if (paymentCashController
-                //                             .text.isNotEmpty) {
-                //                           paymentCashValue = double.parse(
-                //                               paymentCashController.text);
-                //                         } else {
-                //                           paymentCashValue = 0;
-                //                         }
-                //                         var parsedNumber =
-                //                             parsedNumberString.isNotEmpty
-                //                                 ? int.parse(parsedNumberString)
-                //                                 : null;
-                //                         var count = 0.0;
-                //                         data.add([
-                //                           paymentTransferValue,
-                //                           parsedNumber,
-                //                           selectedOption
-                //                         ]);
-                //
-                //                         for (var i = 0; i < data.length; i++) {
-                //                           count += double.parse(
-                //                               data[i][0].toString());
-                //                         }
-                //                         total = count + paymentCashValue;
-                //                       }
-                //                     }
-                //                     for (var element
-                //                         in widget.arguments.summaries!) {
-                //                       totalSummary = element.grandTotalCopy!;
-                //                     }
-                //                     if (total != totalSummary) {
-                //                       message =
-                //                           'el recaudo debe ser igual al total';
-                //                       ScaffoldMessenger.of(context)
-                //                           .hideCurrentSnackBar();
-                //                       ScaffoldMessenger.of(context)
-                //                           .showSnackBar(
-                //                         SnackBar(
-                //                           backgroundColor: Colors.red,
-                //                           content: Text(
-                //                             message,
-                //                             style: const TextStyle(
-                //                                 color: Colors.white),
-                //                           ),
-                //                         ),
-                //                       );
-                //                     }
-                //                   });
-                //                 },
-                //                 icon: const Icon(Icons.add),
-                //               ),
-                //               IconButton(
-                //                 icon: const Icon(Icons.qr_code_2),
-                //                 onPressed: () {
-                //                   _navigationService.goTo(AppRoutes.codeQr,
-                //                       arguments:
-                //                           _storageService.getString('code_qr'));
-                //                 },
-                //               ),
-                //             ],
-                //           )
-                //         ],
-                //       )
-                //     : Container(),
+                TextFormField(
+                  keyboardType: TextInputType.number,
+                  autofocus: false,
+                  controller: widget.collectionCubit.transferController,
+                  decoration: InputDecoration(
+                    prefixText: currency,
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey, width: 2.0),
+                    ),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
+                    ),
+                    errorBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
+                    ),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        if (double.tryParse(widget
+                                    .collectionCubit.transferController.text) !=
+                                null &&
+                            widget.collectionCubit.total != null) {
+                          // collectionCubit.total -=
+                          //     double.parse(collectionCubit.transferController.text);
+                        }
+                        widget.collectionCubit.transferController.clear();
+                      },
+                      icon: const Icon(Icons.clear),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value!.contains(',')) {
+                      return '';
+                    }
+                    return null;
+                  },
+                ),
+                BlocSelector<CollectionCubit, CollectionState, bool>(
+                    selector: (state) =>
+                        state is CollectionSuccess &&
+                        state.enterpriseConfig!.specifiedAccountTransfer ==
+                            true,
+                    builder: (c, x) {
+                      return x
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Row(children: [
+                                  Text('NÚMERO DE CUENTA',
+                                      style: TextStyle(fontSize: 14)),
+                                  Icon(Icons.account_balance_outlined)
+                                ]),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+
+                                        setState(() {});
+                                      },
+                                      icon: const Icon(Icons.add),
+                                    ),
+                                    // IconButton(
+                                    //   icon: const Icon(Icons.qr_code_2),
+                                    //   onPressed: () {
+                                    //     _navigationService.goTo(AppRoutes.codeQr,
+                                    //         arguments: );
+                                    //   },
+                                    // ),
+                                  ],
+                                )
+                              ],
+                            )
+                          : Container();
+                    }),
+
                 // state.enterpriseConfig != null &&
                 //         state.enterpriseConfig!.specifiedAccountTransfer == true
                 //     ? BlocBuilder<AccountBloc, AccountState>(
@@ -382,7 +281,8 @@ class FormCollection extends StatelessWidget with FormatNumber {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Total:', style: TextStyle(fontSize: 20)),
-                      Text('\$${formatter.format(state.total)}',
+                      Text(
+                          '\$${formatter.format(widget.collectionCubit.total)}',
                           style: const TextStyle(fontSize: 20)),
                     ]),
               ],

@@ -1,12 +1,7 @@
 import 'dart:async';
-import 'dart:io';
-import 'package:bexdeliveries/src/presentation/views/user/collection/features/form.dart';
-import 'package:bexdeliveries/src/presentation/views/user/collection/features/header.dart';
-import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 //blocs
 import '../../../blocs/account/account_bloc.dart';
@@ -15,7 +10,6 @@ import '../../../blocs/account/account_bloc.dart';
 import '../../../cubits/collection/collection_cubit.dart';
 
 //utils
-import '../../../../utils/constants/strings.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/nums.dart';
 
@@ -23,17 +17,11 @@ import '../../../../utils/constants/nums.dart';
 import '../../../../domain/models/arguments.dart';
 import '../../../../domain/abstracts/format_abstract.dart';
 
-//services
-import '../../../../locator.dart';
-import '../../../../services/navigation.dart';
-import '../../../../services/storage.dart';
-
 //widgets
 import '../../../widgets/default_button_widget.dart';
-import '../../../widgets/transaction_list.dart';
-
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final NavigationService _navigationService = locator<NavigationService>();
+//features
+import './features/form.dart';
+import './features/header.dart';
 
 class CollectionView extends StatefulWidget {
   const CollectionView({Key? key, required this.arguments}) : super(key: key);
@@ -54,12 +42,19 @@ class CollectionViewState extends State<CollectionView>
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     context.read<AccountBloc>().add(LoadAccountListEvent());
+
     collectionCubit = BlocProvider.of<CollectionCubit>(context);
     collectionCubit.getCollection(
         widget.arguments.work.id!, widget.arguments.orderNumber);
-    collectionCubit.cashController.addListener(collectionCubit.listenForCash);
-    collectionCubit.transferController
-        .addListener(collectionCubit.listenForTransfer);
+
+    collectionCubit.cashController.addListener(() {
+      collectionCubit.listenForCash();
+      setState(() {});
+    });
+    collectionCubit.transferController.addListener(() {
+      collectionCubit.listenForTransfer();
+      setState(() {});
+    });
     super.initState();
   }
 
@@ -98,9 +93,8 @@ class CollectionViewState extends State<CollectionView>
             )));
   }
 
-  void buildBlocListener(context, CollectionState state) {
-    print(state);
-    if (state is CollectionSuccess || state is CollectionFailed) {
+  void buildBlocListener(context, CollectionState state) async {
+    if (state is CollectionSuccess) {
       if (state.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -111,12 +105,28 @@ class CollectionViewState extends State<CollectionView>
             ),
           ),
         );
-      } else {
+      } else if (state is CollectionFailed && state.error != null) {
         if (state.validate != null && state.validate == true) {
           collectionCubit.goToWork(state.work);
         } else if (state.validate != null && state.validate == false) {
           collectionCubit.goToSummary(state.work);
         }
+      } else if (state is CollectionWaiting) {
+        //TODO:: [Heider Zapa] resolve variable data
+        await showDialog(
+            context: context,
+            builder: (_) {
+              return MyDialog(
+                total: collectionCubit.total!,
+                totalSummary: state.totalSummary!.toDouble(),
+                confirmateTransaction: () => collectionCubit.confirmTransaction(
+                    widget.arguments,
+                    collectionCubit.cashController,
+                    collectionCubit.transferController,
+                    []),
+                context: context,
+              );
+            });
       }
     } else {
       print('failed');
@@ -125,6 +135,7 @@ class CollectionViewState extends State<CollectionView>
 
   Widget _buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionCubit, CollectionState>(
+      buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
         switch (state.runtimeType) {

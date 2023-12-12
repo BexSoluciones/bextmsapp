@@ -1,36 +1,18 @@
 part of 'collection_cubit.dart';
 
-class CollectionState extends Equatable {
+abstract class CollectionState extends Equatable {
   final double? totalSummary;
-  double? total;
   final EnterpriseConfig? enterpriseConfig;
   final bool? validate;
   final Work? work;
   final String? error;
 
-  CollectionState(
+  const CollectionState(
       {this.enterpriseConfig,
-      this.total,
       this.totalSummary,
       this.work,
       this.validate,
       this.error});
-
-  CollectionState copyWith(
-          {double? totalSummary,
-          double? total,
-          EnterpriseConfig? enterpriseConfig,
-          bool? validate,
-          Work? work,
-          String? error}) =>
-      CollectionState(
-        totalSummary: totalSummary ?? this.totalSummary,
-        total: total ?? this.total,
-        enterpriseConfig: enterpriseConfig ?? this.enterpriseConfig,
-        validate: validate ?? this.validate,
-        work: work ?? this.work,
-        error: error ?? this.error,
-      );
 
   @override
   List<Object?> get props =>
@@ -38,19 +20,25 @@ class CollectionState extends Equatable {
 }
 
 class CollectionInitial extends CollectionState {
-  CollectionInitial({super.total, super.totalSummary, super.enterpriseConfig});
+  const CollectionInitial({super.totalSummary, super.enterpriseConfig});
+}
+
+class CollectionChangeTotal extends CollectionState {
+  final double? total;
+
+  const CollectionChangeTotal(this.total);
 }
 
 class CollectionLoading extends CollectionState {
-  CollectionLoading();
+  const CollectionLoading();
 }
 
 class CollectionWaiting extends CollectionState {
-  CollectionWaiting();
+  const CollectionWaiting();
 }
 
 class CollectionSuccess extends CollectionState {
-  CollectionSuccess({super.work, super.validate});
+  const CollectionSuccess({super.work, super.validate});
 }
 
 class CollectionFailed extends CollectionState {

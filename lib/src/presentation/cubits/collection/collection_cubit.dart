@@ -47,43 +47,40 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
   CollectionCubit(
       this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
-      : super(CollectionLoading(), null);
+      : super(const CollectionLoading(), null);
 
   final TextEditingController transferController = TextEditingController();
   final TextEditingController cashController = TextEditingController();
 
   late int? accountId;
+  late double? total;
 
   void listenForCash() {
     if (transferController.text.isNotEmpty && cashController.text.isNotEmpty) {
-      state.total = double.parse(cashController.text) +
+      total = double.parse(cashController.text) +
           double.parse(transferController.text);
     } else if (cashController.text.isNotEmpty) {
-      state.total = double.parse(cashController.text);
+      total = double.parse(cashController.text);
     } else if (cashController.text.isEmpty && transferController.text.isEmpty) {
-      state.total = 0;
+      total = 0;
     } else if (transferController.text.isNotEmpty &&
         cashController.text.isEmpty) {
-      state.total = double.parse(transferController.text);
+      total = double.parse(transferController.text);
     }
-
-    emit(state.copyWith(total: state.total));
   }
 
   void listenForTransfer() {
     if (cashController.text.isNotEmpty && transferController.text.isNotEmpty) {
-      state.total = double.parse(transferController.text) +
+      total = double.parse(transferController.text) +
           double.parse(cashController.text);
     } else if (transferController.text.isNotEmpty) {
-      state.total = double.parse(transferController.text);
+      total = double.parse(transferController.text);
     } else if (cashController.text.isEmpty && transferController.text.isEmpty) {
-      state.total = 0;
+      total = 0;
     } else if (cashController.text.isNotEmpty &&
         transferController.text.isEmpty) {
-      state.total = double.parse(cashController.text);
+      total = double.parse(cashController.text);
     }
-
-    emit(state.copyWith(total: state.total));
   }
 
   void dispose() {
@@ -98,9 +95,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   Future<CollectionState> _getCollection(int workId, String orderNumber) async {
     var totalSummary =
         await _databaseRepository.getTotalSummaries(workId, orderNumber);
-
+    total = 0;
     return CollectionInitial(
-        total: 0,
         totalSummary: totalSummary,
         enterpriseConfig: _storageService.getObject('config') != null
             ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
@@ -149,7 +145,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     if (isBusy) return;
 
     await run(() async {
-      emit(CollectionLoading());
+      emit(const CollectionLoading());
 
       final allowInsetsBelow = state.enterpriseConfig!.allowInsetsBelow;
       final allowInsetsAbove = state.enterpriseConfig!.allowInsetsAbove;
@@ -163,7 +159,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
       if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
           (allowInsetsAbove == null || allowInsetsAbove == false)) {
-        if (state.total == state.totalSummary!.toDouble()) {
+        if (total == state.totalSummary!.toDouble()) {
           _storageService.setBool('firmRequired', false);
           _storageService.setBool('photoRequired', false);
           //TODO:: [Heider Zapa] confirm transaction
@@ -176,35 +172,14 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         _storageService.setBool('firmRequired', false);
         _storageService.setBool('photoRequired', false);
 
-        if (state.total != null &&
-            state.total! <= state.totalSummary!.toDouble()) {
+        if (total != null && total! <= state.totalSummary!.toDouble()) {
           //TODO:: [Heider Zapa] confirm transaction
         } else {
-          //TODO:: [Heider Zapa] show dialog
-          // await showDialog(
-          //     context: context,
-          //     builder: (_) {
-          //       return MyDialog(
-          //         total: total,
-          //         totalSummary:
-          //         state.totalSummary!.toDouble(),
-          //         confirmateTransaction: () => context
-          //             .read<CollectionCubit>()
-          //             .confirmTransaction(
-          //             widget.arguments,
-          //             cashController,
-          //             transferController,
-          //             data),
-          //         context: context,
-          //       );
-          //     });
+          emit(const CollectionWaiting());
         }
-
-        return;
       } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
           (allowInsetsAbove == null || allowInsetsAbove == false)) {
-        if (state.total != null &&
-            state.total! <= state.totalSummary!.toDouble()) {
+        if (total != null && total! <= state.totalSummary!.toDouble()) {
           _storageService.setBool('firmRequired', false);
           _storageService.setBool('photoRequired', false);
           //TODO:: [Heider Zapa] confirm transaction
@@ -212,31 +187,12 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           emit(CollectionFailed(
               error: 'el recaudo debe ser igual o menor al total'));
         }
-        return;
       } else if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
           (allowInsetsAbove != null && allowInsetsAbove == true)) {
-        if (state.total != null &&
-            state.total! >= state.totalSummary!.toDouble()) {
+        if (total != null && total! >= state.totalSummary!.toDouble()) {
           _storageService.setBool('firmRequired', false);
           _storageService.setBool('photoRequired', false);
-          //TODO:: [Heider Zapa] show dialog
-          // await showDialog(
-          //     context: context,
-          //     builder: (_) {
-          //       return MyDialog(
-          //         total: total,
-          //         totalSummary:
-          //         state.totalSummary!.toDouble(),
-          //         confirmateTransaction: () => context
-          //             .read<CollectionCubit>()
-          //             .confirmTransaction(
-          //             widget.arguments,
-          //             cashController,
-          //             transferController,
-          //             data),
-          //         context: context,
-          //       );
-          //     });
+          emit(const CollectionWaiting());
         } else {
           emit(CollectionFailed(
               error: 'el recaudo debe ser igual o mayor al total'));
@@ -245,13 +201,143 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     });
   }
 
+  Future<void> addAccount() async {
+    if (isBusy) return;
+
+    await run(() async {
+      emit(const CollectionLoading());
+
+      //   if (data.isNotEmpty) {
+      //     paymentTransferController.text = '';
+      //   }
+      //
+      //   if (paymentTransferController
+      //       .text.isNotEmpty) {
+      //     if (double.tryParse(
+      //             paymentTransferController
+      //                 .text) !=
+      //         null) {
+      //       paymentTransferValue =
+      //           double.parse(
+      //               paymentTransferController
+      //                   .text);
+      //       var parsedNumberString = '';
+      //       if (selectedOption != null) {
+      //         var parts = selectedOption!
+      //             .split(' - ');
+      //         if (parts.length >= 3) {
+      //           parsedNumberString = parts[2]
+      //               .replaceAll(
+      //                   RegExp(r'[^\d]+'),
+      //                   '');
+      //         }
+      //       }
+      //       if (paymentCashController
+      //           .text.isNotEmpty) {
+      //         paymentCashValue = double.parse(
+      //             paymentCashController.text);
+      //       } else {
+      //         paymentCashValue = 0;
+      //       }
+      //       var parsedNumber =
+      //           parsedNumberString.isNotEmpty
+      //               ? int.parse(
+      //                   parsedNumberString)
+      //               : null;
+      //       var count = 0.0;
+      //       data.add([
+      //         paymentTransferValue,
+      //         parsedNumber,
+      //         selectedOption
+      //       ]);
+      //
+      //       for (var i = 0;
+      //           i < data.length;
+      //           i++) {
+      //         count += double.parse(
+      //             data[i][0].toString());
+      //       }
+      //       total = count + paymentCashValue;
+      //     }
+      //   } else {
+      //     if (double.tryParse(
+      //             paymentTransferArrayController
+      //                 .text) !=
+      //         null) {
+      //       paymentTransferValue = double.parse(
+      //           paymentTransferArrayController
+      //               .text);
+      //       var parsedNumberString = '';
+      //       if (selectedOption != null) {
+      //         var parts = selectedOption!
+      //             .split(' - ');
+      //         if (parts.length >= 3) {
+      //           parsedNumberString = parts[2]
+      //               .replaceAll(
+      //                   RegExp(r'[^\d]+'),
+      //                   '');
+      //         }
+      //       }
+      //       if (paymentCashController
+      //           .text.isNotEmpty) {
+      //         paymentCashValue = double.parse(
+      //             paymentCashController.text);
+      //       } else {
+      //         paymentCashValue = 0;
+      //       }
+      //       var parsedNumber =
+      //           parsedNumberString.isNotEmpty
+      //               ? int.parse(
+      //                   parsedNumberString)
+      //               : null;
+      //       var count = 0.0;
+      //       data.add([
+      //         paymentTransferValue,
+      //         parsedNumber,
+      //         selectedOption
+      //       ]);
+      //
+      //       for (var i = 0;
+      //           i < data.length;
+      //           i++) {
+      //         count += double.parse(
+      //             data[i][0].toString());
+      //       }
+      //       total = count + paymentCashValue;
+      //     }
+      //   }
+      //   for (var element
+      //       in widget.arguments.summaries!) {
+      //     totalSummary =
+      //         element.grandTotalCopy!;
+      //   }
+      //   if (total != totalSummary) {
+      //     message =
+      //         'el recaudo debe ser igual al total';
+      //     ScaffoldMessenger.of(context)
+      //         .hideCurrentSnackBar();
+      //     ScaffoldMessenger.of(context)
+      //         .showSnackBar(
+      //       SnackBar(
+      //         backgroundColor: Colors.red,
+      //         content: Text(
+      //           message,
+      //           style: const TextStyle(
+      //               color: Colors.white),
+      //         ),
+      //       ),
+      //     );
+      //   }
+    });
+
+
+  }
+
   Future<void> confirmTransaction(InventoryArgument arguments, cashController,
       transferController, List<dynamic> data) async {
     if (isBusy) return;
 
     await run(() async {
-      emit(CollectionLoading());
-
       var status = arguments.r != null && arguments.r!.isNotEmpty
           ? 'partial'
           : 'delivery';
