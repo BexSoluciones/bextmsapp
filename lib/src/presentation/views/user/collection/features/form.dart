@@ -2,6 +2,7 @@ import 'package:bexdeliveries/src/domain/models/account.dart';
 import 'package:bexdeliveries/src/presentation/views/user/collection/features/accounts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 //blocs
 import '../../../../blocs/account/account_bloc.dart';
 //cubits
@@ -32,7 +33,8 @@ class FormCollection extends StatefulWidget {
   State<FormCollection> createState() => _FormCollectionState();
 }
 
-class _FormCollectionState extends State<FormCollection> with FormatNumber {
+class _FormCollectionState extends State<FormCollection>
+    with FormatNumber, FormatDate {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -91,8 +93,8 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'El campo es requerido';
+                    if (value!.contains(',')) {
+                      return '';
                     }
                     return null;
                   },
@@ -191,14 +193,19 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                               widget: const Text('Cuentas Bancarias',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 20)),
-                              press: ()  {
-                                showModalBottomSheet(context: context, builder: (c) {
-                                  return AccountsCollection(
-                                    orderNumber: widget.orderNumber,
-                                    collectionCubit: widget.collectionCubit,
-                                    state: widget.state,
-                                  );
-                                });
+                              press: () {
+                                widget.collectionCubit.dateController.text =
+                                    now();
+                                showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (c) {
+                                      return AccountsCollection(
+                                        orderNumber: widget.orderNumber,
+                                        collectionCubit: widget.collectionCubit,
+                                        state: widget.state,
+                                      );
+                                    });
                               });
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
@@ -314,7 +321,56 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                             )
                           : Container();
                     }),
+                const SizedBox(height: 10),
+                BlocSelector<CollectionCubit, CollectionState, bool>(
+                    selector: (state) =>
+                        state is CollectionInitial &&
+                        state.enterpriseConfig!.specifiedAccountTransfer ==
+                            true &&
+                        state.enterpriseConfig!.multipleAccounts == false,
+                    builder: (c, x) {
+                      return x
+                          ? TextField(
+                              controller: widget.collectionCubit
+                                  .dateController, //editing controller of this TextField
+                              autofocus: false,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.only(left: 15.0),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: kPrimaryColor, width: 2.0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: kPrimaryColor, width: 2.0),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: kPrimaryColor, width: 2.0),
+                                ),
+                              ),
+                              readOnly: true,
+                              onTap: () async {
+                                var pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2101));
 
+                                if (pickedDate != null) {
+                                  var formattedDate = DateFormat('yyyy-MM-dd')
+                                      .format(pickedDate);
+                                  setState(() {
+                                    widget.collectionCubit.dateController.text =
+                                        formattedDate; //set output date to TextField value.
+                                  });
+                                } else {
+                                  print('Fecha no seleccionada');
+                                }
+                              },
+                            )
+                          : Container();
+                    }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
                         state is CollectionInitial &&
@@ -337,7 +393,7 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                             )
                           : Container();
                     }),
-                const SizedBox(height: 50),
+                const SizedBox(height: 30),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

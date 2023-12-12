@@ -156,7 +156,7 @@ class CollectionViewState extends State<CollectionView>
         width: size.width,
         child: Column(children: [
           HeaderCollection(
-              type: widget.arguments.typeOfCharge, total: state.totalSummary!),
+              type: widget.arguments.typeOfCharge, total: state.totalSummary ?? 0.0),
           SizedBox(height: size.height * 0.02),
           FormCollection(
               formKey: _formKey,

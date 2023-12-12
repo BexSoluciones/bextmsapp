@@ -51,6 +51,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
   final TextEditingController transferController = TextEditingController();
   final TextEditingController cashController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
 
   late int? accountId;
   double total = 0;
@@ -154,7 +155,10 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         if (state.enterpriseConfig!.specifiedAccountTransfer == true &&
             transferController.text.isNotEmpty) {
           if (accountId == null) {
-            emit(CollectionFailed(error: 'Selecciona un numero de cuenta'));
+            emit(CollectionFailed(
+                totalSummary: state.totalSummary,
+                enterpriseConfig: state.enterpriseConfig,
+                error: 'Selecciona un numero de cuenta'));
           }
         }
 
@@ -166,7 +170,10 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             //TODO:: [Heider Zapa] confirm transaction
             confirmTransaction(arguments, cashController, transferController);
           } else {
-            emit(CollectionFailed(error: 'el recaudo debe ser igual al total'));
+            emit(CollectionFailed(
+                totalSummary: state.totalSummary,
+                enterpriseConfig: state.enterpriseConfig,
+                error: 'el recaudo debe ser igual al total'));
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove != null && allowInsetsAbove == true)) {
@@ -188,6 +195,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             confirmTransaction(arguments, cashController, transferController);
           } else {
             emit(CollectionFailed(
+                totalSummary: state.totalSummary,
+                enterpriseConfig: state.enterpriseConfig,
                 error: 'el recaudo debe ser igual o menor al total'));
           }
         } else if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
@@ -198,6 +207,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             emit(const CollectionWaiting());
           } else {
             emit(CollectionFailed(
+                totalSummary: state.totalSummary,
+                enterpriseConfig: state.enterpriseConfig,
                 error: 'el recaudo debe ser igual o mayor al total'));
           }
         }

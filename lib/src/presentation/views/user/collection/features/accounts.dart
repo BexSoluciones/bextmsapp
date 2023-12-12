@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 //utils
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/nums.dart';
@@ -45,6 +46,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
             horizontal: kDefaultPadding, vertical: kDefaultPadding),
         child: Column(
           children: [
+            const SizedBox(height: 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -182,6 +184,43 @@ class _AccountsCollectionState extends State<AccountsCollection>
                   return Text('Error: ${accountBlocState.error}');
                 } else {
                   return const Text('No se han cargado datos aún.');
+                }
+              },
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: widget.collectionCubit
+                  .dateController, //editing controller of this TextField
+              autofocus: false,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.only(left: 15.0),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
+                ),
+              ),
+              readOnly: true,
+              onTap: () async {
+                var pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101));
+
+                if (pickedDate != null) {
+                  var formattedDate =
+                      DateFormat('yyyy-MM-dd').format(pickedDate);
+                  setState(() {
+                    widget.collectionCubit.dateController.text =
+                        formattedDate; //set output date to TextField value.
+                  });
+                } else {
+                  print('Fecha no seleccionada');
                 }
               },
             ),

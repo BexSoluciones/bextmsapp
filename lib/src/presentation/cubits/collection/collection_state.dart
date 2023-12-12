@@ -42,5 +42,5 @@ class CollectionSuccess extends CollectionState {
 }
 
 class CollectionFailed extends CollectionState {
-  CollectionFailed({super.error});
+  const CollectionFailed({super.totalSummary, super.enterpriseConfig, super.error});
 }
