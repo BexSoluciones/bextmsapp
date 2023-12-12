@@ -1,0 +1,210 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+//utils
+import '../../../../../utils/constants/colors.dart';
+import '../../../../../utils/constants/nums.dart';
+//blocs
+import '../../../../blocs/account/account_bloc.dart';
+//cubit
+import '../../../../cubits/collection/collection_cubit.dart';
+//domain
+import '../../../../../domain/models/account.dart';
+import '../../../../../domain/abstracts/format_abstract.dart';
+//widgets
+import '../../../../widgets/default_button_widget.dart';
+import '../../../../widgets/transaction_list.dart';
+
+class AccountsCollection extends StatefulWidget {
+  final String orderNumber;
+  final CollectionCubit collectionCubit;
+  final CollectionState state;
+
+  const AccountsCollection({
+    super.key,
+    required this.orderNumber,
+    required this.collectionCubit,
+    required this.state,
+  });
+
+  @override
+  State<AccountsCollection> createState() => _AccountsCollectionState();
+}
+
+class _AccountsCollectionState extends State<AccountsCollection>
+    with FormatNumber {
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return SafeArea(
+        child: SizedBox(
+      height: size.height,
+      width: size.width,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: kDefaultPadding, vertical: kDefaultPadding),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(children: [
+                  Text('TRANSFERENCIA BANCARIA',
+                      style: TextStyle(fontSize: 14)),
+                  Icon(Icons.credit_card)
+                ]),
+                IconButton(
+                    icon: const Icon(Icons.camera_alt,
+                        size: 32, color: kPrimaryColor),
+                    onPressed: () =>
+                        widget.collectionCubit.goToCamera(widget.orderNumber)),
+                widget.state.enterpriseConfig != null &&
+                        widget.state.enterpriseConfig!.codeQr != null
+                    ? IconButton(
+                        icon: const Icon(Icons.qr_code_2,
+                            size: 32, color: kPrimaryColor),
+                        onPressed: () => widget.collectionCubit.goToCodeQR())
+                    : Container()
+              ],
+            ),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              autofocus: false,
+              controller: widget.collectionCubit.transferController,
+              decoration: InputDecoration(
+                prefixText: currency,
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 2.0),
+                ),
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
+                ),
+                errorBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
+                ),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    if (double.tryParse(
+                            widget.collectionCubit.transferController.text) !=
+                        null) {
+                      widget.collectionCubit.total -= double.parse(
+                          widget.collectionCubit.transferController.text);
+                    }
+                    widget.collectionCubit.transferController.clear();
+                  },
+                  icon: const Icon(Icons.clear),
+                ),
+              ),
+              validator: (value) {
+                if (value!.contains(',')) {
+                  return '';
+                }
+                return null;
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(children: [
+                  Text('NÚMERO DE CUENTA', style: TextStyle(fontSize: 14)),
+                  Icon(Icons.account_balance_outlined)
+                ]),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        widget.collectionCubit.addAccount();
+                        setState(() {});
+                      },
+                      icon: const Icon(Icons.add),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.qr_code_2),
+                      onPressed: () =>
+                          widget.collectionCubit.goToCamera(widget.orderNumber),
+                    ),
+                  ],
+                )
+              ],
+            ),
+            BlocBuilder<AccountBloc, AccountState>(
+              builder: (context, accountBlocState) {
+                if (accountBlocState is AccountLoadingState) {
+                  return const CircularProgressIndicator();
+                } else if (accountBlocState is AccountLoadedState) {
+                  return DropdownButtonFormField<Account>(
+                    itemHeight: null,
+                    isExpanded: true,
+                    value: accountBlocState.accounts.first,
+                    onChanged: (Account? newValue) {
+                      widget.collectionCubit.accountId = newValue?.accountId;
+                      setState(() {});
+                    },
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey, width: 2.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: kPrimaryColor, width: 2.0),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: kPrimaryColor, width: 2.0),
+                      ),
+                      hintStyle: TextStyle(
+                        color: Colors.orange,
+                      ),
+                    ),
+                    style: const TextStyle(
+                      // fontSize: 10,
+                      color: kPrimaryColor,
+                    ),
+                    dropdownColor: Colors.white,
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Selecciona una opción válida';
+                      }
+                      return null;
+                    },
+                    items: accountBlocState.accounts.map((Account value) {
+                      return DropdownMenuItem<Account>(
+                        value: value,
+                        child: Text(
+                          '${value.name} - ${value.accountNumber}',
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                } else if (accountBlocState is AccountErrorState) {
+                  return Text('Error: ${accountBlocState.error}');
+                } else {
+                  return const Text('No se han cargado datos aún.');
+                }
+              },
+            ),
+            const SizedBox(height: 10),
+            DefaultButton(
+                widget: const Text('Agregar',
+                    style: TextStyle(color: Colors.white, fontSize: 20)),
+                press: () => widget.collectionCubit.addAccount()),
+            Expanded(
+                child: TransactionList(
+              selectedAccounts: widget.collectionCubit.selectedAccounts,
+              onTotalChange: (amount) {
+                widget.collectionCubit.total += amount;
+                setState(() {});
+              },
+              onDataRemove: (removedData) {
+                widget.collectionCubit.selectedAccounts.remove(removedData);
+                setState(() {});
+              },
+            ))
+          ],
+        ),
+      ),
+    ));
+  }
+}

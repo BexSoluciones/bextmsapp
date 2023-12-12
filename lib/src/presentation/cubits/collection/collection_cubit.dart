@@ -221,127 +221,38 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         transferController.clear();
       }
 
-      //   if (paymentTransferController
-      //       .text.isNotEmpty) {
-      //     if (double.tryParse(
-      //             paymentTransferController
-      //                 .text) !=
-      //         null) {
-      //       paymentTransferValue =
-      //           double.parse(
-      //               paymentTransferController
-      //                   .text);
-      //       var parsedNumberString = '';
-      //       if (selectedOption != null) {
-      //         var parts = selectedOption!
-      //             .split(' - ');
-      //         if (parts.length >= 3) {
-      //           parsedNumberString = parts[2]
-      //               .replaceAll(
-      //                   RegExp(r'[^\d]+'),
-      //                   '');
-      //         }
-      //       }
-      //       if (paymentCashController
-      //           .text.isNotEmpty) {
-      //         paymentCashValue = double.parse(
-      //             paymentCashController.text);
-      //       } else {
-      //         paymentCashValue = 0;
-      //       }
-      //       var parsedNumber =
-      //           parsedNumberString.isNotEmpty
-      //               ? int.parse(
-      //                   parsedNumberString)
-      //               : null;
-      //       var count = 0.0;
-      //       selectedAccounts.add([
-      //         paymentTransferValue,
-      //         parsedNumber,
-      //         selectedOption
-      //       ]);
-      //
-      //       for (var i = 0;
-      //           i < selectedAccounts.length;
-      //           i++) {
-      //         count += double.parse(
-      //             selectedAccounts[i][0].toString());
-      //       }
-      //       total = count + paymentCashValue;
-      //     }
-      //   } else {
-      //     if (double.tryParse(
-      //             paymentTransferArrayController
-      //                 .text) !=
-      //         null) {
-      //       paymentTransferValue = double.parse(
-      //           paymentTransferArrayController
-      //               .text);
-      //       var parsedNumberString = '';
-      //       if (selectedOption != null) {
-      //         var parts = selectedOption!
-      //             .split(' - ');
-      //         if (parts.length >= 3) {
-      //           parsedNumberString = parts[2]
-      //               .replaceAll(
-      //                   RegExp(r'[^\d]+'),
-      //                   '');
-      //         }
-      //       }
-      //       if (paymentCashController
-      //           .text.isNotEmpty) {
-      //         paymentCashValue = double.parse(
-      //             paymentCashController.text);
-      //       } else {
-      //         paymentCashValue = 0;
-      //       }
-      //       var parsedNumber =
-      //           parsedNumberString.isNotEmpty
-      //               ? int.parse(
-      //                   parsedNumberString)
-      //               : null;
-      //       var count = 0.0;
-      //       selectedAccounts.add([
-      //         paymentTransferValue,
-      //         parsedNumber,
-      //         selectedOption
-      //       ]);
-      //
-      //       for (var i = 0;
-      //           i < selectedAccounts.length;
-      //           i++) {
-      //         count += double.parse(
-      //             selectedAccounts[i][0].toString());
-      //       }
-      //       total = count + paymentCashValue;
-      //     }
-      //   }
-      //   for (var element
-      //       in widget.arguments.summaries!) {
-      //     totalSummary =
-      //         element.grandTotalCopy!;
-      //   }
-      //   if (total != totalSummary) {
-      //     message =
-      //         'el recaudo debe ser igual al total';
-      //     ScaffoldMessenger.of(context)
-      //         .hideCurrentSnackBar();
-      //     ScaffoldMessenger.of(context)
-      //         .showSnackBar(
-      //       SnackBar(
-      //         backgroundColor: Colors.red,
-      //         content: Text(
-      //           message,
-      //           style: const TextStyle(
-      //               color: Colors.white),
-      //         ),
-      //       ),
-      //     );
-      //   }
+      if (transferController.text.isNotEmpty) {
+        if (double.tryParse(transferController.text) != null) {
+          var transferValue = double.parse(transferController.text);
+          double cashValue = 0.0;
+
+          if (cashController.text.isNotEmpty) {
+            cashValue = double.parse(cashController.text);
+          }
+
+          var count = 0.0;
+          selectedAccounts.add([transferValue, 'transfer', accountId]);
+
+          for (var i = 0; i < selectedAccounts.length; i++) {
+            count += double.parse(selectedAccounts[i][0].toString());
+          }
+
+          total = count + cashValue;
+        }
+      }
+
+      // for (var element in arguments.summaries!) {
+      //   state.totalSummary = element.grandTotalCopy!;
+      // }
+
+      if (total != state.totalSummary) {
+        emit(CollectionFailed(error: 'el recaudo debe ser igual al total'));
+      }
     });
   }
 
-  Future<void> confirmTransaction(InventoryArgument arguments, cashController, transferController) async {
+  Future<void> confirmTransaction(
+      InventoryArgument arguments, cashController, transferController) async {
     if (isBusy) return;
 
     await run(() async {

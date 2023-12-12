@@ -11,32 +11,35 @@ class EnterpriseConfig extends Equatable {
       fixedDeliveryDistance,
       hadReasonRespawn,
       specifiedAccountTransfer,
-      skipUpdate;
+      skipUpdate,
+      multipleAccounts;
   final String? mapbox;
   final String? codeQr;
-  final int? limitDaysWorks, ratio,distance;
+  final int? limitDaysWorks, ratio, distance;
   final bool? blockPartial;
   final bool? background_location;
 
-  const EnterpriseConfig(
-      {this.id,
-      this.allowInsetsBelow,
-      this.allowInsetsAbove,
-      this.hadTakePicture,
-      this.canBlockClients,
-      this.requiredArrived,
-      this.canMakeHistory,
-      this.fixedDeliveryDistance,
-      this.hadReasonRespawn,
-      this.specifiedAccountTransfer,
-      this.mapbox,
-      this.codeQr,
-      this.blockPartial,
-      this.skipUpdate,
-      this.limitDaysWorks,
-      this.ratio,
-        this.background_location,this.distance,
-      });
+  const EnterpriseConfig({
+    this.id,
+    this.allowInsetsBelow,
+    this.allowInsetsAbove,
+    this.hadTakePicture,
+    this.canBlockClients,
+    this.requiredArrived,
+    this.canMakeHistory,
+    this.fixedDeliveryDistance,
+    this.hadReasonRespawn,
+    this.specifiedAccountTransfer,
+    this.mapbox,
+    this.codeQr,
+    this.blockPartial,
+    this.skipUpdate,
+    this.limitDaysWorks,
+    this.ratio,
+    this.multipleAccounts,
+    this.background_location,
+    this.distance,
+  });
 
   factory EnterpriseConfig.fromMap(Map<String, dynamic> map) {
     return EnterpriseConfig(
@@ -104,6 +107,13 @@ class EnterpriseConfig extends Equatable {
                   : false
               : map['specified_account_transfer']
           : null,
+      multipleAccounts: map['multiple_accounts'] != null
+          ? map['multiple_accounts'] is int
+              ? map['multiple_accounts'] == 1
+                  ? true
+                  : false
+              : map['multiple_accounts']
+          : null,
       mapbox: map['mapbox'] != null ? map['mapbox'] as String : null,
       codeQr: map['code_qr'] != null ? map['code_qr'] as String : null,
       blockPartial: map['block_partial'] != null
@@ -124,13 +134,13 @@ class EnterpriseConfig extends Equatable {
           ? map['limit_days_works'] as int
           : null,
       ratio: map['ratio'] != null ? map['ratio'] as int : null,
-        background_location:  map['block_partial'] != null
-            ? map['background_location'] is int
-            ? map['background_location'] == 1
-            ? true
-            : false
-            : map['background_location']
-            : null,
+      background_location: map['block_partial'] != null
+          ? map['background_location'] is int
+              ? map['background_location'] == 1
+                  ? true
+                  : false
+              : map['background_location']
+          : null,
       distance: map['distance'] != null ? map['distance'] as int : null,
     );
   }
@@ -152,9 +162,10 @@ class EnterpriseConfig extends Equatable {
       'had_reason_respawn': hadReasonRespawn,
       'fixed_delivery_distance': fixedDeliveryDistance,
       'ratio': ratio,
-      'distance':distance,
+      'distance': distance,
       'specified_account_transfer': specifiedAccountTransfer,
-      'background_location':background_location
+      'background_location': background_location,
+      'multiple_accounts': multipleAccounts
     };
   }
 
@@ -180,6 +191,7 @@ class EnterpriseConfig extends Equatable {
         limitDaysWorks,
         ratio,
         distance,
-        background_location
+        background_location,
+        multipleAccounts
       ];
 }

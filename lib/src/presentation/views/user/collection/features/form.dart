@@ -1,13 +1,18 @@
+import 'package:bexdeliveries/src/domain/models/account.dart';
+import 'package:bexdeliveries/src/presentation/views/user/collection/features/accounts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-//cubits
+//blocs
 import '../../../../blocs/account/account_bloc.dart';
+//cubits
 import '../../../../cubits/collection/collection_cubit.dart';
 //utils
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/nums.dart';
 //domain
 import '../../../../../domain/abstracts/format_abstract.dart';
+//widgets
+import '../../../../widgets/default_button_widget.dart';
 import '../../../../widgets/transaction_list.dart';
 
 class FormCollection extends StatefulWidget {
@@ -75,7 +80,7 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                                 .collectionCubit.transferController.text) !=
                             null) {
                           widget.collectionCubit.total = widget
-                                  .collectionCubit.total! -
+                                  .collectionCubit.total -
                               double.parse(
                                   widget.collectionCubit.cashController.text);
                         }
@@ -92,69 +97,116 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                     return null;
                   },
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Row(children: [
-                      Text('TRANSFERENCIA BANCARIA',
-                          style: TextStyle(fontSize: 14)),
-                      Icon(Icons.credit_card)
-                    ]),
-                    IconButton(
-                        icon: const Icon(Icons.camera_alt,
-                            size: 32, color: kPrimaryColor),
-                        onPressed: () => widget.collectionCubit
-                            .goToCamera(widget.orderNumber)),
-                    widget.state.enterpriseConfig != null &&
-                            widget.state.enterpriseConfig!.codeQr != null
-                        ? IconButton(
-                            icon: const Icon(Icons.qr_code_2,
-                                size: 32, color: kPrimaryColor),
-                            onPressed: () =>
-                                widget.collectionCubit.goToCodeQR())
-                        : Container()
-                  ],
-                ),
-                TextFormField(
-                  keyboardType: TextInputType.number,
-                  autofocus: false,
-                  controller: widget.collectionCubit.transferController,
-                  decoration: InputDecoration(
-                    prefixText: currency,
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey, width: 2.0),
-                    ),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-                    ),
-                    errorBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-                    ),
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        if (double.tryParse(widget
-                                .collectionCubit.transferController.text) !=
-                            null) {
-                          widget.collectionCubit.total -= double.parse(
-                              widget.collectionCubit.transferController.text);
-                        }
-                        widget.collectionCubit.transferController.clear();
-                      },
-                      icon: const Icon(Icons.clear),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value!.contains(',')) {
-                      return '';
-                    }
-                    return null;
-                  },
-                ),
+                //TODO:: [Heider Zapa] fix multiple accounts
+                const SizedBox(height: 10),
+                BlocSelector<CollectionCubit, CollectionState, bool>(
+                    selector: (state) =>
+                        state is CollectionInitial &&
+                        state.enterpriseConfig!.multipleAccounts == false,
+                    builder: (c, x) {
+                      return x
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Row(children: [
+                                  Text('TRANSFERENCIA BANCARIA',
+                                      style: TextStyle(fontSize: 14)),
+                                  Icon(Icons.credit_card)
+                                ]),
+                                IconButton(
+                                    icon: const Icon(Icons.camera_alt,
+                                        size: 32, color: kPrimaryColor),
+                                    onPressed: () => widget.collectionCubit
+                                        .goToCamera(widget.orderNumber)),
+                                widget.state.enterpriseConfig != null &&
+                                        widget.state.enterpriseConfig!.codeQr !=
+                                            null
+                                    ? IconButton(
+                                        icon: const Icon(Icons.qr_code_2,
+                                            size: 32, color: kPrimaryColor),
+                                        onPressed: () =>
+                                            widget.collectionCubit.goToCodeQR())
+                                    : Container()
+                              ],
+                            )
+                          : const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(children: [
+                                  Text('TRANSFERENCIA BANCARIA',
+                                      style: TextStyle(fontSize: 14)),
+                                  Icon(Icons.credit_card)
+                                ])
+                              ],
+                            );
+                    }),
+                BlocSelector<CollectionCubit, CollectionState, bool>(
+                    selector: (state) =>
+                        state is CollectionInitial &&
+                        state.enterpriseConfig!.multipleAccounts == false,
+                    builder: (c, x) {
+                      return x
+                          ? TextFormField(
+                              keyboardType: TextInputType.number,
+                              autofocus: false,
+                              controller:
+                                  widget.collectionCubit.transferController,
+                              decoration: InputDecoration(
+                                prefixText: currency,
+                                focusedBorder: const OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.grey, width: 2.0),
+                                ),
+                                enabledBorder: const OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: kPrimaryColor, width: 2.0),
+                                ),
+                                errorBorder: const OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: kPrimaryColor, width: 2.0),
+                                ),
+                                suffixIcon: IconButton(
+                                  onPressed: () {
+                                    if (double.tryParse(widget.collectionCubit
+                                            .transferController.text) !=
+                                        null) {
+                                      widget.collectionCubit.total -=
+                                          double.parse(widget.collectionCubit
+                                              .transferController.text);
+                                    }
+                                    widget.collectionCubit.transferController
+                                        .clear();
+                                  },
+                                  icon: const Icon(Icons.clear),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value!.contains(',')) {
+                                  return '';
+                                }
+                                return null;
+                              },
+                            )
+                          : DefaultButton(
+                              widget: const Text('Cuentas Bancarias',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20)),
+                              press: ()  {
+                                showModalBottomSheet(context: context, builder: (c) {
+                                  return AccountsCollection(
+                                    orderNumber: widget.orderNumber,
+                                    collectionCubit: widget.collectionCubit,
+                                    state: widget.state,
+                                  );
+                                });
+                              });
+                    }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
                         state is CollectionInitial &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
-                            true,
+                            true &&
+                        state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
                           ? Row(
@@ -189,28 +241,28 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                     selector: (state) =>
                         state is CollectionInitial &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
-                            true,
+                            true &&
+                        state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
                           ? BlocBuilder<AccountBloc, AccountState>(
-                              builder: (context, state) {
-                                if (state is AccountLoadingState) {
+                              builder: (context, accountBlocState) {
+                                if (accountBlocState is AccountLoadingState) {
                                   return const CircularProgressIndicator();
-                                } else if (state is AccountLoadedState) {
-                                  final formattedAccountLists =
-                                      state.formattedAccountList;
-                                  return DropdownButtonFormField<String>(
+                                } else if (accountBlocState
+                                    is AccountLoadedState) {
+                                  return DropdownButtonFormField<Account>(
+                                    itemHeight: null,
                                     isExpanded: true,
-                                    value: state.formattedAccountList.first,
-                                    onChanged: (String? newValue) {
-                                      // setState(() {
-                                      //   selectedOption = newValue;
-                                      //   showDropdownError = false;
-                                      // });
+                                    value: accountBlocState.accounts.first,
+                                    onChanged: (Account? newValue) {
+                                      widget.collectionCubit.accountId =
+                                          newValue?.accountId;
+                                      setState(() {});
                                     },
                                     decoration: const InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 12),
+                                      contentPadding:
+                                          EdgeInsets.symmetric(horizontal: 10),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
                                             color: Colors.grey, width: 2.0),
@@ -228,35 +280,32 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                                       ),
                                     ),
                                     style: const TextStyle(
+                                      // fontSize: 10,
                                       color: kPrimaryColor,
                                     ),
                                     dropdownColor: Colors.white,
-                                    // validator: (value) {
-                                    //   if (showDropdownError &&
-                                    //       (value == null ||
-                                    //           value.isEmpty ||
-                                    //           value == options[0])) {
-                                    //     return 'Selecciona una opción válida';
-                                    //   }
-                                    //   return null;
-                                    // },
-                                    items: formattedAccountLists
-                                        .map<DropdownMenuItem<String>>(
-                                            (String value) {
-                                      return DropdownMenuItem<String>(
+                                    validator: (value) {
+                                      if (value == null) {
+                                        return 'Selecciona una opción válida';
+                                      }
+                                      return null;
+                                    },
+                                    items: accountBlocState.accounts
+                                        .map((Account value) {
+                                      return DropdownMenuItem<Account>(
                                         value: value,
                                         child: Text(
-                                          value.contains('-')
-                                              ? '${value.split('-')[0]} - ${value.split('-')[1]}'
-                                              : 'Seleccionar cuenta',
+                                          '${value.name} - ${value.accountNumber}',
                                           style: const TextStyle(
                                               color: Colors.black),
                                         ),
                                       );
                                     }).toList(),
                                   );
-                                } else if (state is AccountErrorState) {
-                                  return Text('Error: ${state.error}');
+                                } else if (accountBlocState
+                                    is AccountErrorState) {
+                                  return Text(
+                                      'Error: ${accountBlocState.error}');
                                 } else {
                                   return const Text(
                                       'No se han cargado datos aún.');
@@ -265,6 +314,7 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                             )
                           : Container();
                     }),
+
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
                         state is CollectionInitial &&
@@ -273,7 +323,8 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                     builder: (c, x) {
                       return x
                           ? TransactionList(
-                              data: widget.collectionCubit.selectedAccounts,
+                              selectedAccounts:
+                                  widget.collectionCubit.selectedAccounts,
                               onTotalChange: (amount) {
                                 widget.collectionCubit.total += amount;
                                 setState(() {});
