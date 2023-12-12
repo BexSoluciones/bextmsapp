@@ -5,7 +5,7 @@ class TransactionList extends StatelessWidget {
   final Function(double) onTotalChange;
   final Function(List<dynamic>) onDataRemove;
 
-  TransactionList({
+  const TransactionList({super.key,
     required this.data,
     required this.onTotalChange,
     required this.onDataRemove,

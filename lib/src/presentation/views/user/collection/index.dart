@@ -95,47 +95,43 @@ class CollectionViewState extends State<CollectionView>
 
   void buildBlocListener(context, CollectionState state) async {
     if (state is CollectionSuccess) {
-      if (state.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.red,
-            content: Text(
-              state.error!,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-        );
-      } else if (state is CollectionFailed && state.error != null) {
-        if (state.validate != null && state.validate == true) {
-          collectionCubit.goToWork(state.work);
-        } else if (state.validate != null && state.validate == false) {
-          collectionCubit.goToSummary(state.work);
-        }
-      } else if (state is CollectionWaiting) {
-        //TODO:: [Heider Zapa] resolve variable data
-        await showDialog(
-            context: context,
-            builder: (_) {
-              return MyDialog(
-                total: collectionCubit.total!,
-                totalSummary: state.totalSummary!.toDouble(),
-                confirmateTransaction: () => collectionCubit.confirmTransaction(
-                    widget.arguments,
-                    collectionCubit.cashController,
-                    collectionCubit.transferController,
-                    []),
-                context: context,
-              );
-            });
+      if (state.validate != null && state.validate == true) {
+        collectionCubit.goToWork(state.work);
+      } else if (state.validate != null && state.validate == false) {
+        collectionCubit.goToSummary(state.work);
       }
-    } else {
-      print('failed');
+    } else if (state is CollectionFailed && state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            state.error!,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    } else if (state is CollectionWaiting) {
+      //TODO:: [Heider Zapa] resolve variable data
+      await showDialog(
+          context: context,
+          builder: (_) {
+            return MyDialog(
+              total: collectionCubit.total!,
+              totalSummary: state.totalSummary!.toDouble(),
+              confirmTransaction: () => collectionCubit.confirmTransaction(
+                widget.arguments,
+                collectionCubit.cashController,
+                collectionCubit.transferController,
+              ),
+              context: context,
+            );
+          });
     }
   }
 
   Widget _buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionCubit, CollectionState>(
-      buildWhen: (previous, current) => previous != current,
+      // buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
         switch (state.runtimeType) {
@@ -193,7 +189,9 @@ class CollectionViewState extends State<CollectionView>
                                     color: Colors.white, fontSize: 20)),
                             press: () async {
                               final form = _formKey.currentState;
-                              if (form!.validate()) collectionCubit.validate();
+                              if (form!.validate()) {
+                                collectionCubit.validate(widget.arguments);
+                              }
                             }));
               })
         ]),
@@ -226,13 +224,13 @@ class MyDialog extends StatefulWidget {
       {Key? key,
       required this.totalSummary,
       required this.total,
-      required this.confirmateTransaction,
+      required this.confirmTransaction,
       required this.context})
       : super(key: key);
 
   final double totalSummary;
   final double total;
-  final Function confirmateTransaction;
+  final Function confirmTransaction;
   final BuildContext context;
 
   @override
@@ -288,7 +286,7 @@ class _MyDialogState extends State<MyDialog> with FormatNumber {
         TextButton(
           child: showText ? const Text('Si') : Text(seconds.toString()),
           onPressed: () {
-            widget.confirmateTransaction(context);
+            widget.confirmTransaction(context);
             Navigator.of(context).pop();
           },
         ),

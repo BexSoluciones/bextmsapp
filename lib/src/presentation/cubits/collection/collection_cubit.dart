@@ -53,7 +53,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   final TextEditingController cashController = TextEditingController();
 
   late int? accountId;
-  late double? total;
+  double total = 0;
+  List<dynamic> selectedAccounts = [];
 
   void listenForCash() {
     if (transferController.text.isNotEmpty && cashController.text.isNotEmpty) {
@@ -95,7 +96,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   Future<CollectionState> _getCollection(int workId, String orderNumber) async {
     var totalSummary =
         await _databaseRepository.getTotalSummaries(workId, orderNumber);
-    total = 0;
     return CollectionInitial(
         totalSummary: totalSummary,
         enterpriseConfig: _storageService.getObject('config') != null
@@ -141,7 +141,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         ));
   }
 
-  Future<void> validate() async {
+  Future<void> validate(InventoryArgument arguments) async {
     if (isBusy) return;
 
     await run(() async {
@@ -164,7 +164,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
             //TODO:: [Heider Zapa] confirm transaction
-            //confirmTransaction(arguments, cashController, transferController, data);
+            confirmTransaction(arguments, cashController, transferController);
           } else {
             emit(CollectionFailed(error: 'el recaudo debe ser igual al total'));
           }
@@ -173,24 +173,26 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           _storageService.setBool('firmRequired', false);
           _storageService.setBool('photoRequired', false);
 
-          if (total != null && total! <= state.totalSummary!.toDouble()) {
+          if (total <= state.totalSummary!.toDouble()) {
             //TODO:: [Heider Zapa] confirm transaction
+            confirmTransaction(arguments, cashController, transferController);
           } else {
             emit(const CollectionWaiting());
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
-          if (total != null && total! <= state.totalSummary!.toDouble()) {
+          if (total <= state.totalSummary!.toDouble()) {
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
             //TODO:: [Heider Zapa] confirm transaction
+            confirmTransaction(arguments, cashController, transferController);
           } else {
             emit(CollectionFailed(
                 error: 'el recaudo debe ser igual o menor al total'));
           }
         } else if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
             (allowInsetsAbove != null && allowInsetsAbove == true)) {
-          if (total != null && total! >= state.totalSummary!.toDouble()) {
+          if (total >= state.totalSummary!.toDouble()) {
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
             emit(const CollectionWaiting());
@@ -215,10 +217,10 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     await run(() async {
       emit(const CollectionLoading());
 
-      //   if (data.isNotEmpty) {
-      //     paymentTransferController.text = '';
-      //   }
-      //
+      if (selectedAccounts.isNotEmpty) {
+        transferController.clear();
+      }
+
       //   if (paymentTransferController
       //       .text.isNotEmpty) {
       //     if (double.tryParse(
@@ -253,17 +255,17 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       //                   parsedNumberString)
       //               : null;
       //       var count = 0.0;
-      //       data.add([
+      //       selectedAccounts.add([
       //         paymentTransferValue,
       //         parsedNumber,
       //         selectedOption
       //       ]);
       //
       //       for (var i = 0;
-      //           i < data.length;
+      //           i < selectedAccounts.length;
       //           i++) {
       //         count += double.parse(
-      //             data[i][0].toString());
+      //             selectedAccounts[i][0].toString());
       //       }
       //       total = count + paymentCashValue;
       //     }
@@ -299,17 +301,17 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       //                   parsedNumberString)
       //               : null;
       //       var count = 0.0;
-      //       data.add([
+      //       selectedAccounts.add([
       //         paymentTransferValue,
       //         parsedNumber,
       //         selectedOption
       //       ]);
       //
       //       for (var i = 0;
-      //           i < data.length;
+      //           i < selectedAccounts.length;
       //           i++) {
       //         count += double.parse(
-      //             data[i][0].toString());
+      //             selectedAccounts[i][0].toString());
       //       }
       //       total = count + paymentCashValue;
       //     }
@@ -339,8 +341,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     });
   }
 
-  Future<void> confirmTransaction(InventoryArgument arguments, cashController,
-      transferController, List<dynamic> data) async {
+  Future<void> confirmTransaction(InventoryArgument arguments, cashController, transferController) async {
     if (isBusy) return;
 
     await run(() async {
@@ -370,7 +371,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           arguments.work.id!, arguments.orderNumber);
 
       var payments = <Payment>[];
-      if (data.isEmpty) {
+
+      if (selectedAccounts.isEmpty) {
         if (cashController.text.isNotEmpty) {
           payments.add(Payment(
             method: 'cash',
@@ -379,11 +381,11 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         }
       }
 
-      for (var i = 0; i < data.length; i++) {
+      for (var i = 0; i < selectedAccounts.length; i++) {
         payments.add(Payment(
             method: 'transfer $i',
-            paid: data[i][0].toString(),
-            accountId: data[i][1].toString()));
+            paid: selectedAccounts[i][0].toString(),
+            accountId: selectedAccounts[i][1].toString()));
       }
 
       if (transferController.text.isNotEmpty) {

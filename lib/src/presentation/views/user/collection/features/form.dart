@@ -49,17 +49,15 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                   keyboardType: TextInputType.number,
                   autofocus: false,
                   controller: widget.collectionCubit.cashController,
-                  // onChanged: data.isNotEmpty
-                  //     ? (newValue) {
-                  //         if (newValue.isEmpty) {
-                  //           setState(() {
-                  //             data.clear();
-                  //             paymentTransferArrayController.clear();
-                  //             paymentCashController.clear();
-                  //           });
-                  //         }
-                  //       }
-                  //     : null,
+                  onChanged: widget.collectionCubit.selectedAccounts.isNotEmpty
+                      ? (newValue) {
+                          if (newValue.isEmpty) {
+                            widget.collectionCubit.selectedAccounts.clear();
+                            widget.collectionCubit.cashController.clear();
+                            setState(() {});
+                          }
+                        }
+                      : null,
                   decoration: InputDecoration(
                     prefixText: currency,
                     focusedBorder: const OutlineInputBorder(
@@ -73,15 +71,16 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                     ),
                     suffixIcon: IconButton(
                       onPressed: () {
-                        // if (double.tryParse(
-                        //         collectionCubit.transferController.text) !=
-                        //     null) {
-                        //   state.total = state.total! -
-                        //       double.parse(collectionCubit.cashController.text);
-                        // }
-                        // data.clear();
-                        // paymentTransferArrayController.clear();
-                        // paymentCashController.clear();
+                        if (double.tryParse(widget
+                                .collectionCubit.transferController.text) !=
+                            null) {
+                          widget.collectionCubit.total = widget
+                                  .collectionCubit.total! -
+                              double.parse(
+                                  widget.collectionCubit.cashController.text);
+                        }
+                        widget.collectionCubit.selectedAccounts.clear();
+                        widget.collectionCubit.transferController.clear();
                       },
                       icon: const Icon(Icons.clear),
                     ),
@@ -134,11 +133,10 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                     suffixIcon: IconButton(
                       onPressed: () {
                         if (double.tryParse(widget
-                                    .collectionCubit.transferController.text) !=
-                                null &&
-                            widget.collectionCubit.total != null) {
-                          // collectionCubit.total -=
-                          //     double.parse(collectionCubit.transferController.text);
+                                .collectionCubit.transferController.text) !=
+                            null) {
+                          widget.collectionCubit.total -= double.parse(
+                              widget.collectionCubit.transferController.text);
                         }
                         widget.collectionCubit.transferController.clear();
                       },
@@ -154,7 +152,7 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                 ),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
-                        state is CollectionSuccess &&
+                        state is CollectionInitial &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true,
                     builder: (c, x) {
@@ -171,17 +169,16 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                                   children: [
                                     IconButton(
                                       onPressed: () {
+                                        widget.collectionCubit.addAccount();
                                         setState(() {});
                                       },
                                       icon: const Icon(Icons.add),
                                     ),
-                                    // IconButton(
-                                    //   icon: const Icon(Icons.qr_code_2),
-                                    //   onPressed: () {
-                                    //     _navigationService.goTo(AppRoutes.codeQr,
-                                    //         arguments: );
-                                    //   },
-                                    // ),
+                                    IconButton(
+                                      icon: const Icon(Icons.qr_code_2),
+                                      onPressed: () => widget.collectionCubit
+                                          .goToCamera(widget.orderNumber),
+                                    ),
                                   ],
                                 )
                               ],
@@ -190,7 +187,7 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
-                        state is CollectionSuccess &&
+                        state is CollectionInitial &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true,
                     builder: (c, x) {
@@ -270,22 +267,21 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
-                        state is CollectionSuccess &&
+                        state is CollectionInitial &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true,
                     builder: (c, x) {
                       return x
                           ? TransactionList(
-                              data: const [],
+                              data: widget.collectionCubit.selectedAccounts,
                               onTotalChange: (amount) {
-                                // setState(() {
-                                //   total += amount;
-                                // });
+                                widget.collectionCubit.total += amount;
+                                setState(() {});
                               },
                               onDataRemove: (removedData) {
-                                // setState(() {
-                                //   data.remove(removedData);
-                                // });
+                                widget.collectionCubit.selectedAccounts
+                                    .remove(removedData);
+                                setState(() {});
                               },
                             )
                           : Container();
