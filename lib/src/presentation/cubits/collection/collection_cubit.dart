@@ -147,56 +147,64 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     await run(() async {
       emit(const CollectionLoading());
 
-      final allowInsetsBelow = state.enterpriseConfig!.allowInsetsBelow;
-      final allowInsetsAbove = state.enterpriseConfig!.allowInsetsAbove;
+      if (state.enterpriseConfig != null) {
+        final allowInsetsBelow = state.enterpriseConfig!.allowInsetsBelow;
+        final allowInsetsAbove = state.enterpriseConfig!.allowInsetsAbove;
 
-      if (state.enterpriseConfig!.specifiedAccountTransfer == true &&
-          transferController.text.isNotEmpty) {
-        if (accountId == null) {
-          emit(CollectionFailed(error: 'Selecciona un numero de cuenta'));
+        if (state.enterpriseConfig!.specifiedAccountTransfer == true &&
+            transferController.text.isNotEmpty) {
+          if (accountId == null) {
+            emit(CollectionFailed(error: 'Selecciona un numero de cuenta'));
+          }
         }
-      }
 
-      if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
-          (allowInsetsAbove == null || allowInsetsAbove == false)) {
-        if (total == state.totalSummary!.toDouble()) {
+        if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
+            (allowInsetsAbove == null || allowInsetsAbove == false)) {
+          if (total == state.totalSummary!.toDouble()) {
+            _storageService.setBool('firmRequired', false);
+            _storageService.setBool('photoRequired', false);
+            //TODO:: [Heider Zapa] confirm transaction
+            //confirmTransaction(arguments, cashController, transferController, data);
+          } else {
+            emit(CollectionFailed(error: 'el recaudo debe ser igual al total'));
+          }
+        } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
+            (allowInsetsAbove != null && allowInsetsAbove == true)) {
           _storageService.setBool('firmRequired', false);
           _storageService.setBool('photoRequired', false);
-          //TODO:: [Heider Zapa] confirm transaction
-          //confirmTransaction(arguments, cashController, transferController, data);
-        } else {
-          emit(CollectionFailed(error: 'el recaudo debe ser igual al total'));
-        }
-      } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
-          (allowInsetsAbove != null && allowInsetsAbove == true)) {
-        _storageService.setBool('firmRequired', false);
-        _storageService.setBool('photoRequired', false);
 
-        if (total != null && total! <= state.totalSummary!.toDouble()) {
-          //TODO:: [Heider Zapa] confirm transaction
-        } else {
-          emit(const CollectionWaiting());
+          if (total != null && total! <= state.totalSummary!.toDouble()) {
+            //TODO:: [Heider Zapa] confirm transaction
+          } else {
+            emit(const CollectionWaiting());
+          }
+        } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
+            (allowInsetsAbove == null || allowInsetsAbove == false)) {
+          if (total != null && total! <= state.totalSummary!.toDouble()) {
+            _storageService.setBool('firmRequired', false);
+            _storageService.setBool('photoRequired', false);
+            //TODO:: [Heider Zapa] confirm transaction
+          } else {
+            emit(CollectionFailed(
+                error: 'el recaudo debe ser igual o menor al total'));
+          }
+        } else if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
+            (allowInsetsAbove != null && allowInsetsAbove == true)) {
+          if (total != null && total! >= state.totalSummary!.toDouble()) {
+            _storageService.setBool('firmRequired', false);
+            _storageService.setBool('photoRequired', false);
+            emit(const CollectionWaiting());
+          } else {
+            emit(CollectionFailed(
+                error: 'el recaudo debe ser igual o mayor al total'));
+          }
         }
-      } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
-          (allowInsetsAbove == null || allowInsetsAbove == false)) {
-        if (total != null && total! <= state.totalSummary!.toDouble()) {
-          _storageService.setBool('firmRequired', false);
-          _storageService.setBool('photoRequired', false);
-          //TODO:: [Heider Zapa] confirm transaction
-        } else {
-          emit(CollectionFailed(
-              error: 'el recaudo debe ser igual o menor al total'));
-        }
-      } else if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
-          (allowInsetsAbove != null && allowInsetsAbove == true)) {
-        if (total != null && total! >= state.totalSummary!.toDouble()) {
-          _storageService.setBool('firmRequired', false);
-          _storageService.setBool('photoRequired', false);
-          emit(const CollectionWaiting());
-        } else {
-          emit(CollectionFailed(
-              error: 'el recaudo debe ser igual o mayor al total'));
-        }
+      } else {
+        emit(CollectionInitial(
+            totalSummary: state.totalSummary,
+            enterpriseConfig: _storageService.getObject('config') != null
+                ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
+                : null));
       }
     });
   }
@@ -329,8 +337,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       //     );
       //   }
     });
-
-
   }
 
   Future<void> confirmTransaction(InventoryArgument arguments, cashController,

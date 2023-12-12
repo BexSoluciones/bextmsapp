@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 //cubits
+import '../../../../blocs/account/account_bloc.dart';
 import '../../../../cubits/collection/collection_cubit.dart';
 //utils
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/nums.dart';
 //domain
 import '../../../../../domain/abstracts/format_abstract.dart';
+import '../../../../widgets/transaction_list.dart';
 
 class FormCollection extends StatefulWidget {
   final GlobalKey formKey;
@@ -169,7 +171,6 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                                   children: [
                                     IconButton(
                                       onPressed: () {
-
                                         setState(() {});
                                       },
                                       icon: const Icon(Icons.add),
@@ -187,95 +188,108 @@ class _FormCollectionState extends State<FormCollection> with FormatNumber {
                             )
                           : Container();
                     }),
-
-                // state.enterpriseConfig != null &&
-                //         state.enterpriseConfig!.specifiedAccountTransfer == true
-                //     ? BlocBuilder<AccountBloc, AccountState>(
-                //         builder: (context, state) {
-                //           if (state is AccountLoadingState) {
-                //             return const CircularProgressIndicator();
-                //           } else if (state is AccountLoadedState) {
-                //             final formattedAccountLists =
-                //                 state.formattedAccountList;
-                //             return DropdownButtonFormField<String>(
-                //               isExpanded: true,
-                //               value: state.formattedAccountList.first,
-                //               onChanged: (String? newValue) {
-                //                 setState(() {
-                //                   selectedOption = newValue;
-                //                   showDropdownError = false;
-                //                 });
-                //               },
-                //               decoration: const InputDecoration(
-                //                 contentPadding: EdgeInsets.symmetric(
-                //                     horizontal: 16, vertical: 12),
-                //                 focusedBorder: OutlineInputBorder(
-                //                   borderSide: BorderSide(
-                //                       color: Colors.grey, width: 2.0),
-                //                 ),
-                //                 enabledBorder: OutlineInputBorder(
-                //                   borderSide: BorderSide(
-                //                       color: kPrimaryColor, width: 2.0),
-                //                 ),
-                //                 errorBorder: OutlineInputBorder(
-                //                   borderSide: BorderSide(
-                //                       color: kPrimaryColor, width: 2.0),
-                //                 ),
-                //                 hintStyle: TextStyle(
-                //                   color: Colors.orange,
-                //                 ),
-                //               ),
-                //               style: const TextStyle(
-                //                 color: kPrimaryColor,
-                //               ),
-                //               dropdownColor: Colors.white,
-                //               validator: (value) {
-                //                 if (showDropdownError &&
-                //                     (value == null ||
-                //                         value.isEmpty ||
-                //                         value == options[0])) {
-                //                   return 'Selecciona una opción válida';
-                //                 }
-                //                 return null;
-                //               },
-                //               items: formattedAccountLists
-                //                   .map<DropdownMenuItem<String>>(
-                //                       (String value) {
-                //                 return DropdownMenuItem<String>(
-                //                   value: value,
-                //                   child: Text(
-                //                     value.contains('-')
-                //                         ? '${value.split('-')[0]} - ${value.split('-')[1]}'
-                //                         : 'Seleccionar cuenta',
-                //                     style: const TextStyle(color: Colors.black),
-                //                   ),
-                //                 );
-                //               }).toList(),
-                //             );
-                //           } else if (state is AccountErrorState) {
-                //             return Text('Error: ${state.error}');
-                //           } else {
-                //             return const Text('No se han cargado datos aún.');
-                //           }
-                //         },
-                //       )
-                //     : Container(),
-                // state.enterpriseConfig != null &&
-                //         state.enterpriseConfig!.specifiedAccountTransfer == true
-                //     ? TransactionList(
-                //         data: data,
-                //         onTotalChange: (amount) {
-                //           setState(() {
-                //             total += amount;
-                //           });
-                //         },
-                //         onDataRemove: (removedData) {
-                //           setState(() {
-                //             data.remove(removedData);
-                //           });
-                //         },
-                //       )
-                //     : Container(),
+                BlocSelector<CollectionCubit, CollectionState, bool>(
+                    selector: (state) =>
+                        state is CollectionSuccess &&
+                        state.enterpriseConfig!.specifiedAccountTransfer ==
+                            true,
+                    builder: (c, x) {
+                      return x
+                          ? BlocBuilder<AccountBloc, AccountState>(
+                              builder: (context, state) {
+                                if (state is AccountLoadingState) {
+                                  return const CircularProgressIndicator();
+                                } else if (state is AccountLoadedState) {
+                                  final formattedAccountLists =
+                                      state.formattedAccountList;
+                                  return DropdownButtonFormField<String>(
+                                    isExpanded: true,
+                                    value: state.formattedAccountList.first,
+                                    onChanged: (String? newValue) {
+                                      // setState(() {
+                                      //   selectedOption = newValue;
+                                      //   showDropdownError = false;
+                                      // });
+                                    },
+                                    decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 12),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.grey, width: 2.0),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: kPrimaryColor, width: 2.0),
+                                      ),
+                                      errorBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: kPrimaryColor, width: 2.0),
+                                      ),
+                                      hintStyle: TextStyle(
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+                                    style: const TextStyle(
+                                      color: kPrimaryColor,
+                                    ),
+                                    dropdownColor: Colors.white,
+                                    // validator: (value) {
+                                    //   if (showDropdownError &&
+                                    //       (value == null ||
+                                    //           value.isEmpty ||
+                                    //           value == options[0])) {
+                                    //     return 'Selecciona una opción válida';
+                                    //   }
+                                    //   return null;
+                                    // },
+                                    items: formattedAccountLists
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          value.contains('-')
+                                              ? '${value.split('-')[0]} - ${value.split('-')[1]}'
+                                              : 'Seleccionar cuenta',
+                                          style: const TextStyle(
+                                              color: Colors.black),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  );
+                                } else if (state is AccountErrorState) {
+                                  return Text('Error: ${state.error}');
+                                } else {
+                                  return const Text(
+                                      'No se han cargado datos aún.');
+                                }
+                              },
+                            )
+                          : Container();
+                    }),
+                BlocSelector<CollectionCubit, CollectionState, bool>(
+                    selector: (state) =>
+                        state is CollectionSuccess &&
+                        state.enterpriseConfig!.specifiedAccountTransfer ==
+                            true,
+                    builder: (c, x) {
+                      return x
+                          ? TransactionList(
+                              data: const [],
+                              onTotalChange: (amount) {
+                                // setState(() {
+                                //   total += amount;
+                                // });
+                              },
+                              onDataRemove: (removedData) {
+                                // setState(() {
+                                //   data.remove(removedData);
+                                // });
+                              },
+                            )
+                          : Container();
+                    }),
                 const SizedBox(height: 50),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

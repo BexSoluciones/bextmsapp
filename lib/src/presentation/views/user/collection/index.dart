@@ -58,12 +58,12 @@ class CollectionViewState extends State<CollectionView>
     super.initState();
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    collectionCubit.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   WidgetsBinding.instance.removeObserver(this);
+  //   collectionCubit.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
