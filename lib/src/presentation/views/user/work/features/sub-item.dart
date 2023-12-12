@@ -75,7 +75,7 @@ class SubItemWorkState extends State<SubItemWork> {
                                 color:
                                     Theme.of(context).colorScheme.onSecondary),
                           ))),
-                  onTap: () => _navigationService.goTo(summaryRoute,
+                  onTap: () => _navigationService.goTo(AppRoutes.summary,
                       arguments: SummaryArgument(work: widget.work)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
