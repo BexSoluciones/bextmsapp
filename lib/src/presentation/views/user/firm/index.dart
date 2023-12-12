@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-
 //utils
-import '../../../../../utils/constants/colors.dart';
-
+import '../../../../utils/constants/colors.dart';
 //widgets
-import '../../../../widgets/painter_widget.dart';
+import '../../../widgets/painter_widget.dart';
 
 class FirmView extends StatefulWidget {
   const FirmView({Key? key, required this.orderNumber}) : super(key: key);
@@ -24,13 +22,13 @@ class FirmViewState extends State<FirmView> {
 
     return SafeArea(
         child: Scaffold(
-      appBar: AppBar(
-        backgroundColor: kPrimaryColor,
-        leading: null,
-      ),
-      backgroundColor: Colors.white,
-      body: TouchControl(
-          width: width, height: height, orderNumber: widget.orderNumber),
-    ));
+          appBar: AppBar(
+            backgroundColor: kPrimaryColor,
+            leading: null,
+          ),
+          backgroundColor: Colors.white,
+          body: TouchControl(
+              width: width, height: height, orderNumber: widget.orderNumber),
+        ));
   }
 }

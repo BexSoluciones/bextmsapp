@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 
 //core
 import '../../../../core/helpers/index.dart';
@@ -46,7 +47,49 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
   CollectionCubit(
       this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
-      : super(const CollectionLoading(), null);
+      : super(CollectionLoading(), null);
+
+  final TextEditingController transferController = TextEditingController();
+  final TextEditingController cashController = TextEditingController();
+
+  late int? accountId;
+
+  void listenForCash() {
+    if (transferController.text.isNotEmpty && cashController.text.isNotEmpty) {
+      state.total = double.parse(cashController.text) +
+          double.parse(transferController.text);
+    } else if (cashController.text.isNotEmpty) {
+      state.total = double.parse(cashController.text);
+    } else if (cashController.text.isEmpty && transferController.text.isEmpty) {
+      state.total = 0;
+    } else if (transferController.text.isNotEmpty &&
+        cashController.text.isEmpty) {
+      state.total = double.parse(transferController.text);
+    }
+
+    emit(state.copyWith(total: state.total));
+  }
+
+  void listenForTransfer() {
+    if (cashController.text.isNotEmpty && transferController.text.isNotEmpty) {
+      state.total = double.parse(transferController.text) +
+          double.parse(cashController.text);
+    } else if (transferController.text.isNotEmpty) {
+      state.total = double.parse(transferController.text);
+    } else if (cashController.text.isEmpty && transferController.text.isEmpty) {
+      state.total = 0;
+    } else if (cashController.text.isNotEmpty &&
+        transferController.text.isEmpty) {
+      state.total = double.parse(cashController.text);
+    }
+
+    emit(state.copyWith(total: state.total));
+  }
+
+  void dispose() {
+    cashController.dispose();
+    transferController.dispose();
+  }
 
   Future<void> getCollection(int workId, String orderNumber) async {
     emit(await _getCollection(workId, orderNumber));
@@ -57,6 +100,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         await _databaseRepository.getTotalSummaries(workId, orderNumber);
 
     return CollectionInitial(
+        total: 0,
         totalSummary: totalSummary,
         enterpriseConfig: _storageService.getObject('config') != null
             ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
@@ -101,15 +145,112 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         ));
   }
 
-  Future<void> confirmTransaction(
-      InventoryArgument arguments,
-      paymentCashController,
-      paymentTransferController,
-      List<dynamic> data) async {
+  Future<void> validate() async {
     if (isBusy) return;
 
     await run(() async {
-      emit(const CollectionLoading());
+      emit(CollectionLoading());
+
+      final allowInsetsBelow = state.enterpriseConfig!.allowInsetsBelow;
+      final allowInsetsAbove = state.enterpriseConfig!.allowInsetsAbove;
+
+      if (state.enterpriseConfig!.specifiedAccountTransfer == true &&
+          transferController.text.isNotEmpty) {
+        if (accountId == null) {
+          emit(CollectionFailed(error: 'Selecciona un numero de cuenta'));
+        }
+      }
+
+      if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
+          (allowInsetsAbove == null || allowInsetsAbove == false)) {
+        if (state.total == state.totalSummary!.toDouble()) {
+          _storageService.setBool('firmRequired', false);
+          _storageService.setBool('photoRequired', false);
+          //TODO:: [Heider Zapa] confirm transaction
+          //confirmTransaction(arguments, cashController, transferController, data);
+        } else {
+          emit(CollectionFailed(error: 'el recaudo debe ser igual al total'));
+        }
+      } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
+          (allowInsetsAbove != null && allowInsetsAbove == true)) {
+        _storageService.setBool('firmRequired', false);
+        _storageService.setBool('photoRequired', false);
+
+        if (state.total != null &&
+            state.total! <= state.totalSummary!.toDouble()) {
+          //TODO:: [Heider Zapa] confirm transaction
+        } else {
+          //TODO:: [Heider Zapa] show dialog
+          // await showDialog(
+          //     context: context,
+          //     builder: (_) {
+          //       return MyDialog(
+          //         total: total,
+          //         totalSummary:
+          //         state.totalSummary!.toDouble(),
+          //         confirmateTransaction: () => context
+          //             .read<CollectionCubit>()
+          //             .confirmTransaction(
+          //             widget.arguments,
+          //             cashController,
+          //             transferController,
+          //             data),
+          //         context: context,
+          //       );
+          //     });
+        }
+
+        return;
+      } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
+          (allowInsetsAbove == null || allowInsetsAbove == false)) {
+        if (state.total != null &&
+            state.total! <= state.totalSummary!.toDouble()) {
+          _storageService.setBool('firmRequired', false);
+          _storageService.setBool('photoRequired', false);
+          //TODO:: [Heider Zapa] confirm transaction
+        } else {
+          emit(CollectionFailed(
+              error: 'el recaudo debe ser igual o menor al total'));
+        }
+        return;
+      } else if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
+          (allowInsetsAbove != null && allowInsetsAbove == true)) {
+        if (state.total != null &&
+            state.total! >= state.totalSummary!.toDouble()) {
+          _storageService.setBool('firmRequired', false);
+          _storageService.setBool('photoRequired', false);
+          //TODO:: [Heider Zapa] show dialog
+          // await showDialog(
+          //     context: context,
+          //     builder: (_) {
+          //       return MyDialog(
+          //         total: total,
+          //         totalSummary:
+          //         state.totalSummary!.toDouble(),
+          //         confirmateTransaction: () => context
+          //             .read<CollectionCubit>()
+          //             .confirmTransaction(
+          //             widget.arguments,
+          //             cashController,
+          //             transferController,
+          //             data),
+          //         context: context,
+          //       );
+          //     });
+        } else {
+          emit(CollectionFailed(
+              error: 'el recaudo debe ser igual o mayor al total'));
+        }
+      }
+    });
+  }
+
+  Future<void> confirmTransaction(InventoryArgument arguments, cashController,
+      transferController, List<dynamic> data) async {
+    if (isBusy) return;
+
+    await run(() async {
+      emit(CollectionLoading());
 
       var status = arguments.r != null && arguments.r!.isNotEmpty
           ? 'partial'
@@ -138,10 +279,10 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
       var payments = <Payment>[];
       if (data.isEmpty) {
-        if (paymentCashController.text.isNotEmpty) {
+        if (cashController.text.isNotEmpty) {
           payments.add(Payment(
             method: 'cash',
-            paid: paymentCashController.text,
+            paid: cashController.text,
           ));
         }
       }
@@ -153,15 +294,15 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             accountId: data[i][1].toString()));
       }
 
-      if (paymentTransferController.text.isNotEmpty) {
+      if (transferController.text.isNotEmpty) {
         payments.add(Payment(
           method: 'transfer',
-          paid: paymentTransferController.text,
+          paid: transferController.text,
         ));
       }
 
       if (payments.isEmpty && (status == 'delivery' || status == 'partial')) {
-        emit(const CollectionFailed(
+        emit(CollectionFailed(
             error:
                 'No hay pagos para el recaudo que cumpla con las condiciones'));
       } else {

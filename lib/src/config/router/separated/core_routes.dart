@@ -1,16 +1,14 @@
 //domain
 import '../../../domain/models/photo.dart';
 //utils
-
 import '../../../utils/constants/strings.dart';
 //router
 import '../route_type.dart';
 //views
 import '../../../presentation/views/user/camera/index.dart';
-import '../../../presentation/views/user/collection/features/firm.dart';
+import '../../../presentation/views/user/firm/index.dart';
 import '../../../presentation/views/user/photos/features/detail.dart';
 import '../../../presentation/views/user/photos/index.dart';
-//TODO:: [Heider Zapa fix code qr view]
 import '../../../presentation/views/user/qr/index.dart';
 
 Map<String, RouteType> coreRoutes = {
