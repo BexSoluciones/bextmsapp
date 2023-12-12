@@ -92,13 +92,13 @@ class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
 
       _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueTransaction));
 
-      _navigationService.goTo(workRoute, arguments: arguments);
+      _navigationService.goTo(AppRoutes.work, arguments: arguments);
 
     });
   }
 
   Future<void> out(arguments) async  {
     _storageService.setBool('${arguments.work.workcode}-started', false);
-    _navigationService.goTo(workRoute, arguments: arguments);
+    _navigationService.goTo(AppRoutes.work, arguments: arguments);
   }
 }

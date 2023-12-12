@@ -49,7 +49,7 @@ class AppBarInventory extends StatelessWidget {
             context
                 .read<InventoryCubit>()
                 .reset(arguments.work.id!, arguments.orderNumber);
-            _navigationService.goTo(summaryRoute,
+            _navigationService.goTo(AppRoutes.summary,
                 arguments: SummaryArgument(work: arguments.work));
           },
           icon: const Icon(Icons.arrow_back_ios_new)),

@@ -21,7 +21,7 @@ class PhotoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () =>
-          Navigator.pushNamed(context, detailPhotoRoute, arguments: photo),
+          Navigator.pushNamed(context, AppRoutes.detailPhoto, arguments: photo),
       child: Card(
         elevation: 5.0,
         child: Stack(

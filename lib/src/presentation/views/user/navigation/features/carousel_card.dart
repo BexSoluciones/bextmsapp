@@ -18,7 +18,7 @@ Widget carouselCard(
   return GestureDetector(
       onTap: () async {
         if (work.hasCompleted != null && work.hasCompleted == 0) {
-          _navigationService.goTo(summaryRoute,
+          _navigationService.goTo(AppRoutes.summary,
               arguments: SummaryArgument(work: work));
         }
       },

@@ -12,12 +12,8 @@ import '../../../../../utils/constants/strings.dart';
 //services
 import '../../../../../locator.dart';
 import '../../../../../services/navigation.dart';
-import '../../../../../services/storage.dart';
-import '../../../../../utils/constants/nums.dart';
-import '../../../../widgets/default_button_widget.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class BottomBarInventory extends StatefulWidget {
   const BottomBarInventory(
@@ -73,7 +69,7 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
             ? SizedBox(
                 height: 65,
                 child: InkWell(
-                  onTap: () => _navigationService.goTo(rejectRoute,
+                  onTap: () => _navigationService.goTo(AppRoutes.reject,
                       arguments: widget.arguments),
                   child: Padding(
                     padding: const EdgeInsets.only(top: 8.0),
@@ -93,7 +89,7 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                         ? MediaQuery.of(context).size.height * 0.1
                         : MediaQuery.of(context).size.height * 0.06,
                     child: InkWell(
-                      onTap: () => _navigationService.goTo(partialRoute,
+                      onTap: () => _navigationService.goTo(AppRoutes.partial,
                           arguments: widget.arguments),
                       child: Padding(
                         padding: EdgeInsets.all(
@@ -128,15 +124,15 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
 
                           switch (currentIndex) {
                             case 0:
-                              _navigationService.goTo(collectionRoute,
+                              _navigationService.goTo(AppRoutes.collection,
                                   arguments: widget.arguments);
                               break;
                             case 1:
-                              _navigationService.goTo(rejectRoute,
+                              _navigationService.goTo(AppRoutes.reject,
                                   arguments: widget.arguments);
                               break;
                             case 2:
-                              _navigationService.goTo(respawnRoute,
+                              _navigationService.goTo(AppRoutes.respawn,
                                   arguments: widget.arguments);
                               break;
                           }
@@ -161,11 +157,7 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
 
   bool hasNavigationBar() {
     var window = WidgetsBinding.instance.window;
-
-    if (window != null) {
-      var padding = window.viewPadding;
-      return padding.bottom > 0;
-    }
-    return false;
+    var padding = window.viewPadding;
+    return padding.bottom > 0;
   }
 }

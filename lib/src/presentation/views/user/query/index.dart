@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -107,7 +106,7 @@ class _QueryViewState extends State<QueryView> {
                       SlidableAction(
                         onPressed: (_) {
                           context.read<QueryCubit>().goTo(
-                              collectionQueryRoute, works[index].workcode);
+                              AppRoutes.collectionQuery, works[index].workcode);
                           queryCubit
                               .getWorks(works[index].workcode.toString());
                         },
@@ -118,7 +117,7 @@ class _QueryViewState extends State<QueryView> {
                       SlidableAction(
                         onPressed: (_) {
                           context.read<QueryCubit>().goTo(
-                              devolutionQueryRoute, works[index].workcode);
+                              AppRoutes.devolutionQuery, works[index].workcode);
                           queryCubit
                               .getWorks(works[index].workcode.toString());
                         },
@@ -134,7 +133,7 @@ class _QueryViewState extends State<QueryView> {
                       onPressed: (_) {
                         context
                             .read<QueryCubit>()
-                            .goTo(respawnQueryRoute, works[index].workcode);
+                            .goTo(AppRoutes.respawnQuery, works[index].workcode);
                         queryCubit
                             .getWorks(works[index].workcode.toString());
                       },

@@ -108,7 +108,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       emit(const HomeLoading());
 
       final timer0 =
-          logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
+          logTimerStart(headerHomeLogger, 'Starting...', level: LogLevel.info);
 
       var currentLocation = gpsBloc.state.lastKnownLocation;
 
@@ -254,7 +254,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           await _databaseRepository.deleteLocationsByDays();
           await _databaseRepository.deleteNotificationsByDays();
 
-          logTimerStop(headerLogger, timer0, 'Initialization completed',
+          logTimerStop(headerHomeLogger, timer0, 'Initialization completed',
               level: LogLevel.success);
 
           for (var work in works) {
@@ -284,7 +284,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       _storageService.remove('user');
       _storageService.remove('token');
 
-      await _navigationService.goTo(loginRoute);
+      await _navigationService.goTo(AppRoutes.login);
     });
   }
 }

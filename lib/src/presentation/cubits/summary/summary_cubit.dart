@@ -113,7 +113,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         isArrived: isArrived,
         isGeoreference: state.isGeoreference));
 
-    _navigationService.goTo(inventoryRoute,
+    _navigationService.goTo(AppRoutes.inventory,
         arguments: InventoryArgument(
             work: work,
             summaryId: summary.id,

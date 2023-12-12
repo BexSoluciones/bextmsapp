@@ -86,7 +86,8 @@ class _FillIssueViewState extends State<FillIssueView> {
                                                 color: Colors.white)
                                           ]),
                             press: () async {
-                              await Navigator.of(context).pushNamed(cameraRoute,
+                              await Navigator.of(context).pushNamed(
+                                  AppRoutes.camera,
                                   arguments: (state.status == 'work')
                                       ? state.workId.toString() +
                                           state.codmotvis!
@@ -106,31 +107,29 @@ class _FillIssueViewState extends State<FillIssueView> {
                                   state.firm != null && state.firm.length != 0
                                       ? Colors.green
                                       : theme.primaryColor,
-                              widget:
-                                  state.firm != null && state.firm.length != 0
-                                      ? const Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Text('Firma Adjuntada !!'),
-                                            Icon(Icons.edit,
-                                                color: Colors.white),
-                                          ],
-                                        )
-                                      : const Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                              Text('La firma es requerida',
-                                                  style: TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.white)),
-                                              Icon(Icons.edit,
-                                                  color: Colors.white)
-                                            ]),
+                              widget: state.firm != null &&
+                                      state.firm.length != 0
+                                  ? const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text('Firma Adjuntada !!'),
+                                        Icon(Icons.edit, color: Colors.white),
+                                      ],
+                                    )
+                                  : const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                          Text('La firma es requerida',
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.white)),
+                                          Icon(Icons.edit, color: Colors.white)
+                                        ]),
                               press: () async {
                                 await _navigationService.goTo(
-                                  firmRoute,
+                                  AppRoutes.firm,
                                   arguments: (state.status == 'work')
                                       ? state.workId.toString() +
                                           state.codmotvis!
@@ -176,24 +175,22 @@ class _FillIssueViewState extends State<FillIssueView> {
                               fontWeight: FontWeight.normal)),
                       press: () async {
                         if (await validateParameters(issuesBloc: issuesBloc)) {
-
                           issuesBloc.add(DataIssue());
 
-                          if(context.mounted) {
+                          if (context.mounted) {
                             Navigator.pop(context);
                             Navigator.pop(context);
 
                             await showDialog(
                                 context: context,
                                 builder: (context) => CustomConfirmDialog(
-                                  title: 'Novedad Creada',
-                                  message: 'Novedad reportada con exito !!',
-                                  onConfirm: () => Navigator.pop(context),
-                                  buttonText: 'Aceptar',
-                                  cancelButtom: false,
-                                ));
+                                      title: 'Novedad Creada',
+                                      message: 'Novedad reportada con exito !!',
+                                      onConfirm: () => Navigator.pop(context),
+                                      buttonText: 'Aceptar',
+                                      cancelButtom: false,
+                                    ));
                           }
-
                         } else {
                           print('all is not ok :C');
                         }

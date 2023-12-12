@@ -531,7 +531,7 @@ class CollectionViewState extends State<CollectionView>
                                       icon: const Icon(Icons.qr_code_2),
                                       onPressed: () {
                                         _navigationService.goTo(
-                                            CodigoQRouteTransf,
+                                            AppRoutes.codeQr,
                                             arguments: _storageService
                                                 .getString('code_qr'));
                                       },
@@ -674,9 +674,9 @@ class CollectionViewState extends State<CollectionView>
                               state.enterpriseConfig!.allowInsetsAbove;
 
                           logDebugFine(
-                              headerLogger, allowInsetsBelow.toString());
+                              headerCollectionLogger, allowInsetsBelow.toString());
                           logDebugFine(
-                              headerLogger, allowInsetsAbove.toString());
+                              headerCollectionLogger, allowInsetsAbove.toString());
 
                           if (state.enterpriseConfig!
                                       .specifiedAccountTransfer ==
@@ -781,8 +781,8 @@ class CollectionViewState extends State<CollectionView>
                                   allowInsetsBelow == true) &&
                               (allowInsetsAbove == null ||
                                   allowInsetsAbove == false)) {
-                            logDebugFine(headerLogger, total.toString());
-                            logDebugFine(headerLogger,
+                            logDebugFine(headerCollectionLogger, total.toString());
+                            logDebugFine(headerCollectionLogger,
                                 state.totalSummary!.toDouble().toString());
 
                             if (total <= state.totalSummary!.toDouble()) {

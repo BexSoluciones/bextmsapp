@@ -99,10 +99,10 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
         emit(RejectSuccess(reasons: reasons));
 
         if (validate == false) {
-          await _navigationService.goTo(summaryRoute,
+          await _navigationService.goTo(AppRoutes.summary,
               arguments: SummaryArgument(work: arguments.work));
         } else {
-          await _navigationService.goTo(workRoute,
+          await _navigationService.goTo(AppRoutes.work,
               arguments: WorkArgument(work: arguments.work));
         }
       }

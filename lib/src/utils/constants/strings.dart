@@ -10,6 +10,7 @@ const String headerSummaryLogger = 'summary';
 const String headerNavigationLogger = 'navigation';
 const String headerDrawerLogger = 'drawer';
 const String headerIssueLogger = 'issue';
+const String headerCollectionLogger = 'issue';
 const String headerDeveloperLogger = 'developer';
 
 //routes

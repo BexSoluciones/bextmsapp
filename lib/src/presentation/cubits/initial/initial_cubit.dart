@@ -72,6 +72,6 @@ class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
   }
 
   void goToLogin() {
-    _navigationService.replaceTo(loginRoute);
+    _navigationService.replaceTo(AppRoutes.login);
   }
 }

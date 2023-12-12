@@ -53,10 +53,11 @@ class AppBarInventory extends StatelessWidget {
             context
                 .read<InventoryCubit>()
                 .reset(arguments.work.id!, arguments.orderNumber);
-            _navigationService.goTo(summaryRoute,
+            _navigationService.goTo(AppRoutes.summary,
                 arguments: SummaryArgument(work: arguments.work));
           },
-          icon:  Icon(Icons.arrow_back_ios_new,color:Theme.of(context).colorScheme.secondaryContainer)),
+          icon: Icon(Icons.arrow_back_ios_new,
+              color: Theme.of(context).colorScheme.secondaryContainer)),
       actions: [
         const IconConnection(),
         isArrived == true
@@ -74,7 +75,9 @@ class AppBarInventory extends StatelessWidget {
                             .reset(arguments.work.id!, arguments.orderNumber);
                       }
                     },
-                    icon:  Icon(Icons.change_circle_outlined,color:Theme.of(context).colorScheme.secondaryContainer)))
+                    icon: Icon(Icons.change_circle_outlined,
+                        color:
+                            Theme.of(context).colorScheme.secondaryContainer)))
             : Container(),
         const SizedBox(width: 5)
       ],
@@ -94,7 +97,7 @@ class AppBarInventory extends StatelessWidget {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                       SizedBox(height: getProportionateScreenHeight(25)),
+                      SizedBox(height: getProportionateScreenHeight(25)),
                       Expanded(
                         child: Padding(
                             padding: const EdgeInsets.all(kDefaultPadding),
@@ -110,32 +113,43 @@ class AppBarInventory extends StatelessWidget {
                                             text: 'EXPEDICIÓN: ',
                                             style: TextStyle(
                                                 fontSize: calculatedFon,
-                                                fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondaryContainer),
                                           ),
                                           TextSpan(
                                               text: arguments.expedition,
                                               style: TextStyle(
                                                   fontSize: 16,
-                                                  fontWeight:
-                                                      FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                                                  fontWeight: FontWeight.normal,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .secondaryContainer)),
                                         ],
                                       ),
                                     ),
                                   Text.rich(
                                     TextSpan(
                                       children: [
-                                         TextSpan(
+                                        TextSpan(
                                           text: 'DOCUMENTO: ',
                                           style: TextStyle(
                                               fontSize: calculatedFon,
-                                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondaryContainer),
                                         ),
                                         TextSpan(
                                             text:
                                                 '${arguments.work.type}-${arguments.orderNumber}',
-                                            style:  TextStyle(
+                                            style: TextStyle(
                                                 fontSize: calculatedFon,
-                                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                                                fontWeight: FontWeight.normal,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondaryContainer)),
                                       ],
                                     ),
                                   ),
@@ -147,13 +161,19 @@ class AppBarInventory extends StatelessWidget {
                                           text: 'NIT: ',
                                           style: TextStyle(
                                               fontSize: calculatedFon,
-                                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondaryContainer),
                                         ),
                                         TextSpan(
                                             text: arguments.work.numberCustomer,
                                             style: TextStyle(
                                                 fontSize: calculatedFon,
-                                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                                                fontWeight: FontWeight.normal,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondaryContainer)),
                                       ],
                                     ),
                                   ),
@@ -162,23 +182,32 @@ class AppBarInventory extends StatelessWidget {
                                     arguments.work.customer!,
                                     style: TextStyle(
                                         fontSize: calculatedFon,
-                                        fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer),
+                                        fontWeight: FontWeight.normal,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondaryContainer),
                                   ),
                                   const SizedBox(height: 10),
                                   Text.rich(
                                     TextSpan(
                                       children: [
-                                         TextSpan(
+                                        TextSpan(
                                           text: 'DIR: ',
                                           style: TextStyle(
                                               fontSize: calculatedFon,
-                                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondaryContainer),
                                         ),
                                         TextSpan(
                                             text: arguments.work.address,
-                                            style:  TextStyle(
+                                            style: TextStyle(
                                                 fontSize: calculatedFon,
-                                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                                                fontWeight: FontWeight.normal,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondaryContainer)),
                                       ],
                                     ),
                                   ),
@@ -187,20 +216,25 @@ class AppBarInventory extends StatelessWidget {
                                       ? Text.rich(
                                           TextSpan(
                                             children: [
-                                               TextSpan(
+                                              TextSpan(
                                                 text: 'CEL: ',
                                                 style: TextStyle(
                                                     fontSize: calculatedFon,
-                                                    fontWeight:
-                                                        FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .secondaryContainer),
                                               ),
                                               TextSpan(
                                                   text:
                                                       arguments.work.cellphone,
-                                                  style:  TextStyle(
+                                                  style: TextStyle(
                                                       fontSize: calculatedFon,
                                                       fontWeight:
-                                                          FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                                                          FontWeight.normal,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .secondaryContainer)),
                                             ],
                                           ),
                                         )
@@ -214,7 +248,10 @@ class AppBarInventory extends StatelessWidget {
       title: Text(arguments.work.workcode!,
           textScaleFactor: calculatedTextScaleFactor,
           textAlign: TextAlign.center,
-          style:  TextStyle(fontSize: calculatedFon, fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+          style: TextStyle(
+              fontSize: calculatedFon,
+              fontWeight: FontWeight.normal,
+              color: Theme.of(context).colorScheme.secondaryContainer)),
     );
   }
 }

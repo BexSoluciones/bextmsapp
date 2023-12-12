@@ -61,7 +61,7 @@ class PhotoViewState extends State<PhotoView> {
       floatingActionButton: FloatingActionButton(
         backgroundColor:
             Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
-        onPressed: () => Navigator.pushNamed(context, cameraRoute),
+        onPressed: () => Navigator.pushNamed(context, AppRoutes.camera),
         tooltip: 'Añadir',
         child: const Icon(
           Icons.add,
