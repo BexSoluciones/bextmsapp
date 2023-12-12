@@ -5,14 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 //blocs
 import '../../../blocs/account/account_bloc.dart';
 
-class CodigoQRTransferScreen extends StatefulWidget {
-  const CodigoQRTransferScreen({Key? key,}) : super(key: key);
+class QrView extends StatefulWidget {
+  const QrView({Key? key,}) : super(key: key);
 
   @override
-  State<CodigoQRTransferScreen> createState() => _CodigoQRScreenState();
+  State<QrView> createState() => _QrViewState();
 }
 
-class _CodigoQRScreenState extends State<CodigoQRTransferScreen> {
+class _QrViewState extends State<QrView> {
 
   @override
   void initState() {
@@ -24,7 +24,7 @@ class _CodigoQRScreenState extends State<CodigoQRTransferScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Código QR transferencia'),
+        title: const Text('Código QR'),
       ),
       body: BlocBuilder<AccountBloc, AccountState>(
         builder: (context, state) {

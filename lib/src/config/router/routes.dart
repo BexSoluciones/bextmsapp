@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:showcaseview/showcaseview.dart';
 //utils
 import '../../utils/constants/strings.dart';
 //routes
@@ -38,15 +39,22 @@ class Routes {
     var routes = _resolveRoutes();
     try {
       final child = routes[settings.name];
+
       Widget builder(BuildContext c) => child!(c, settings);
+
       if (settings.name == AppRoutes.navigation) {
         return SlideRoute(builder: builder);
       }
+
       return MaterialPageRoute(
-        builder: builder,
-      );
+          builder: (context) => ShowCaseWidget(
+                autoPlayDelay: const Duration(seconds: 3),
+                blurValue: 1,
+                builder: Builder(builder: builder),
+              ));
     } catch (e) {
-      return MaterialPageRoute(builder: (BuildContext context) => const UndefinedView());
+      return MaterialPageRoute(
+          builder: (BuildContext context) => const UndefinedView());
     }
   }
 }

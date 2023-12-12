@@ -11,17 +11,14 @@ import '../../../presentation/views/user/collection/features/firm.dart';
 import '../../../presentation/views/user/photos/features/detail.dart';
 import '../../../presentation/views/user/photos/index.dart';
 //TODO:: [Heider Zapa fix code qr view]
-import '../../../presentation/views/user/codigoQr/index.dart';
+import '../../../presentation/views/user/qr/index.dart';
 
 Map<String, RouteType> coreRoutes = {
   AppRoutes.firm: (context, settings) =>
       FirmView(orderNumber: settings.arguments as String),
-  AppRoutes.camera: (context, settings) =>
-      const CameraView(),
-  AppRoutes.photo: (context, settings) =>
-      const PhotoView(),
+  AppRoutes.camera: (context, settings) => const CameraView(),
+  AppRoutes.photo: (context, settings) => const PhotoView(),
   AppRoutes.detailPhoto: (context, settings) =>
       DetailPhotoView(photo: settings.arguments as Photo),
-  AppRoutes.codeQr: (context, settings) =>
-      const CodigoQRTransferScreen(),
+  AppRoutes.codeQr: (context, settings) => const QrView(),
 };

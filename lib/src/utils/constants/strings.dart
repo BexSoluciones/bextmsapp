@@ -22,7 +22,7 @@ class AppRoutes {
   static const permission = '/permission';
   static const login = '/login';
   //HOME ROUTES
-  static  const home = '/home';
+  static const home = '/home';
   //WORK ROUTES
   static const work = '/work';
   static const confirm = '/confirm-work';
@@ -64,6 +64,15 @@ class AppRoutes {
   static const codeQr = '/code-qr';
 }
 
+const showCases = [
+  {'/home': true},
+  {'/work': true},
+  {'/confirm': true},
+  {'/navigation': true},
+  {'/summary': true},
+  {'/summary-geo-reference': true},
+
+];
 
 const String buttonTextDefault = "Permitir";
 const String buttonTextSuccess = "Continuar";
