@@ -48,7 +48,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
   ) async {
     if (_storageService.getBool('${event.work.workcode}-oneOrMoreFinished') ==
         true) {
-      await _navigationService.goTo(workRoute,
+      await _navigationService.goTo(AppRoutes.work,
           arguments: WorkArgument(
             work: event.work,
           ));
@@ -66,11 +66,11 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
       showAgain = _storageService.getBool('${event.work.workcode}-showAgain');
 
       (historyOrder != null && showAgain == false)
-          ? await _navigationService.goTo(historyRoute, arguments: historyOrder)
-          : await _navigationService.goTo(workRoute,
+          ? await _navigationService.goTo(AppRoutes.history, arguments: historyOrder)
+          : await _navigationService.goTo(AppRoutes.work,
               arguments: WorkArgument(work: event.work));
     } else {
-      await _navigationService.goTo(workRoute,
+      await _navigationService.goTo(AppRoutes.work,
           arguments: WorkArgument(work: event.work));
 
       emit(HistoryOrderError(error: 'Error obteniendo el historico'));
@@ -89,7 +89,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
 
     emit(HistoryOrderChanged(historyOrder: historyOrder));
 
-    await _navigationService.goTo(workRoute,
+    await _navigationService.goTo(AppRoutes.work,
         arguments: WorkArgument(work: event.work));
   }
 

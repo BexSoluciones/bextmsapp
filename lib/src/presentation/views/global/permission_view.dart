@@ -38,7 +38,7 @@ class RequestPermissionViewState extends State<RequestPermissionView> {
           child: BlocConsumer<PermissionCubit, PermissionState>(
               listener: (context, state) {
             if (state is AllPermissionsGranted) {
-              _navigationService.replaceTo(companyRoute);
+              _navigationService.replaceTo(AppRoutes.company);
             }
           }, listenWhen: (previous, current) {
             return (current is AllPermissionsGranted);
@@ -72,7 +72,7 @@ class RequestPermissionViewState extends State<RequestPermissionView> {
                     buttonText: state.permissionRepository.buttonText ?? "Permitir",
                     onButtonPressed: () {
                       if (state.permissionRepository.isGranted != null && state.permissionRepository.isGranted == true) {
-                        _navigationService.goTo(companyRoute);
+                        _navigationService.goTo(AppRoutes.company);
                       } else {
                         return permissionCubit.onRequestAllPermission();
                       }

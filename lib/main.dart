@@ -81,7 +81,7 @@ import 'src/services/remote_config.dart';
 import 'src/services/logger.dart';
 
 //router
-import 'src/config/router/index.dart' as router;
+import 'src/config/router/routes.dart';
 
 //undefined
 import 'src/presentation/views/global/undefined_view.dart';
@@ -113,7 +113,7 @@ void callbackDispatcher() async {
   DartPluginRegistrant.ensureInitialized();
 
   ChargerStatus.instance.listenToEvents().listen((event) {
-    logDebug(headerLogger, 'onNewEvent: $event');
+    logDebug(headerMainLogger, 'onNewEvent: $event');
   });
 
   ChargerStatus.instance.startPowerChangesListener();
@@ -134,14 +134,14 @@ Future<void> main() async {
 
   _loggerService.setLogLevel(LogLevel.debugFinest);
 
-  logDebugFinest(headerLogger, 'Starting a expensive async operation...');
+  logDebugFinest(headerMainLogger, 'Starting a expensive async operation...');
 
   try {
     await _notificationService.init();
-    logDebugFine(headerLogger, 'Notification already done');
+    logDebugFine(headerMainLogger, 'Notification already done');
   } catch (error) {
     logErrorObject(
-        headerLogger, error, 'Caught an error in the async operation!');
+        headerMainLogger, error, 'Caught an error in the async operation!');
   }
 
   bool damagedDatabaseDeleted = false;
@@ -481,7 +481,7 @@ class _MyAppState extends State<MyApp> {
                                     name: settings.name,
                                   )),
                       initialRoute: '/splash',
-                      onGenerateRoute: router.generateRoute,
+                      onGenerateRoute: Routes.onGenerateRoutes,
                     ),
                   );
                 })),

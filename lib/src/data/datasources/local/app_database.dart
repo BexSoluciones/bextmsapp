@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -317,9 +316,7 @@ class AppDatabase {
   }
 
   Future<Database?> get database async {
-    var company = _storageService.getString('company');
-    var dbName = company ?? databaseName;
-
+    var dbName = _storageService.getString('company');
     if (_database != null) return _database;
     await lock.synchronized(() async {
       if (_database == null) {

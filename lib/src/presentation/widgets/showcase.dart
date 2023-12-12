@@ -134,7 +134,7 @@ Widget buildPublishShowcase(GlobalKey four, int summaryId) {
     onPressed: () {
       issuesBloc.add(GetIssuesList(
           currentStatus: 'summary', workId: null, summaryId: summaryId));
-      navigationService.goTo(issueRoute);
+      navigationService.goTo(AppRoutes.issue);
     },
   );
 }

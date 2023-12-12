@@ -123,7 +123,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                       widget: const Text('¿Quieres georeferenciarlo?',
                           style: TextStyle(color: Colors.white, fontSize: 18)),
                       press: () => _navigationService.goTo(
-                          summaryGeoreferenceRoute,
+                          AppRoutes.summaryGeoReference,
                           arguments: widget.arguments.work)),
                 )
         ],

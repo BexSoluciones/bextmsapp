@@ -76,17 +76,17 @@ Drawer drawer(BuildContext context, User? user) {
             context: context,
             icon: Icons.import_export,
             text: 'Exportar base de datos.',
-            onTap: () => _navigationService.goTo(databaseRoute)),
+            onTap: () => _navigationService.goTo(AppRoutes.database)),
         createDrawerItem(
             context: context,
             icon: Icons.query_builder,
             text: 'Consultas.',
-            onTap: () => _navigationService.goTo(queryRoute)),
+            onTap: () => _navigationService.goTo(AppRoutes.query)),
         createDrawerItem(
             context: context,
             icon: Icons.transfer_within_a_station,
             text: 'Transacciones.',
-            onTap: () => _navigationService.goTo(transactionRoute)),
+            onTap: () => _navigationService.goTo(AppRoutes.transaction)),
         createDrawerItem(
             context: context,
             icon: Icons.warning_rounded,
@@ -94,7 +94,7 @@ Drawer drawer(BuildContext context, User? user) {
             onTap: () async {
               issuesBloc.add(GetIssuesList(
                   currentStatus: 'general', summaryId: null, workId: null));
-              await _navigationService.goTo(issueRoute);
+              await _navigationService.goTo(AppRoutes.issue);
             }),
         if (kDebugMode) const Divider(),
         if (kDebugMode) ... [
@@ -102,27 +102,27 @@ Drawer drawer(BuildContext context, User? user) {
               context: context,
               icon: Icons.queue,
               text: 'Cola de procesamiento.',
-              onTap: () => _navigationService.goTo(processingQueueRoute)),
+              onTap: () => _navigationService.goTo(AppRoutes.processingQueue)),
           createDrawerItem(
               context: context,
               icon: Icons.location_history,
               text: 'Localizaciones.',
-              onTap: () => _navigationService.goTo(locationsRoute)),
+              onTap: () => _navigationService.goTo(AppRoutes.locations)),
           createDrawerItem(
               context: context,
               icon: Icons.photo,
               text: 'Fotos.',
-              onTap: () => _navigationService.goTo(photoRoute)),
+              onTap: () => _navigationService.goTo(AppRoutes.photo)),
           createDrawerItem(
               context: context,
               icon: Icons.notifications,
               text: 'Notificaciones.',
-              onTap: () => _navigationService.goTo(notificationsRoute)),
+              onTap: () => _navigationService.goTo(AppRoutes.notifications)),
           createDrawerItem(
               context: context,
               icon: Icons.list_alt,
               text: 'Transacciones.',
-              onTap: () => _navigationService.goTo(transactionsRoute)),
+              onTap: () => _navigationService.goTo(AppRoutes.transactions)),
         ],
         const Divider(),
         FutureBuilder(

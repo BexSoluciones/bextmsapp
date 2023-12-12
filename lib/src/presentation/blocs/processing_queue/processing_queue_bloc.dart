@@ -87,12 +87,12 @@ class ProcessingQueueBloc
   Stream get resolve {
     return Stream.periodic(const Duration(seconds: 30), (int value) async {
       final timer0 =
-          logTimerStart(headerLogger, 'Starting...', level: LogLevel.info);
+          logTimerStart(headerDeveloperLogger, 'Starting...', level: LogLevel.info);
       var result = await _databaseRepository.listenForTableChanges(
           'works', 'status', 'complete');
-      logDebugFine(headerLogger, result.toString());
+      logDebugFine(headerDeveloperLogger, result.toString());
       if (result) await _getProcessingQueue();
-      logTimerStop(headerLogger, timer0, 'Initialization completed',
+      logTimerStop(headerDeveloperLogger, timer0, 'Initialization completed',
           level: LogLevel.success);
     });
   }
@@ -111,7 +111,7 @@ class ProcessingQueueBloc
   }
 
   Future<void> _getProcessingQueue() async {
-    logDebugFine(headerLogger, 'activating pq');
+    logDebugFine(headerDeveloperLogger, 'activating pq');
     final queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
     _inProcessingQueue.add(queues);
   }

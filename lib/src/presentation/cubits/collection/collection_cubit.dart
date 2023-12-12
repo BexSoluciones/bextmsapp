@@ -64,8 +64,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   }
 
   void goBack() {
-    if(state is CollectionSuccess){
-      if(state.validate != null && state.validate == true){
+    if (state is CollectionSuccess) {
+      if (state.validate != null && state.validate == true) {
         goToWork(state.work);
       } else {
         goToSummary(state.work);
@@ -73,30 +73,29 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     } else {
       _navigationService.goBack();
     }
-
   }
 
   void goToFirm(String orderNumber) {
-    _navigationService.goTo(firmRoute, arguments: orderNumber);
+    _navigationService.goTo(AppRoutes.firm, arguments: orderNumber);
   }
 
   void goToCamera(String orderNumber) {
-    _navigationService.goTo(cameraRoute, arguments: orderNumber);
+    _navigationService.goTo(AppRoutes.camera, arguments: orderNumber);
   }
 
   void goToCodeQR() {
-    _navigationService.goTo(qrRoute);
+    _navigationService.goTo(AppRoutes.codeQr);
   }
 
   void goToSummary(work) {
-    _navigationService.goTo(summaryRoute,
+    _navigationService.goTo(AppRoutes.summary,
         arguments: SummaryArgument(
           work: work,
         ));
   }
 
   void goToWork(work) {
-    _navigationService.goTo(workRoute,
+    _navigationService.goTo(AppRoutes.work,
         arguments: WorkArgument(
           work: work,
         ));
@@ -246,8 +245,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             await _databaseRepository.validateTransaction(arguments.work.id!);
 
         emit(CollectionSuccess(
-            work: arguments.work,
-            validate: v,
+          work: arguments.work,
+          validate: v,
         ));
       }
     });

@@ -171,7 +171,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraFolderToState(CameraFolder event, emit) {
-    _navigationService.goTo(photoRoute, arguments: event.path);
+    _navigationService.goTo(AppRoutes.photo, arguments: event.path);
     emit(CameraReady());
   }
 

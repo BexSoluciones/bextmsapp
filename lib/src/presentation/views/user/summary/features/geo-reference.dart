@@ -23,18 +23,18 @@ import '../../../../widgets/default_button_widget.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
 
-class SummaryGeoreferenceView extends StatefulWidget {
-  const SummaryGeoreferenceView({Key? key, required this.work})
+class SummaryGeoReferenceView extends StatefulWidget {
+  const SummaryGeoReferenceView({Key? key, required this.work})
       : super(key: key);
 
   final Work work;
 
   @override
-  State<SummaryGeoreferenceView> createState() =>
+  State<SummaryGeoReferenceView> createState() =>
       SummaryGeoreferenceViewState();
 }
 
-class SummaryGeoreferenceViewState extends State<SummaryGeoreferenceView> {
+class SummaryGeoreferenceViewState extends State<SummaryGeoReferenceView> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;

@@ -107,7 +107,7 @@ class SummaryViewState extends State<SummaryView> {
                         widget.arguments.origin == 'navigation') {
                       _navigationService.goBack();
                     } else {
-                      _navigationService.goTo(workRoute,
+                      _navigationService.goTo(AppRoutes.work,
                           arguments: WorkArgument(work: widget.arguments.work));
                     }
                   },

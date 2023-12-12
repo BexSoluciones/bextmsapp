@@ -2,63 +2,67 @@
 const String appTitle = 'Bex Deliveries';
 
 // Log header:
-const String headerLogger = 'main';
-
-// Networking and APIs
-const String baseUrl = 'https://demo.bexdeliveries.com/api/v1/';
-const String defaultApiKey = 'ff957763c54c44d8b00e5e082bc76cb0';
-const String defaultSources = 'bbc-news, abc-news, al-jazeera-english';
-
-// Storage and Databases
-const String databaseName = 'app_database';
+const String headerMainLogger = 'main';
+const String headerLoginLogger = 'login';
+const String headerHomeLogger = 'home';
+const String headerWorkLogger = 'work';
+const String headerSummaryLogger = 'summary';
+const String headerNavigationLogger = 'navigation';
+const String headerDrawerLogger = 'drawer';
+const String headerIssueLogger = 'issue';
+const String headerDeveloperLogger = 'developer';
 
 //routes
-const splashRoute = '/splash';
-const politicsRoute = '/politics';
-const companyRoute = '/company';
-const permissionRoute = '/permission';
-const loginRoute = '/login';
-const homeRoute = '/home';
+class AppRoutes {
+  //AUTH ROUTES
+  static const splash = '/splash';
+  static const politics = '/politics';
+  static const company = '/company';
+  static const permission = '/permission';
+  static const login = '/login';
+  //HOME ROUTES
+  static  const home = '/home';
+  //WORK ROUTES
+  static const work = '/work';
+  static const confirm = '/confirm-work';
+  static const history = '/historic';
+  static const navigation = '/navigation';
+  //SUMMARY ROUTES
+  static const summary = '/summary';
+  static const summaryNavigation = '/summary-navigation';
+  static const summaryGeoReference = '/summary-geo-reference';
 
-const workRoute = '/work';
-const confirmRoute = '/confirm-work';
-const historyRoute = '/historic';
-const navigationRoute = '/navigation';
+  static const inventory = '/inventory';
+  static const package = '/package';
+  static const camera = '/camera';
+  static const firm = '/firm';
+  static const qr = '/code-qr';
+  static const photo = '/photos';
+  static const detailPhoto = '/detail-photo';
+  //TRANSACTIONS ROUTES
+  static const collection = '/collection';
+  static const partial = '/partial';
+  static const reject = '/reject';
+  static const respawn = '/respawn';
+  //DRAWER ROUTES
+  static const notifications = '/notifications';
+  static const transaction = '/transaction';
+  static const query = '/query';
+  static const dispatch = '/dispatch';
+  static const quote = '/quote';
+  static const collectionQuery = '/collection-query';
+  static const devolutionQuery = '/devolution-query';
+  static const respawnQuery = '/respawn-query';
+  //DEVELOPER ROUTES
+  static const database = '/database';
+  static const processingQueue = '/processing-queue';
+  static const transactions = '/transactions';
+  static const locations = '/locations';
+  static const issue = '/issues';
+  static const fillIssue = '/fill-issue';
+  static const codeQr = '/code-qr';
+}
 
-const summaryRoute = '/summary';
-const summaryNavigationRoute = '/summary-navigation';
-const summaryGeoreferenceRoute = '/summary-georeference';
-
-const inventoryRoute = '/inventory';
-const packageRoute = '/package';
-const cameraRoute = '/camera';
-const firmRoute = '/firm';
-const qrRoute = '/code-qr';
-const photoRoute = '/photos';
-const detailPhotoRoute = '/detail-photo';
-
-
-const collectionRoute = '/collection';
-const partialRoute = '/partial';
-const rejectRoute = '/reject';
-const respawnRoute = '/respawn';
-
-const queryRoute = '/query';
-const dispatchRoute = '/dispatch';
-const quoteRoute = '/quote';
-const collectionQueryRoute = '/collection-query';
-const devolutionQueryRoute = '/devolution-query';
-const respawnQueryRoute = '/respawn-query';
-
-const databaseRoute = '/database';
-const processingQueueRoute = '/processing-queue';
-const notificationsRoute = '/notifications';
-const transactionRoute = '/transaction';
-const transactionsRoute = '/transactions';
-const locationsRoute = '/locations';
-const issueRoute = '/issues';
-const fillIssueRoute = '/fill-issue-route';
-const CodigoQRouteTransf = '/codigoQRTransf';
 
 const String buttonTextDefault = "Permitir";
 const String buttonTextSuccess = "Continuar";
