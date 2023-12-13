@@ -33,6 +33,24 @@ class AccountsCollection extends StatefulWidget {
 
 class _AccountsCollectionState extends State<AccountsCollection>
     with FormatNumber {
+
+  @override
+  void setState(VoidCallback fn) {
+    if(mounted){
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -218,8 +236,14 @@ class _AccountsCollectionState extends State<AccountsCollection>
             ),
             const SizedBox(height: 10),
             DefaultButton(
-                widget: const Text('Agregar',
-                    style: TextStyle(color: Colors.white, fontSize: 20)),
+                widget: BlocSelector<CollectionCubit, CollectionState, bool>(
+                  selector: (state) => state is CollectionEditingPayment,
+                  builder: (c, x) {
+                    return x ? const Text('Agregar',
+                        style: TextStyle(color: Colors.white, fontSize: 20)) : const Text('Editar',
+                        style: TextStyle(color: Colors.white, fontSize: 20));
+                  },
+                ),
                 press: () {
                   widget.collectionCubit.addOrUpdatePaymentWithAccount(
                       index: widget.collectionCubit.indexToEdit);

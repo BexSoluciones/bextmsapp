@@ -274,12 +274,21 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   }
 
   Future<void> editPaymentWithAccount(int index) async {
-    indexToEdit = index;
-    isEditing = true;
+    if(isBusy) return;
 
-    dateController.text = selectedAccounts[index][3];
-    transferController.text = selectedAccounts[index][0].toString();
-    accountId = selectedAccounts[index][2];
+    await run(() async {
+      indexToEdit = index;
+      isEditing = true;
+
+      dateController.text = selectedAccounts[index][3];
+      transferController.text = selectedAccounts[index][0].toString();
+      accountId = selectedAccounts[index][2];
+
+      emit(CollectionEditingPayment(
+          totalSummary: state.totalSummary,
+          enterpriseConfig: state.enterpriseConfig));
+    });
+
   }
 
   Future<void> confirmTransaction(InventoryArgument arguments) async {
@@ -427,6 +436,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
       cashController.clear();
       transferController.clear();
+      selectedAccounts.clear();
 
       emit(CollectionSuccess(
         work: arguments.work,

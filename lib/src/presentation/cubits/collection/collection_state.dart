@@ -31,6 +31,10 @@ class CollectionChangeTotal extends CollectionState {
   const CollectionChangeTotal(this.total);
 }
 
+class CollectionEditingPayment extends CollectionState {
+  const CollectionEditingPayment({super.totalSummary, super.enterpriseConfig});
+}
+
 class CollectionLoading extends CollectionState {
   const CollectionLoading({super.totalSummary, super.enterpriseConfig});
 }
