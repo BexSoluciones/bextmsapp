@@ -15,6 +15,16 @@ class TransactionDao {
     return transactions;
   }
 
+  List<TransactionValidate> parseValidateTransactions(
+      List<Map<String, dynamic>> transactionList) {
+    final transactions = <TransactionValidate>[];
+    transactionList.forEach((transactionMap) {
+      final transaction = TransactionValidate.fromJson(transactionMap);
+      transactions.add(transaction);
+    });
+    return transactions;
+  }
+
   Future<WorkTypes> getWorkTypesFromWorkcode(String workcode) async {
     final db = await _appDatabase.streamDatabase;
 
@@ -153,6 +163,34 @@ class TransactionDao {
       sum += summary.grandTotalCopy!;
     });
     return sum;
+  }
+
+  Future<int> countLeftClients(String workcode) async {
+    final db = await _appDatabase.streamDatabase;
+
+    var validateList = await db?.rawQuery('''
+          SELECT $tableWorks.${WorkFields.id} as work_id, 
+          (SELECT count(DISTINCT $tableSummaries.${SummaryFields.orderNumber}) FROM $tableSummaries WHERE $tableSummaries.${SummaryFields.workId} = $tableWorks.${WorkFields.id}) as countSummaries,
+          COUNT(DISTINCT $tableTransactions.${TransactionFields.orderNumber}) as countTransactions 
+          FROM $tableWorks
+          LEFT JOIN $tableTransactions ON ($tableTransactions.${TransactionFields.workId} = $tableWorks.${WorkFields.id}
+          AND $tableTransactions.${TransactionFields.status} != 'start' AND $tableTransactions.${TransactionFields.status} != 'arrived' AND $tableTransactions.${TransactionFields.status} != 'summary')
+          WHERE $tableWorks.${WorkFields.workcode} = "$workcode" 
+          GROUP BY $tableWorks.${WorkFields.numberCustomer}, $tableWorks.${WorkFields.codePlace}
+          ORDER BY ${WorkFields.order} ASC
+        ''');
+
+    var vl = parseValidateTransactions(validateList!);
+
+    var clients = 0;
+
+    await Future.forEach(vl, (v) async {
+      if (v.countSummaries == v.countTransactions) {
+        clients += 1;
+      }
+    });
+
+    return clients.toInt();
   }
 
   Future<List<t.Transaction>> getAllTransactions() async {

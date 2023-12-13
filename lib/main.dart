@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'package:bexdeliveries/src/presentation/cubits/left/left_cubit.dart';
 import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -414,6 +415,8 @@ class _MyAppState extends State<MyApp> {
           BlocProvider(
             create: (context) => QueryCubit(locator<DatabaseRepository>()),
           ),
+          BlocProvider(
+              create: (context) => LeftCubit(locator<DatabaseRepository>())),
           BlocProvider(
             create: (context) => IssuesBloc(
                 locator<DatabaseRepository>(),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bexdeliveries/src/domain/models/transaction_validate.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';

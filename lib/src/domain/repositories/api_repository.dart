@@ -1,5 +1,6 @@
 
 
+import 'package:bexdeliveries/src/domain/models/requests/reason_m_request.dart';
 import 'package:bexdeliveries/src/domain/models/requests/routing_request.dart';
 import 'package:bexdeliveries/src/domain/models/responses/routing_response.dart';
 
@@ -143,4 +144,9 @@ abstract class ApiRepository {
   Future<DataState<StatusResponse>> locations({
     required LocationsRequest request
   });
+
+  Future<DataState<StatusResponse>> reason({
+    required ReasonMRequest request
+  });
+
 }

@@ -140,7 +140,10 @@ class IssuesBloc extends Bloc<IssuesEvent, IssuesState> with FormatDate {
     var firmApplicationPath = <String>[];
 
     if (firmApplication != null) {
-      firmApplicationPath.add(firmApplication.path);
+      List<int> imageBytes =
+      firmApplication.readAsBytesSync();
+      var base64Image = base64Encode(imageBytes);
+      firmApplicationPath.add(base64Image);
     }
 
     if (images.isNotEmpty) {
@@ -168,7 +171,7 @@ class IssuesBloc extends Bloc<IssuesEvent, IssuesState> with FormatDate {
         firm: firmApplicationPath,
         observation: state.observations!.text);
 
-    // _databaseRepository.insertNew(news);
+     _databaseRepository.insertNews(news);
 
     var processingQueue = ProcessingQueue(
         body: jsonEncode(news.toJson()),
@@ -178,6 +181,8 @@ class IssuesBloc extends Bloc<IssuesEvent, IssuesState> with FormatDate {
         updatedAt: now());
 
     _processingQueueBloc.inAddPq.add(processingQueue);
+    await helperFunctions.deleteImages("");
+    await helperFunctions.deleteFirm('');
 
     if (news.firm != null) {
       news.firm = jsonEncode(firmApplicationPath);

@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/domain/models/news.dart';
 import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
@@ -34,6 +35,9 @@ abstract class DatabaseRepository {
 
   //DELIVER
   Future<List<WorkAdditional>> getClientsResJetDel(String workcode,String reason);
+
+  //MOTIVO
+  Future<void> insertNews(News news);
 
   //WAREHOUSES
   Future<Warehouse?> findWarehouse(Warehouse warehouse);
@@ -73,6 +77,8 @@ abstract class DatabaseRepository {
   Future<void> insertTransactions(List<Transaction> transactions);
   Future<void> emptyTransactions();
   Future<void> deleteTransactionsByWorkcode(String workcode);
+  Future<int> countLeftClients(String workcode);
+
 
   //REASONS
   Future<List<Reason>> getAllReasons();
