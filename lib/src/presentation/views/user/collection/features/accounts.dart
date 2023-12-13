@@ -114,16 +114,9 @@ class _AccountsCollectionState extends State<AccountsCollection>
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () {
-                        widget.collectionCubit.addAccount();
-                        setState(() {});
-                      },
-                      icon: const Icon(Icons.add),
-                    ),
-                    IconButton(
                       icon: const Icon(Icons.qr_code_2),
                       onPressed: () =>
-                          widget.collectionCubit.goToCamera(widget.orderNumber),
+                          widget.collectionCubit.goToCodeQR(),
                     ),
                   ],
                 )
@@ -229,6 +222,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                 widget: const Text('Agregar',
                     style: TextStyle(color: Colors.white, fontSize: 20)),
                 press: () => widget.collectionCubit.addAccount()),
+            const SizedBox(height: 10),
             Expanded(
                 child: TransactionList(
               selectedAccounts: widget.collectionCubit.selectedAccounts,

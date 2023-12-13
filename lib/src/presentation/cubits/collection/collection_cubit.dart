@@ -258,7 +258,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           }
 
           var count = 0.0;
-          selectedAccounts.add([transferValue, 'transfer', accountId]);
+          selectedAccounts.add([transferValue, 'transfer', accountId, dateController.text]);
 
           for (var i = 0; i < selectedAccounts.length; i++) {
             count += double.parse(selectedAccounts[i][0].toString());

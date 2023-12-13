@@ -173,14 +173,14 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Text(
-                                'Atendidos: ${widget.work.right ?? '0'} ',
+                                'Atendidos: $left ',
                                 style: TextStyle(
                                     fontSize: calculatedFon,
                                     fontWeight: FontWeight.normal,
                                     color: Theme.of(context).colorScheme.scrim),
                               ),
                               Text(
-                                'Pendientes: ${widget.work.left! - widget.work.right!}',
+                                'Pendientes: ${widget.work.count! - left}',
                                 style: TextStyle(
                                     fontSize: calculatedFon,
                                     fontWeight: FontWeight.normal,
