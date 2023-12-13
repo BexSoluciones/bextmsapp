@@ -65,6 +65,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       total = double.parse(cashController.text) +
           double.parse(transferController.text);
     } else if(cashController.text.isNotEmpty && selectedAccounts.isNotEmpty) {
+      total = 0;
       var cashValue = double.parse(cashController.text);
       var count = 0.0;
       for (var i = 0; i < selectedAccounts.length; i++) {
@@ -72,7 +73,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       }
       total = count + cashValue;
     } else if(cashController.text.isEmpty && selectedAccounts.isNotEmpty) {
-      print('aqui 2');
+      total = 0;
       for (var i = 0; i < selectedAccounts.length; i++) {
         total += double.parse(selectedAccounts[i][0].toString());
       }
