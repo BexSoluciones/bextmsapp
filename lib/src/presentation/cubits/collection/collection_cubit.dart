@@ -50,6 +50,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       : super(const CollectionLoading(), null);
 
   final TextEditingController transferController = TextEditingController();
+  final TextEditingController multiTransferController = TextEditingController();
   final TextEditingController cashController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
 
@@ -63,12 +64,27 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     if (transferController.text.isNotEmpty && cashController.text.isNotEmpty) {
       total = double.parse(cashController.text) +
           double.parse(transferController.text);
+    } else if(cashController.text.isNotEmpty && selectedAccounts.isNotEmpty) {
+      var cashValue = double.parse(cashController.text);
+      var count = 0.0;
+      for (var i = 0; i < selectedAccounts.length; i++) {
+        count += double.parse(selectedAccounts[i][0].toString());
+      }
+      total = count + cashValue;
+    } else if(cashController.text.isEmpty && selectedAccounts.isNotEmpty) {
+      print('aqui 2');
+      for (var i = 0; i < selectedAccounts.length; i++) {
+        total += double.parse(selectedAccounts[i][0].toString());
+      }
     } else if (cashController.text.isNotEmpty) {
+      print('aqui 3');
       total = double.parse(cashController.text);
     } else if (cashController.text.isEmpty && transferController.text.isEmpty) {
+      print('aqui 4');
       total = 0;
     } else if (transferController.text.isNotEmpty &&
         cashController.text.isEmpty) {
+      print('aqui 5');
       total = double.parse(transferController.text);
     }
   }
@@ -201,18 +217,11 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
-          print('aqui esta entrando');
-
-          print(total);
-          print(state.totalSummary);
-
           if (total <= state.totalSummary!.toDouble()) {
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
             confirmTransaction(arguments);
           } else {
-            print('fallo correctamente');
-
             emit(CollectionFailed(
                 totalSummary: state.totalSummary,
                 enterpriseConfig: state.enterpriseConfig,
@@ -253,31 +262,33 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         indexToEdit = null;
         isEditing = false;
       } else {
-        if (transferController.text.isNotEmpty) {
-          if (double.tryParse(transferController.text) != null) {
-            var transferValue = double.parse(transferController.text);
-            double cashValue = 0.0;
+        if (multiTransferController.text.isNotEmpty) {
+          if (double.tryParse(multiTransferController.text) != null) {
+            var transferValue = double.parse(multiTransferController.text);
 
-            if (cashController.text.isNotEmpty) {
-              cashValue = double.parse(cashController.text);
-            }
-
-            var count = 0.0;
             selectedAccounts.add(
                 [transferValue, 'transfer', accountId, dateController.text]);
 
-            for (var i = 0; i < selectedAccounts.length; i++) {
-              count += double.parse(selectedAccounts[i][0].toString());
-            }
-
-            total = count + cashValue;
           }
         }
       }
 
-      transferController.clear();
+      double cashValue = 0.0;
+      if (cashController.text.isNotEmpty) {
+        cashValue = double.parse(cashController.text);
+      }
+
+      var count = 0.0;
+      for (var i = 0; i < selectedAccounts.length; i++) {
+        count += double.parse(selectedAccounts[i][0].toString());
+      }
+
+      total = count + cashValue;
+      multiTransferController.clear();
       accountId = null;
       dateController.text = date(null);
+
+      print(total);
 
       emit(CollectionInitial(
           totalSummary: state.totalSummary,
@@ -297,6 +308,15 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       accountId = selectedAccounts[index][2];
 
       emit(CollectionEditingPayment(
+          totalSummary: state.totalSummary,
+          enterpriseConfig: state.enterpriseConfig));
+    });
+  }
+
+  void closeModal() async {
+    if (isBusy) return;
+    await run(() async {
+      emit(CollectionModalClosed(
           totalSummary: state.totalSummary,
           enterpriseConfig: state.enterpriseConfig));
     });

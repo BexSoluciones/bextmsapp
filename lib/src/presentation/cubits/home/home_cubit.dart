@@ -80,7 +80,18 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   Future<HomeState> _getAllWorks() async {
     final works = await _databaseRepository.getAllWorks();
 
-    print(works.length);
+    var futures = <Future>[];
+
+    for(var work in works) {
+      futures.add(_databaseRepository.countLeftClients(work.workcode!));
+    }
+
+    var response = await Future.wait(futures);
+    var i = 0;
+    for(var left in response) {
+      works[i].left = left;
+      i++;
+    }
 
     final user = _storageService.getObject('user') != null
         ? User.fromJson(_storageService.getObject('user')!)

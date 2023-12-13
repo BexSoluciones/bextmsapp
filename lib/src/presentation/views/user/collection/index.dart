@@ -54,12 +54,13 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       collectionCubit.cashController.addListener(() {
         collectionCubit.listenForCash();
-        if (context.mounted) setState(() {});
+        setState(() {});
       });
       collectionCubit.transferController.addListener(() {
-        collectionCubit.listenForTransfer();
-
-        if (context.mounted) setState(() {});
+        if (!collectionCubit.isEditing) {
+          collectionCubit.listenForTransfer();
+          setState(() {});
+        }
       });
     });
   }
@@ -98,7 +99,8 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
             )));
   }
 
-  void buildBlocListener(context, CollectionState state) async {
+  void buildBlocListener(BuildContext context, CollectionState state) async {
+    print(state);
     if (state is CollectionSuccess) {
       if (state.validate != null && state.validate == true) {
         collectionCubit.goToWork(state.work);
@@ -128,6 +130,8 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
               context: context,
             );
           });
+    } else if (state is CollectionModalClosed) {
+      print(collectionCubit.total);
     }
   }
 
@@ -138,6 +142,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
       builder: (context, state) {
         if (state is CollectionLoading ||
             state is CollectionInitial ||
+            state is CollectionModalClosed ||
             state is CollectionFailed) {
           return _buildCollection(size, state);
         } else if (state is CollectionSuccess) {

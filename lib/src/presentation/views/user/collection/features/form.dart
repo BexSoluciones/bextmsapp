@@ -35,6 +35,23 @@ class FormCollection extends StatefulWidget {
 
 class _FormCollectionState extends State<FormCollection>
     with FormatNumber, FormatDate {
+
+  @override
+  void setState(VoidCallback fn) {
+    if(mounted){
+      super.setState(fn);
+    }
+  }
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  void _closeModal(void value) => widget.collectionCubit.closeModal();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -203,7 +220,7 @@ class _FormCollectionState extends State<FormCollection>
                               press: () {
                                 widget.collectionCubit.dateController.text =
                                     date(null);
-                                showModalBottomSheet(
+                                Future<void> future = showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,
                                     builder: (c) {
@@ -212,9 +229,10 @@ class _FormCollectionState extends State<FormCollection>
                                         collectionCubit: widget.collectionCubit,
                                         state: widget.state,
                                       );
-                                    }).whenComplete(() {
-                                    setState(() {});
-                                });
+                                    });
+
+                                future.then((void value) => _closeModal(value));
+
                               });
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(

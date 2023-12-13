@@ -25,14 +25,16 @@ class CollectionInitial extends CollectionState {
   const CollectionInitial({super.totalSummary, super.enterpriseConfig});
 }
 
-class CollectionChangeTotal extends CollectionState {
-  final double? total;
-
-  const CollectionChangeTotal(this.total);
-}
-
 class CollectionEditingPayment extends CollectionState {
   const CollectionEditingPayment({super.totalSummary, super.enterpriseConfig});
+}
+
+class CollectionModalOpen extends CollectionState {
+  const CollectionModalOpen({super.totalSummary, super.enterpriseConfig});
+}
+
+class CollectionModalClosed extends CollectionState {
+  const CollectionModalClosed({super.totalSummary, super.enterpriseConfig});
 }
 
 class CollectionLoading extends CollectionState {

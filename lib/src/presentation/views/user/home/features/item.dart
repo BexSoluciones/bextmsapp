@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:bexdeliveries/src/presentation/cubits/left/left_cubit.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -51,10 +49,8 @@ class ItemWork extends StatefulWidget {
 
 class _ItemWorkState extends State<ItemWork> with FormatDate {
   late HistoryOrderBloc historyOrderBloc;
-  late LeftCubit leftCubit;
   static final FirebaseMessaging _firebaseMessaging =
       FirebaseMessaging.instance;
-  int left = 0;
   bool isLoading = true;
   bool success = false;
   var connectivity = Connectivity();
@@ -70,17 +66,10 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
   @override
   void initState() {
     historyOrderBloc = BlocProvider.of<HistoryOrderBloc>(context);
-    leftCubit = BlocProvider.of<LeftCubit>(context);
-    lefCount();
     final pushNotificationService = PushNotificationService(_firebaseMessaging);
     pushNotificationService.initialise();
     super.initState();
   }
-
-  Future<void> lefCount()async{
-    left =await leftCubit.getCountLeft(widget.work.workcode.toString());
-  }
-
 
   @override
   void dispose() {
@@ -106,7 +95,7 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                           topRight: Radius.circular(15),
                           bottomRight: Radius.circular(15)),
                       onPressed: (_) {
-                        if (widget.work.count! == left) {
+                        if (widget.work.count! == widget.work.left!) {
                           showDialog(
                               context: context,
                               builder: (context) => CustomConfirmDialog(
@@ -123,7 +112,7 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                               builder: (context) => CustomDialog(
                                     title: 'Clientes pendientes por visitar',
                                     message:
-                                        'Cantidad :${widget.work.count! - left}',
+                                        'Cantidad :${widget.work.count! - widget.work.left!}',
                                     elevatedButton1: Colors.red,
                                     elevatedButton2: Colors.green,
                                     cancelarButtonText: '',
@@ -169,18 +158,18 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                                 fontSize: calculatedFon,
                                 color: Theme.of(context).colorScheme.scrim),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                          Wrap(
+                            spacing: 10,
                             children: [
                               Text(
-                                'Atendidos: $left ',
+                                'Atendidos: ${widget.work.left}',
                                 style: TextStyle(
                                     fontSize: calculatedFon,
                                     fontWeight: FontWeight.normal,
                                     color: Theme.of(context).colorScheme.scrim),
                               ),
                               Text(
-                                'Pendientes: ${widget.work.count! - left}',
+                                'Pendientes: ${widget.work.count! - widget.work.left!}',
                                 style: TextStyle(
                                     fontSize: calculatedFon,
                                     fontWeight: FontWeight.normal,

@@ -94,7 +94,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
               TextFormField(
                 keyboardType: TextInputType.number,
                 autofocus: false,
-                controller: widget.collectionCubit.transferController,
+                controller: widget.collectionCubit.multiTransferController,
                 decoration: InputDecoration(
                   prefixText: currency,
                   focusedBorder: const OutlineInputBorder(
@@ -109,12 +109,12 @@ class _AccountsCollectionState extends State<AccountsCollection>
                   suffixIcon: IconButton(
                     onPressed: () {
                       if (double.tryParse(
-                              widget.collectionCubit.transferController.text) !=
+                              widget.collectionCubit.multiTransferController.text) !=
                           null) {
                         widget.collectionCubit.total -= double.parse(
-                            widget.collectionCubit.transferController.text);
+                            widget.collectionCubit.multiTransferController.text);
                       }
-                      widget.collectionCubit.transferController.clear();
+                      widget.collectionCubit.multiTransferController.clear();
                     },
                     icon: const Icon(Icons.clear),
                   ),
