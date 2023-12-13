@@ -31,8 +31,7 @@ class CollectionView extends StatefulWidget {
   State<CollectionView> createState() => CollectionViewState();
 }
 
-class CollectionViewState extends State<CollectionView>
-    with WidgetsBindingObserver, FormatNumber {
+class CollectionViewState extends State<CollectionView> with FormatNumber {
   final _formKey = GlobalKey<FormState>();
 
   late CollectionCubit collectionCubit;
@@ -46,12 +45,12 @@ class CollectionViewState extends State<CollectionView>
 
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+
     context.read<AccountBloc>().add(LoadAccountListEvent());
     collectionCubit = BlocProvider.of<CollectionCubit>(context);
     collectionCubit.getCollection(
         widget.arguments.work.id!, widget.arguments.orderNumber);
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       collectionCubit.cashController.addListener(() {
         collectionCubit.listenForCash();
@@ -63,13 +62,10 @@ class CollectionViewState extends State<CollectionView>
         if (context.mounted) setState(() {});
       });
     });
-
-    super.initState();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     // collectionCubit.dispose();
     super.dispose();
   }

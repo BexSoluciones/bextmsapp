@@ -107,6 +107,7 @@ class _FormCollectionState extends State<FormCollection>
                         (state is CollectionInitial ||
                             state is CollectionLoading ||
                             state is CollectionFailed) &&
+                            state.enterpriseConfig != null &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
@@ -150,6 +151,7 @@ class _FormCollectionState extends State<FormCollection>
                         (state is CollectionInitial ||
                             state is CollectionLoading ||
                             state is CollectionFailed) &&
+                            state.enterpriseConfig != null &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
@@ -218,6 +220,7 @@ class _FormCollectionState extends State<FormCollection>
                         (state is CollectionInitial ||
                             state is CollectionLoading ||
                             state is CollectionFailed) &&
+                            state.enterpriseConfig != null &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,
@@ -256,6 +259,7 @@ class _FormCollectionState extends State<FormCollection>
                         (state is CollectionInitial ||
                             state is CollectionLoading ||
                             state is CollectionFailed) &&
+                            state.enterpriseConfig != null &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,
@@ -342,6 +346,7 @@ class _FormCollectionState extends State<FormCollection>
                         (state is CollectionInitial ||
                             state is CollectionLoading ||
                             state is CollectionFailed) &&
+                            state.enterpriseConfig != null &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,
