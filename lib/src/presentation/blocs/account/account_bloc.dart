@@ -15,6 +15,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       emit(AccountLoadingState());
       try {
         final accounts = await _databaseRepository.getAllAccounts();
+        accounts.insert(0, Account(id: 0, name: 'Selecciona una cuenta'));
         emit(AccountLoadedState(accounts));
       } catch (e, stackTrace) {
         emit(AccountErrorState('Error loading accounts: $e'));

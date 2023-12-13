@@ -53,7 +53,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   final TextEditingController cashController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
 
-  late int? accountId;
+  int? accountId;
   double total = 0;
   List<dynamic> selectedAccounts = [];
 
@@ -169,7 +169,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         if (arguments.typeOfCharge == 'CREDITO' && total == 0) {
           _storageService.setBool('firmRequired', false);
           _storageService.setBool('photoRequired', false);
-          confirmTransaction(arguments, cashController, transferController);
+          confirmTransaction(arguments);
         }
 
         if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
@@ -177,7 +177,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           if (total == state.totalSummary!.toDouble()) {
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
-            confirmTransaction(arguments, cashController, transferController);
+            confirmTransaction(arguments);
           } else {
             emit(CollectionFailed(
                 totalSummary: state.totalSummary,
@@ -190,7 +190,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           _storageService.setBool('photoRequired', false);
 
           if (total != 0 && total <= state.totalSummary!.toDouble()) {
-            confirmTransaction(arguments, cashController, transferController);
+            confirmTransaction(arguments);
           } else {
             emit(const CollectionWaiting());
           }
@@ -204,7 +204,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           if (total <= state.totalSummary!.toDouble()) {
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
-            confirmTransaction(arguments, cashController, transferController);
+            confirmTransaction(arguments);
           } else {
             print('fallo correctamente');
 
@@ -281,8 +281,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     });
   }
 
-  Future<void> confirmTransaction(
-      InventoryArgument arguments, cashController, transferController) async {
+  Future<void> confirmTransaction(InventoryArgument arguments) async {
     var status =
         arguments.r != null && arguments.r!.isNotEmpty ? 'partial' : 'delivery';
 
@@ -318,18 +317,27 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       }
     }
 
-    for (var i = 0; i < selectedAccounts.length; i++) {
-      payments.add(Payment(
-          method: 'transfer $i',
-          paid: selectedAccounts[i][0].toString(),
-          accountId: selectedAccounts[i][1].toString()));
-    }
-
-    if (transferController.text.isNotEmpty) {
-      payments.add(Payment(
-        method: 'transfer',
-        paid: transferController.text,
-      ));
+    if (state.enterpriseConfig!.multipleAccounts == true &&
+        selectedAccounts.isNotEmpty) {
+      for (var i = 0; i < selectedAccounts.length; i++) {
+        payments.add(Payment(
+            method: 'transfer',
+            paid: selectedAccounts[i][0].toString(),
+            accountId: selectedAccounts[i][1].toString(),
+            date: selectedAccounts[i][2]));
+      }
+    } else {
+      if (transferController.text.isNotEmpty) {
+        payments.add(Payment(
+            method: 'transfer',
+            paid: transferController.text,
+            accountId: state.enterpriseConfig!.specifiedAccountTransfer == true
+                ? accountId.toString()
+                : null,
+            date: state.enterpriseConfig!.specifiedAccountTransfer == true
+                ? dateController.text
+                : null));
+      }
     }
 
     if (payments.isEmpty && (status == 'delivery' || status == 'partial')) {
@@ -416,6 +424,9 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       await helperFunctions.deleteFirm('firm-${arguments.orderNumber}');
 
       var v = await _databaseRepository.validateTransaction(arguments.work.id!);
+
+      cashController.clear();
+      transferController.clear();
 
       emit(CollectionSuccess(
         work: arguments.work,

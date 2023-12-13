@@ -87,7 +87,7 @@ class _FormCollectionState extends State<FormCollection>
                                   widget.collectionCubit.cashController.text);
                         }
                         widget.collectionCubit.selectedAccounts.clear();
-                        widget.collectionCubit.transferController.clear();
+                        widget.collectionCubit.cashController.clear();
                       },
                       icon: const Icon(Icons.clear),
                     ),
@@ -105,6 +105,7 @@ class _FormCollectionState extends State<FormCollection>
                     bloc: widget.collectionCubit,
                     selector: (state) =>
                         (state is CollectionInitial ||
+                            state is CollectionLoading ||
                             state is CollectionFailed) &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
@@ -147,6 +148,7 @@ class _FormCollectionState extends State<FormCollection>
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
                         (state is CollectionInitial ||
+                            state is CollectionLoading ||
                             state is CollectionFailed) &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
@@ -187,7 +189,7 @@ class _FormCollectionState extends State<FormCollection>
                               ),
                               validator: (value) {
                                 if (value!.contains(',')) {
-                                  return '';
+                                  return 'el valor no puede contener comas';
                                 }
                                 return null;
                               },
@@ -214,6 +216,7 @@ class _FormCollectionState extends State<FormCollection>
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
                         (state is CollectionInitial ||
+                            state is CollectionLoading ||
                             state is CollectionFailed) &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
@@ -230,13 +233,13 @@ class _FormCollectionState extends State<FormCollection>
                                 ]),
                                 Row(
                                   children: [
-                                    IconButton(
-                                      onPressed: () {
-                                        widget.collectionCubit.addAccount();
-                                        setState(() {});
-                                      },
-                                      icon: const Icon(Icons.add),
-                                    ),
+                                    // IconButton(
+                                    //   onPressed: () {
+                                    //     widget.collectionCubit.addAccount();
+                                    //     setState(() {});
+                                    //   },
+                                    //   icon: const Icon(Icons.add),
+                                    // ),
                                     IconButton(
                                       icon: const Icon(Icons.qr_code_2),
                                       onPressed: () => widget.collectionCubit
@@ -251,6 +254,7 @@ class _FormCollectionState extends State<FormCollection>
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
                         (state is CollectionInitial ||
+                            state is CollectionLoading ||
                             state is CollectionFailed) &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
@@ -297,7 +301,12 @@ class _FormCollectionState extends State<FormCollection>
                                     ),
                                     dropdownColor: Colors.white,
                                     validator: (value) {
-                                      if (value == null) {
+                                      if (widget
+                                              .collectionCubit
+                                              .transferController
+                                              .text
+                                              .isNotEmpty &&
+                                          value!.id == 0) {
                                         return 'Selecciona una opción válida';
                                       }
                                       return null;

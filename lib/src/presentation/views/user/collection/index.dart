@@ -41,28 +41,34 @@ class CollectionViewState extends State<CollectionView>
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     context.read<AccountBloc>().add(LoadAccountListEvent());
-
     collectionCubit = BlocProvider.of<CollectionCubit>(context);
     collectionCubit.getCollection(
         widget.arguments.work.id!, widget.arguments.orderNumber);
 
-    collectionCubit.cashController.addListener(() {
-      collectionCubit.listenForCash();
-      setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+
+
+
+      collectionCubit.cashController.addListener(() {
+        collectionCubit.listenForCash();
+        if(context.mounted) setState(() {});
+      });
+      collectionCubit.transferController.addListener(() {
+        collectionCubit.listenForTransfer();
+
+        if(context.mounted) setState(() {});
+      });
     });
-    collectionCubit.transferController.addListener(() {
-      collectionCubit.listenForTransfer();
-      setState(() {});
-    });
+
     super.initState();
   }
 
-  // @override
-  // void dispose() {
-  //   WidgetsBinding.instance.removeObserver(this);
-  //   collectionCubit.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // collectionCubit.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,8 +125,6 @@ class CollectionViewState extends State<CollectionView>
               totalSummary: state.totalSummary!.toDouble(),
               confirmTransaction: () => collectionCubit.confirmTransaction(
                 widget.arguments,
-                collectionCubit.cashController,
-                collectionCubit.transferController,
               ),
               context: context,
             );
