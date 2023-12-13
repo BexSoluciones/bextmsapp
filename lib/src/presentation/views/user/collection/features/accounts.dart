@@ -160,7 +160,6 @@ class _AccountsCollectionState extends State<AccountsCollection>
                       ),
                     ),
                     style: const TextStyle(
-                      // fontSize: 10,
                       color: kPrimaryColor,
                     ),
                     dropdownColor: Colors.white,
@@ -175,6 +174,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                         value: value,
                         child: Text(
                           '${value.name} - ${value.accountNumber}',
+                          overflow: TextOverflow.visible,
                           style: const TextStyle(color: Colors.black),
                         ),
                       );

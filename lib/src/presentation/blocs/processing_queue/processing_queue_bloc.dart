@@ -463,7 +463,6 @@ class ProcessingQueueBloc
               updatedAt: now(),
             );
             await _databaseRepository.insertProcessingQueue(processingQueue);
-
             await _databaseRepository.updateStatusWork(workcode, 'complete');
           }
         }

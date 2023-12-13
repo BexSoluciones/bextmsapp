@@ -228,8 +228,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   }
 
   Future<void> getCurrentPosition(double zoom) async {
-    //currentLocation = await _locationRepository.getCurrentLocation();
-
     var currentLocation = gpsBloc.state.lastKnownLocation;
 
     mapController.move(

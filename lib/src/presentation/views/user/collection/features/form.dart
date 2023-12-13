@@ -102,8 +102,10 @@ class _FormCollectionState extends State<FormCollection>
                 //TODO:: [Heider Zapa] fix multiple accounts
                 const SizedBox(height: 10),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
+                    bloc: widget.collectionCubit,
                     selector: (state) =>
-                        state is CollectionInitial &&
+                        (state is CollectionInitial ||
+                            state is CollectionFailed) &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
@@ -144,7 +146,8 @@ class _FormCollectionState extends State<FormCollection>
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
-                        state is CollectionInitial &&
+                        (state is CollectionInitial ||
+                            state is CollectionFailed) &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
@@ -195,7 +198,7 @@ class _FormCollectionState extends State<FormCollection>
                                       color: Colors.white, fontSize: 20)),
                               press: () {
                                 widget.collectionCubit.dateController.text =
-                                    now();
+                                    date(null);
                                 showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,
@@ -210,7 +213,8 @@ class _FormCollectionState extends State<FormCollection>
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
-                        state is CollectionInitial &&
+                        (state is CollectionInitial ||
+                            state is CollectionFailed) &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,
@@ -246,7 +250,8 @@ class _FormCollectionState extends State<FormCollection>
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
-                        state is CollectionInitial &&
+                        (state is CollectionInitial ||
+                            state is CollectionFailed) &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,
@@ -303,6 +308,7 @@ class _FormCollectionState extends State<FormCollection>
                                         value: value,
                                         child: Text(
                                           '${value.name} - ${value.accountNumber}',
+                                          overflow: TextOverflow.visible,
                                           style: const TextStyle(
                                               color: Colors.black),
                                         ),
@@ -324,7 +330,8 @@ class _FormCollectionState extends State<FormCollection>
                 const SizedBox(height: 10),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
-                        state is CollectionInitial &&
+                        (state is CollectionInitial ||
+                            state is CollectionFailed) &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,
@@ -373,7 +380,8 @@ class _FormCollectionState extends State<FormCollection>
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
-                        state is CollectionInitial &&
+                        (state is CollectionInitial ||
+                            state is CollectionFailed) &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true,
                     builder: (c, x) {

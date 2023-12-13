@@ -97,6 +97,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   Future<CollectionState> _getCollection(int workId, String orderNumber) async {
     var totalSummary =
         await _databaseRepository.getTotalSummaries(workId, orderNumber);
+    dateController.text = date(null);
     return CollectionInitial(
         totalSummary: totalSummary,
         enterpriseConfig: _storageService.getObject('config') != null
@@ -146,20 +147,29 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     if (isBusy) return;
 
     await run(() async {
-      emit(const CollectionLoading());
+      emit(CollectionLoading(
+          totalSummary: state.totalSummary,
+          enterpriseConfig: state.enterpriseConfig));
 
       if (state.enterpriseConfig != null) {
+        print('paso a hacer validaciones');
         final allowInsetsBelow = state.enterpriseConfig!.allowInsetsBelow;
         final allowInsetsAbove = state.enterpriseConfig!.allowInsetsAbove;
 
-        if (state.enterpriseConfig!.specifiedAccountTransfer == true &&
-            transferController.text.isNotEmpty) {
-          if (accountId == null) {
-            emit(CollectionFailed(
-                totalSummary: state.totalSummary,
-                enterpriseConfig: state.enterpriseConfig,
-                error: 'Selecciona un numero de cuenta'));
-          }
+        if (state.enterpriseConfig!.multipleAccounts == false &&
+            state.enterpriseConfig!.specifiedAccountTransfer == true &&
+            transferController.text.isNotEmpty &&
+            accountId == null) {
+          emit(CollectionFailed(
+              totalSummary: state.totalSummary,
+              enterpriseConfig: state.enterpriseConfig,
+              error: 'Selecciona un numero de cuenta'));
+        }
+
+        if (arguments.typeOfCharge == 'CREDITO' && total == 0) {
+          _storageService.setBool('firmRequired', false);
+          _storageService.setBool('photoRequired', false);
+          confirmTransaction(arguments, cashController, transferController);
         }
 
         if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
@@ -167,7 +177,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           if (total == state.totalSummary!.toDouble()) {
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
-            //TODO:: [Heider Zapa] confirm transaction
             confirmTransaction(arguments, cashController, transferController);
           } else {
             emit(CollectionFailed(
@@ -180,20 +189,25 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           _storageService.setBool('firmRequired', false);
           _storageService.setBool('photoRequired', false);
 
-          if (total <= state.totalSummary!.toDouble()) {
-            //TODO:: [Heider Zapa] confirm transaction
+          if (total != 0 && total <= state.totalSummary!.toDouble()) {
             confirmTransaction(arguments, cashController, transferController);
           } else {
             emit(const CollectionWaiting());
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
+          print('aqui esta entrando');
+
+          print(total);
+          print(state.totalSummary);
+
           if (total <= state.totalSummary!.toDouble()) {
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
-            //TODO:: [Heider Zapa] confirm transaction
             confirmTransaction(arguments, cashController, transferController);
           } else {
+            print('fallo correctamente');
+
             emit(CollectionFailed(
                 totalSummary: state.totalSummary,
                 enterpriseConfig: state.enterpriseConfig,
@@ -226,7 +240,9 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     if (isBusy) return;
 
     await run(() async {
-      emit(const CollectionLoading());
+      emit(CollectionLoading(
+          totalSummary: state.totalSummary,
+          enterpriseConfig: state.enterpriseConfig));
 
       if (selectedAccounts.isNotEmpty) {
         transferController.clear();
@@ -257,155 +273,154 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       // }
 
       if (total != state.totalSummary) {
-        emit(CollectionFailed(error: 'el recaudo debe ser igual al total'));
+        emit(CollectionFailed(
+            totalSummary: state.totalSummary,
+            enterpriseConfig: state.enterpriseConfig,
+            error: 'el recaudo debe ser igual al total'));
       }
     });
   }
 
   Future<void> confirmTransaction(
       InventoryArgument arguments, cashController, transferController) async {
-    if (isBusy) return;
+    var status =
+        arguments.r != null && arguments.r!.isNotEmpty ? 'partial' : 'delivery';
 
-    await run(() async {
-      var status = arguments.r != null && arguments.r!.isNotEmpty
-          ? 'partial'
-          : 'delivery';
+    String? firm;
+    var firmApplication =
+        await helperFunctions.getFirm('firm-${arguments.orderNumber}');
+    if (firmApplication != null) {
+      var base64Firm = firmApplication.readAsBytesSync();
+      firm = base64Encode(base64Firm);
+    }
 
-      String? firm;
-      var firmApplication =
-          await helperFunctions.getFirm('firm-${arguments.orderNumber}');
-      if (firmApplication != null) {
-        var base64Firm = firmApplication.readAsBytesSync();
-        firm = base64Encode(base64Firm);
+    var images = await helperFunctions.getImages(arguments.orderNumber);
+    var imagesServer = <String>[];
+    if (images.isNotEmpty) {
+      for (var element in images) {
+        List<int> imageBytes = element.readAsBytesSync();
+        var base64Image = base64Encode(imageBytes);
+        imagesServer.add(base64Image);
       }
+    }
 
-      var images = await helperFunctions.getImages(arguments.orderNumber);
-      var imagesServer = <String>[];
-      if (images.isNotEmpty) {
-        for (var element in images) {
-          List<int> imageBytes = element.readAsBytesSync();
-          var base64Image = base64Encode(imageBytes);
-          imagesServer.add(base64Image);
-        }
-      }
+    var totalSummary = await _databaseRepository.getTotalSummaries(
+        arguments.work.id!, arguments.orderNumber);
 
-      var totalSummary = await _databaseRepository.getTotalSummaries(
-          arguments.work.id!, arguments.orderNumber);
+    var payments = <Payment>[];
 
-      var payments = <Payment>[];
-
-      if (selectedAccounts.isEmpty) {
-        if (cashController.text.isNotEmpty) {
-          payments.add(Payment(
-            method: 'cash',
-            paid: cashController.text,
-          ));
-        }
-      }
-
-      for (var i = 0; i < selectedAccounts.length; i++) {
+    if (selectedAccounts.isEmpty) {
+      if (cashController.text.isNotEmpty) {
         payments.add(Payment(
-            method: 'transfer $i',
-            paid: selectedAccounts[i][0].toString(),
-            accountId: selectedAccounts[i][1].toString()));
-      }
-
-      if (transferController.text.isNotEmpty) {
-        payments.add(Payment(
-          method: 'transfer',
-          paid: transferController.text,
+          method: 'cash',
+          paid: cashController.text,
         ));
       }
+    }
 
-      if (payments.isEmpty && (status == 'delivery' || status == 'partial')) {
-        emit(CollectionFailed(
-            error:
-                'No hay pagos para el recaudo que cumpla con las condiciones'));
-      } else {
-        var currentLocation = gpsBloc.state.lastKnownLocation;
-        var transaction = Transaction(
-            workId: arguments.work.id!,
-            summaryId: arguments.summaryId,
-            workcode: arguments.work.workcode,
-            orderNumber: arguments.orderNumber,
-            operativeCenter: arguments.operativeCenter,
-            status: status,
-            payments: payments,
-            firm: firm,
-            images: imagesServer.isNotEmpty ? imagesServer : null,
-            delivery: totalSummary.toString(),
-            start: now(),
-            end: null,
-            latitude: currentLocation!.latitude.toString(),
-            longitude: currentLocation.longitude.toString());
+    for (var i = 0; i < selectedAccounts.length; i++) {
+      payments.add(Payment(
+          method: 'transfer $i',
+          paid: selectedAccounts[i][0].toString(),
+          accountId: selectedAccounts[i][1].toString()));
+    }
 
-        var id = await _databaseRepository.insertTransaction(transaction);
+    if (transferController.text.isNotEmpty) {
+      payments.add(Payment(
+        method: 'transfer',
+        paid: transferController.text,
+      ));
+    }
 
-        var processingQueue = ProcessingQueue(
-            body: jsonEncode(transaction.toJson()),
-            task: 'incomplete',
-            code: 'store_transaction',
-            relationId: id.toString(),
-            relation: 'transactions',
-            createdAt: now(),
-            updatedAt: now());
+    if (payments.isEmpty && (status == 'delivery' || status == 'partial')) {
+      emit(CollectionFailed(
+          totalSummary: state.totalSummary,
+          enterpriseConfig: state.enterpriseConfig,
+          error:
+              'No hay pagos para el recaudo que cumpla con las condiciones'));
+    } else {
+      var currentLocation = gpsBloc.state.lastKnownLocation;
+      var transaction = Transaction(
+          workId: arguments.work.id!,
+          summaryId: arguments.summaryId,
+          workcode: arguments.work.workcode,
+          orderNumber: arguments.orderNumber,
+          operativeCenter: arguments.operativeCenter,
+          status: status,
+          payments: payments,
+          firm: firm,
+          images: imagesServer.isNotEmpty ? imagesServer : null,
+          delivery: totalSummary.toString(),
+          start: now(),
+          end: null,
+          latitude: currentLocation!.latitude.toString(),
+          longitude: currentLocation.longitude.toString());
 
-        _processingQueueBloc
-            .add(ProcessingQueueAdd(processingQueue: processingQueue));
+      var id = await _databaseRepository.insertTransaction(transaction);
 
-        if (status == 'partial') {
-          await Future.forEach(arguments.summaries!, (summary) async {
-            if (summary.minus != 0) {
-              var reason = arguments.r!
-                  .where((element) => element.summaryId == summary.id)
-                  .toList();
+      var processingQueue = ProcessingQueue(
+          body: jsonEncode(transaction.toJson()),
+          task: 'incomplete',
+          code: 'store_transaction',
+          relationId: id.toString(),
+          relation: 'transactions',
+          createdAt: now(),
+          updatedAt: now());
 
-              var re = await _databaseRepository
-                  .findReason(reason[0].controller.text);
+      _processingQueueBloc
+          .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
-              var transactionSummary = TransactionSummary(
-                  productName: summary.nameItem,
-                  numItems:
-                      (summary.minus * double.parse(summary.unitOfMeasurement))
-                          .toString(),
-                  summaryId: summary.id,
-                  orderNumber: summary.orderNumber,
-                  workId: arguments.work.id!,
-                  codmotvis: re!.codmotvis,
-                  reason: reason[0].controller.text,
-                  createdAt: DateTime.now().toString(),
-                  updatedAt: DateTime.now().toString());
+      if (status == 'partial') {
+        await Future.forEach(arguments.summaries!, (summary) async {
+          if (summary.minus != 0) {
+            var reason = arguments.r!
+                .where((element) => element.summaryId == summary.id)
+                .toList();
 
-              var id = await _databaseRepository
-                  .insertTransactionSummary(transactionSummary);
+            var re =
+                await _databaseRepository.findReason(reason[0].controller.text);
 
-              var processingQueue = ProcessingQueue(
-                body: jsonEncode(transactionSummary.toJson()),
-                task: 'incomplete',
-                code: 'store_transaction_product',
-                relationId: id.toString(),
-                relation: 'transaction_summaries',
-                createdAt: now(),
-                updatedAt: now(),
-              );
+            var transactionSummary = TransactionSummary(
+                productName: summary.nameItem,
+                numItems:
+                    (summary.minus * double.parse(summary.unitOfMeasurement))
+                        .toString(),
+                summaryId: summary.id,
+                orderNumber: summary.orderNumber,
+                workId: arguments.work.id!,
+                codmotvis: re!.codmotvis,
+                reason: reason[0].controller.text,
+                createdAt: DateTime.now().toString(),
+                updatedAt: DateTime.now().toString());
 
-              _processingQueueBloc
-                  .add(ProcessingQueueAdd(processingQueue: processingQueue));
-            }
-          });
-        }
+            var id = await _databaseRepository
+                .insertTransactionSummary(transactionSummary);
 
-        await helperFunctions.deleteImages(arguments.orderNumber);
-        await helperFunctions.deleteFirm('firm-${arguments.orderNumber}');
+            var processingQueue = ProcessingQueue(
+              body: jsonEncode(transactionSummary.toJson()),
+              task: 'incomplete',
+              code: 'store_transaction_product',
+              relationId: id.toString(),
+              relation: 'transaction_summaries',
+              createdAt: now(),
+              updatedAt: now(),
+            );
 
-        var v =
-            await _databaseRepository.validateTransaction(arguments.work.id!);
-
-        emit(CollectionSuccess(
-          work: arguments.work,
-          validate: v,
-        ));
+            _processingQueueBloc
+                .add(ProcessingQueueAdd(processingQueue: processingQueue));
+          }
+        });
       }
-    });
+
+      await helperFunctions.deleteImages(arguments.orderNumber);
+      await helperFunctions.deleteFirm('firm-${arguments.orderNumber}');
+
+      var v = await _databaseRepository.validateTransaction(arguments.work.id!);
+
+      emit(CollectionSuccess(
+        work: arguments.work,
+        validate: v,
+      ));
+    }
   }
 }

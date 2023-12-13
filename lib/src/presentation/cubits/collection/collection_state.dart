@@ -6,12 +6,14 @@ abstract class CollectionState extends Equatable {
   final bool? validate;
   final Work? work;
   final String? error;
+  final CollectionState? state;
 
   const CollectionState(
       {this.enterpriseConfig,
       this.totalSummary,
       this.work,
       this.validate,
+      this.state,
       this.error});
 
   @override
@@ -30,7 +32,7 @@ class CollectionChangeTotal extends CollectionState {
 }
 
 class CollectionLoading extends CollectionState {
-  const CollectionLoading();
+  const CollectionLoading({super.totalSummary, super.enterpriseConfig});
 }
 
 class CollectionWaiting extends CollectionState {
@@ -42,5 +44,6 @@ class CollectionSuccess extends CollectionState {
 }
 
 class CollectionFailed extends CollectionState {
-  const CollectionFailed({super.totalSummary, super.enterpriseConfig, super.error});
+  const CollectionFailed(
+      {super.totalSummary, super.enterpriseConfig, super.error});
 }

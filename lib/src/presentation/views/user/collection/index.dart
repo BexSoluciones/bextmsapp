@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -116,7 +115,7 @@ class CollectionViewState extends State<CollectionView>
           context: context,
           builder: (_) {
             return MyDialog(
-              total: collectionCubit.total!,
+              total: collectionCubit.total,
               totalSummary: state.totalSummary!.toDouble(),
               confirmTransaction: () => collectionCubit.confirmTransaction(
                 widget.arguments,
@@ -134,15 +133,14 @@ class CollectionViewState extends State<CollectionView>
       // buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
-        switch (state.runtimeType) {
-          case CollectionLoading:
-            return const Center(child: CupertinoActivityIndicator());
-          case CollectionInitial:
-            return _buildCollection(size, state);
-          case CollectionSuccess:
-            return _buildSuccessTransaction(size);
-          default:
-            return const SizedBox();
+        if (state is CollectionLoading ||
+            state is CollectionInitial ||
+            state is CollectionFailed) {
+          return _buildCollection(size, state);
+        } else if (state is CollectionSuccess) {
+          return _buildSuccessTransaction(size);
+        } else {
+          return const SizedBox();
         }
       },
     );
@@ -156,7 +154,8 @@ class CollectionViewState extends State<CollectionView>
         width: size.width,
         child: Column(children: [
           HeaderCollection(
-              type: widget.arguments.typeOfCharge, total: state.totalSummary ?? 0.0),
+              type: widget.arguments.typeOfCharge,
+              total: state.totalSummary ?? 0.0),
           SizedBox(height: size.height * 0.02),
           FormCollection(
               formKey: _formKey,

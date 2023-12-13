@@ -42,9 +42,9 @@ class Routes {
 
       Widget builder(BuildContext c) => child!(c, settings);
 
-      if (settings.name == AppRoutes.navigation) {
-        return SlideRoute(builder: builder);
-      }
+      // if (settings.name == AppRoutes.navigation) {
+      //   return SlideRoute(builder: builder);
+      // }
 
       return MaterialPageRoute(
           builder: (context) => ShowCaseWidget(
