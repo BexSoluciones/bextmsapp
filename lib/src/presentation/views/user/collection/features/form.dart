@@ -340,6 +340,7 @@ class _FormCollectionState extends State<FormCollection>
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
                         (state is CollectionInitial ||
+                            state is CollectionLoading ||
                             state is CollectionFailed) &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
@@ -383,29 +384,6 @@ class _FormCollectionState extends State<FormCollection>
                                 } else {
                                   print('Fecha no seleccionada');
                                 }
-                              },
-                            )
-                          : Container();
-                    }),
-                BlocSelector<CollectionCubit, CollectionState, bool>(
-                    selector: (state) =>
-                        (state is CollectionInitial ||
-                            state is CollectionFailed) &&
-                        state.enterpriseConfig!.specifiedAccountTransfer ==
-                            true,
-                    builder: (c, x) {
-                      return x
-                          ? TransactionList(
-                              selectedAccounts:
-                                  widget.collectionCubit.selectedAccounts,
-                              onTotalChange: (amount) {
-                                widget.collectionCubit.total += amount;
-                                setState(() {});
-                              },
-                              onDataRemove: (removedData) {
-                                widget.collectionCubit.selectedAccounts
-                                    .remove(removedData);
-                                setState(() {});
                               },
                             )
                           : Container();

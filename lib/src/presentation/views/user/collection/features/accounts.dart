@@ -115,8 +115,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                   children: [
                     IconButton(
                       icon: const Icon(Icons.qr_code_2),
-                      onPressed: () =>
-                          widget.collectionCubit.goToCodeQR(),
+                      onPressed: () => widget.collectionCubit.goToCodeQR(),
                     ),
                   ],
                 )
@@ -221,11 +220,19 @@ class _AccountsCollectionState extends State<AccountsCollection>
             DefaultButton(
                 widget: const Text('Agregar',
                     style: TextStyle(color: Colors.white, fontSize: 20)),
-                press: () => widget.collectionCubit.addAccount()),
+                press: () {
+                  widget.collectionCubit.addOrUpdatePaymentWithAccount(
+                      index: widget.collectionCubit.indexToEdit);
+                  setState(() {});
+                }),
             const SizedBox(height: 10),
             Expanded(
                 child: TransactionList(
               selectedAccounts: widget.collectionCubit.selectedAccounts,
+              onDataEdit: (index) {
+                widget.collectionCubit.editPaymentWithAccount(index);
+                setState(() {});
+              },
               onTotalChange: (amount) {
                 widget.collectionCubit.total += amount;
                 setState(() {});

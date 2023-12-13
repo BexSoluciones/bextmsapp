@@ -38,6 +38,13 @@ class CollectionViewState extends State<CollectionView>
   late CollectionCubit collectionCubit;
 
   @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     context.read<AccountBloc>().add(LoadAccountListEvent());
@@ -46,17 +53,14 @@ class CollectionViewState extends State<CollectionView>
         widget.arguments.work.id!, widget.arguments.orderNumber);
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-
-
-
       collectionCubit.cashController.addListener(() {
         collectionCubit.listenForCash();
-        if(context.mounted) setState(() {});
+        if (context.mounted) setState(() {});
       });
       collectionCubit.transferController.addListener(() {
         collectionCubit.listenForTransfer();
 
-        if(context.mounted) setState(() {});
+        if (context.mounted) setState(() {});
       });
     });
 
@@ -116,7 +120,6 @@ class CollectionViewState extends State<CollectionView>
         ),
       );
     } else if (state is CollectionWaiting) {
-      //TODO:: [Heider Zapa] resolve variable data
       await showDialog(
           context: context,
           builder: (_) {

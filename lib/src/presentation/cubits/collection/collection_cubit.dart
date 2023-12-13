@@ -55,6 +55,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
   int? accountId;
   double total = 0;
+  bool isEditing = false;
+  int? indexToEdit;
   List<dynamic> selectedAccounts = [];
 
   void listenForCash() {
@@ -72,16 +74,20 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   }
 
   void listenForTransfer() {
-    if (cashController.text.isNotEmpty && transferController.text.isNotEmpty) {
-      total = double.parse(transferController.text) +
-          double.parse(cashController.text);
-    } else if (transferController.text.isNotEmpty) {
-      total = double.parse(transferController.text);
-    } else if (cashController.text.isEmpty && transferController.text.isEmpty) {
-      total = 0;
-    } else if (cashController.text.isNotEmpty &&
-        transferController.text.isEmpty) {
-      total = double.parse(cashController.text);
+    if (!isEditing) {
+      if (cashController.text.isNotEmpty &&
+          transferController.text.isNotEmpty) {
+        total = double.parse(transferController.text) +
+            double.parse(cashController.text);
+      } else if (transferController.text.isNotEmpty) {
+        total = double.parse(transferController.text);
+      } else if (cashController.text.isEmpty &&
+          transferController.text.isEmpty) {
+        total = 0;
+      } else if (cashController.text.isNotEmpty &&
+          transferController.text.isEmpty) {
+        total = double.parse(cashController.text);
+      }
     }
   }
 
@@ -152,7 +158,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           enterpriseConfig: state.enterpriseConfig));
 
       if (state.enterpriseConfig != null) {
-        print('paso a hacer validaciones');
         final allowInsetsBelow = state.enterpriseConfig!.allowInsetsBelow;
         final allowInsetsAbove = state.enterpriseConfig!.allowInsetsAbove;
 
@@ -236,18 +241,12 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     });
   }
 
-  Future<void> addAccount() async {
-    if (isBusy) return;
-
-    await run(() async {
-      emit(CollectionLoading(
-          totalSummary: state.totalSummary,
-          enterpriseConfig: state.enterpriseConfig));
-
-      if (selectedAccounts.isNotEmpty) {
-        transferController.clear();
-      }
-
+  Future<void> addOrUpdatePaymentWithAccount({int? index}) async {
+    if (index != null) {
+      // selectedAccounts[0] = accountId;
+      selectedAccounts[2] = transferController.text;
+      selectedAccounts[3] = dateController.text;
+    } else {
       if (transferController.text.isNotEmpty) {
         if (double.tryParse(transferController.text) != null) {
           var transferValue = double.parse(transferController.text);
@@ -258,63 +257,42 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           }
 
           var count = 0.0;
-          selectedAccounts.add([transferValue, 'transfer', accountId, dateController.text]);
+          selectedAccounts
+              .add([transferValue, 'transfer', accountId, dateController.text]);
 
           for (var i = 0; i < selectedAccounts.length; i++) {
             count += double.parse(selectedAccounts[i][0].toString());
           }
 
           total = count + cashValue;
+          transferController.clear();
+          accountId = null;
+          dateController.text = date(null);
         }
       }
+    }
+  }
 
-      // for (var element in arguments.summaries!) {
-      //   state.totalSummary = element.grandTotalCopy!;
-      // }
+  Future<void> editPaymentWithAccount(int index) async {
+    indexToEdit = index;
+    isEditing = true;
 
-      if (total != state.totalSummary) {
-        emit(CollectionFailed(
-            totalSummary: state.totalSummary,
-            enterpriseConfig: state.enterpriseConfig,
-            error: 'el recaudo debe ser igual al total'));
-      }
-    });
+    dateController.text = selectedAccounts[index][3];
+    transferController.text = selectedAccounts[index][0].toString();
+    accountId = selectedAccounts[index][2];
   }
 
   Future<void> confirmTransaction(InventoryArgument arguments) async {
     var status =
         arguments.r != null && arguments.r!.isNotEmpty ? 'partial' : 'delivery';
 
-    String? firm;
-    var firmApplication =
-        await helperFunctions.getFirm('firm-${arguments.orderNumber}');
-    if (firmApplication != null) {
-      var base64Firm = firmApplication.readAsBytesSync();
-      firm = base64Encode(base64Firm);
-    }
-
-    var images = await helperFunctions.getImages(arguments.orderNumber);
-    var imagesServer = <String>[];
-    if (images.isNotEmpty) {
-      for (var element in images) {
-        List<int> imageBytes = element.readAsBytesSync();
-        var base64Image = base64Encode(imageBytes);
-        imagesServer.add(base64Image);
-      }
-    }
-
-    var totalSummary = await _databaseRepository.getTotalSummaries(
-        arguments.work.id!, arguments.orderNumber);
-
     var payments = <Payment>[];
 
-    if (selectedAccounts.isEmpty) {
-      if (cashController.text.isNotEmpty) {
-        payments.add(Payment(
-          method: 'cash',
-          paid: cashController.text,
-        ));
-      }
+    if (cashController.text.isNotEmpty) {
+      payments.add(Payment(
+        method: 'cash',
+        paid: cashController.text,
+      ));
     }
 
     if (state.enterpriseConfig!.multipleAccounts == true &&
@@ -323,8 +301,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         payments.add(Payment(
             method: 'transfer',
             paid: selectedAccounts[i][0].toString(),
-            accountId: selectedAccounts[i][1].toString(),
-            date: selectedAccounts[i][2]));
+            accountId: selectedAccounts[i][2].toString(),
+            date: selectedAccounts[i][3]));
       }
     } else {
       if (transferController.text.isNotEmpty) {
@@ -348,6 +326,28 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
               'No hay pagos para el recaudo que cumpla con las condiciones'));
     } else {
       var currentLocation = gpsBloc.state.lastKnownLocation;
+
+      String? firm;
+      var firmApplication =
+          await helperFunctions.getFirm('firm-${arguments.orderNumber}');
+      if (firmApplication != null) {
+        var base64Firm = firmApplication.readAsBytesSync();
+        firm = base64Encode(base64Firm);
+      }
+
+      var images = await helperFunctions.getImages(arguments.orderNumber);
+      var imagesServer = <String>[];
+      if (images.isNotEmpty) {
+        for (var element in images) {
+          List<int> imageBytes = element.readAsBytesSync();
+          var base64Image = base64Encode(imageBytes);
+          imagesServer.add(base64Image);
+        }
+      }
+
+      var totalSummary = await _databaseRepository.getTotalSummaries(
+          arguments.work.id!, arguments.orderNumber);
+
       var transaction = Transaction(
           workId: arguments.work.id!,
           summaryId: arguments.summaryId,
