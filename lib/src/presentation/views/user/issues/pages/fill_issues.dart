@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -29,7 +30,7 @@ class FillIssueView extends StatefulWidget {
 
 class _FillIssueViewState extends State<FillIssueView> {
   final TextEditingController observationsController = TextEditingController();
-
+  final helperFunctions = HelperFunctions();
   late IssuesBloc issuesBloc;
   @override
   void initState() {
@@ -205,45 +206,44 @@ class _FillIssueViewState extends State<FillIssueView> {
   }
 
   Future<bool> validateParameters({required IssuesBloc issuesBloc}) async {
-    if (issuesBloc.state.selectedIssue!.firm == 1) {
-      // var firmApplication = await helperFunctions.getFirm(
-      //     'firm-${(issuesBloc.state.status == 'work') ? issuesBloc.state.workId.toString() + issuesBloc.state.codmotvis! : (issuesBloc.state.status == 'summary') ? issuesBloc.state.selectedSummaryId.toString() + issuesBloc.state.codmotvis! : _storageService.getInt('user_id')!.toString() + issuesBloc.state.codmotvis!}');
-      // if (firmApplication != null) {
-      //   print('firm Ok');
-      // } else {
-      //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      //       backgroundColor: Colors.red,
-      //       content: Text('Debe ingresar la firma en las evidencias.',
-      //           style: TextStyle(color: Colors.white))));
-      //   return false;
-      // }
-    }
 
+    if (issuesBloc.state.selectedIssue!.firm == 1) {
+      var firmApplication = await helperFunctions.getFirm(
+          'firm-${(issuesBloc.state.status == 'work') ? issuesBloc.state.workId.toString() + issuesBloc.state.codmotvis! : (issuesBloc.state.status == 'summary') ? issuesBloc.state.selectedSummaryId.toString() + issuesBloc.state.codmotvis! : _storageService.getInt('user_id')!.toString() + issuesBloc.state.codmotvis!}');
+      if (firmApplication != null) {
+        print('firm Ok');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Debe ingresar la firma en las evidencias.',
+                style: TextStyle(color: Colors.white))));
+        return false;
+      }
+    }
     if (issuesBloc.state.selectedIssue!.observation == 1) {
-      // if (issuesBloc.state.observations!.text.isNotEmpty) {
-      //   print('observations ok');
-      // } else {
-      //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      //       backgroundColor: Colors.red,
-      //       content: Text('Debe ingresar Observaciones en las evidencias.',
-      //           style: TextStyle(color: Colors.white))));
-      //   return false;
-      // }
+      if (issuesBloc.state.observations!.text.isNotEmpty) {
+        print('observations ok');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Debe ingresar Observaciones en las evidencias.',
+                style: TextStyle(color: Colors.white))));
+        return false;
+      }
     }
     if (issuesBloc.state.selectedIssue!.photo == 1) {
-      // var images = await helperFunctions.getImages(
-      //     (issuesBloc.state.status == 'work') ? issuesBloc.state.workId.toString() + issuesBloc.state.codmotvis! : (issuesBloc.state.status == 'summary') ? issuesBloc.state.selectedSummaryId.toString() + issuesBloc.state.codmotvis! : _storageService.getInt('user_id')!.toString() + issuesBloc.state.codmotvis!);
-      // if (images.isNotEmpty) {
-      //   print('photos Ok');
-      // } else {
-      //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      //       backgroundColor: Colors.red,
-      //       content: Text('Debe ingresar fotos en las evidencias.',
-      //           style: TextStyle(color: Colors.white))));
-      //   return false;
-      // }
+      var images = await helperFunctions.getImages(
+          (issuesBloc.state.status == 'work') ? issuesBloc.state.workId.toString() + issuesBloc.state.codmotvis! : (issuesBloc.state.status == 'summary') ? issuesBloc.state.selectedSummaryId.toString() + issuesBloc.state.codmotvis! : _storageService.getInt('user_id')!.toString() + issuesBloc.state.codmotvis!);
+      if (images.isNotEmpty) {
+        print('photos Ok');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Debe ingresar fotos en las evidencias.',
+                style: TextStyle(color: Colors.white))));
+        return false;
+      }
     }
-
     return true;
   }
 }

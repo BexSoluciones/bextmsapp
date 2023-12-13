@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bexdeliveries/src/presentation/cubits/left/left_cubit.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -50,6 +51,7 @@ class ItemWork extends StatefulWidget {
 
 class _ItemWorkState extends State<ItemWork> with FormatDate {
   late HistoryOrderBloc historyOrderBloc;
+  late LeftCubit leftCubit;
   static final FirebaseMessaging _firebaseMessaging =
       FirebaseMessaging.instance;
   int left = 0;
@@ -68,10 +70,17 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
   @override
   void initState() {
     historyOrderBloc = BlocProvider.of<HistoryOrderBloc>(context);
+    leftCubit = BlocProvider.of<LeftCubit>(context);
+    lefCount();
     final pushNotificationService = PushNotificationService(_firebaseMessaging);
     pushNotificationService.initialise();
     super.initState();
   }
+
+  Future<void> lefCount()async{
+    left =await leftCubit.getCountLeft(widget.work.workcode.toString());
+  }
+
 
   @override
   void dispose() {

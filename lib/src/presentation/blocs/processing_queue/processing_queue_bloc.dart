@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 //utils
 import '../../../domain/models/requests/locations_request.dart';
+import '../../../domain/models/requests/reason_m_request.dart';
 import '../../../utils/constants/strings.dart';
 import '../../../utils/resources/data_state.dart';
 
@@ -275,6 +276,27 @@ class ProcessingQueueBloc
             queue.task = 'processing';
             final response = await _apiRepository.locations(
                 request: LocationsRequest(queue.body));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+
+          break;
+
+        case 'store_news':
+          try {
+            queue.task = 'processing';
+            final response = await _apiRepository.reason(
+                request: ReasonMRequest(queue));
             if (response is DataSuccess) {
               queue.task = 'done';
             } else {

@@ -3,6 +3,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 
+import '../../domain/models/news.dart';
 import '../../domain/repositories/database_repository.dart';
 import '../datasources/local/app_database.dart';
 
@@ -250,6 +251,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.transactionDao.deleteTransactionsByWorkcode(workcode);
   }
 
+  @override
+  Future<int> countLeftClients(String workcode) {
+    return _appDatabase.transactionDao.countLeftClients(workcode);
+  }
+
   //REASONS
   @override
   Future<List<Reason>> getAllReasons() async {
@@ -279,6 +285,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyReasons() async {
     return _appDatabase.reasonDao.emptyReasons();
+  }
+
+  @override
+  Future<int> insertNews(News news) async {
+    return _appDatabase.reasonDao.insertNews(news);
   }
 
   //ACCOUNTS
@@ -346,6 +357,7 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   Stream<List<Location>> watchAllLocations() {
     return _appDatabase.locationDao.watchAllLocations();
   }
+
 
   @override
   Future<List<Location>> getAllLocations() async {
