@@ -107,7 +107,7 @@ class _FormCollectionState extends State<FormCollection>
                         (state is CollectionInitial ||
                             state is CollectionLoading ||
                             state is CollectionFailed) &&
-                            state.enterpriseConfig != null &&
+                        state.enterpriseConfig != null &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
@@ -151,7 +151,7 @@ class _FormCollectionState extends State<FormCollection>
                         (state is CollectionInitial ||
                             state is CollectionLoading ||
                             state is CollectionFailed) &&
-                            state.enterpriseConfig != null &&
+                        state.enterpriseConfig != null &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
@@ -212,7 +212,9 @@ class _FormCollectionState extends State<FormCollection>
                                         collectionCubit: widget.collectionCubit,
                                         state: widget.state,
                                       );
-                                    });
+                                    }).whenComplete(() {
+                                    setState(() {});
+                                });
                               });
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
@@ -220,7 +222,7 @@ class _FormCollectionState extends State<FormCollection>
                         (state is CollectionInitial ||
                             state is CollectionLoading ||
                             state is CollectionFailed) &&
-                            state.enterpriseConfig != null &&
+                        state.enterpriseConfig != null &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,
@@ -236,13 +238,6 @@ class _FormCollectionState extends State<FormCollection>
                                 ]),
                                 Row(
                                   children: [
-                                    // IconButton(
-                                    //   onPressed: () {
-                                    //     widget.collectionCubit.addAccount();
-                                    //     setState(() {});
-                                    //   },
-                                    //   icon: const Icon(Icons.add),
-                                    // ),
                                     IconButton(
                                       icon: const Icon(Icons.qr_code_2),
                                       onPressed: () => widget.collectionCubit
@@ -259,7 +254,7 @@ class _FormCollectionState extends State<FormCollection>
                         (state is CollectionInitial ||
                             state is CollectionLoading ||
                             state is CollectionFailed) &&
-                            state.enterpriseConfig != null &&
+                        state.enterpriseConfig != null &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,
@@ -346,7 +341,7 @@ class _FormCollectionState extends State<FormCollection>
                         (state is CollectionInitial ||
                             state is CollectionLoading ||
                             state is CollectionFailed) &&
-                            state.enterpriseConfig != null &&
+                        state.enterpriseConfig != null &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,

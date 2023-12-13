@@ -242,39 +242,51 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   }
 
   Future<void> addOrUpdatePaymentWithAccount({int? index}) async {
-    if (index != null) {
-      // selectedAccounts[0] = accountId;
-      selectedAccounts[2] = transferController.text;
-      selectedAccounts[3] = dateController.text;
-    } else {
-      if (transferController.text.isNotEmpty) {
-        if (double.tryParse(transferController.text) != null) {
-          var transferValue = double.parse(transferController.text);
-          double cashValue = 0.0;
+    if (isBusy) return;
 
-          if (cashController.text.isNotEmpty) {
-            cashValue = double.parse(cashController.text);
+    await run(() async {
+      if (index != null) {
+        selectedAccounts[index][0] = transferController.text;
+        selectedAccounts[index][2] = accountId;
+        selectedAccounts[index][3] = dateController.text;
+
+        indexToEdit = null;
+        isEditing = false;
+      } else {
+        if (transferController.text.isNotEmpty) {
+          if (double.tryParse(transferController.text) != null) {
+            var transferValue = double.parse(transferController.text);
+            double cashValue = 0.0;
+
+            if (cashController.text.isNotEmpty) {
+              cashValue = double.parse(cashController.text);
+            }
+
+            var count = 0.0;
+            selectedAccounts.add(
+                [transferValue, 'transfer', accountId, dateController.text]);
+
+            for (var i = 0; i < selectedAccounts.length; i++) {
+              count += double.parse(selectedAccounts[i][0].toString());
+            }
+
+            total = count + cashValue;
           }
-
-          var count = 0.0;
-          selectedAccounts
-              .add([transferValue, 'transfer', accountId, dateController.text]);
-
-          for (var i = 0; i < selectedAccounts.length; i++) {
-            count += double.parse(selectedAccounts[i][0].toString());
-          }
-
-          total = count + cashValue;
-          transferController.clear();
-          accountId = null;
-          dateController.text = date(null);
         }
       }
-    }
+
+      transferController.clear();
+      accountId = null;
+      dateController.text = date(null);
+
+      emit(CollectionInitial(
+          totalSummary: state.totalSummary,
+          enterpriseConfig: state.enterpriseConfig));
+    });
   }
 
   Future<void> editPaymentWithAccount(int index) async {
-    if(isBusy) return;
+    if (isBusy) return;
 
     await run(() async {
       indexToEdit = index;
@@ -288,7 +300,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           totalSummary: state.totalSummary,
           enterpriseConfig: state.enterpriseConfig));
     });
-
   }
 
   Future<void> confirmTransaction(InventoryArgument arguments) async {
