@@ -1,7 +1,9 @@
 //utils
 import 'package:bexdeliveries/src/domain/models/requests/history_order_saved_request.dart';
 import 'package:bexdeliveries/src/domain/models/requests/history_order_updated_request.dart';
+import 'package:bexdeliveries/src/domain/models/requests/routing_request.dart';
 import 'package:bexdeliveries/src/domain/models/responses/history_order_saved_response.dart';
+import 'package:bexdeliveries/src/domain/models/responses/routing_response.dart';
 
 import '../../domain/models/requests/locations_request.dart';
 import '../../utils/resources/data_state.dart';
@@ -258,6 +260,15 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }) {
     return getStateOf<HistoryOrderUpdatedResponse>(
       request: () => _apiService.historyOrderUpdate(request),
+    );
+  }
+
+  @override
+  Future<DataState<RoutingResponse>> routing({
+    required RoutingRequest request,
+  }) {
+    return getStateOf<RoutingResponse>(
+      request: () => _apiService.routing(request),
     );
   }
 

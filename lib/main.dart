@@ -61,6 +61,7 @@ import 'src/presentation/blocs/history_order/history_order_bloc.dart';
 import 'src/presentation/blocs/issues/issues_bloc.dart';
 import 'src/presentation/blocs/account/account_bloc.dart';
 import 'src/presentation/blocs/gps/gps_bloc.dart';
+import 'src/presentation/blocs/camera/camera_bloc.dart';
 
 //database
 import 'src/data/datasources/local/app_database.dart';
@@ -70,6 +71,7 @@ import 'src/presentation/providers/photo_provider.dart';
 
 //utils
 import 'src/utils/constants/strings.dart';
+import 'src/utils/resources/camera.dart';
 
 //service
 import 'src/locator.dart';
@@ -303,7 +305,6 @@ class _MyAppState extends State<MyApp> {
             create: (context) => ProcessingQueueBloc(
               locator<DatabaseRepository>(),
               locator<ApiRepository>(),
-
             )..add(ProcessingQueueObserve()),
           ),
           BlocProvider(
@@ -418,6 +419,12 @@ class _MyAppState extends State<MyApp> {
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
                 BlocProvider.of<GpsBloc>(context)),
+          ),
+          BlocProvider(
+            create: (_) => CameraBloc(
+                cameraUtils: CameraUtils(),
+                databaseRepository: locator<DatabaseRepository>())
+              ..add(CameraInitialized()),
           ),
           BlocProvider(
             create: (context) => AccountBloc(locator<DatabaseRepository>()),

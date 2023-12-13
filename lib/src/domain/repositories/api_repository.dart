@@ -1,5 +1,8 @@
 
 
+import 'package:bexdeliveries/src/domain/models/requests/routing_request.dart';
+import 'package:bexdeliveries/src/domain/models/responses/routing_response.dart';
+
 import '../../utils/resources/data_state.dart';
 
 import '../models/requests/enterprise_request.dart';
@@ -127,6 +130,10 @@ abstract class ApiRepository {
 
   Future<DataState<HistoryOrderSavedResponse>> historyOrderSaved({
     required HistoryOrderSavedRequest request
+  });
+
+  Future<DataState<RoutingResponse>> routing({
+    required RoutingRequest request
   });
 
   Future<DataState<HistoryOrderUpdatedResponse>> historyOrderUpdated({

@@ -53,8 +53,10 @@ class Routes {
                 builder: Builder(builder: builder),
               ));
     } catch (e) {
+      print('*******************');
+      print(e);
       return MaterialPageRoute(
-          builder: (BuildContext context) => const UndefinedView());
+          builder: (BuildContext context) => UndefinedView(name: settings.name));
     }
   }
 }

@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/src/domain/models/requests/history_order_saved_request.dart';
+import 'package:bexdeliveries/src/domain/models/requests/history_order_updated_request.dart';
+import 'package:bexdeliveries/src/domain/models/requests/routing_request.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -312,7 +315,14 @@ class ProcessingQueueBloc
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
-            //TODO:: [Heider Zapa ] do
+            final response = await _apiRepository.historyOrderUpdated(
+                request: HistoryOrderUpdatedRequest(body['workcode'], 1));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -325,8 +335,16 @@ class ProcessingQueueBloc
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
-            //TODO:: [Heider Zapa ] do
+            final response = await _apiRepository.historyOrderSaved(
+                request: HistoryOrderSavedRequest(body['work_id']));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
             await _databaseRepository.updateProcessingQueue(queue);
+
           } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
@@ -342,6 +360,8 @@ class ProcessingQueueBloc
                 request: PredictionRequest(
                     int.parse(body['zone_id']), body['workcode']));
             if (response is DataSuccess) {
+              //TODO:: [Heider Zapa] insert prediction
+              // await _databaseRepository.insert
               queue.task = 'done';
             } else {
               queue.task = 'error';
@@ -360,7 +380,15 @@ class ProcessingQueueBloc
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
-            //TODO:: [Heider Zapa ] do
+            final response = await _apiRepository.routing(
+                request: RoutingRequest(body['history_id'], body['workcode']));
+            if (response is DataSuccess) {
+              await _databaseRepository.insertWorks(response.data!.works);
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';

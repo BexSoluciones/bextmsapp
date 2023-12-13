@@ -45,17 +45,6 @@ class QueryCubit extends BaseCubit<QueryState, List<Work>?> {
         data = [];
 
         await Future.forEach(works, (work) async {
-          var dob = DateTime.parse(work.date!);
-          var dur = DateTime.now().difference(dob);
-
-          // if (dur.inDays > _storageService.getInt('limit_days_works')! &&
-          //     work.status == 'complete') {
-          //   // await database.deleteTransactionsByWorkcode(work.workcode);
-          //   // await database.deleteWork(work);
-          // } else {
-          //
-          // }
-
           data?.add(work);
         }).then((value) => emit(QuerySuccess(works: data,respawns: respawnList,totalRespawn:countTotalReturnRespawn,rejects: rejectList ,totalRejects: countTotalReturnReject,delivery: deliveryList,totalDelivery: countTotalReturnDelivery,countTotalCollectionWorks: countTotalCollectionWork)));
 

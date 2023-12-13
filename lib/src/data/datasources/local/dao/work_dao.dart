@@ -18,7 +18,8 @@ class WorkDao {
     final db = await _appDatabase.streamDatabase;
 
     final workList = await db!.rawQuery('''
-        SELECT works.*,
+        SELECT works.workcode, works.latitude, works.longitude,
+        works.active, works.status,
         COUNT(DISTINCT number_customer || code_place) as count,
         COUNT(DISTINCT summaries.order_number || works.number_customer || works.code_place) as left,
         COUNT(DISTINCT transactions.order_number || works.number_customer || works.code_place) as right

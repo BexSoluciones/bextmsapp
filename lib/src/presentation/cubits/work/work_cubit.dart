@@ -46,6 +46,8 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
       // final total = await _databaseRepository.countAllWorksByWorkcode(workcode);
       final works = await _databaseRepository.findAllWorksByWorkcode(workcode);
 
+      print(works.length);
+
       if(needRebuild){
         data = [];
       }
