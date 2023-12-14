@@ -64,8 +64,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     networkCubit = BlocProvider.of<NetworkBloc>(context);
-    networkCubit.add(NetworkObserve(
-        processingQueueBloc: context.read<ProcessingQueueBloc>()));
+    networkCubit.add(NetworkObserve());
 
     navigationCubit = BlocProvider.of<NavigationCubit>(context);
     navigationCubit.getAllWorksByWorkcode(widget.workcode);
@@ -88,8 +87,7 @@ class _MapPageState extends State<MapPage> {
     navigationCubit.getAllWorksByWorkcode(widget.workcode);
 
     networkCubit = BlocProvider.of<NetworkBloc>(context);
-    networkCubit.add(NetworkObserve(
-        processingQueueBloc: context.read<ProcessingQueueBloc>()));
+    networkCubit.add(NetworkObserve());
     super.didChangeDependencies();
   }
 

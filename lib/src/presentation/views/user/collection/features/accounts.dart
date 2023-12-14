@@ -187,7 +187,9 @@ class _AccountsCollectionState extends State<AccountsCollection>
                         return DropdownMenuItem<Account>(
                           value: value,
                           child: Text(
-                            '${value.name} - ${value.accountNumber}',
+                            value.accountNumber != null
+                                ? '${value.name} - ${value.accountNumber}'
+                                : value.name!,
                             overflow: TextOverflow.visible,
                             style: const TextStyle(color: Colors.black),
                           ),

@@ -3,9 +3,7 @@ part of 'network_bloc.dart';
 abstract class NetworkEvent {}
 
 class NetworkObserve extends NetworkEvent {
-  final ProcessingQueueBloc processingQueueBloc;
-
-  NetworkObserve({ required this.processingQueueBloc });
+  NetworkObserve();
 }
 
 class NetworkNotify extends NetworkEvent {

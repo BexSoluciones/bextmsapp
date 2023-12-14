@@ -23,7 +23,7 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
       if (result == ConnectivityResult.none) {
         NetworkBloc().add(NetworkNotify());
       } else {
-        event.processingQueueBloc.add(ProcessingQueueObserve());
+        // event.processingQueueBloc.add(ProcessingQueueObserve());
         NetworkBloc().add(NetworkNotify(isConnected: true));
       }
     });

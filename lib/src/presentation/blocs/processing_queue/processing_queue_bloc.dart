@@ -1,15 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bexdeliveries/src/domain/models/requests/history_order_saved_request.dart';
-import 'package:bexdeliveries/src/domain/models/requests/history_order_updated_request.dart';
-import 'package:bexdeliveries/src/domain/models/requests/routing_request.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //utils
-import '../../../domain/models/requests/locations_request.dart';
-import '../../../domain/models/requests/reason_m_request.dart';
+
 import '../../../utils/constants/strings.dart';
 import '../../../utils/resources/data_state.dart';
 
@@ -28,6 +24,11 @@ import '../../../domain/models/requests/logout_request.dart';
 import '../../../domain/models/requests/status_request.dart';
 import '../../../domain/models/requests/client_request.dart';
 import '../../../domain/models/requests/send_token.dart';
+import '../../../domain/models/requests/locations_request.dart';
+import '../../../domain/models/requests/reason_m_request.dart';
+import '../../../domain/models/requests/history_order_saved_request.dart';
+import '../../../domain/models/requests/history_order_updated_request.dart';
+import '../../../domain/models/requests/routing_request.dart';
 //repositories
 import '../../../domain/repositories/api_repository.dart';
 import '../../../domain/repositories/database_repository.dart';
@@ -36,6 +37,7 @@ import '../../../domain/abstracts/format_abstract.dart';
 
 //service
 import '../../../services/logger.dart';
+import '../network/network_bloc.dart';
 
 part 'processing_queue_event.dart';
 part 'processing_queue_state.dart';
@@ -44,6 +46,10 @@ class ProcessingQueueBloc
     extends Bloc<ProcessingQueueEvent, ProcessingQueueState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ApiRepository _apiRepository;
+
+  NetworkBloc? networkBloc;
+  StreamSubscription? networkSubscription;
+  bool? isConnected;
 
   final _processingQueueController =
       StreamController<List<ProcessingQueue>>.broadcast();
@@ -56,12 +62,19 @@ class ProcessingQueueBloc
       _processingQueueController.sink;
   StreamSink<ProcessingQueue> get inAddPq => _addProcessingQueueController.sink;
 
-  ProcessingQueueBloc(this._databaseRepository, this._apiRepository)
+  ProcessingQueueBloc(
+      this._databaseRepository, this._apiRepository, this.networkBloc)
       : super(ProcessingQueueInitial()) {
     on<ProcessingQueueAdd>(_add);
     on<ProcessingQueueObserve>(_observe);
     on<ProcessingQueueSender>(_sender);
     on<ProcessingQueueCancel>(_cancel);
+
+    if (networkBloc == null) return;
+    networkSubscription = networkBloc?.stream.listen((networkState) {
+      isConnected = networkState.runtimeType is NetworkSuccess;
+    });
+
     _addProcessingQueueController.stream.listen((p) async {
       await _databaseRepository.insertProcessingQueue(p);
       await Future.value([
@@ -90,8 +103,8 @@ class ProcessingQueueBloc
 
   Stream get resolve {
     return Stream.periodic(const Duration(seconds: 30), (int value) async {
-      final timer0 =
-          logTimerStart(headerDeveloperLogger, 'Starting...', level: LogLevel.info);
+      final timer0 = logTimerStart(headerDeveloperLogger, 'Starting...',
+          level: LogLevel.info);
       var result = await _databaseRepository.listenForTableChanges(
           'works', 'status', 'complete');
       logDebugFine(headerDeveloperLogger, result.toString());
@@ -115,9 +128,12 @@ class ProcessingQueueBloc
   }
 
   Future<void> _getProcessingQueue() async {
-    logDebugFine(headerDeveloperLogger, 'activating pq');
-    final queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
-    _inProcessingQueue.add(queues);
+    if (isConnected != null && isConnected == true) {
+      logDebugFine(headerDeveloperLogger, 'activating pq');
+      final queues =
+          await _databaseRepository.getAllProcessingQueuesIncomplete();
+      _inProcessingQueue.add(queues);
+    }
   }
 
   void _add(event, emit) {
@@ -126,7 +142,9 @@ class ProcessingQueueBloc
   }
 
   void _observe(event, emit) {
-    _getProcessingQueue();
+    if (isConnected != null && isConnected == true) {
+      _getProcessingQueue();
+    }
     emit(ProcessingQueueSuccess());
   }
 
@@ -295,8 +313,8 @@ class ProcessingQueueBloc
         case 'store_news':
           try {
             queue.task = 'processing';
-            final response = await _apiRepository.reason(
-                request: ReasonMRequest(queue));
+            final response =
+                await _apiRepository.reason(request: ReasonMRequest(queue));
             if (response is DataSuccess) {
               queue.task = 'done';
             } else {
@@ -366,7 +384,6 @@ class ProcessingQueueBloc
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-
           } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();

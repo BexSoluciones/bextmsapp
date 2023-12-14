@@ -294,6 +294,16 @@ class _MyAppState extends State<MyApp> {
               ..add(PhotosLoaded()),
           ),
           BlocProvider(
+            create: (_) => NetworkBloc()..add(NetworkObserve()),
+          ),
+          BlocProvider(
+            create: (context) => ProcessingQueueBloc(
+                locator<DatabaseRepository>(),
+                locator<ApiRepository>(),
+                BlocProvider.of<NetworkBloc>(context))
+              ..add(ProcessingQueueObserve()),
+          ),
+          BlocProvider(
               create: (context) => LocationBloc(
                   locationRepository: context.read<LocationRepository>(),
                   databaseRepository: locator<DatabaseRepository>())
@@ -301,17 +311,7 @@ class _MyAppState extends State<MyApp> {
           BlocProvider(
             create: (context) => ThemeBloc(),
           ),
-          BlocProvider(
-            create: (context) => ProcessingQueueBloc(
-              locator<DatabaseRepository>(),
-              locator<ApiRepository>(),
-            )..add(ProcessingQueueObserve()),
-          ),
-          BlocProvider(
-            create: (context) => NetworkBloc()
-              ..add(NetworkObserve(
-                  processingQueueBloc: context.read<ProcessingQueueBloc>())),
-          ),
+
           BlocProvider(create: (_) => GpsBloc()),
           BlocProvider(
               create: (context) => InitialCubit(locator<ApiRepository>())),

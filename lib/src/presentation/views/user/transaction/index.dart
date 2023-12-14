@@ -29,7 +29,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
   late ProcessingQueueBloc processingQueueBloc;
 
   late Stream stream;
-  late StreamSubscription subcription;
+  late StreamSubscription subscription;
   int computationCount = 0;
 
   var works = <Work>[];
@@ -42,7 +42,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
       return processingQueueBloc.countProcessingQueueIncompleteToTransactions();
     });
 
-    subcription = stream.listen((event) async {
+    subscription = stream.listen((event) async {
       var int = await event;
       setState(() {
         computationCount = int;
@@ -54,7 +54,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
 
   @override
   void dispose() {
-    subcription.cancel();
+    subscription.cancel();
     super.dispose();
   }
 
@@ -145,9 +145,9 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                         item(
                             'Transacciones pendientes',
                             queues
-                                .where((queue) => queue.task == "pending")
+                                .where((queue) => queue.task == "pending" || queue.task == "incomplete")
                                 .length,
-                            Colors.blue),
+                            Colors.orange),
                         const SizedBox(height: 16),
                         item(
                             'Transacciones con error',
@@ -158,13 +158,20 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                         const SizedBox(height: 20),
                         item('Total', queues.length, null),
                         const SizedBox(height: 20),
-                        DefaultButton(
-                            widget: const Text('Enviar transacciones',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.white)),
-                            press: () => context
-                                .read<ProcessingQueueBloc>()
-                                .add(ProcessingQueueSender()))
+                        queues
+                                .where((queue) =>
+                                    queue.task == "pending" ||
+                                    queue.task == "error" ||
+                                    queue.task == "incomplete")
+                                .isNotEmpty
+                            ? DefaultButton(
+                                widget: const Text('Enviar transacciones',
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.white)),
+                                press: () => context
+                                    .read<ProcessingQueueBloc>()
+                                    .add(ProcessingQueueSender()))
+                            : Container()
                       ],
                     )));
           }
@@ -183,11 +190,15 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
         ),
         child: ListTile(
           title: Text(title,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600)),
           trailing: Text(cant.toString(),
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500)),
         ),
       ),
     );

@@ -35,14 +35,12 @@ class FormCollection extends StatefulWidget {
 
 class _FormCollectionState extends State<FormCollection>
     with FormatNumber, FormatDate {
-
   @override
   void setState(VoidCallback fn) {
-    if(mounted){
+    if (mounted) {
       super.setState(fn);
     }
   }
-
 
   @override
   void initState() {
@@ -232,7 +230,6 @@ class _FormCollectionState extends State<FormCollection>
                                     });
 
                                 future.then((void value) => _closeModal(value));
-
                               });
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
@@ -333,7 +330,9 @@ class _FormCollectionState extends State<FormCollection>
                                       return DropdownMenuItem<Account>(
                                         value: value,
                                         child: Text(
-                                          '${value.name} - ${value.accountNumber}',
+                                          value.accountNumber != null
+                                              ? '${value.name} - ${value.accountNumber}'
+                                              : value.name!,
                                           overflow: TextOverflow.visible,
                                           style: const TextStyle(
                                               color: Colors.black),
