@@ -40,21 +40,28 @@ class Routes {
     try {
       final child = routes[settings.name];
 
-      Widget builder(BuildContext c) => child!(c, settings);
+      if (child != null) {
+        Widget builder(BuildContext c) => child(c, settings);
 
-      if (settings.name == AppRoutes.splash) {
-        return MaterialPageRoute(builder: builder);
+        if (settings.name == AppRoutes.splash) {
+          return MaterialPageRoute(builder: builder);
+        }
+
+        return MaterialPageRoute(
+            builder: (context) => ShowCaseWidget(
+                  autoPlayDelay: const Duration(seconds: 3),
+                  blurValue: 1,
+                  builder: Builder(builder: builder),
+                ));
+      } else {
+        return MaterialPageRoute(
+            builder: (BuildContext context) =>
+                UndefinedView(name: settings.name));
       }
-
-      return MaterialPageRoute(
-          builder: (context) => ShowCaseWidget(
-                autoPlayDelay: const Duration(seconds: 3),
-                blurValue: 1,
-                builder: Builder(builder: builder),
-              ));
     } catch (e) {
       return MaterialPageRoute(
-          builder: (BuildContext context) => UndefinedView(name: settings.name));
+          builder: (BuildContext context) =>
+              UndefinedView(name: settings.name));
     }
   }
 }
