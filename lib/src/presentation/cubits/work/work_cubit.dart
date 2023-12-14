@@ -31,24 +31,19 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
 
   CurrentUserLocationEntity? currentLocation;
 
-  WorkCubit(
-      this._databaseRepository, this._locationRepository, this._processingQueueBloc)
+  WorkCubit(this._databaseRepository, this._locationRepository,
+      this._processingQueueBloc)
       : super(const WorkLoading(), []);
 
   int page = 0;
 
   Future<void> getAllWorksByWorkcode(String workcode, bool needRebuild) async {
-
     if (isBusy) return;
 
     await run(() async {
-
-      // final total = await _databaseRepository.countAllWorksByWorkcode(workcode);
       final works = await _databaseRepository.findAllWorksByWorkcode(workcode);
 
-      print(works.length);
-
-      if(needRebuild){
+      if (needRebuild) {
         data = [];
       }
 
@@ -67,7 +62,7 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
               element.hasCompleted != null && element.hasCompleted == 0)
           .toList();
 
-      final notGeoreferenced = data
+      final notGeoReferenced = data
           .where((element) =>
               element.latitude == null && element.longitude == null)
           .toList();
@@ -77,7 +72,7 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
           works: data,
           visited: visited,
           notVisited: notVisited,
-          notGeoreferenced: notGeoreferenced,
+          notGeoreferenced: notGeoReferenced,
           // noMoreData: noMoreData,
           started: started ?? false,
           confirm: confirm ?? false));
@@ -86,10 +81,8 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
 
   void changeStarted(String workcode, bool data) {
     _storageService.setBool('$workcode-started', data);
-    emit(WorkSuccess(
-        works: state.works,
-        confirm: state.confirm,
-        started: data));
+    emit(
+        WorkSuccess(works: state.works, confirm: state.confirm, started: data));
   }
 
   void changeConfirm(String workcode, bool data) {
@@ -102,5 +95,4 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
         started: state.started,
         confirm: data));
   }
-
 }

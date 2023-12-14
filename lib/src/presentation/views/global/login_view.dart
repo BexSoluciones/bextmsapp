@@ -75,24 +75,11 @@ class LoginViewState extends State<LoginView> {
     loginCubit = BlocProvider.of<LoginCubit>(context);
 
     return Scaffold(
-      //appBar: buildAppBar,
       body: BlocBuilder<LoginCubit, LoginState>(
         builder: (context, state) => buildBlocConsumer(size),
       ),
     );
   }
-
-  /*AppBar get buildAppBar => AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => context.read<LoginCubit>().goToCompany(),
-        ),
-        scrolledUnderElevation: 5.0,
-        shadowColor: Theme.of(context).colorScheme.shadow,
-        notificationPredicate: (ScrollNotification notification) {
-          return notification.depth == 1;
-        },
-      );*/
 
   Widget _buildBody(Size size,LoginState state) {
     return SafeArea(

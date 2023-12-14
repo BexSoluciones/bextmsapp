@@ -69,7 +69,7 @@ class ConfirmWorkViewState extends State<ConfirmWorkView> {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: '¿Realmente deseas iniciar \nel servicio ',
+                      text: '¿Realmente deseas iniciar \nel servicio',
                       style:
                           TextStyle(fontSize: 20, color: Colors.grey.shade800),
                     ),

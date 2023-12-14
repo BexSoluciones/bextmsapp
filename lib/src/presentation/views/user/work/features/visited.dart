@@ -61,7 +61,6 @@ class VisitedViewWorkState extends State<VisitedViewWork> {
               width: double.infinity,
               child: Center(
                   child: Text('SERVICIO: ${widget.workcode}',
-                      textScaleFactor: calculatedTextScaleFactor,
                       style: TextStyle(
                         fontSize: calculatedFon,
                         fontWeight: FontWeight.bold,

@@ -56,7 +56,7 @@ class WorkBloc extends Bloc<WorkEvent, WorkState> {
             element.hasCompleted != null && element.hasCompleted == 0)
         .toList();
 
-    final notGeoreferenced = works
+    final notGeoReferenced = works
         .where(
             (element) => element.latitude == null && element.longitude == null)
         .toList();
@@ -66,7 +66,7 @@ class WorkBloc extends Bloc<WorkEvent, WorkState> {
         works: works,
         visited: visited,
         notVisited: notVisited,
-        notGeoreferenced: notGeoreferenced,
+        notGeoreferenced: notGeoReferenced,
         noMoreData: noMoreData,
         started: started ?? false,
         blocked: blocked ?? false,

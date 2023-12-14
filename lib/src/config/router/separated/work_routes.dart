@@ -14,5 +14,5 @@ Map<String, RouteType> workRoutes = {
       WorkView(arguments: settings.arguments as WorkArgument),
   AppRoutes.confirm: (context, settings) =>
       ConfirmWorkView(arguments: settings.arguments as WorkArgument),
-  // AppRoutes.history: (context, settings) => const View(),
+  // AppRoutes.history: (context, settings) =>
 };

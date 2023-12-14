@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:location_repository/location_repository.dart';
 
 //utils
+import '../../../domain/models/arguments.dart';
 import '../../../utils/constants/strings.dart';
 
 //domain
@@ -47,7 +48,7 @@ class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
     return ConfirmSuccess(work: work);
   }
 
-  Future<void> confirm(arguments) async {
+  Future<void> confirm(WorkArgument arguments) async {
     if (isBusy) return;
 
     await run(() async {
@@ -71,7 +72,7 @@ class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
       _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueStatus));
 
       var transaction = Transaction(
-          workId: arguments.work.id,
+          workId: arguments.work.id!,
           workcode: arguments.work.workcode,
           status: 'start',
           start: now(),
