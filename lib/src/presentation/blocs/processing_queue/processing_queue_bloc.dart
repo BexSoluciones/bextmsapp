@@ -4,8 +4,13 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-//utils
+//core
+import '../../../../core/helpers/index.dart';
 
+//blocs
+import '../network/network_bloc.dart';
+
+//utils
 import '../../../utils/constants/strings.dart';
 import '../../../utils/resources/data_state.dart';
 
@@ -14,6 +19,7 @@ import '../../../domain/models/processing_queue.dart';
 import '../../../domain/models/isolate.dart';
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/client.dart';
+import '../../../domain/models/history_order.dart';
 import '../../../domain/models/transaction_summary.dart';
 import '../../../domain/models/requests/prediction_request.dart';
 
@@ -36,16 +42,21 @@ import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //service
+import '../../../locator.dart';
 import '../../../services/logger.dart';
-import '../network/network_bloc.dart';
+import '../../../services/storage.dart';
+
 
 part 'processing_queue_event.dart';
 part 'processing_queue_state.dart';
+
+final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class ProcessingQueueBloc
     extends Bloc<ProcessingQueueEvent, ProcessingQueueState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ApiRepository _apiRepository;
+  final helperFunctions = HelperFunctions();
 
   NetworkBloc? networkBloc;
 
@@ -234,6 +245,9 @@ class ProcessingQueueBloc
             queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
+            //TODO:: verify if transaction exists
+
+
             final response = await _apiRepository.index(
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {
@@ -393,8 +407,42 @@ class ProcessingQueueBloc
                 request: PredictionRequest(
                     int.parse(body['zone_id']), body['workcode']));
             if (response is DataSuccess) {
+
+              var prediction = response.data;
               //TODO:: [Heider Zapa] insert prediction
-              // await _databaseRepository.insert
+
+              var historyOrder = HistoryOrder(
+                  id: prediction?.id,
+                  workId: prediction!.workId,
+                  workcode: body['workcode'],
+                  zoneId: prediction.zoneId,
+                  listOrder: prediction.listOrders,
+                  works: prediction.works,
+                  different: prediction.differences,
+                  likelihood: prediction.likelihood,
+                  used: prediction.used);
+
+              // await _databaseRepository.insertHistoryOrder(historyOrder);
+
+              if (historyOrder.used!) {
+                _storageService.setBool(
+                    '${historyOrder.workcode}-usedHistoric', true);
+                _storageService.setBool(
+                    '${historyOrder.workcode}-recentlyUpdated', true);
+                _storageService.setBool('${historyOrder.workcode}-showAgain', true);
+                _storageService.setBool(
+                    '${historyOrder.workcode}-oneOrMoreFinished', true);
+
+
+                await helperFunctions.useHistoricFromSync(
+                    workcode: historyOrder.workcode!,
+                    historyId: historyOrder.id!,
+                    queue: queue);
+              } else {
+                _storageService.setBool('${historyOrder.workcode}-showAgain', false);
+                queue.task = 'done';
+              }
+
               queue.task = 'done';
             } else {
               queue.task = 'error';
@@ -524,8 +572,8 @@ class ProcessingQueueBloc
               updatedAt: now(),
             );
             await _databaseRepository.insertProcessingQueue(processingQueue);
-            await _databaseRepository.updateStatusWork(workcode, 'complete');
           }
+          await _databaseRepository.updateStatusWork(workcode, 'complete');
         }
       }
     } catch (e, stackTrace) {

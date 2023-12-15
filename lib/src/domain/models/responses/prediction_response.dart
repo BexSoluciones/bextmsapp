@@ -1,38 +1,42 @@
+import 'package:bexdeliveries/src/domain/models/different.dart';
+import 'package:bexdeliveries/src/domain/models/list_order.dart';
 import 'package:equatable/equatable.dart';
+
+import '../work.dart';
 
 class PredictionResponse extends Equatable {
   final int id;
-  final double likehood;
+  final double likelihood;
   final int workId;
   final int zoneId;
   final String workcode;
-  final List listOrders;
-  final List works;
-  final List differents;
+  final List<ListOrder> listOrders;
+  final List<Work> works;
+  final List<Different> differences;
   final bool used;
 
   const PredictionResponse({
     required this.id,
-    required this.likehood,
+    required this.likelihood,
     required this.workId,
     required this.zoneId,
     required this.workcode,
     required this.listOrders,
     required this.works,
-    required this.differents,
+    required this.differences,
     required this.used,
   });
 
   factory PredictionResponse.fromMap(Map<String, dynamic> map) {
     return PredictionResponse(
       id: map['id'],
-      likehood: map['likehood'],
+      likelihood: map['likelihood'],
       workId: map['work_id'],
       zoneId: map['zone_id'],
       workcode: map['workcode'],
       listOrders: map['list_orders'],
       works: map['works'],
-      differents: map['differents'],
+      differences: map['differents'],
       used: map['used'],
     );
   }
@@ -43,13 +47,13 @@ class PredictionResponse extends Equatable {
   @override
   List<Object> get props => [
         id,
-        likehood,
+        likelihood,
         workId,
         zoneId,
         workcode,
         listOrders,
         works,
-        differents,
+        differences,
         used
       ];
 }
