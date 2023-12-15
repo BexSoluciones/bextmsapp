@@ -559,10 +559,9 @@ class ProcessingQueueBloc
         var isLast = await _databaseRepository.checkLastTransaction(workcode);
         if (isLast) {
           var isPartial = body['status'] == 'partial';
-          if (isPartial) {
-            //TODO:: [Heider Zapa] determine when productos all send by server
-            // var isLastProduct =
-            //     await _databaseRepository.checkLastTransaction(workcode);
+          if (isPartial){
+            //TODO:: [Heider Zapa] check if last product to send
+
           } else {
             var processingQueue = ProcessingQueue(
               body: jsonEncode({'workcode': workcode, 'status': 'complete'}),

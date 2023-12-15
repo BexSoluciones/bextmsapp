@@ -30,13 +30,13 @@ abstract class DatabaseRepository {
   Future<void> emptyWorks();
   Future<void> deleteWorksByWorkcode(String workcode);
 
-  //WORKTYPE
+  //WORK-TYPE
   Future<WorkTypes?> getWorkTypesFromWorkcode(String workcode);
 
-  //DELIVER
+  //DELIVERY
   Future<List<WorkAdditional>> getClientsResJetDel(String workcode,String reason);
 
-  //MOTIVO
+  //NEWS
   Future<void> insertNews(News news);
 
   //WAREHOUSES
@@ -121,7 +121,6 @@ abstract class DatabaseRepository {
   Future<int> updatePhoto(Photo photo);
   Future<int> deletePhoto(Photo photo);
   Future<int> deleteAll(int photoId);
-
   Future<void> insertPhotos(List<Photo> photos);
   Future<void> emptyPhotos();
 
@@ -149,8 +148,7 @@ abstract class DatabaseRepository {
   Future<int> insertPolylines(String workcode,List<LatLng> data);
   Future<List<LatLng>> getPolylines(String workcode);
 
-  //DELETEBYDAYS
-  @override
+  //DELETE-BY-DAYS
   Future<void> deleteProcessingQueueByDays();
   Future<void> deleteLocationsByDays();
   Future<void> deleteNotificationsByDays();

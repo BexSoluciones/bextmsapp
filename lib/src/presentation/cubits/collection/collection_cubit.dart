@@ -78,14 +78,11 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         total += double.parse(selectedAccounts[i][0].toString());
       }
     } else if (cashController.text.isNotEmpty) {
-      print('aqui 3');
       total = double.parse(cashController.text);
     } else if (cashController.text.isEmpty && transferController.text.isEmpty) {
-      print('aqui 4');
       total = 0;
     } else if (transferController.text.isNotEmpty &&
         cashController.text.isEmpty) {
-      print('aqui 5');
       total = double.parse(transferController.text);
     }
   }
@@ -289,8 +286,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       accountId = null;
       dateController.text = date(null);
 
-      print(total);
-
       emit(CollectionInitial(
           totalSummary: state.totalSummary,
           enterpriseConfig: state.enterpriseConfig));
@@ -450,7 +445,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
               task: 'incomplete',
               code: 'store_transaction_product',
               relationId: id.toString(),
-              relation: 'transaction_summaries',
+              relation: 'transactions',
               createdAt: now(),
               updatedAt: now(),
             );
