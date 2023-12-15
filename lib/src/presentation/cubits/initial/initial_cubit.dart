@@ -65,7 +65,7 @@ class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
         print(token);
         emit(InitialSuccess(enterprise: enterprise, token: token));
       } else if (response is DataFailed) {
-        _storageService.setString('company_name', null);
+        _storageService.setString('company', null);
         emit(InitialFailed(error: response.error));
       }
     });

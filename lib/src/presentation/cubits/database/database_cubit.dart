@@ -73,7 +73,7 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
   }
 
   Future<DatabaseState> _getDatabase() async {
-    var company = _storageService.getString('company_name');
+    var company = _storageService.getString('company');
     if (company != null) {
       var dir = await getApplicationDocumentsDirectory();
       var dbPath = '${dir.path}/$company.db';

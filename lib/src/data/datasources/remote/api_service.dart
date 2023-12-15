@@ -50,7 +50,7 @@ class ApiService {
   late Dio dio;
 
   String? get url {
-    var company = _storageService.getString('company_name');
+    var company = _storageService.getString('company');
     if (company == null) return null;
     return 'https://$company.bexdeliveries.com/api/v1';
   }

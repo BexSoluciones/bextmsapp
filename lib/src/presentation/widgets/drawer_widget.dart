@@ -58,7 +58,7 @@ Drawer drawer(BuildContext context, User? user) {
         createDrawerItem(
             context: context,
             icon: Icons.business,
-            text: _storageService.getString('company_name')!.toUpperCase(),
+            text: _storageService.getString('company')!.toUpperCase(),
             onTap: null),
         createDrawerItem(
             context: context,

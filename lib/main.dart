@@ -267,7 +267,7 @@ class _MyAppState extends State<MyApp> {
 
         if (forceDatabase! &&
             codeTransporter == _storageService.getString('username') &&
-            enterprise == _storageService.getString('company_name')) {
+            enterprise == _storageService.getString('company')) {
           if (context.mounted) databaseCubit.exportDatabase(context, false);
         }
         if (forceProcessingQueue! &&
