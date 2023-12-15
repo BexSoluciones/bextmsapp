@@ -48,8 +48,6 @@ class ProcessingQueueBloc
   final ApiRepository _apiRepository;
 
   NetworkBloc? networkBloc;
-  StreamSubscription? networkSubscription;
-  bool? isConnected;
 
   final _processingQueueController =
       StreamController<List<ProcessingQueue>>.broadcast();
@@ -65,14 +63,6 @@ class ProcessingQueueBloc
   ProcessingQueueBloc(
       this._databaseRepository, this._apiRepository, this.networkBloc)
       : super(ProcessingQueueInitial()) {
-
-    print(networkBloc);
-    if (networkBloc == null) return;
-    networkSubscription = networkBloc?.stream.listen((networkState) {
-      print(networkState);
-
-      isConnected = networkState.runtimeType is NetworkSuccess;
-    });
 
     on<ProcessingQueueAdd>(_add);
     on<ProcessingQueueObserve>(_observe);
@@ -132,9 +122,7 @@ class ProcessingQueueBloc
   }
 
   Future<void> _getProcessingQueue() async {
-    print(isConnected);
-
-    if (isConnected != null && isConnected == true) {
+    if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
       logDebugFine(headerDeveloperLogger, 'activating pq');
       final queues =
           await _databaseRepository.getAllProcessingQueuesIncomplete();
@@ -148,7 +136,7 @@ class ProcessingQueueBloc
   }
 
   void _observe(event, emit) {
-    if (isConnected != null && isConnected == true) {
+    if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
       _getProcessingQueue();
     }
     emit(ProcessingQueueSuccess());

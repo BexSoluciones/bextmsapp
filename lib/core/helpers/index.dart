@@ -29,6 +29,7 @@ import '../../src/services/storage.dart';
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
+final LocationRepository _locationRepository = locator<LocationRepository>();
 
 class HelperFunctions {
   loc.Location location = loc.Location();
@@ -271,6 +272,9 @@ class HelperFunctions {
   Future<Widget?> showMapDirection(BuildContext context, Work work,
       CurrentUserLocationEntity? location) async {
     final availableMaps = await MapLauncher.installedMaps;
+
+    location ??= await _locationRepository.getCurrentLocation();
+
 
     if (availableMaps.length == 1) {
       await availableMaps.first.showDirections(

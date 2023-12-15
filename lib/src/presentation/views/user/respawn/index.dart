@@ -89,7 +89,7 @@ class _RespawnViewState extends State<RespawnView> {
 
   SizedBox buildBody(Size size, RespawnState state) {
     return SizedBox(
-      height: size.height / 1.5,
+      height: size.height / 1.6,
       width: size.width,
       child: Padding(
         padding: const EdgeInsets.all(kDefaultPadding),

@@ -292,13 +292,10 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     BuildContext context,
     Work work,
   ) async {
-    emit( NavigationLoadingMap());
     currentLocation ??= await _locationRepository.getCurrentLocation();
     if (context.mounted) {
       helperFunctions.showMapDirection(context, work, currentLocation!);
     }
-
-    emit( NavigationLoading());
   }
 
   Future<void> clean()async{

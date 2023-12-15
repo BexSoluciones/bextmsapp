@@ -91,7 +91,7 @@ class _RejectViewState extends State<RejectView> {
 
   SizedBox buildBody(Size size, state) {
     return SizedBox(
-      height: size.height / 1.5,
+      height: size.height / 1.6,
       width: size.width,
       child: Padding(
         padding: const EdgeInsets.all(kDefaultPadding),
