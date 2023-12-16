@@ -139,16 +139,23 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   Future<void> compressAndSaveImage(String imagePath) async {
     try {
       final File originalImage = File(imagePath);
-      final img.Image image = img.decodeImage(originalImage.readAsBytesSync())!;
-
+      img.Image image = img.decodeImage(originalImage.readAsBytesSync())!;
+      if (image.width > image.height) {
+        image = await rotateImage(image);
+      }
       final File compressedImage = File(imagePath)
         ..writeAsBytesSync(img.encodeJpg(image, quality: 80));
-
-       originalImage.writeAsBytesSync(compressedImage.readAsBytesSync());
     } catch (error) {
       print('Error al comprimir la imagen: $error');
     }
   }
+
+  Future<img.Image> rotateImage(img.Image image) async {
+    return await Future.microtask(() {
+      return img.copyRotate(image, 90);
+    });
+  }
+
 
   Future<int> countImagesInCache() async {
     try {

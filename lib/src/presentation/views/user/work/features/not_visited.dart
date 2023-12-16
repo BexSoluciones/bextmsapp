@@ -105,7 +105,7 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Lottie.asset('assets/animations/36499-page-not-found.json'),
-          const Text('Ocurrio un error, por favor sincroniza de nuevo.')
+          const Text('No tienes clientes por entregar.')
         ],
       );
     } else {
