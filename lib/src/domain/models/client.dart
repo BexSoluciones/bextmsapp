@@ -37,7 +37,9 @@ class Client {
     latitude = json['latitude'];
     longitude = json['longitude'];
     action = json['action'];
-    userId = json['user_id'];
+    userId = json['user_id'] is String
+        ? int.parse(json['user_id'])
+        : json['user_id'];
   }
 
   int? id;

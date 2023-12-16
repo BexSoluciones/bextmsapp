@@ -452,6 +452,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<bool> validateClient(int id) async {
+    return _appDatabase.clientDao.validateClient(id);
+  }
+
+  @override
   Future<int> updateClient(Client client) async {
     return _appDatabase.clientDao.updateClient(client);
   }

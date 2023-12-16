@@ -56,13 +56,17 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     var time = await _databaseRepository.getDiffTime(workId);
     var isArrived =
         await _databaseRepository.validateTransactionArrived(workId, 'arrived');
+    var isGeoReferenced = await _databaseRepository.validateClient(workId);
+
+    print('**********');
+    print(isGeoReferenced);
 
     return SummarySuccess(
         summaries: summaries,
         origin: state.origin,
         time: time,
         isArrived: isArrived,
-        isGeoreference: state.isGeoreference);
+        isGeoreference: isGeoReferenced);
   }
 
   Future<void> getDiffTime(int workId) async {
@@ -96,6 +100,8 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
           body: jsonEncode(transaction.toJson()),
           task: 'incomplete',
           code: 'store_transaction_summary',
+          relation: 'transactions',
+          relationId: id.toString(),
           createdAt: now(),
           updatedAt: now());
 

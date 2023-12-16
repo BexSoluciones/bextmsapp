@@ -127,6 +127,7 @@ abstract class DatabaseRepository {
   //CLIENTS
   Stream<List<Client>> watchAllClients();
   Future<List<Client>> getAllClients();
+  Future<bool> validateClient(int id);
   Future<int> insertClient(Client client);
   Future<int> updateClient(Client client);
   Future<void> emptyClients();

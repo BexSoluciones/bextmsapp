@@ -31,10 +31,10 @@ class SummaryGeoReferenceView extends StatefulWidget {
 
   @override
   State<SummaryGeoReferenceView> createState() =>
-      SummaryGeoreferenceViewState();
+      SummaryGeoReferenceViewState();
 }
 
-class SummaryGeoreferenceViewState extends State<SummaryGeoReferenceView> {
+class SummaryGeoReferenceViewState extends State<SummaryGeoReferenceView> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -46,13 +46,13 @@ class SummaryGeoreferenceViewState extends State<SummaryGeoReferenceView> {
             onPressed: () => _navigationService.goBack(),
           ),
         ),
-        body: BlocBuilder<GeoreferenceCubit, GeoreferenceState>(
+        body: BlocBuilder<GeoReferenceCubit, GeoreferenceState>(
             builder: (context, state) {
           switch (state.runtimeType) {
             case GeoreferenceLoading:
               return const Center(child: CupertinoActivityIndicator());
             case GeoreferenceSuccess:
-              return _buildGeoreference(context, state, widget.work, size);
+              return _buildGeoReference(context, state, widget.work, size);
             default:
               return const SizedBox();
           }
@@ -60,7 +60,7 @@ class SummaryGeoreferenceViewState extends State<SummaryGeoReferenceView> {
   }
 }
 
-Widget _buildGeoreference(context, state, Work work, Size size) {
+Widget _buildGeoReference(context, state, Work work, Size size) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.all(kDefaultPadding),
@@ -74,7 +74,6 @@ Widget _buildGeoreference(context, state, Work work, Size size) {
             Lottie.asset('assets/animations/18199-location-pin-on-a-map.json'),
             const Text('¿Deseas georeferenciar este cliente?',
                 textAlign: TextAlign.center,
-                // textScaleFactor: textScaleFactor(context),
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600)),
             const SizedBox(height: 20),
             const Text(
@@ -90,6 +89,7 @@ Widget _buildGeoreference(context, state, Work work, Size size) {
                     style: const TextStyle(fontSize: 20, color: Colors.white)),
                 press: () async {
                   var client = Client(
+                      id: work.id,
                       nit: work.numberCustomer,
                       operativeCenter: work.codePlace,
                       action: work.latitude != null &&
@@ -98,7 +98,7 @@ Widget _buildGeoreference(context, state, Work work, Size size) {
                           : 'save',
                       userId: null);
 
-                  BlocProvider.of<GeoreferenceCubit>(context).sendTransactionClient(client);
+                  BlocProvider.of<GeoReferenceCubit>(context).sendTransactionClient(client);
                 }),
             const SizedBox(height: 30),
             DefaultButton(

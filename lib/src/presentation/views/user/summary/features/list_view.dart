@@ -97,6 +97,17 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
             flex: 3,
             child: _buildList(state.isArrived, state.summaries),
           ),
+          state.isGeoreference == false && state.isArrived == true
+              ? Padding(
+                  padding: const EdgeInsets.all(kDefaultPadding),
+                  child: DefaultButton(
+                      widget: const Text('¿Quieres georeferenciarlo?',
+                          style: TextStyle(color: Colors.white, fontSize: 18)),
+                      press: () => _navigationService.goTo(
+                          AppRoutes.summaryGeoReference,
+                          arguments: widget.arguments.work)),
+                )
+              : Container(),
           state.isArrived == false
               ? Padding(
                   padding: const EdgeInsets.all(kDefaultPadding),
@@ -117,15 +128,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                             widget.arguments.work, transaction);
                       }),
                 )
-              : Padding(
-                  padding: const EdgeInsets.all(kDefaultPadding),
-                  child: DefaultButton(
-                      widget: const Text('¿Quieres georeferenciarlo?',
-                          style: TextStyle(color: Colors.white, fontSize: 18)),
-                      press: () => _navigationService.goTo(
-                          AppRoutes.summaryGeoReference,
-                          arguments: widget.arguments.work)),
-                )
+              : Container()
         ],
       ),
     );

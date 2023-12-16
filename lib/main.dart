@@ -356,7 +356,7 @@ class _MyAppState extends State<MyApp> {
                 BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
-            create: (context) => GeoreferenceCubit(
+            create: (context) => GeoReferenceCubit(
                 locator<DatabaseRepository>(),
                 locator<LocationRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),

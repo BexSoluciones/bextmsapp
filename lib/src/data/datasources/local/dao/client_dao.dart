@@ -21,6 +21,14 @@ class ClientDao {
     return clients;
   }
 
+  Future<bool> validateClient(int id) async {
+    final db = await _appDatabase.streamDatabase;
+    final clientList =
+        await db!.query(tableClients, where: 'id = ?', whereArgs: [id]);
+    final clients = parseClients(clientList);
+    return clients.isNotEmpty;
+  }
+
   Stream<List<Client>> watchAllClients() async* {
     final db = await _appDatabase.streamDatabase;
     final clientList = await db!.query(tableClients);
@@ -33,8 +41,7 @@ class ClientDao {
   }
 
   Future<int> updateClient(Client client) {
-    return _appDatabase.update(
-        tableClients, client.toJson(), 'id', client.id!);
+    return _appDatabase.update(tableClients, client.toJson(), 'id', client.id!);
   }
 
   Future<void> emptyClients() async {

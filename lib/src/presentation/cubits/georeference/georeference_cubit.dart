@@ -25,20 +25,20 @@ part 'georeference_state.dart';
 final NavigationService _navigationService = locator<NavigationService>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
 
-class GeoreferenceCubit extends Cubit<GeoreferenceState> with FormatDate {
+class GeoReferenceCubit extends Cubit<GeoreferenceState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final LocationRepository _locationRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
   CurrentUserLocationEntity? currentLocation;
 
-  GeoreferenceCubit(this._databaseRepository, this._locationRepository, this._processingQueueBloc,this.gpsBloc) : super(GeoreferenceSuccess());
+  GeoReferenceCubit(this._databaseRepository, this._locationRepository,
+      this._processingQueueBloc, this.gpsBloc)
+      : super(GeoreferenceSuccess());
 
   Future<void> sendTransactionClient(Client client) async {
-
     emit(GeoreferenceLoading());
 
-    //currentLocation = await _locationRepository.getCurrentLocation();
     var currentLocation = gpsBloc.state.lastKnownLocation;
 
     client.latitude = currentLocation!.latitude.toString();
@@ -60,7 +60,5 @@ class GeoreferenceCubit extends Cubit<GeoreferenceState> with FormatDate {
     emit(GeoreferenceFinished());
 
     _navigationService.goBack();
-
   }
-
 }
