@@ -131,7 +131,25 @@ class _MapPageState extends State<MapPage> {
               _navigationService.goBack();
               context.read<NavigationCubit>().clean();
             }),
-        title: Text('Cientes a visitar: ${navigationCubit.state.works.length}'),
+      title: BlocBuilder<NavigationCubit, NavigationState>(
+        builder: (context, navigationState) {
+          if (navigationState is NavigationLoading) {
+            // Show loading indicator
+            return const Row(
+              children: [
+                CupertinoActivityIndicator(),
+
+              ],
+            );
+          } else if (navigationState is NavigationSuccess) {
+            // Show client count
+            return Text('Clientes a visitar: ${navigationState.works.length}');
+          } else {
+            // Handle other states or return an empty widget
+            return const SizedBox();
+          }
+        },
+      ),
         actions: [
           Showcase(
               key: widget.one,
@@ -303,11 +321,11 @@ class _MapPageState extends State<MapPage> {
                 items: List<Widget>.generate(
                     state.carouselData.length,
                     (index) => carouselCard(
-                        state.works[index] ?? 999,
-                        state.carouselData[index]['index'],
-                        state.carouselData[index]['distance'],
-                        state.carouselData[index]['duration'],
-                        context)),
+                        work:  state.works[index] ?? 999,
+                        index: state.carouselData[index]['index'],
+                        distance:state.carouselData[index]['distance'],
+                        duration:  state.carouselData[index]['duration'],
+                        context: context)),
                 carouselController: state.buttonCarouselController,
                 options: CarouselOptions(
                   height: 100,
