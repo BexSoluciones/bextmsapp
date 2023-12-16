@@ -52,7 +52,7 @@ class SearchHomeDelegate extends SearchDelegate<Work?> {
               separatorBuilder: (context, index) => const SizedBox(height: 16.0),
               itemBuilder: (context, index) {
                 final work = _filters[index];
-                return ItemWork(work: work);
+               return ItemWork(work: work);
               },
             )));
   }
@@ -79,7 +79,7 @@ class SearchHomeDelegate extends SearchDelegate<Work?> {
                   const SizedBox(height: 16.0),
               itemBuilder: (context, index) {
                 final work = _filters[index];
-                return ItemWork(work: work);
+                return (work.active == false || work.status != 'complete') ?  ItemWork(work: work): Container();
               },
             )));
   }

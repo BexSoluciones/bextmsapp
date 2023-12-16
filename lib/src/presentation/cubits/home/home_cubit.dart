@@ -116,7 +116,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   }
 
   Future<void> sync() async {
-    if (isBusy) return;
+    if (false) return;
 
     await run(() async {
       emit(const HomeLoading());
