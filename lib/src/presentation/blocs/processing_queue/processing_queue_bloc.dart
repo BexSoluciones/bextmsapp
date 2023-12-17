@@ -478,7 +478,7 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'post_update_client':
+        case 'update_client':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';

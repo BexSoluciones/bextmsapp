@@ -107,20 +107,20 @@ extension LoginButton on LoginViewState {
     return await location.serviceEnabled();
   }
 
-  Widget buildButton(BuildContext context, LoginState state) {
+  Widget buildButton(BuildContext context, LoginState state, bool remember) {
     return DefaultButton(
       widget: buildChild(state),
-      press: () => buildOnPressed(context),
+      press: () => buildOnPressed(context, remember),
       login: true,
     );
   }
 
-  Future<void> buildOnPressed(BuildContext context) async {
+  Future<void> buildOnPressed(BuildContext context, bool remember) async {
     if (formKey.currentState!.validate()) {
       Location location = Location();
       var isGpsEnabled = await location.serviceEnabled();
       if (isGpsEnabled) {
-        context.read<LoginCubit>().onPressedLogin(username, password);
+        context.read<LoginCubit>().onPressedLogin(username, password, remember);
       } else {
         buildSnackBar(context,
             'El GPS no está activado. Activa el GPS y vuelve a intentarlo.');

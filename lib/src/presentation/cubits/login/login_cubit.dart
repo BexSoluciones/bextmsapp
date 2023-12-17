@@ -122,7 +122,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   }
 
   Future<void> onPressedLogin(TextEditingController usernameController,
-      TextEditingController passwordController) async {
+      TextEditingController passwordController, bool remember) async {
     if (isBusy) return;
 
     await run(() async {
@@ -130,6 +130,11 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
           enterprise: _storageService.getObject('enterprise') != null
               ? Enterprise.fromMap(_storageService.getObject('enterprise')!)
               : null));
+
+      if (remember) {
+        _storageService.setString('username', usernameController.text);
+        _storageService.setString('password', passwordController.text);
+      }
 
       currentLocation = await _locationRepository.getCurrentLocation();
       //var currentLocation = gpsBloc.state.lastKnownLocation;

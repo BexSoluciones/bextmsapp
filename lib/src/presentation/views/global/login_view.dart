@@ -39,6 +39,7 @@ class LoginViewState extends State<LoginView> {
   Enterprise? enterprise;
   bool passwordVisible = true;
   List<String> errors = [];
+  bool remember = false;
 
   final formKey = GlobalKey<FormState>();
 
@@ -55,15 +56,21 @@ class LoginViewState extends State<LoginView> {
     var usernameStorage = _storageService.getString('username');
     var passwordStorage = _storageService.getString('password');
 
-    if (usernameStorage != null) {
+    if (usernameStorage != '') {
       setState(() {
-        username.text = usernameStorage;
+        username.text = usernameStorage!;
       });
     }
 
-    if (passwordStorage != null) {
+    if (passwordStorage != '') {
       setState(() {
-        password.text = passwordStorage;
+        password.text = passwordStorage!;
+      });
+    }
+
+    if (usernameStorage != '' && passwordStorage != '') {
+      setState(() {
+        remember = true;
       });
     }
   }
@@ -81,144 +88,174 @@ class LoginViewState extends State<LoginView> {
     );
   }
 
-  Widget _buildBody(Size size,LoginState state) {
+  Widget _buildBody(Size size, LoginState state) {
     return SafeArea(
       child: SizedBox(
           height: size.height,
           width: size.width,
           child: BlocBuilder<NetworkBloc, NetworkState>(
               builder: (context, networkState) {
-                if (networkState is NetworkFailure) {
-                  return Center(
+            if (networkState is NetworkFailure) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Lottie.asset('assets/animations/1611-online-offline.json',
+                        height: 180, width: 180),
+                    const Text('No tienes conexión o tu conexión es lenta.')
+                  ],
+                ),
+              );
+            } else if (networkState is NetworkSuccess) {
+              return Scaffold(
+                body: SingleChildScrollView(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                          Colors.white,
+                          Colors.white54,
+                        ])),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Lottie.asset('assets/animations/1611-online-offline.json',
-                            height: 180, width: 180),
-                        const Text('No tienes conexión o tu conexión es lenta.')
-                      ],
-                    ),
-                  );
-                } else if (networkState is NetworkSuccess) {
-                  return Scaffold(
-                    body: SingleChildScrollView(
-                      child: Container(
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
-                        decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Colors.white,
-                                  Colors.white54,
-                                ]
-                            )
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        const SizedBox(
+                          height: 50,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            const SizedBox(height: 50,),
-                            Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle, // Forma circular
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.3),
-                                      spreadRadius: 5,
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 5),
-                                    ),
-                                  ],
+                        Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle, // Forma circular
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  spreadRadius: 5,
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
                                 ),
-                                child: ClipOval(
-                                  child: CircleAvatar(
-                                    backgroundColor: Theme.of(context).primaryColor,
-                                    radius: 50,
-                                    child: CachedNetworkImage(
-                                      width: double.infinity,
-                                      height: 100.0,
-                                      imageUrl: state.enterprise != null && state.enterprise!.logo != null
-                                          ? 'https://bexdeliveries.com/${state.enterprise!.logo}'
-                                          : '',
-                                      placeholder: (context, url) => const CircularProgressIndicator(),
-                                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                                    ),
-                                  ),
-                                )
-
+                              ],
                             ),
-                            const SizedBox(height: 10,),
-                            Container(
-                              width: 325,
-                              height: 420,
-                              decoration:  BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: const BorderRadius.all(Radius.circular(35)),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    spreadRadius: 5,
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ],
+                            child: ClipOval(
+                              child: CircleAvatar(
+                                backgroundColor: Theme.of(context).primaryColor,
+                                radius: 50,
+                                child: CachedNetworkImage(
+                                  width: double.infinity,
+                                  height: 100.0,
+                                  imageUrl: state.enterprise != null &&
+                                          state.enterprise!.logo != null
+                                      ? 'https://bexdeliveries.com/${state.enterprise!.logo}'
+                                      : '',
+                                  placeholder: (context, url) =>
+                                      const CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const SizedBox(height: 30,),
-                                  Text(
-                                    state.enterprise != null &&
+                            )),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          width: 325,
+                          height: 460,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(35)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                spreadRadius: 5,
+                                blurRadius: 20,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              Text(
+                                state.enterprise != null &&
                                         state.enterprise!.name != null
-                                        ? state.enterprise!.name!
-                                        : 'demo',
-                                    maxLines: 2,
-                                    style: const TextStyle(
-                                        fontSize: 40,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Text(
-                                    'bexsoluciones.com',
-                                    maxLines: 2,
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 30,),
-                                  buildForm(context, state),
-                                  const SizedBox(height: 30,),
-                                ],
+                                    ? state.enterprise!.name!
+                                    : 'demo',
+                                maxLines: 2,
+                                style: const TextStyle(
+                                    fontSize: 40, fontWeight: FontWeight.bold),
                               ),
-                            ),
-                            const SizedBox(height: 90,),
-                            Center(child: TextButton(
+                              const Text(
+                                'bexsoluciones.com',
+                                maxLines: 2,
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              buildForm(context, state),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 60),
+                        Center(
+                            child: TextButton(
                                 onPressed: () {
                                   setState(() {
                                     context.read<LoginCubit>().goToCompany();
                                   });
                                 },
-                                child: Text("Desea cambiar de empresa?", style: TextStyle(color: context.theme.colorScheme.primary,fontWeight: FontWeight.bold,fontSize: 20),)))
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                } else {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Algo ocurrió mientras cargaba la información'),
-                        IconButton(
-                          icon: Icon(Icons.refresh),
-                          onPressed: null,
-                        )
+                                child: Text(
+                                  "Desea cambiar de empresa?",
+                                  style: TextStyle(
+                                      color: context.theme.colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20),
+                                )))
                       ],
                     ),
-                  );
-                }
-              })),
+                  ),
+                ),
+              );
+            } else {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Algo ocurrió mientras cargaba la información'),
+                    IconButton(
+                      icon: Icon(Icons.refresh),
+                      onPressed: null,
+                    )
+                  ],
+                ),
+              );
+            }
+          })),
+    );
+  }
+
+  SizedBox buildRememberSession() {
+    return SizedBox(
+      width: 260,
+      height: 60,
+      child: CheckboxListTile(
+          title: const Text('Recuérdame'),
+          value: remember,
+          onChanged: (val) {
+            setState(() {
+              remember = val!;
+            });
+          }),
     );
   }
 
@@ -246,11 +283,13 @@ class LoginViewState extends State<LoginView> {
       key: formKey,
       child: Column(
         children: [
-          buildTextField(username,'Correo o código'),
+          buildTextField(username, 'Correo o código'),
           const SizedBox(height: 10.0),
           buildPasswordFormField(password),
-          const SizedBox(height: 50.0),
-          buildButton(context, state),
+          const SizedBox(height: 10.0),
+          buildRememberSession(),
+          const SizedBox(height: 20.0),
+          buildButton(context, state, remember),
         ],
       ),
     );
