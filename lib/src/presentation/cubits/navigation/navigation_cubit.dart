@@ -48,13 +48,18 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   var model = <LayerMoodle>[];
   var layer = <PolylineLayer>[];
   var kWorksList = <LatLng>[];
- 
-
+  
   Future<void> getAllWorksByWorkcode(String workcode) async {
     if (isBusy) return;
-    await run(() async {
-      emit(await _getAllWorksByWorkcode(workcode));
-    });
+    emit(NavigationLoading());
+    try {
+      await run(() async {
+        emit(await _getAllWorksByWorkcode(workcode));
+      });
+    } catch (error, stackTrace) {
+      emit(NavigationFailed(error: error.toString()));
+      await FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    }
   }
 
   LatLng getPosition(LngLat lngLat) {
@@ -247,32 +252,42 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   }
 
   Future<void> moveController(int index, double zoom) async {
-    if (index > 0 && data[index - 1].color == 15) {
-      if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
-        data[index - 1].color = 5;
-      } else {
-        data[index - 1].color = 8;
+    if (index >= 0 && index < data.length) {
+
+      if (index > 0 && data[index - 1].color == 15) {
+        if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
+          data[index - 1].color = 5;
+        } else {
+          data[index - 1].color = 8;
+        }
       }
-    }
 
-    if (index < data.length - 1 && data[index + 1].color == 15) {
-      if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
-        data[index + 1].color = 5;
-      } else {
-        data[index + 1].color = 5;
+      if (index < data.length - 1 && data[index + 1].color == 15) {
+        if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
+          data[index + 1].color = 5;
+        } else {
+          data[index + 1].color = 5;
+        }
       }
-    }
 
-    data[index].color = 15;
+      data[index].color = 15;
 
-    Future.wait([
-      _databaseRepository.updateWork(data[index - 1]),
-      _databaseRepository.updateWork(data[index + 1]),
-      _databaseRepository.updateWork(data[index])
-    ]).then((value) {
-      mapController.move(kWorksList[index], zoom);
+      final List<Future<void>> updateWorkFutures = [];
 
-      emit(NavigationSuccess(
+      if (index - 1 >= 0) {
+        updateWorkFutures.add(_databaseRepository.updateWork(data[index - 1]));
+      }
+
+      if (index + 1 < data.length) {
+        updateWorkFutures.add(_databaseRepository.updateWork(data[index + 1]));
+      }
+
+      updateWorkFutures.add(_databaseRepository.updateWork(data[index]));
+
+      Future.wait(updateWorkFutures).then((value) {
+        mapController.move(kWorksList[index], zoom);
+
+        emit(NavigationSuccess(
           works: data,
           mapController: mapController,
           buttonCarouselController: buttonCarouselController,
@@ -282,11 +297,17 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           carouselData: carouselData,
           Polylines: Polylines,
           pageIndex: index,
-          model: model));
-    }).catchError((error) {
-      emit(NavigationFailed(error: error.toString()));
-    });
+          model: model,
+        ));
+      }).catchError((error) {
+        emit(NavigationFailed(error: error.toString()));
+      });
+    } else {
+      print("Invalid index: $index");
+      // Handle the case when 'index' is out of range.
+    }
   }
+
 
   Future<void> showMaps(
     BuildContext context,
