@@ -181,11 +181,16 @@ class ProcessingQueueBloc
               queue.task = 'done';
             } else {
               queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
+            var body = jsonDecode(queue.body);
+            body['start'] = now();
+            queue.body = jsonEncode(body);
             queue.error = e.toString();
             await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
@@ -204,11 +209,16 @@ class ProcessingQueueBloc
               queue.task = 'done';
             } else {
               queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
+            var body = jsonDecode(queue.body);
+            body['start'] = now();
+            queue.body = jsonEncode(body);
             queue.error = e.toString();
             await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
@@ -228,11 +238,16 @@ class ProcessingQueueBloc
               queue.task = 'done';
             } else {
               queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
+            var body = jsonDecode(queue.body);
+            body['start'] = now();
+            queue.body = jsonEncode(body);
             queue.error = e.toString();
             await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
@@ -254,6 +269,8 @@ class ProcessingQueueBloc
               queue.task = 'done';
             } else {
               queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
@@ -285,6 +302,8 @@ class ProcessingQueueBloc
               }
             } else {
               queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
               queue.error = res.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
@@ -552,7 +571,6 @@ class ProcessingQueueBloc
     try {
       if (p.code == 'store_transaction' ||
           p.code == 'store_transaction_product') {
-        //TODO:: [Heider Zapa] check if partial
         var body = jsonDecode(p.body);
         var workcode = body['workcode'];
 

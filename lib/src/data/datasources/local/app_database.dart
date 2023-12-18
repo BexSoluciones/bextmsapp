@@ -9,6 +9,8 @@ import 'package:synchronized/synchronized.dart';
 
 //utils
 import '../../../domain/abstracts/format_abstract.dart';
+import '../../../domain/models/confirm.dart';
+import '../../../domain/models/zone.dart';
 import '../../../utils/constants/strings.dart';
 
 //models
@@ -62,7 +64,7 @@ class AppDatabase {
 
   final initialScript = [
     '''
-        CREATE TABLE $tableWorks (
+        CREATE TABLE IF NOT EXISTS $tableWorks (
         ${WorkFields.id} INTEGER PRIMARY KEY,
         ${WorkFields.workcode} TEXT DEFAULT NULL,
         ${WorkFields.numberCompany} INTEGER DEFAULT NULL,
@@ -100,7 +102,7 @@ class AppDatabase {
       )
     ''',
     '''
-      CREATE TABLE $tableSummaries (
+      CREATE TABLE IF NOT EXISTS $tableSummaries (
         ${SummaryFields.id} INTEGER PRIMARY KEY,
         ${SummaryFields.workId} INTEGER DEFAULT NULL,
         ${SummaryFields.orderNumber} TEXT DEFAULT NULL,
@@ -134,7 +136,7 @@ class AppDatabase {
       )
     ''',
     '''
-       CREATE TABLE ${t.tableTransactions} (
+       CREATE TABLE IF NOT EXISTS ${t.tableTransactions} (
         ${t.TransactionFields.id} INTEGER PRIMARY KEY,
         ${t.TransactionFields.workId} INTEGER DEFAULT NULL,
         ${t.TransactionFields.summaryId} INTEGER DEFAULT 999,
@@ -158,7 +160,7 @@ class AppDatabase {
       )
     ''',
     '''
-      CREATE TABLE $tableTransactionSummaries (
+      CREATE TABLE IF NOT EXISTS $tableTransactionSummaries (
         ${TransactionSummaryFields.id} INTEGER PRIMARY KEY,
         ${TransactionSummaryFields.transactionId} INTEGER DEFAULT NULL,
         ${TransactionSummaryFields.summaryId} INTEGER DEFAULT NULL,
@@ -173,7 +175,7 @@ class AppDatabase {
       )
     ''',
     '''
-      CREATE TABLE $tableLocations ( 
+      CREATE TABLE IF NOT EXISTS $tableLocations ( 
         ${LocationFields.id} INTEGER PRIMARY KEY, 
         ${LocationFields.latitude} REAL DEFAULT NULL,
         ${LocationFields.longitude} REAL DEFAULT NULL,
@@ -184,22 +186,27 @@ class AppDatabase {
         ${LocationFields.heading} REAL DEFAULT NULL,
         ${LocationFields.isMock} BOOLEAN DEFAULT NULL,
         ${LocationFields.userId} INTEGER DEFAULT NULL,
-        ${LocationFields.time} TEXT DEFAULT NULL
+        ${LocationFields.time} TEXT DEFAULT NULL,
+        ${LocationFields.type} TEXT DEFAULT NULL,
+        ${LocationFields.workcode} TEXT DEFAULT NULL,
+        ${LocationFields.send} TEXT DEFAULT 0,
       )  
     ''',
     '''
-      CREATE TABLE $tableProcessingQueues (
-        ${ProcessingQueueFields.id} INTEGER PRIMARY KEY,
-        ${ProcessingQueueFields.body} TEXT DEFAULT NULL,
-        ${ProcessingQueueFields.task} TEXT DEFAULT NULL,
-        ${ProcessingQueueFields.code} TEXT DEFAULT NULL,
-        ${ProcessingQueueFields.error} TEXT DEFAULT NULL,
-        ${ProcessingQueueFields.createdAt} TEXT DEFAULT NULL,
-        ${ProcessingQueueFields.updatedAt} TEXT DEFAULT NULL
+      CREATE TABLE IF NOT EXISTS $tableHistoryOrders (
+        ${HistoryOrderFields.id} INTEGER PRIMARY KEY,
+        ${HistoryOrderFields.workId} INTEGER NOT NULL,
+        ${HistoryOrderFields.workcode} TEXT NOT NULL ,
+        ${HistoryOrderFields.zoneId} INTEGER DEFAULT NULL,
+        ${HistoryOrderFields.likelihood} REAL DEFAULT NULL,
+        ${HistoryOrderFields.used} BOOLEAN DEFAULT NULL,
+        ${HistoryOrderFields.listOrder} TEXT NOT NULL,
+        ${HistoryOrderFields.works} TEXT NOT NULL,
+        ${HistoryOrderFields.different} TEXT NOT NULL
       )
     ''',
     '''
-      CREATE TABLE $tableReasons (
+      CREATE TABLE IF NOT EXISTS $tableReasons (
         ${ReasonFields.id} INTEGER PRIMARY KEY,
         ${ReasonFields.codmotvis} TEXT DEFAULT NULL,
         ${ReasonFields.nommotvis} TEXT DEFAULT NULL,
@@ -213,21 +220,50 @@ class AppDatabase {
         ${ReasonFields.updatedAt} TEXT DEFAULT NULL 
       )
     ''',
-  ];
-
-  final migrations = [
     '''
-      CREATE INDEX workcode_index ON $tableWorks(${WorkFields.workcode});
-    ''',
-    '''
-      CREATE TABLE $tablePhotos (
-        ${PhotoFields.id} INTEGER PRIMARY KEY,
-        ${PhotoFields.name} TEXT DEFAULT NULL,
-        ${PhotoFields.path} TEXT DEFAULT NULL
+      CREATE TABLE IF NOT EXISTS $tableZone (
+        ${ZoneFields.id} INTEGER PRIMARY KEY,
+        ${ZoneFields.city} TEXT NOT NULL ,
+        ${ZoneFields.departament} TEXT NOT NULL ,
+        ${ZoneFields.southwestlat} TEXT NOT NULL ,
+        ${ZoneFields.southwestlng} TEXT NOT NULL ,
+        ${ZoneFields.northestlat} TEXT NOT NULL ,
+        ${ZoneFields.northestlng} TEXT NOT NULL
       )
     ''',
     '''
-      CREATE TABLE $tableClients (
+      CREATE TABLE IF NOT EXISTS $tableNotifications (
+        ${NotificationFields.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${NotificationFields.id_from_server} TEXT,
+        ${NotificationFields.title} TEXT,
+        ${NotificationFields.body} TEXT,
+        ${NotificationFields.date} TEXT,
+        ${NotificationFields.with_click_action} TEXT,
+        ${NotificationFields.read_at} TEXT 
+      )
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tableProcessingQueues (
+        ${ProcessingQueueFields.id} INTEGER PRIMARY KEY,
+        ${ProcessingQueueFields.body} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.task} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.code} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.error} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.createdAt} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.updatedAt} TEXT DEFAULT NULL
+      )
+    ''',
+    '''
+       CREATE TABLE $tableConfirms (
+        ${ConfirmFields.id} INTEGER PRIMARY KEY,
+        ${ConfirmFields.workcode} TEXT NOT NULL ,
+        ${ConfirmFields.latitude} TEXT NOT NULL ,
+        ${ConfirmFields.longitude} TEXT NOT NULL ,
+        ${ConfirmFields.createdAt} TEXT NOT NULL 
+      );
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tableClients (
         ${ClientFields.id} INTEGER PRIMARY KEY,
         ${ClientFields.nit} TEXT DEFAULT NULL,
         ${ClientFields.operativeCenter} TEXT DEFAULT NULL,
@@ -238,20 +274,19 @@ class AppDatabase {
       )
     ''',
     '''
-      CREATE TABLE $tableHistoryOrders (
-        ${HistoryOrderFields.id} INTEGER PRIMARY KEY,
-        ${HistoryOrderFields.workId} INTEGER NOT NULL,
-        ${HistoryOrderFields.workcode} TEXT NOT NULL ,
-        ${HistoryOrderFields.zoneId} INTEGER DEFAULT NULL,
-        ${HistoryOrderFields.likelihood} REAL DEFAULT NULL,
-        ${HistoryOrderFields.used} BOOLEAN DEFAULT NULL,
-        ${HistoryOrderFields.listOrder} TEXT NOT NULL,
-        ${HistoryOrderFields.works} TEXT NOT NULL,
-        ${HistoryOrderFields.different} TEXT NOT NULL
-      )
+      CREATE TABLE IF NOT EXISTS $tableWarehouses ( 
+        ${WarehouseFields.id} INTEGER PRIMARY KEY, 
+        ${WarehouseFields.name} TEXT NOT NULL,
+        ${WarehouseFields.latitude} TEXT NOT NULL,
+        ${WarehouseFields.longitude} TEXT NOT NULL,
+        ${WarehouseFields.description} TEXT DEFAULT NULL,
+        ${WarehouseFields.createdAt} TEXT NOT NULL,
+        ${WarehouseFields.updatedAt} TEXT NOT NULL,
+        ${WarehouseFields.principal} TEXT NOT NULL
+      );
     ''',
     '''
-      CREATE TABLE $tableNews (
+      CREATE TABLE IF NOT EXISTS $tableNews (
         ${NewsFields.id} INTEGER PRIMARY KEY,
         ${NewsFields.userId} INTEGER NOT NULL,
         ${NewsFields.workId} INTEGER DEFAULT NULL,
@@ -268,7 +303,7 @@ class AppDatabase {
         ${NewsFields.updatedAt} TEXT DEFAULT NULL)
     ''',
     '''
-       CREATE TABLE $tableAccount (
+       CREATE TABLE IF NOT EXISTS $tableAccount (
         ${AccountFields.id} INTEGER PRIMARY KEY,
         ${AccountFields.idAccount} INTEGER NOT NULL ,
         ${AccountFields.accountId} INTEGER DEFAULT NULL,
@@ -278,20 +313,22 @@ class AppDatabase {
         ${AccountFields.code_qr} TEXT DEFAULT NULL,
         ${AccountFields.createdAt} TEXT DEFAULT NULL
       )
+    '''
+  ];
+
+  final migrations = [
+    '''
+      CREATE INDEX workcode_index ON $tableWorks(${WorkFields.workcode})
     ''',
     '''
-      CREATE TABLE $tableNotifications (
-        ${NotificationFields.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${NotificationFields.id_from_server} TEXT,
-        ${NotificationFields.title} TEXT,
-        ${NotificationFields.body} TEXT,
-        ${NotificationFields.date} TEXT,
-        ${NotificationFields.with_click_action} TEXT,
-        ${NotificationFields.read_at} TEXT 
+      CREATE TABLE IF NOT EXISTS $tablePhotos (
+        ${PhotoFields.id} INTEGER PRIMARY KEY,
+        ${PhotoFields.name} TEXT DEFAULT NULL,
+        ${PhotoFields.path} TEXT DEFAULT NULL
       )
     ''',
     '''
-      CREATE TABLE  polylines (
+      CREATE TABLE IF NOT EXISTS polylines (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         workcode TEXT,
         polylines TEXT
@@ -304,7 +341,7 @@ class AppDatabase {
       ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL
     ''',
     '''
-      ALTER TABLE $tableLocations ADD COLUMN ${LocationFields.send} INTEGER DEFAULT NULL
+      ALTER TABLE $tableLocations ADD COLUMN ${LocationFields.send} INTEGER DEFAULT 0
     '''
   ];
 
