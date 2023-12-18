@@ -69,7 +69,15 @@ class _AccountsCollectionState extends State<AccountsCollection>
           child: Column(
             children: [
               const SizedBox(height: 40),
-
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(children: [
+                    Text('TOTAL A RECAUDAR',
+                        style: TextStyle(fontSize: 14)),
+                  ]),
+                ],
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

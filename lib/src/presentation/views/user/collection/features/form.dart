@@ -1,5 +1,3 @@
-import 'package:bexdeliveries/src/domain/models/account.dart';
-import 'package:bexdeliveries/src/presentation/views/user/collection/features/accounts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -11,10 +9,11 @@ import '../../../../cubits/collection/collection_cubit.dart';
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/nums.dart';
 //domain
+import '../../../../../domain/models/account.dart';
 import '../../../../../domain/abstracts/format_abstract.dart';
 //widgets
 import '../../../../widgets/default_button_widget.dart';
-import '../../../../widgets/transaction_list.dart';
+import '../features/accounts.dart';
 
 class FormCollection extends StatefulWidget {
   final GlobalKey formKey;
