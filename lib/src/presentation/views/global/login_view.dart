@@ -56,19 +56,19 @@ class LoginViewState extends State<LoginView> {
     var usernameStorage = _storageService.getString('username');
     var passwordStorage = _storageService.getString('password');
 
-    if (usernameStorage != '') {
+    if (usernameStorage != null) {
       setState(() {
-        username.text = usernameStorage!;
+        username.text = usernameStorage;
       });
     }
 
-    if (passwordStorage != '') {
+    if (passwordStorage != null) {
       setState(() {
-        password.text = passwordStorage!;
+        password.text = passwordStorage;
       });
     }
 
-    if (usernameStorage != '' && passwordStorage != '') {
+    if (usernameStorage != null && passwordStorage != null) {
       setState(() {
         remember = true;
       });

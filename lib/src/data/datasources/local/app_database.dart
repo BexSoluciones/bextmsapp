@@ -189,8 +189,8 @@ class AppDatabase {
         ${LocationFields.time} TEXT DEFAULT NULL,
         ${LocationFields.type} TEXT DEFAULT NULL,
         ${LocationFields.workcode} TEXT DEFAULT NULL,
-        ${LocationFields.send} TEXT DEFAULT 0,
-      )  
+        ${LocationFields.send} TEXT DEFAULT 0
+      )
     ''',
     '''
       CREATE TABLE IF NOT EXISTS $tableHistoryOrders (
@@ -224,10 +224,10 @@ class AppDatabase {
       CREATE TABLE IF NOT EXISTS $tableZone (
         ${ZoneFields.id} INTEGER PRIMARY KEY,
         ${ZoneFields.city} TEXT NOT NULL ,
-        ${ZoneFields.departament} TEXT NOT NULL ,
-        ${ZoneFields.southwestlat} TEXT NOT NULL ,
-        ${ZoneFields.southwestlng} TEXT NOT NULL ,
-        ${ZoneFields.northestlat} TEXT NOT NULL ,
+        ${ZoneFields.departament} TEXT NOT NULL,
+        ${ZoneFields.southwestlat} TEXT NOT NULL,
+        ${ZoneFields.southwestlng} TEXT NOT NULL,
+        ${ZoneFields.northestlat} TEXT NOT NULL,
         ${ZoneFields.northestlng} TEXT NOT NULL
       )
     ''',
@@ -256,9 +256,9 @@ class AppDatabase {
     '''
        CREATE TABLE $tableConfirms (
         ${ConfirmFields.id} INTEGER PRIMARY KEY,
-        ${ConfirmFields.workcode} TEXT NOT NULL ,
-        ${ConfirmFields.latitude} TEXT NOT NULL ,
-        ${ConfirmFields.longitude} TEXT NOT NULL ,
+        ${ConfirmFields.workcode} TEXT NOT NULL,
+        ${ConfirmFields.latitude} TEXT NOT NULL,
+        ${ConfirmFields.longitude} TEXT NOT NULL,
         ${ConfirmFields.createdAt} TEXT NOT NULL 
       );
     ''',
@@ -283,7 +283,7 @@ class AppDatabase {
         ${WarehouseFields.createdAt} TEXT NOT NULL,
         ${WarehouseFields.updatedAt} TEXT NOT NULL,
         ${WarehouseFields.principal} TEXT NOT NULL
-      );
+      )
     ''',
     '''
       CREATE TABLE IF NOT EXISTS $tableNews (
@@ -300,7 +300,8 @@ class AppDatabase {
         ${NewsFields.firm} TEXT DEFAULT NULL,
         ${NewsFields.observation} TEXT DEFAULT NULL,
         ${NewsFields.createdAt} TEXT DEFAULT NULL,
-        ${NewsFields.updatedAt} TEXT DEFAULT NULL)
+        ${NewsFields.updatedAt} TEXT DEFAULT NULL
+      )
     ''',
     '''
        CREATE TABLE IF NOT EXISTS $tableAccount (

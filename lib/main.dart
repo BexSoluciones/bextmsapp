@@ -88,6 +88,9 @@ import 'src/config/router/routes.dart';
 //undefined
 import 'src/presentation/views/global/undefined_view.dart';
 
+//widget
+import 'src/presentation/widgets/custom_error_widget.dart';
+
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NotificationService _notificationService = locator<NotificationService>();
 final RemoteConfigService _remoteConfigService = locator<RemoteConfigService>();
@@ -172,7 +175,25 @@ Future<void> main() async {
   if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
 
   // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    FlutterError.dumpErrorToConsole(details);
+    runApp(ErrorWidgetClass(details));
+  };
+
   runApp(MyApp(databaseCubit: databaseCubit));
+}
+
+class ErrorWidgetClass extends StatelessWidget {
+  final FlutterErrorDetails errorDetails;
+  const ErrorWidgetClass(this.errorDetails, {super.key});
+  @override
+  Widget build(BuildContext context) {
+    return CustomErrorWidget(
+      errorMessage: errorDetails.exceptionAsString(),
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -311,7 +332,6 @@ class _MyAppState extends State<MyApp> {
           BlocProvider(
             create: (context) => ThemeBloc(),
           ),
-
           BlocProvider(create: (_) => GpsBloc()),
           BlocProvider(
               create: (context) => InitialCubit(locator<ApiRepository>())),
