@@ -67,17 +67,18 @@ class _AccountsCollectionState extends State<AccountsCollection>
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Row(children: [
-                    Text('TOTAL A RECAUDAR',
-                        style: TextStyle(fontSize: 14)),
-                  ]),
-                ],
-              ),
+              const Text('TOTAL A RECAUDAR',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(formatter.format(widget.collectionCubit.state.totalSummary),
+                  style: const TextStyle(fontSize: 18)),
+              const SizedBox(height: 10),
+              const Text('TOTAL RECAUDADO',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(formatter.format(widget.collectionCubit.total),
+                  style: const TextStyle(fontSize: 18)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

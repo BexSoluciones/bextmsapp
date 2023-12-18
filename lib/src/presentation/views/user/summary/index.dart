@@ -53,6 +53,7 @@ class SummaryViewState extends State<SummaryView> {
 
   @override
   void initState() {
+    print('*******init*******');
     summaryCubit = BlocProvider.of<SummaryCubit>(context);
     summaryCubit.getAllSummariesByOrderNumber(widget.arguments.work.id!);
 
@@ -62,6 +63,7 @@ class SummaryViewState extends State<SummaryView> {
 
   @override
   void didChangeDependencies() {
+    print('*******changed*******');
     summaryCubit = BlocProvider.of<SummaryCubit>(context);
     summaryCubit.getAllSummariesByOrderNumber(widget.arguments.work.id!);
     super.didChangeDependencies();

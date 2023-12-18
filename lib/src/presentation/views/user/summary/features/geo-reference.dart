@@ -35,6 +35,16 @@ class SummaryGeoReferenceView extends StatefulWidget {
 }
 
 class SummaryGeoReferenceViewState extends State<SummaryGeoReferenceView> {
+
+  late GeoReferenceCubit geoReferenceCubit;
+
+  @override
+  void initState() {
+    geoReferenceCubit = BlocProvider.of<GeoReferenceCubit>(context);
+    geoReferenceCubit.init();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -46,12 +56,12 @@ class SummaryGeoReferenceViewState extends State<SummaryGeoReferenceView> {
             onPressed: () => _navigationService.goBack(),
           ),
         ),
-        body: BlocBuilder<GeoReferenceCubit, GeoreferenceState>(
+        body: BlocBuilder<GeoReferenceCubit, GeoReferenceState>(
             builder: (context, state) {
           switch (state.runtimeType) {
-            case GeoreferenceLoading:
+            case GeoReferenceLoading:
               return const Center(child: CupertinoActivityIndicator());
-            case GeoreferenceSuccess:
+            case GeoReferenceSuccess:
               return _buildGeoReference(context, state, widget.work, size);
             default:
               return const SizedBox();
