@@ -1,10 +1,11 @@
 import 'package:bexdeliveries/src/domain/abstracts/format_abstract.dart';
+import 'package:bexdeliveries/src/domain/models/account.dart';
 import 'package:flutter/material.dart';
 
 class TransactionList extends StatelessWidget with FormatNumber {
-  final List<dynamic> selectedAccounts;
+  final List<AccountPayment> selectedAccounts;
   final Function(double) onTotalChange;
-  final Function(List<dynamic>) onDataRemove;
+  final Function(AccountPayment) onDataRemove;
   final Function(int index) onDataEdit;
 
   TransactionList({
@@ -22,9 +23,9 @@ class TransactionList extends StatelessWidget with FormatNumber {
       shrinkWrap: true,
       separatorBuilder: (BuildContext context, i) => const SizedBox(height: 10),
       itemBuilder: (BuildContext context, int index) {
-        var currentValue = double.parse(selectedAccounts[index][0].toString());
-        String bankName = selectedAccounts[index][2].toString();
-        String date = selectedAccounts[index][3].toString();
+        var currentValue = double.parse(selectedAccounts[index].paid.toString());
+        String bankName = selectedAccounts[index].account!.name.toString();
+        String date = selectedAccounts[index].date.toString();
 
         return Container(
           decoration: BoxDecoration(
