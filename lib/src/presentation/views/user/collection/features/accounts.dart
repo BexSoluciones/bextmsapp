@@ -153,7 +153,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                       isExpanded: true,
                       value: accountBlocState.accounts.first,
                       onChanged: (Account? newValue) {
-                        widget.collectionCubit.accountId = newValue?.accountId;
+                        widget.collectionCubit.selectedAccount = newValue;
                         setState(() {});
                       },
                       decoration: const InputDecoration(

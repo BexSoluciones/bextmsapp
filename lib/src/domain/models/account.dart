@@ -66,3 +66,18 @@ class Account {
   String? code_qr;
   String? createdAt;
 }
+
+class AccountPayment {
+  AccountPayment(
+      {
+        this.paid,
+        this.type,
+        this.account,
+        this.date,
+      });
+
+  String? type;
+  String? paid;
+  Account? account;
+  String? date;
+}

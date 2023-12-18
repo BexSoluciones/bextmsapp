@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import '../../../../core/helpers/index.dart';
 
 //utils
-import '../../../domain/models/transaction_summary.dart';
 import '../../../utils/constants/strings.dart';
 
 //base
@@ -24,6 +23,8 @@ import '../../../domain/models/arguments.dart';
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/processing_queue.dart';
 import '../../../domain/models/enterprise_config.dart';
+import '../../../domain/models/account.dart';
+import '../../../domain/models/transaction_summary.dart';
 import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
@@ -54,28 +55,28 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   final TextEditingController cashController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
 
-  int? accountId;
+  Account? selectedAccount;
   double total = 0;
   bool isEditing = false;
   int? indexToEdit;
-  List<dynamic> selectedAccounts = [];
+  List<AccountPayment> selectedAccounts = [];
 
   void listenForCash() {
     if (transferController.text.isNotEmpty && cashController.text.isNotEmpty) {
       total = double.parse(cashController.text) +
           double.parse(transferController.text);
-    } else if(cashController.text.isNotEmpty && selectedAccounts.isNotEmpty) {
+    } else if (cashController.text.isNotEmpty && selectedAccounts.isNotEmpty) {
       total = 0;
       var cashValue = double.parse(cashController.text);
       var count = 0.0;
       for (var i = 0; i < selectedAccounts.length; i++) {
-        count += double.parse(selectedAccounts[i][0].toString());
+        count += double.parse(selectedAccounts[i].paid.toString());
       }
       total = count + cashValue;
-    } else if(cashController.text.isEmpty && selectedAccounts.isNotEmpty) {
+    } else if (cashController.text.isEmpty && selectedAccounts.isNotEmpty) {
       total = 0;
       for (var i = 0; i < selectedAccounts.length; i++) {
-        total += double.parse(selectedAccounts[i][0].toString());
+        total += double.parse(selectedAccounts[i].paid.toString());
       }
     } else if (cashController.text.isNotEmpty) {
       total = double.parse(cashController.text);
@@ -178,7 +179,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         if (state.enterpriseConfig!.multipleAccounts == false &&
             state.enterpriseConfig!.specifiedAccountTransfer == true &&
             transferController.text.isNotEmpty &&
-            accountId == null) {
+            selectedAccount == null) {
           emit(CollectionFailed(
               totalSummary: state.totalSummary,
               enterpriseConfig: state.enterpriseConfig,
@@ -253,9 +254,9 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
     await run(() async {
       if (index != null) {
-        selectedAccounts[index][0] = transferController.text;
-        selectedAccounts[index][2] = accountId;
-        selectedAccounts[index][3] = dateController.text;
+        selectedAccounts[index].paid = transferController.text;
+        selectedAccounts[index].account = selectedAccount;
+        selectedAccounts[index].date = dateController.text;
 
         indexToEdit = null;
         isEditing = false;
@@ -264,9 +265,11 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           if (double.tryParse(multiTransferController.text) != null) {
             var transferValue = double.parse(multiTransferController.text);
 
-            selectedAccounts.add(
-                [transferValue, 'transfer', accountId, dateController.text]);
-
+            selectedAccounts.add(AccountPayment(
+                paid: transferValue.toString(),
+                type: 'transfer',
+                account: selectedAccount,
+                date: dateController.text));
           }
         }
       }
@@ -278,12 +281,12 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
       var count = 0.0;
       for (var i = 0; i < selectedAccounts.length; i++) {
-        count += double.parse(selectedAccounts[i][0].toString());
+        count += double.parse(selectedAccounts[i].paid!);
       }
 
       total = count + cashValue;
       multiTransferController.clear();
-      accountId = null;
+      selectedAccount = null;
       dateController.text = date(null);
 
       emit(CollectionInitial(
@@ -299,9 +302,9 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       indexToEdit = index;
       isEditing = true;
 
-      dateController.text = selectedAccounts[index][3];
-      transferController.text = selectedAccounts[index][0].toString();
-      accountId = selectedAccounts[index][2];
+      dateController.text = selectedAccounts[index].date!;
+      transferController.text = selectedAccounts[index].paid!;
+      selectedAccount = selectedAccounts[index].account;
 
       emit(CollectionEditingPayment(
           totalSummary: state.totalSummary,
@@ -336,9 +339,9 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       for (var i = 0; i < selectedAccounts.length; i++) {
         payments.add(Payment(
             method: 'transfer',
-            paid: selectedAccounts[i][0].toString(),
-            accountId: selectedAccounts[i][2].toString(),
-            date: selectedAccounts[i][3]));
+            paid: selectedAccounts[i].paid!,
+            accountId: selectedAccounts[i].account!.id!.toString(),
+            date: selectedAccounts[i].date));
       }
     } else {
       if (transferController.text.isNotEmpty) {
@@ -346,7 +349,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             method: 'transfer',
             paid: transferController.text,
             accountId: state.enterpriseConfig!.specifiedAccountTransfer == true
-                ? accountId.toString()
+                ? selectedAccount!.id.toString()
                 : null,
             date: state.enterpriseConfig!.specifiedAccountTransfer == true
                 ? dateController.text
