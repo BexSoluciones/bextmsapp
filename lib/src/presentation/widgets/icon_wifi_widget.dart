@@ -10,15 +10,16 @@ class IconConnection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<NetworkBloc, NetworkState>(
       builder: (context, state) {
+        print(state);
         if (state is NetworkFailure) {
           return Icon(Icons.wifi_off,
-              color: Theme.of(context).colorScheme.secondaryContainer);
+              color: Theme.of(context).colorScheme.primary);
         } else if (state is NetworkSuccess) {
           return Icon(Icons.wifi,
-              color: Theme.of(context).colorScheme.secondaryContainer);
+              color: Theme.of(context).colorScheme.primary);
         } else {
           return Icon(Icons.e_mobiledata,
-              color: Theme.of(context).colorScheme.secondaryContainer);
+              color: Theme.of(context).colorScheme.primary);
         }
       },
     );

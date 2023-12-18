@@ -87,7 +87,9 @@ class Location {
         heading: json[LocationFields.heading],
         isMock: json[LocationFields.isMock] == 1,
         userId: json[LocationFields.userId],
-        send: json[LocationFields.send],
+        send: json[LocationFields.send] is String
+            ? int.parse(json[LocationFields.send])
+            : json[LocationFields.send],
         time: DateTime.parse(json[LocationFields.time] as String),
       );
 

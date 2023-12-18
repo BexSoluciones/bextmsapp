@@ -116,6 +116,7 @@ class ProcessingQueueBloc
       if (result) await _getProcessingQueue();
       logTimerStop(headerDeveloperLogger, timer0, 'Initialization completed',
           level: LogLevel.success);
+      return true;
     });
   }
 

@@ -480,6 +480,7 @@ class _MyAppState extends State<MyApp> {
                   darkScheme = darkColorScheme;
 
                   return StreamBuilder(
+                    initialData: false,
                     stream: context.read<ProcessingQueueBloc>().resolve,
                     builder: (context, snapshot) => MaterialApp(
                       debugShowCheckedModeBanner: false,
