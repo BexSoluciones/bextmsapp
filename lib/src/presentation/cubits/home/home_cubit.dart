@@ -55,7 +55,6 @@ final helperFunctions = HelperFunctions();
 class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   final ApiRepository _apiRepository;
   final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
 
@@ -63,7 +62,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   CurrentUserLocationEntity? currentLocation;
 
   HomeCubit(this._databaseRepository, this._apiRepository,
-      this._locationRepository, this._processingQueueBloc, this.gpsBloc)
+      this._processingQueueBloc, this.gpsBloc)
       : super(const HomeLoading(), null);
 
   Future<void> getAllWorks() async {
@@ -82,13 +81,13 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
 
     var futures = <Future>[];
 
-    for(var work in works) {
+    for (var work in works) {
       futures.add(_databaseRepository.countLeftClients(work.workcode!));
     }
 
     var response = await Future.wait(futures);
     var i = 0;
-    for(var left in response) {
+    for (var left in response) {
       works[i].left = left;
       i++;
     }
@@ -139,6 +138,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
         if (results[0] is DataSuccess) {
           var data = results[0].data as EnterpriseConfigResponse;
           _storageService.setObject('config', data.enterpriseConfig.toMap());
+          _storageService.setBool('can_make_history', data.enterpriseConfig.canMakeHistory);
           if (data.enterpriseConfig.specifiedAccountTransfer == true) {
             var response =
                 await _apiRepository.accounts(request: AccountRequest());
@@ -201,8 +201,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                       100);
                 }
                 summary.grandTotalCopy = summary.grandTotal;
-
-                print(summary.transaction);
                 if (summary.transaction != null) {
                   transactions.add(summary.transaction!);
                 }

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class HistoryOrderSavedResponse extends Equatable {
-  final int status;
+  final int? status;
   final String message;
 
   const HistoryOrderSavedResponse({
@@ -20,6 +20,6 @@ class HistoryOrderSavedResponse extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props => [status, message];
+  List<Object> get props => [status!, message];
 
 }

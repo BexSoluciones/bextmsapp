@@ -348,7 +348,6 @@ class _MyAppState extends State<MyApp> {
               create: (context) => HomeCubit(
                   locator<DatabaseRepository>(),
                   locator<ApiRepository>(),
-                  locator<LocationRepository>(),
                   BlocProvider.of<ProcessingQueueBloc>(context),
                   BlocProvider.of<GpsBloc>(context))),
           BlocProvider(

@@ -383,8 +383,8 @@ class ProcessingQueueBloc
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
-            final response = await _apiRepository.historyOrderUpdated(
-                request: HistoryOrderUpdatedRequest(body['workcode'], 1));
+            final response = await _apiRepository.historyOrderSaved(
+                request: HistoryOrderSavedRequest(body['work_id']));
             if (response is DataSuccess) {
               queue.task = 'done';
             } else {
@@ -403,8 +403,9 @@ class ProcessingQueueBloc
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
-            final response = await _apiRepository.historyOrderSaved(
-                request: HistoryOrderSavedRequest(body['work_id']));
+            final response = await _apiRepository.historyOrderUpdated(
+                request: HistoryOrderUpdatedRequest(body['workcode'], 1));
+
             if (response is DataSuccess) {
               queue.task = 'done';
             } else {
