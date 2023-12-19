@@ -62,8 +62,8 @@ class _FormCollectionState extends State<FormCollection>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(children: [
-                        Text('EFECTIVO', style: TextStyle(fontSize: 14)),
-                        Icon(Icons.money, color: Colors.green),
+                        const Text('EFECTIVO', style: TextStyle(fontSize: 14)),
+                        const Icon(Icons.money, color: Colors.green),
                         SizedBox( width: MediaQuery.of(context).size.width / 2,),
                         IconButton(
                             icon: const Icon(Icons.camera_alt,
@@ -122,8 +122,11 @@ class _FormCollectionState extends State<FormCollection>
                     ),
                   ),
                   validator: (value) {
-                    if (value!.contains(',')) {
-                      return '';
+                    if(value!.startsWith('.') || value.endsWith('.')) {
+                      return 'valor no válido';
+                    }
+                    if (value.contains(',')) {
+                      return 'no debe contener comas';
                     }
                     return null;
                   },
@@ -219,7 +222,10 @@ class _FormCollectionState extends State<FormCollection>
                                 ),
                               ),
                               validator: (value) {
-                                if (value!.contains(',')) {
+                                if(value!.startsWith('.') || value.endsWith('.')) {
+                                  return 'valor no válido';
+                                }
+                                if (value.contains(',')) {
                                   return 'el valor no puede contener comas';
                                 }
                                 return null;

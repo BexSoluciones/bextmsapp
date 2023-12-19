@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -62,47 +63,58 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   List<AccountPayment> selectedAccounts = [];
 
   void listenForCash() {
-    if (transferController.text.isNotEmpty && cashController.text.isNotEmpty) {
-      total = double.parse(cashController.text) +
-          double.parse(transferController.text);
-    } else if (cashController.text.isNotEmpty && selectedAccounts.isNotEmpty) {
-      total = 0;
-      var cashValue = double.parse(cashController.text);
-      var count = 0.0;
-      for (var i = 0; i < selectedAccounts.length; i++) {
-        count += double.parse(selectedAccounts[i].paid.toString());
+    try {
+      if (transferController.text.isNotEmpty &&
+          cashController.text.isNotEmpty) {
+        total = double.tryParse(cashController.text)! +
+            double.tryParse(transferController.text)!;
+      } else if (cashController.text.isNotEmpty &&
+          selectedAccounts.isNotEmpty) {
+        total = 0;
+        var cashValue = double.tryParse(cashController.text)!;
+        var count = 0.0;
+        for (var i = 0; i < selectedAccounts.length; i++) {
+          count += double.tryParse(selectedAccounts[i].paid.toString())!;
+        }
+        total = count + cashValue;
+      } else if (cashController.text.isEmpty && selectedAccounts.isNotEmpty) {
+        total = 0;
+        for (var i = 0; i < selectedAccounts.length; i++) {
+          total += double.tryParse(selectedAccounts[i].paid.toString())!;
+        }
+      } else if (cashController.text.isNotEmpty) {
+        total = double.tryParse(cashController.text)!;
+      } else if (cashController.text.isEmpty &&
+          transferController.text.isEmpty) {
+        total = 0;
+      } else if (transferController.text.isNotEmpty &&
+          cashController.text.isEmpty) {
+        total = double.tryParse(transferController.text)!;
       }
-      total = count + cashValue;
-    } else if (cashController.text.isEmpty && selectedAccounts.isNotEmpty) {
-      total = 0;
-      for (var i = 0; i < selectedAccounts.length; i++) {
-        total += double.parse(selectedAccounts[i].paid.toString());
-      }
-    } else if (cashController.text.isNotEmpty) {
-      total = double.parse(cashController.text);
-    } else if (cashController.text.isEmpty && transferController.text.isEmpty) {
-      total = 0;
-    } else if (transferController.text.isNotEmpty &&
-        cashController.text.isEmpty) {
-      total = double.parse(transferController.text);
+    } catch (e) {
+      logDebugFine(headerDeveloperLogger, e.toString());
     }
   }
 
   void listenForTransfer() {
-    if (!isEditing) {
-      if (cashController.text.isNotEmpty &&
-          transferController.text.isNotEmpty) {
-        total = double.parse(transferController.text) +
-            double.parse(cashController.text);
-      } else if (transferController.text.isNotEmpty) {
-        total = double.parse(transferController.text);
-      } else if (cashController.text.isEmpty &&
-          transferController.text.isEmpty) {
-        total = 0;
-      } else if (cashController.text.isNotEmpty &&
-          transferController.text.isEmpty) {
-        total = double.parse(cashController.text);
+    try {
+      if (!isEditing) {
+        if (cashController.text.isNotEmpty &&
+            transferController.text.isNotEmpty) {
+          total = double.tryParse(transferController.text)! +
+              double.tryParse(cashController.text)!;
+        } else if (transferController.text.isNotEmpty) {
+          total = double.tryParse(transferController.text)!;
+        } else if (cashController.text.isEmpty &&
+            transferController.text.isEmpty) {
+          total = 0;
+        } else if (cashController.text.isNotEmpty &&
+            transferController.text.isEmpty) {
+          total = double.tryParse(cashController.text)!;
+        }
       }
+    } catch (e) {
+      logDebugFine(headerDeveloperLogger, e.toString());
     }
   }
 
