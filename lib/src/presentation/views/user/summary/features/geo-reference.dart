@@ -99,7 +99,6 @@ Widget _buildGeoReference(context, state, Work work, Size size) {
                     style: const TextStyle(fontSize: 20, color: Colors.white)),
                 press: () async {
                   var client = Client(
-                      id: work.id,
                       nit: work.numberCustomer,
                       operativeCenter: work.codePlace,
                       action: work.latitude != null &&
