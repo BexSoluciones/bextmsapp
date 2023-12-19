@@ -129,9 +129,9 @@ class ListViewWorkState extends State<ListViewWork> {
           (context, index) {
             final work = works[index];
             if (index == 0) {
-              return showCaseClientTile(context, work);
+              return showCaseClientTile(context, work, index);
             } else {
-              return ItemWork(work: work);
+              return ItemWork(index: index, work: work);
             }
           },
           childCount: works.length,
@@ -140,11 +140,11 @@ class ListViewWorkState extends State<ListViewWork> {
     }
   }
 
-  Widget showCaseClientTile(BuildContext context, work) {
+  Widget showCaseClientTile(BuildContext context, work, index) {
     return Showcase(
         key: widget.six,
         disableMovingAnimation: true,
         description: 'Este en tu primer cliente, click para ver sus facturas!',
-        child: ItemWork(work: work));
+        child: ItemWork(index: index, work: work));
   }
 }

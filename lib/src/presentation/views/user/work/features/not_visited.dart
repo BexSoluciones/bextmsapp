@@ -115,7 +115,7 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
         itemCount: works.length,
         itemBuilder: (context, index) {
           final work = works[index];
-          return SubItemWork(work: work, enabled: isStarted);
+          return SubItemWork(index: index, work: work, enabled: isStarted);
         },
       );
     }

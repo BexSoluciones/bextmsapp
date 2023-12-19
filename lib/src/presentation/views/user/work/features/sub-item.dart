@@ -15,9 +15,10 @@ import '../../../../../services/navigation.dart';
 final NavigationService _navigationService = locator<NavigationService>();
 
 class SubItemWork extends StatefulWidget {
-  const SubItemWork({Key? key, required this.work, required this.enabled})
+  const SubItemWork({Key? key, required this.index, required this.work, required this.enabled})
       : super(key: key);
 
+  final int index;
   final Work work;
   final bool enabled;
 
@@ -68,7 +69,7 @@ class SubItemWorkState extends State<SubItemWork> {
                           backgroundColor:
                               Colors.primaries[widget.work.color ?? 5],
                           child: Text(
-                            '${widget.work.order ?? 0 + 1}',
+                            '${widget.index + 1}',
                             textScaler:
                                 TextScaler.linear(calculatedTextScaleFactor),
                             style: TextStyle(

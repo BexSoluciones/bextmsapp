@@ -26,13 +26,10 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
   final DatabaseRepository _databaseRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
-  final LocationRepository _locationRepository;
 
   CurrentUserLocationEntity? currentLocation;
 
-  WorkCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc)
+  WorkCubit(this._databaseRepository)
       : super(const WorkLoading(), []);
 
   int page = 0;

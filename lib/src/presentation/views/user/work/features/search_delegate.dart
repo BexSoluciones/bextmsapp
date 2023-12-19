@@ -46,7 +46,7 @@ class SearchWorkDelegate extends SearchDelegate<Work?> {
         itemCount: _filters.length,
         itemBuilder: (context, index) {
           final work = _filters[index];
-          return ItemWork(work: work);
+          return ItemWork(index: index, work: work);
         },
       ),
     );
@@ -74,7 +74,7 @@ class SearchWorkDelegate extends SearchDelegate<Work?> {
         itemCount: _filters.length,
         itemBuilder: (context, index) {
           final work = _filters[index];
-          return ItemWork(work: work);
+          return ItemWork(index: index, work: work);
         },
       ),
     );

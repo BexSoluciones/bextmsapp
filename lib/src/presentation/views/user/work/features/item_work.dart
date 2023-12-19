@@ -18,8 +18,9 @@ import '../../../../../services/navigation.dart';
 final NavigationService _navigationService = locator<NavigationService>();
 
 class ItemWork extends StatefulWidget {
-  const ItemWork({Key? key, required this.work}) : super(key: key);
+  const ItemWork({Key? key, required this.index, required this.work}) : super(key: key);
 
+  final int index;
   final Work work;
   @override
   ItemWorkState createState() => ItemWorkState();
@@ -72,7 +73,7 @@ class ItemWorkState extends State<ItemWork> {
                           backgroundColor:
                               Colors.primaries[widget.work.color ?? 5],
                           child: Text(
-                            '${widget.work.order != null ? widget.work.order! + 1 : 1}',
+                            '${widget.index + 1}',
                             textScaler:
                                 TextScaler.linear(calculatedTextScaleFactor),
                             style: TextStyle(

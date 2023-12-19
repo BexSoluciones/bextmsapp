@@ -88,7 +88,7 @@ class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
         itemCount: works.length,
         itemBuilder: (context, index) {
           final work = works[index];
-          return SubItemWork(work: work, enabled: true);
+          return SubItemWork(index: index, work: work, enabled: true);
         },
       );
     }

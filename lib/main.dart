@@ -355,10 +355,7 @@ class _MyAppState extends State<MyApp> {
                 BlocProvider.of<ProcessingQueueBloc>(context)),
           ),
           BlocProvider(
-            create: (context) => WorkCubit(
-                locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+            create: (context) => WorkCubit(locator<DatabaseRepository>()),
           ),
           BlocProvider(
             create: (context) => ConfirmCubit(
