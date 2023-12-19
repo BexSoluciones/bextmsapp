@@ -130,7 +130,10 @@ class _AccountsCollectionState extends State<AccountsCollection>
                   ),
                 ),
                 validator: (value) {
-                  if (value!.contains(',')) {
+                  if(value!.startsWith('.') || value.endsWith('.')) {
+                    return 'valor no válido';
+                  }
+                  if (value.contains(',')) {
                     return '';
                   }
                   return null;
