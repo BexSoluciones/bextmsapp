@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bexdeliveries/src/domain/models/warehouse.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
@@ -25,9 +24,11 @@ import '../../blocs/processing_queue/processing_queue_bloc.dart';
 //utils
 import '../../../utils/resources/data_state.dart';
 import '../../../utils/constants/strings.dart';
+import '../../../utils/extensions/list_extension.dart';
 
 //domain
 import '../../../domain/models/work.dart';
+import '../../../domain/models/warehouse.dart';
 import '../../../domain/models/user.dart';
 import '../../../domain/models/summary.dart';
 import '../../../domain/models/transaction.dart';
@@ -225,8 +226,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             var wn = responseWorks.data!.works.where((element) => element.workcode == w);
             warehouses.add(wn.first.warehouse!);
           }
-
-          await _databaseRepository.insertWarehouses(warehouses);
+          final distinct = warehouses.unique((x) => x.id);
+          await _databaseRepository.insertWarehouses(distinct);
 
           //TODO:: refactoring
           var workcodes = groupBy(works, (Work work) => work.workcode);

@@ -1,13 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bexdeliveries/src/domain/models/requests/account_request.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_udid/flutter_udid.dart';
-import 'package:intl/intl.dart';
 import 'package:yaml/yaml.dart';
 import 'package:location_repository/location_repository.dart';
 
@@ -28,6 +25,7 @@ import '../../../domain/models/requests/login_request.dart';
 import '../../../domain/models/requests/work_request.dart';
 import '../../../domain/models/requests/enterprise_config_request.dart';
 import '../../../domain/models/requests/reason_request.dart';
+import '../../../domain/models/requests/account_request.dart';
 
 ///responses
 import '../../../domain/models/responses/reason_response.dart';
@@ -49,6 +47,7 @@ import '../base/base_cubit.dart';
 //utils
 import '../../../utils/resources/data_state.dart';
 import '../../../utils/constants/strings.dart';
+import '../../../utils/extensions/list_extension.dart';
 
 //service
 import '../../../locator.dart';
@@ -228,8 +227,8 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
             var wn = responseWorks.data!.works.where((element) => element.workcode == w);
             warehouses.add(wn.first.warehouse!);
           }
-
-          await _databaseRepository.insertWarehouses(warehouses);
+          final distinct = warehouses.unique((x) => x.id);
+          await _databaseRepository.insertWarehouses(distinct);
 
           //TODO:: refactoring
           var workcodes = groupBy(works, (Work work) => work.workcode);
