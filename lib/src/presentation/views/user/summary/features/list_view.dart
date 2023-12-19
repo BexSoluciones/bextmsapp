@@ -105,7 +105,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                           style: TextStyle(color: Colors.white, fontSize: 18)),
                       press: () => _navigationService.goTo(
                           AppRoutes.summaryGeoReference,
-                          arguments: widget.arguments.work)),
+                          arguments: widget.arguments)),
                 )
               : Container(),
           state.isArrived == false

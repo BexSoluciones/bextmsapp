@@ -15,7 +15,7 @@ Map<String, RouteType> summaryRoutes = {
   AppRoutes.summary: (context, settings) =>
       SummaryView(arguments: settings.arguments as SummaryArgument),
   AppRoutes.summaryGeoReference: (context, settings) =>
-      SummaryGeoReferenceView(work: settings.arguments as Work),
+      SummaryGeoReferenceView(argument: settings.arguments as SummaryArgument),
   AppRoutes.summaryNavigation: (context, settings) => SummaryNavigationView(
       arguments: settings.arguments as SummaryNavigationArgument),
   AppRoutes.inventory: (context, settings) => InventoryView(

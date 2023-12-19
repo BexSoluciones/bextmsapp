@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:location_repository/location_repository.dart';
 
@@ -7,6 +8,7 @@ import 'package:location_repository/location_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //bloc
+import '../../../utils/constants/strings.dart';
 import '../../blocs/gps/gps_bloc.dart';
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
 
@@ -40,7 +42,7 @@ class GeoReferenceCubit extends Cubit<GeoReferenceState> with FormatDate {
     emit(GeoReferenceSuccess());
   }
 
-  Future<void> sendTransactionClient(Client client) async {
+  Future<void> sendTransactionClient(SummaryArgument argument, Client client) async {
     emit(GeoReferenceLoading());
 
     var currentLocation = gpsBloc.state.lastKnownLocation;
@@ -63,6 +65,6 @@ class GeoReferenceCubit extends Cubit<GeoReferenceState> with FormatDate {
 
     emit(GeoReferenceFinished());
 
-    _navigationService.goBack();
+    _navigationService.goTo(AppRoutes.summary, arguments: argument);
   }
 }
