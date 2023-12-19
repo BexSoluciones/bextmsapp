@@ -482,6 +482,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.historyOrderDao.getHistoryOrder(workcode, zoneId);
   }
 
+  @override
+  Future<int> insertHistory(HistoryOrder historyOrder) async {
+    return _appDatabase.historyOrderDao.insertHistory(historyOrder);
+  }
+
   //WORK TYPE
   @override
   Future<WorkTypes?> getWorkTypesFromWorkcode(String workcode) async {

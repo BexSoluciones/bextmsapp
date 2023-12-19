@@ -134,6 +134,7 @@ abstract class DatabaseRepository {
   Future<void> emptyClients();
 
   //HISTORY ORDER
+  Future<int> insertHistory(HistoryOrder historyOrder);
   Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId);
 
   //ROOT

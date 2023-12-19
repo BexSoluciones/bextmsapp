@@ -428,9 +428,7 @@ class ProcessingQueueBloc
                 request: PredictionRequest(
                     int.parse(body['zone_id']), body['workcode']));
             if (response is DataSuccess) {
-
               var prediction = response.data;
-              //TODO:: [Heider Zapa] insert prediction
 
               var historyOrder = HistoryOrder(
                   id: prediction?.id,
@@ -443,7 +441,7 @@ class ProcessingQueueBloc
                   likelihood: prediction.likelihood,
                   used: prediction.used);
 
-              // await _databaseRepository.insertHistoryOrder(historyOrder);
+              await _databaseRepository.insertHistory(historyOrder);
 
               if (historyOrder.used!) {
                 _storageService.setBool(
