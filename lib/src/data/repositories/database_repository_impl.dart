@@ -92,8 +92,13 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   //WAREHOUSES
   @override
-  Future<Warehouse?> findWarehouse(Warehouse warehouse) async {
-    return _appDatabase.warehouseDao.findWarehouse(warehouse);
+  Future<List<Warehouse>> getAllWarehouses() async {
+    return _appDatabase.warehouseDao.getAllWarehouses();
+  }
+
+  @override
+  Future<Warehouse?> findWarehouse(int id) async {
+    return _appDatabase.warehouseDao.findWarehouse(id);
   }
 
   @override

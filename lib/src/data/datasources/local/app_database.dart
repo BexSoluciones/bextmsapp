@@ -282,7 +282,8 @@ class AppDatabase {
         ${WarehouseFields.description} TEXT DEFAULT NULL,
         ${WarehouseFields.createdAt} TEXT NOT NULL,
         ${WarehouseFields.updatedAt} TEXT NOT NULL,
-        ${WarehouseFields.principal} TEXT NOT NULL
+        ${WarehouseFields.principal} TEXT NOT NULL,
+        ${WarehouseFields.codeWarehouse} TEXT DEFAULT NULL
       )
     ''',
     '''
@@ -340,6 +341,9 @@ class AppDatabase {
     ''',
     '''
       ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL
+    ''',
+    '''
+      ALTER TABLE $tableWarehouses ADD COLUMN ${WarehouseFields.codeWarehouse} TEXT DEFAULT NULL
     '''
   ];
 

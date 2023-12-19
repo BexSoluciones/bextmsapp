@@ -105,7 +105,10 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         if (data.isEmpty) {
           data.addAll(works);
         }
-        //TODO:: get warehouse
+
+        List<LngLat> waypoints = [];
+
+        //TODO::  get current position
         markers.add(
           Marker(
               height: 25,
@@ -120,22 +123,28 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
                   ]))),
         );
 
-        //TODO::  get current position
-        markers.add(
-          Marker(
-              height: 25,
-              width: 25,
-              point:
-              LatLng(currentLocation.latitude, currentLocation.longitude),
-              builder: (ctx) => GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  child: Stack(alignment: Alignment.center, children: <Widget>[
-                    Image.asset('assets/icons/point.png', color: Colors.blue),
-                    const Icon(Icons.location_on, size: 14, color: Colors.white),
-                  ]))),
-        );
+        var warehouse = await _databaseRepository.findWarehouse(works.first.warehouseId!);
 
-        List<LngLat> waypoints = [];
+        if(warehouse != null) {
+          //TODO:: get warehouse
+          markers.add(
+            Marker(
+                height: 25,
+                width: 25,
+                point:
+                LatLng(double.parse(warehouse!.latitude!), double.parse(warehouse.longitude!)),
+                builder: (ctx) => GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    child: Stack(alignment: Alignment.center, children: <Widget>[
+                      Image.asset('assets/icons/point.png', color: Colors.blue),
+                      Text(0.toString()),
+                    ]))),
+          );
+
+          waypoints.add(LngLat(lng: double.parse(warehouse.longitude!), lat: double.parse(warehouse.latitude!)));
+        }
+
+
 
         for (var index = 0; index < works.length; index++) {
           if (works[index].latitude != null &&

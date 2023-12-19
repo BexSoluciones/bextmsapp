@@ -45,7 +45,7 @@ class Warehouse {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     codeWarehouse = json['code_warehouse'];
-    principal = json['principal'];
+    principal = json['principal'] is String ? int.parse(json['principal']) : json['principal'];
   }
 
   late int? id;

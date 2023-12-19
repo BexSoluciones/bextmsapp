@@ -218,6 +218,13 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             }
           });
 
+          var worksF = groupBy(responseWorks.data!.works, (Work o) => o.workcode);
+
+          for(var w in worksF.keys){
+            var wn = responseWorks.data!.works.where((element) => element.workcode == w);
+            await _databaseRepository.insertWarehouse(wn.first.warehouse!);
+          }
+
           //TODO:: refactoring
           var workcodes = groupBy(works, (Work work) => work.workcode);
           if (workcodes.isNotEmpty) {

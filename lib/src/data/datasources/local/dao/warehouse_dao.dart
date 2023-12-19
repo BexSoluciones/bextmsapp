@@ -21,9 +21,9 @@ class WarehouseDao {
     return warehouses;
   }
 
-  Future<Warehouse?> findWarehouse(Warehouse warehouse) async {
+  Future<Warehouse?> findWarehouse(int id) async {
     final db = await _appDatabase.streamDatabase;
-    final warehouseList = await db!.query(tableWarehouses, where: 'nommotvis = ?', whereArgs: [warehouse.name]);
+    final warehouseList = await db!.query(tableWarehouses, where: 'id = ?', whereArgs: [id]);
     final warehouses = parseWarehouses(warehouseList);
     if(warehouses.isEmpty){
       return null;

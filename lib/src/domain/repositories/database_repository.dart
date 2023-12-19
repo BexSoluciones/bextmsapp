@@ -40,7 +40,8 @@ abstract class DatabaseRepository {
   Future<void> insertNews(News news);
 
   //WAREHOUSES
-  Future<Warehouse?> findWarehouse(Warehouse warehouse);
+  Future<List<Warehouse>> getAllWarehouses();
+  Future<Warehouse?> findWarehouse(int id);
   Future<int> insertWarehouse(Warehouse warehouse);
   Future<int> updateWarehouse(Warehouse warehouse);
   Future<void> insertWarehouses(List<Warehouse> warehouses);

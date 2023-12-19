@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'summary.dart';
+import 'warehouse.dart';
 
 const String tableWorks = 'works';
 
@@ -243,6 +244,7 @@ class Work {
   int? hasCompleted;
   List<Summary>? summaries;
   int? warehouseId;
+  Warehouse? warehouse;
 
   // ignore: sort_constructors_first
   Work.fromJson(Map<String, dynamic> json) {
@@ -292,6 +294,9 @@ class Work {
     warehouseId = json['warehouse_id'];
     if(json['summaries'] != null){
       summaries =  json['summaries'].map<Summary>((e) => Summary.fromJson(e)).toList();
+    }
+    if(json['warehouse'] != null ){
+      warehouse = Warehouse.fromJson(json['warehouse']);
     }
 
   }
