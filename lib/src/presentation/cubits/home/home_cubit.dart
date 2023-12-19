@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/src/domain/models/warehouse.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
@@ -219,11 +220,13 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           });
 
           var worksF = groupBy(responseWorks.data!.works, (Work o) => o.workcode);
-
+          var warehouses = <Warehouse>[];
           for(var w in worksF.keys){
             var wn = responseWorks.data!.works.where((element) => element.workcode == w);
-            await _databaseRepository.insertWarehouse(wn.first.warehouse!);
+            warehouses.add(wn.first.warehouse!);
           }
+
+          await _databaseRepository.insertWarehouses(warehouses);
 
           //TODO:: refactoring
           var workcodes = groupBy(works, (Work work) => work.workcode);

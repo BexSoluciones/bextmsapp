@@ -17,6 +17,7 @@ import '../../../../core/helpers/index.dart';
 ///models
 import '../../../domain/models/login.dart';
 import '../../../domain/models/enterprise.dart';
+import '../../../domain/models/warehouse.dart';
 import '../../../domain/models/work.dart';
 import '../../../domain/models/summary.dart';
 import '../../../domain/models/transaction.dart';
@@ -220,6 +221,15 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
               }
             }
           });
+
+          var worksF = groupBy(responseWorks.data!.works, (Work o) => o.workcode);
+          var warehouses = <Warehouse>[];
+          for(var w in worksF.keys){
+            var wn = responseWorks.data!.works.where((element) => element.workcode == w);
+            warehouses.add(wn.first.warehouse!);
+          }
+
+          await _databaseRepository.insertWarehouses(warehouses);
 
           //TODO:: refactoring
           var workcodes = groupBy(works, (Work work) => work.workcode);

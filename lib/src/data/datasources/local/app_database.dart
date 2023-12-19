@@ -341,9 +341,6 @@ class AppDatabase {
     ''',
     '''
       ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL
-    ''',
-    '''
-      ALTER TABLE $tableWarehouses ADD COLUMN ${WarehouseFields.codeWarehouse} TEXT DEFAULT NULL
     '''
   ];
 
