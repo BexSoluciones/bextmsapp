@@ -1,3 +1,9 @@
+import 'package:bexdeliveries/src/domain/models/notification.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:sqflite/sqflite.dart' as sqflite;
+import 'package:bexdeliveries/src/domain/models/summary_report.dart';
+
+import '../../domain/models/news.dart';
 import '../../domain/repositories/database_repository.dart';
 import '../datasources/local/app_database.dart';
 
@@ -67,10 +73,32 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.workDao.emptyWorks();
   }
 
+  @override
+  Future<void> deleteWorksByWorkcode(String workcode) async {
+    _appDatabase.workDao.deleteWorksByWorkcode(workcode);
+  }
+
+  //POLYLINES
+
+  @override
+  Future<int> insertPolylines(String workcode, List<LatLng> data) async {
+    return _appDatabase.workDao.insertPolylines(workcode, data);
+  }
+
+  @override
+  Future<List<LatLng>> getPolylines(String workcode) async {
+    return _appDatabase.workDao.getPolylines(workcode);
+  }
+
   //WAREHOUSES
   @override
-  Future<Warehouse?> findWarehouse(Warehouse warehouse) async {
-    return _appDatabase.warehouseDao.findWarehouse(warehouse);
+  Future<List<Warehouse>> getAllWarehouses() async {
+    return _appDatabase.warehouseDao.getAllWarehouses();
+  }
+
+  @override
+  Future<Warehouse?> findWarehouse(int id) async {
+    return _appDatabase.warehouseDao.findWarehouse(id);
   }
 
   @override
@@ -150,6 +178,18 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.summaryDao.emptySummaries();
   }
 
+  @override
+  Future<List<SummaryReport>> getSummaryReportsWithReasonOrRedelivery(
+      String orderNumber) async {
+    return _appDatabase.summaryDao
+        .getSummaryReportsWithReasonOrRedelivery(orderNumber);
+  }
+
+  @override
+  Future<void> deleteSummariesByWorkcode(String workcode) {
+    return _appDatabase.summaryDao.deleteSummariesByWorkcode(workcode);
+  }
+
   //TRANSACTIONS
   @override
   Future<List<Transaction>> getAllTransactions() async {
@@ -168,7 +208,8 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
-  Future<bool> validateTransactionSummary(String workcode, String orderNumber, String status) {
+  Future<bool> validateTransactionSummary(
+      String workcode, String orderNumber, String status) {
     return _appDatabase.transactionDao
         .validateTransactionSummary(workcode, orderNumber, status);
   }
@@ -189,8 +230,10 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
-  Future<int> insertTransactionSummary(TransactionSummary transactionSummary) async {
-    return _appDatabase.transactionDao.insertTransactionSummary(transactionSummary);
+  Future<int> insertTransactionSummary(
+      TransactionSummary transactionSummary) async {
+    return _appDatabase.transactionDao
+        .insertTransactionSummary(transactionSummary);
   }
 
   @override
@@ -206,6 +249,16 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyTransactions() async {
     return _appDatabase.transactionDao.emptyTransactions();
+  }
+
+  @override
+  Future<void> deleteTransactionsByWorkcode(String workcode) {
+    return _appDatabase.transactionDao.deleteTransactionsByWorkcode(workcode);
+  }
+
+  @override
+  Future<int> countLeftClients(String workcode) {
+    return _appDatabase.transactionDao.countLeftClients(workcode);
   }
 
   //REASONS
@@ -237,6 +290,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyReasons() async {
     return _appDatabase.reasonDao.emptyReasons();
+  }
+
+  @override
+  Future<int> insertNews(News news) async {
+    return _appDatabase.reasonDao.insertNews(news);
   }
 
   //ACCOUNTS
@@ -278,7 +336,8 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   @override
   Future<int> countProcessingQueueIncompleteToTransactions() {
-    return _appDatabase.processingQueueDao.countProcessingQueueIncompleteToTransactions();
+    return _appDatabase.processingQueueDao
+        .countProcessingQueueIncompleteToTransactions();
   }
 
   @override
@@ -304,6 +363,7 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.locationDao.watchAllLocations();
   }
 
+
   @override
   Future<List<Location>> getAllLocations() async {
     return _appDatabase.locationDao.getAllLocations();
@@ -315,15 +375,28 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<bool> countLocationsManager() async {
+    return _appDatabase.locationDao.countLocationsManager();
+  }
+
+  @override
+  Future<String> getLocationsToSend() async {
+    return _appDatabase.locationDao.getLocationsToSend();
+  }
+
+  @override
+  Future<int?> updateLocationsManager() async {
+    return _appDatabase.locationDao.updateLocationsManager();
+  }
+
+  @override
   Future<int> updateLocation(Location location) async {
-    return _appDatabase.locationDao
-        .updateLocation(location);
+    return _appDatabase.locationDao.updateLocation(location);
   }
 
   @override
   Future<int> insertLocation(Location location) async {
-    return _appDatabase.locationDao
-        .insertLocation(location);
+    return _appDatabase.locationDao.insertLocation(location);
   }
 
   @override
@@ -353,6 +426,16 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<int> deletePhoto(Photo photo) async {
+    return _appDatabase.photoDao.deletePhoto(photo);
+  }
+
+  @override
+  Future<int> deleteAll(int photoId) {
+    return _appDatabase.photoDao.deleteAll(photoId);
+  }
+
+  @override
   Future<void> insertPhotos(List<Photo> photos) async {
     return _appDatabase.photoDao.insertPhotos(photos);
   }
@@ -363,7 +446,6 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   //CLIENTS
-  //LOCATIONS
   @override
   Stream<List<Client>> watchAllClients() {
     return _appDatabase.clientDao.watchAllClients();
@@ -375,15 +457,18 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<bool> validateClient(int id) async {
+    return _appDatabase.clientDao.validateClient(id);
+  }
+
+  @override
   Future<int> updateClient(Client client) async {
-    return _appDatabase.clientDao
-        .updateClient(client);
+    return _appDatabase.clientDao.updateClient(client);
   }
 
   @override
   Future<int> insertClient(Client client) async {
-    return _appDatabase.clientDao
-        .insertClient(client);
+    return _appDatabase.clientDao.insertClient(client);
   }
 
   @override
@@ -397,6 +482,93 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.historyOrderDao.getHistoryOrder(workcode, zoneId);
   }
 
+  @override
+  Future<int> insertHistory(HistoryOrder historyOrder) async {
+    return _appDatabase.historyOrderDao.insertHistory(historyOrder);
+  }
+
+  //WORK TYPE
+  @override
+  Future<WorkTypes?> getWorkTypesFromWorkcode(String workcode) async {
+    return _appDatabase.transactionDao.getWorkTypesFromWorkcode(workcode);
+  }
+
+  //DELIVERY
+  @override
+  Future<List<WorkAdditional>> getClientsResJetDel(
+      String workcode, String reason) async {
+    return _appDatabase.transactionDao.getClientsResJetDel(workcode, reason);
+  }
+
+  @override
+  Future<double?> countTotalCollectionWorks() async {
+    return _appDatabase.transactionDao.countTotalCollectionWorks();
+  }
+
+  @override
+  Future<double> countTotalRespawnWorksByWorkcode(
+      String workcode, String reason) async {
+    return _appDatabase.summaryDao
+        .countTotalRespawnWorksByWorkcode(workcode, reason);
+  }
+
+  @override
+  Future<List<SummaryReport>> getSummaryReportsWithReturnOrRedelivery(
+      String orderNumber) async {
+    return _appDatabase.summaryDao
+        .getSummaryReportsWithReturnOrRedelivery(orderNumber);
+  }
+
+  @override
+  Future<List<SummaryReport>> getSummaryReportsWithDelivery(
+      String orderNumber) {
+    return _appDatabase.summaryDao.getSummaryReportsWithDelivery(orderNumber);
+  }
+
+  //NOTIFICATION
+  @override
+  Future<int> insertNotification(PushNotification notification) {
+    return _appDatabase.notificationDao
+        .insert(tableNotifications, notification.toJson());
+  }
+
+  @override
+  Future<List<PushNotification>> getNotifications() {
+    return _appDatabase.notificationDao.getNotifications();
+  }
+
+  @override
+  Future<void> updateNotification(int notificationId, String readAt) {
+    return _appDatabase.notificationDao
+        .updateNotification(notificationId, readAt);
+  }
+
+  @override
+  Future<int?> countAllUnreadNotifications() {
+    return _appDatabase.notificationDao.countAllUnreadNotifications();
+  }
+
+  //DELETE BY DAYS
+  @override
+  Future<void> deleteProcessingQueueByDays() {
+    return _appDatabase.processingQueueDao.deleteProcessingQueueByDays();
+  }
+
+  @override
+  Future<void> deleteLocationsByDays() {
+    return _appDatabase.locationDao.deleteLocationsByDays();
+  }
+
+  @override
+  Future<void> deleteNotificationsByDays() {
+    return _appDatabase.notificationDao.deleteNotificationsByDays();
+  }
+
+  @override
+  Future<void> deleteTransactionByDays() {
+    return _appDatabase.transactionDao.deleteTransactionByDays();
+  }
+
   // initialize and close methods go here
   Future init() async {
     await _appDatabase.database;
@@ -405,5 +577,16 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   void close() {
     _appDatabase.close();
+  }
+
+  @override
+  Future<sqflite.Database?> get() async {
+    return await _appDatabase.database;
+  }
+
+  @override
+  Future<bool> listenForTableChanges(
+      String table, String column, String value) {
+    return _appDatabase.listenForTableChanges(table, column, value);
   }
 }

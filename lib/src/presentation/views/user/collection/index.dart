@@ -1,8 +1,9 @@
-import 'dart:io';
-import 'package:flutter/cupertino.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+
+//blocs
+import '../../../blocs/account/account_bloc.dart';
 
 //cubit
 import '../../../cubits/collection/collection_cubit.dart';
@@ -15,14 +16,11 @@ import '../../../../utils/constants/nums.dart';
 import '../../../../domain/models/arguments.dart';
 import '../../../../domain/abstracts/format_abstract.dart';
 
-//services
-import '../../../../locator.dart';
-import '../../../../services/storage.dart';
-
 //widgets
 import '../../../widgets/default_button_widget.dart';
-
-final LocalStorageService _storageService = locator<LocalStorageService>();
+//features
+import './features/form.dart';
+import './features/header.dart';
 
 class CollectionView extends StatefulWidget {
   const CollectionView({Key? key, required this.arguments}) : super(key: key);
@@ -33,98 +31,43 @@ class CollectionView extends StatefulWidget {
   State<CollectionView> createState() => CollectionViewState();
 }
 
-class CollectionViewState extends State<CollectionView>
-    with WidgetsBindingObserver, FormatNumber {
+class CollectionViewState extends State<CollectionView> with FormatNumber {
   final _formKey = GlobalKey<FormState>();
 
   late CollectionCubit collectionCubit;
 
-  bool isLoading = false;
-  double totalSummary = 0;
-  double total = 0;
-  int cantPictures = 0;
-
-  File? file;
-  bool isErrorReasons = false;
-  bool isErrorCollection = false;
-  static const _locale = 'en';
-  String message = '';
-  final allowInsetsBelow = _storageService.getBool('allow_insets_below');
-
-  String get _currency =>
-      '  ${NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol}';
-
-  final TextEditingController _typeAheadController = TextEditingController();
-  final TextEditingController paymentEfectyController = TextEditingController();
-  final TextEditingController paymentTransferController =
-      TextEditingController();
-
-  String? get firmS => null;
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
+    super.initState();
 
+    context.read<AccountBloc>().add(LoadAccountListEvent());
     collectionCubit = BlocProvider.of<CollectionCubit>(context);
     collectionCubit.getCollection(
         widget.arguments.work.id!, widget.arguments.orderNumber);
-
-    paymentEfectyController.addListener(() {
-      if (paymentTransferController.text.isNotEmpty &&
-          paymentEfectyController.text.isNotEmpty) {
-        setState(() {
-          total = double.parse(paymentEfectyController.text) +
-              double.parse(paymentTransferController.text);
-        });
-      } else if (paymentEfectyController.text.isNotEmpty) {
-        setState(() {
-          total = double.parse(paymentEfectyController.text);
-        });
-      } else if (paymentEfectyController.text.isEmpty &&
-          paymentTransferController.text.isEmpty) {
-        setState(() {
-          total = 0;
-        });
-      } else if (paymentTransferController.text.isNotEmpty &&
-          paymentEfectyController.text.isEmpty) {
-        setState(() {
-          total = double.parse(paymentTransferController.text);
-        });
-      }
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      collectionCubit.cashController.addListener(() {
+        collectionCubit.listenForCash();
+        setState(() {});
+      });
+      collectionCubit.transferController.addListener(() {
+        if (!collectionCubit.isEditing) {
+          collectionCubit.listenForTransfer();
+          setState(() {});
+        }
+      });
     });
-
-    paymentTransferController.addListener(() {
-      if (paymentEfectyController.text.isNotEmpty &&
-          paymentTransferController.text.isNotEmpty) {
-        setState(() {
-          total = double.parse(paymentTransferController.text) +
-              double.parse(paymentEfectyController.text);
-        });
-      } else if (paymentTransferController.text.isNotEmpty) {
-        setState(() {
-          total = double.parse(paymentTransferController.text);
-        });
-      } else if (paymentEfectyController.text.isEmpty &&
-          paymentTransferController.text.isEmpty) {
-        setState(() {
-          total = 0;
-        });
-      } else if (paymentEfectyController.text.isNotEmpty &&
-          paymentTransferController.text.isEmpty) {
-        setState(() {
-          total = double.parse(paymentEfectyController.text);
-        });
-      }
-    });
-    super.initState();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    paymentTransferController.dispose();
-    paymentEfectyController.dispose();
-    _typeAheadController.dispose();
+    // collectionCubit.dispose();
     super.dispose();
   }
 
@@ -144,7 +87,7 @@ class CollectionViewState extends State<CollectionView>
     return GestureDetector(
         onTap: unfocus,
         child: Scaffold(
-            resizeToAvoidBottomInset: false,
+            resizeToAvoidBottomInset: true,
             appBar: AppBar(
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
@@ -152,20 +95,63 @@ class CollectionViewState extends State<CollectionView>
               ),
             ),
             body: BlocBuilder<CollectionCubit, CollectionState>(
-              builder: (_, state) {
-                switch (state.runtimeType) {
-                  case CollectionLoading:
-                    return const Center(child: CupertinoActivityIndicator());
-                  case CollectionSuccess:
-                    return _buildCollection(
-                      size,
-                      state,
-                    );
-                  default:
-                    return const SizedBox();
-                }
-              },
+              builder: (_, state) => _buildBlocConsumer(size),
             )));
+  }
+
+  void buildBlocListener(BuildContext context, CollectionState state) async {
+    print(state);
+    if (state is CollectionSuccess) {
+      if (state.validate != null && state.validate == true) {
+        collectionCubit.goToWork(state.work);
+      } else if (state.validate != null && state.validate == false) {
+        collectionCubit.goToSummary(state.work);
+      }
+    } else if (state is CollectionFailed && state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            state.error!,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    } else if (state is CollectionWaiting) {
+      await showDialog(
+          context: context,
+          builder: (_) {
+            return MyDialog(
+              total: collectionCubit.total,
+              totalSummary: state.totalSummary!.toDouble(),
+              confirmTransaction: () => collectionCubit.confirmTransaction(
+                widget.arguments,
+              ),
+              context: context,
+            );
+          });
+    } else if (state is CollectionModalClosed) {
+      print(collectionCubit.total);
+    }
+  }
+
+  Widget _buildBlocConsumer(Size size) {
+    return BlocConsumer<CollectionCubit, CollectionState>(
+      // buildWhen: (previous, current) => previous != current,
+      listener: buildBlocListener,
+      builder: (context, state) {
+        if (state is CollectionLoading ||
+            state is CollectionInitial ||
+            state is CollectionModalClosed ||
+            state is CollectionFailed) {
+          return _buildCollection(size, state);
+        } else if (state is CollectionSuccess) {
+          return _buildSuccessTransaction(size);
+        } else {
+          return const SizedBox();
+        }
+      },
+    );
   }
 
   Widget _buildCollection(Size size, CollectionState state) {
@@ -174,233 +160,16 @@ class CollectionViewState extends State<CollectionView>
       child: SizedBox(
         height: size.height,
         width: size.width,
-        child: ListView(children: [
-          SizedBox(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  left: kDefaultPadding, right: kDefaultPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  Text(
-                      'TOTAL A RECAUDAR: \$${formatter.format(state.totalSummary)}',
-                      textAlign: TextAlign.start,
-                      style: const TextStyle(
-                          fontSize: 25, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 3),
-                  Text(widget.arguments.typeOfCharge,
-                      textAlign: TextAlign.start,
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold))
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: size.height * 0.05),
-          Padding(
-              padding: const EdgeInsets.only(
-                  left: kDefaultPadding, right: kDefaultPadding),
-              child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(children: [
-                              Text('EFECTIVO', style: TextStyle(fontSize: 14)),
-                              Icon(Icons.money, color: Colors.green),
-                            ]),
-                          ]),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        autofocus: false,
-                        controller: paymentEfectyController,
-                        decoration: InputDecoration(
-                          prefixText: _currency,
-                          focusedBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.grey, width: 2.0),
-                          ),
-                          enabledBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: kPrimaryColor, width: 2.0),
-                          ),
-                          errorBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: kPrimaryColor, width: 2.0),
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              if (double.tryParse(
-                                      paymentEfectyController.text) !=
-                                  null) {
-                                setState(() {
-                                  total = total -
-                                      double.parse(
-                                          paymentEfectyController.text);
-                                });
-                              }
-
-                              paymentEfectyController.clear();
-                            },
-                            icon: const Icon(Icons.clear),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value!.contains(',')) {
-                            return '';
-                          }
-                          return null;
-                        },
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Row(children: [
-                            Text('TRANSFERENCIA BANCARIA',
-                                style: TextStyle(fontSize: 14)),
-                            Icon(Icons.credit_card)
-                          ]),
-                          IconButton(
-                              icon: const Icon(Icons.camera_alt,
-                                  size: 32, color: kPrimaryColor),
-                              onPressed: () => context
-                                  .read<CollectionCubit>()
-                                  .goToCamera(widget.arguments.orderNumber)),
-                          state.enterpriseConfig != null && state.enterpriseConfig!.codeQr != null
-                              ? IconButton(
-                                  icon: const Icon(Icons.qr_code_2,
-                                      size: 32, color: kPrimaryColor),
-                                  onPressed: () => context
-                                      .read<CollectionCubit>()
-                                      .goToCodeQR())
-                              : Container()
-                        ],
-                      ),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        autofocus: false,
-                        controller: paymentTransferController,
-                        decoration: InputDecoration(
-                          prefixText: _currency,
-                          focusedBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.grey, width: 2.0),
-                          ),
-                          enabledBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: kPrimaryColor, width: 2.0),
-                          ),
-                          errorBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: kPrimaryColor, width: 2.0),
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              if (double.tryParse(
-                                      paymentTransferController.text) !=
-                                  null) {
-                                setState(() {
-                                  total = total -
-                                      double.parse(
-                                          paymentTransferController.text);
-                                });
-                              }
-
-                              paymentTransferController.clear();
-                            },
-                            icon: const Icon(Icons.clear),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value!.contains(',')) {
-                            return '';
-                          }
-                          return null;
-                        },
-                      ),
-                      state.enterpriseConfig != null && state.enterpriseConfig!.specifiedAccountTransfer == true
-                          ? const Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(children: [
-                                  Text('NÚMERO DE CUENTA',
-                                      style: TextStyle(fontSize: 14)),
-                                  Icon(Icons.account_balance_outlined)
-                                ]),
-                              ],
-                            )
-                          : Container(),
-                      state.enterpriseConfig != null && state.enterpriseConfig!.specifiedAccountTransfer == true
-                          ? DropdownButtonFormField<String>(
-                              isExpanded: true,
-                              value: null,
-                              onChanged: (String? newValue) {
-                                // setState(() {
-                                //   selectedOption = newValue;
-                                //   showDropdownError = false;
-                                // });
-                              },
-                              decoration: const InputDecoration(
-                                contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide:
-                                  BorderSide(color: Colors.grey, width: 2.0),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide:
-                                  BorderSide(color: kPrimaryColor, width: 2.0),
-                                ),
-                                errorBorder: OutlineInputBorder(
-                                  borderSide:
-                                  BorderSide(color: kPrimaryColor, width: 2.0),
-                                ),
-                                hintStyle: TextStyle(
-                                  color: Colors.orange,
-                                ),
-                              ),
-                              style: const TextStyle(
-                                color: kPrimaryColor,
-                              ),
-                              dropdownColor: Colors.white,
-                              validator: (value) {
-                                // if (showDropdownError &&
-                                //     (value == null ||
-                                //         value.isEmpty ||
-                                //         value == options[0])) {
-                                //   return 'Selecciona una opción válida';
-                                // }
-                                return null;
-                              },
-                              items: [
-                                'cuenta 1'
-                              ].map<DropdownMenuItem<String>>((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(
-                                    value.contains('-')
-                                        ? '${value.split('-')[0]} - ${value.split('-')[1]}'
-                                        : 'Selecciona una cuenta',
-                                    style: const TextStyle(color: Colors.black),
-                                  ),
-                                );
-                              }).toList(),
-                            )
-                          : Container(),
-                      const SizedBox(height: 50),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Total:',
-                                style: TextStyle(fontSize: 20)),
-                            Text('\$${formatter.format(total)}',
-                                style: const TextStyle(fontSize: 20)),
-                          ]),
-                    ],
-                  ))),
+        child: Column(children: [
+          HeaderCollection(
+              type: widget.arguments.typeOfCharge,
+              total: state.totalSummary ?? 0.0),
+          SizedBox(height: size.height * 0.02),
+          FormCollection(
+              formKey: _formKey,
+              collectionCubit: collectionCubit,
+              state: state,
+              orderNumber: widget.arguments.orderNumber),
           Padding(
               padding: const EdgeInsets.only(
                   left: kDefaultPadding, right: kDefaultPadding),
@@ -409,77 +178,126 @@ class CollectionViewState extends State<CollectionView>
                   press: () => context
                       .read<CollectionCubit>()
                       .goToFirm(widget.arguments.orderNumber))),
-          SizedBox(height: size.height * 0.12),
-          isLoading
-              ? const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
-                )
-              : Padding(
-                  padding: const EdgeInsets.only(
-                      left: kDefaultPadding, right: kDefaultPadding),
-                  child: DefaultButton(
-                      widget: const Text('Confirmar',
-                          style: TextStyle(color: Colors.white, fontSize: 20)),
-                      press: () async {
-                        final form = _formKey.currentState;
-                        if (form!.validate()) {
-                          switch (state.enterpriseConfig?.allowInsetsBelow) {
-                            case false:
-                              if (widget.arguments.typeOfCharge == 'CREDITO' &&
-                                  total == 0.0) {
-                                await context
-                                    .read<CollectionCubit>()
-                                    .confirmTransaction(
-                                        widget.arguments,
-                                        paymentEfectyController,
-                                        paymentTransferController);
-                              } else if (total != state.totalSummary) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        backgroundColor: Colors.red,
-                                        content: Text(
-                                            'El valor a recaudar debe ser igual al total',
-                                            style: TextStyle(
-                                                color: Colors.white))));
-                              } else {
-                                await context
-                                    .read<CollectionCubit>()
-                                    .confirmTransaction(
-                                        widget.arguments,
-                                        paymentEfectyController,
-                                        paymentTransferController);
+          SizedBox(height: size.height * 0.05),
+          BlocSelector<CollectionCubit, CollectionState, bool>(
+              selector: (state) => state is CollectionLoading,
+              builder: (BuildContext c, x) {
+                return x
+                    ? const CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(kPrimaryColor),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.only(
+                            left: kDefaultPadding, right: kDefaultPadding),
+                        child: DefaultButton(
+                            widget: const Text('Confirmar',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 20)),
+                            press: () async {
+                              final form = _formKey.currentState;
+                              if (form!.validate()) {
+                                collectionCubit.validate(widget.arguments);
                               }
-                              break;
-                            case true:
-                              if (total <= state.totalSummary!.toDouble() ||
-                                  widget.arguments.typeOfCharge == 'CREDITO') {
-                                await context
-                                    .read<CollectionCubit>()
-                                    .confirmTransaction(
-                                        widget.arguments,
-                                        paymentEfectyController,
-                                        paymentTransferController);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        backgroundColor: Colors.red,
-                                        content: Text(
-                                            'El recaudo no puede ser mayor al total',
-                                            style: TextStyle(
-                                                color: Colors.white))));
-                              }
-                              break;
-                          }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                              backgroundColor: Colors.orange,
-                              content: Text(
-                                  'El recaudo solo puede contener puntos y unicamente para los decimales, ejemplo: 127809.64',
-                                  style: TextStyle(color: Colors.white))));
-                        }
-                      })),
+                            }));
+              })
         ]),
       ),
     ));
+  }
+
+  Widget _buildSuccessTransaction(Size size) {
+    return SafeArea(
+      child: SizedBox(
+        height: size.height,
+        width: size.width,
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.check, size: 50, color: Colors.green),
+              Text('Transación exitosa.')
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class MyDialog extends StatefulWidget {
+  const MyDialog(
+      {Key? key,
+      required this.totalSummary,
+      required this.total,
+      required this.confirmTransaction,
+      required this.context})
+      : super(key: key);
+
+  final double totalSummary;
+  final double total;
+  final Function confirmTransaction;
+  final BuildContext context;
+
+  @override
+  _MyDialogState createState() => _MyDialogState();
+}
+
+class _MyDialogState extends State<MyDialog> with FormatNumber {
+  var seconds = 5;
+  var showText = false;
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (Timer timer) {
+        if (seconds == 0) {
+          setState(() {
+            timer.cancel();
+            showText = true;
+          });
+        } else {
+          setState(() {
+            seconds--;
+            showText = false;
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Confirmar recaudo'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Text(
+                'Valor a recaudar: \$${formatter.format(widget.totalSummary)}'),
+            Text('Valor a guardar: por \$${formatter.format(widget.total)}'),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text('Cancelar'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: showText ? const Text('Si') : Text(seconds.toString()),
+          onPressed: () {
+            widget.confirmTransaction(context);
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
   }
 }

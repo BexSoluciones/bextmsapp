@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,22 +34,26 @@ class VisitedViewWorkState extends State<VisitedViewWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(18);
     return SafeArea(
         child: BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
       switch (state.runtimeType) {
         case WorkLoading:
           return const Center(child: CupertinoActivityIndicator());
         case WorkSuccess:
-          return _buildWork(state);
+          return _buildWork(state, calculatedTextScaleFactor, calculatedFon);
         default:
           return const SizedBox();
       }
     }));
   }
 
-  Widget _buildWork(state) {
+  Widget _buildWork(
+      state, double calculatedTextScaleFactor, double calculatedFon) {
     return Padding(
-        padding: const EdgeInsets.only(left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
+        padding: const EdgeInsets.only(
+            left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
         child: Column(
           children: [
             SizedBox(
@@ -56,9 +61,11 @@ class VisitedViewWorkState extends State<VisitedViewWork> {
               width: double.infinity,
               child: Center(
                   child: Text('SERVICIO: ${widget.workcode}',
-                      // textScaleFactor: textScaleFactor(context),
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold))),
+                      style: TextStyle(
+                        fontSize: calculatedFon,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ))),
             ),
             Flexible(flex: 16, child: buildStaticBody(state.visited))
           ],
@@ -80,7 +87,7 @@ class VisitedViewWorkState extends State<VisitedViewWork> {
         itemCount: works.length,
         itemBuilder: (context, index) {
           final work = works[index];
-          return SubItemWork(work: work, enabled: false);
+          return SubItemWork(index: index, work: work, enabled: false);
         },
       );
     }

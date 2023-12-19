@@ -1,4 +1,12 @@
 //utils
+import 'package:bexdeliveries/src/domain/models/requests/history_order_saved_request.dart';
+import 'package:bexdeliveries/src/domain/models/requests/history_order_updated_request.dart';
+import 'package:bexdeliveries/src/domain/models/requests/reason_m_request.dart';
+import 'package:bexdeliveries/src/domain/models/requests/routing_request.dart';
+import 'package:bexdeliveries/src/domain/models/responses/history_order_saved_response.dart';
+import 'package:bexdeliveries/src/domain/models/responses/routing_response.dart';
+
+import '../../domain/models/requests/locations_request.dart';
 import '../../utils/resources/data_state.dart';
 
 import '../../domain/models/requests/login_request.dart';
@@ -34,10 +42,19 @@ import '../../domain/models/responses/status_response.dart';
 import '../../domain/models/requests/account_request.dart';
 import '../../domain/models/responses/account_response.dart';
 
+import '../../domain/models/requests/prediction_request.dart';
+import '../../domain/models/responses/prediction_response.dart';
+
+import '../../domain/models/requests/history_order_saved_request.dart';
+import '../../domain/models/responses/history_order_saved_response.dart';
+
+import '../../domain/models/requests/history_order_updated_request.dart';
+import '../../domain/models/responses/history_order_updated_response.dart';
+
 import '../../domain/models/requests/client_request.dart';
+import '../../domain/models/requests/send_token.dart';
 
 import '../../domain/repositories/api_repository.dart';
-
 import '../datasources/remote/api_service.dart';
 import 'base/base_api_repository.dart';
 
@@ -208,6 +225,69 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }) {
     return getStateOf<StatusResponse>(
       request: () => _apiService.georeference(request.client),
+    );
+  }
+
+  @override
+  Future<DataState<StatusResponse>> sendFCMToken({
+    required SendTokenRequest request,
+  }) {
+    return getStateOf<StatusResponse>(
+      request: () => _apiService.sendFCMToken(request.user_id,request.fcm_token),
+    );
+  }
+
+  @override
+  Future<DataState<PredictionResponse>> prediction({
+    required PredictionRequest request,
+  }) {
+    return getStateOf<PredictionResponse>(
+      request: () => _apiService.prediction(request),
+    );
+  }
+
+  @override
+  Future<DataState<HistoryOrderSavedResponse>> historyOrderSaved({
+    required HistoryOrderSavedRequest request,
+  }) {
+    return getStateOf<HistoryOrderSavedResponse>(
+      request: () => _apiService.historyOrderSave(request),
+    );
+  }
+
+  @override
+  Future<DataState<HistoryOrderUpdatedResponse>> historyOrderUpdated({
+    required HistoryOrderUpdatedRequest request,
+  }) {
+    return getStateOf<HistoryOrderUpdatedResponse>(
+      request: () => _apiService.historyOrderUpdate(request),
+    );
+  }
+
+  @override
+  Future<DataState<RoutingResponse>> routing({
+    required RoutingRequest request,
+  }) {
+    return getStateOf<RoutingResponse>(
+      request: () => _apiService.routing(request),
+    );
+  }
+
+  @override
+  Future<DataState<StatusResponse>> locations({
+    required LocationsRequest request,
+  }) {
+    return getStateOf<StatusResponse>(
+      request: () => _apiService.locations(request),
+    );
+  }
+
+  @override
+  Future<DataState<StatusResponse>> reason({
+    required ReasonMRequest request,
+  }) {
+    return getStateOf<StatusResponse>(
+      request: () => _apiService.reasonsM(request.news),
     );
   }
 

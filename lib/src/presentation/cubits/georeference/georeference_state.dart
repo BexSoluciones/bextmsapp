@@ -1,11 +1,13 @@
 part of 'georeference_cubit.dart';
 
-abstract class GeoreferenceState {}
+abstract class GeoReferenceState {}
 
-class GeoreferenceLoading extends GeoreferenceState {}
+class GeoReferenceInitial extends GeoReferenceState {}
 
-class GeoreferenceSuccess extends GeoreferenceState {}
+class GeoReferenceLoading extends GeoReferenceState {}
 
-class GeoreferenceFinished extends GeoreferenceState {}
+class GeoReferenceSuccess extends GeoReferenceState {}
 
-class GeoreferenceFailed extends GeoreferenceState {}
+class GeoReferenceFinished extends GeoReferenceState {}
+
+class GeoReferenceFailed extends GeoReferenceState {}

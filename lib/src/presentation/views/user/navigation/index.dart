@@ -162,19 +162,20 @@ class _NavigationScreenState extends State<NavigationView> {
     final Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      bottomNavigationBar: size.width > 950
-          ? null
-          : NavigationBar(
-              backgroundColor:
-                  Theme.of(context).navigationBarTheme.backgroundColor,
-              onDestinationSelected: _onDestinationSelected,
-              selectedIndex: currentPageIndex,
-              destinations: _destinations,
-              labelBehavior: MediaQuery.of(context).size.width > 450
-                  ? null
-                  : NavigationDestinationLabelBehavior.alwaysHide,
-              height: 70,
-            ),
+      //TODO:: [Heider Zapa uncomment y verify logic work]
+      // bottomNavigationBar: size.width > 950
+      //     ? null
+      //     : NavigationBar(
+      //         backgroundColor:
+      //             Theme.of(context).navigationBarTheme.backgroundColor,
+      //         onDestinationSelected: _onDestinationSelected,
+      //         selectedIndex: currentPageIndex,
+      //         destinations: _destinations,
+      //         labelBehavior: MediaQuery.of(context).size.width > 450
+      //             ? null
+      //             : NavigationDestinationLabelBehavior.alwaysHide,
+      //         height: 70,
+      //       ),
       resizeToAvoidBottomInset: false,
       body: Row(
         children: [

@@ -11,12 +11,13 @@ abstract class NavigationState extends Equatable {
   final List<LatLng>? kWorksList;
   final List<Map>? carouselData;
   final List<LayerMoodle>? model;
+  List<Polyline>? Polylines = [];
   final int pageIndex;
 
   final bool isLoadingFullScreenNavigation;
   final bool isLoadingPosition;
 
-  const NavigationState(
+  NavigationState(
       {this.works = const [],
       this.isLoadingFullScreenNavigation = false,
       this.isLoadingPosition = false,
@@ -28,6 +29,7 @@ abstract class NavigationState extends Equatable {
       this.kWorksList,
       this.carouselData,
       this.model,
+        this.Polylines,
       this.pageIndex = 0,
       this.error});
 
@@ -44,21 +46,22 @@ abstract class NavigationState extends Equatable {
         kWorksList,
         carouselData,
         model,
+        Polylines,
         pageIndex,
         error
       ];
 }
 
 class NavigationLoading extends NavigationState {
-  const NavigationLoading();
+  NavigationLoading();
 }
 
 class NavigationLoadingMap extends NavigationState {
-  const NavigationLoadingMap();
+   NavigationLoadingMap();
 }
 
 class NavigationSuccess extends NavigationState {
-  const NavigationSuccess(
+   NavigationSuccess(
       {super.works,
       super.isLoadingFullScreenNavigation,
       super.isLoadingPosition,
@@ -69,10 +72,11 @@ class NavigationSuccess extends NavigationState {
       super.rotation,
       super.kWorksList,
       super.carouselData,
+        super.Polylines,
       super.pageIndex,
       super.model});
 }
 
 class NavigationFailed extends NavigationState {
-  const NavigationFailed({super.error});
+   NavigationFailed({super.error});
 }

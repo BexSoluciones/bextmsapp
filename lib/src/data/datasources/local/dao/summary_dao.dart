@@ -14,6 +14,16 @@ class SummaryDao {
     return summaries;
   }
 
+  List<SummaryReport> parseSummariesReport(
+      List<Map<String, dynamic>> summaryList) {
+    final summaries = <SummaryReport>[];
+    summaryList.forEach((summaryMap) {
+      final summary = SummaryReport.fromJson(summaryMap);
+      summaries.add(summary);
+    });
+    return summaries;
+  }
+
   Future<List<Summary>> getAllSummariesByOrderNumber(int workId) async {
     final db = await _appDatabase.streamDatabase;
     var summaryList = await db!.rawQuery(''' 
@@ -69,6 +79,83 @@ class SummaryDao {
             GROUP BY $tableSummaries.${SummaryFields.idPacking}, $tableSummaries.${SummaryFields.packing}
             ''');
     return parseSummaries(summaryList);
+  }
+
+  Future<List<SummaryReport>> getSummaryReportsWithReasonOrRedelivery(
+      String orderNumber) async {
+    final db = await _appDatabase.streamDatabase;
+    final summaryList = await db!.rawQuery('''
+    SELECT  $tableSummaries.* ,
+    CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
+    THEN 'REDESPACHO'
+    ELSE transactions.reason
+    END AS reason
+    FROM summaries
+    INNER JOIN transactions ON (transactions.order_number = summaries.order_number AND transactions.work_id = summaries.work_id AND transactions.`status` = 'respawn')
+    WHERE summaries.order_number = $orderNumber
+    GROUP BY summaries.name_item
+   ORDER BY summaries.id ASC;
+  ''');
+
+    final parsedSummaries = parseSummariesReport(summaryList);
+    return parsedSummaries;
+  }
+
+  Future<List<SummaryReport>> getSummaryReportsWithReturnOrRedelivery(String orderNumber) async {
+    final db = await _appDatabase.streamDatabase;
+    final summaryList = await db!.rawQuery('''
+    SELECT  $tableSummaries.* ,
+    CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
+    THEN 'RECHAZADO'
+    ELSE transactions.reason
+    END AS reason
+    FROM summaries
+    INNER JOIN transactions ON (transactions.order_number = summaries.order_number AND transactions.work_id = summaries.work_id AND transactions.`status` = 'reject')
+    WHERE summaries.order_number = $orderNumber
+    GROUP BY summaries.name_item
+   ORDER BY summaries.id ASC;
+  ''');
+
+    final parsedSummaries = parseSummariesReport(summaryList);
+    return parsedSummaries;
+  }
+
+  Future<List<SummaryReport>> getSummaryReportsWithDelivery(String orderNumber) async {
+    final db = await _appDatabase.streamDatabase;
+    final summaryList = await db!.rawQuery('''
+    SELECT $tableSummaries.*, COALESCE(MAX($tableTransactions.${TransactionFields.reason}), 'ENTREGADO') AS reason
+    FROM $tableSummaries
+    LEFT JOIN $tableTransactions ON $tableTransactions.${TransactionFields.workId} = $tableSummaries.${SummaryReportFields.workId} AND $tableTransactions.${TransactionFields.orderNumber} = $tableSummaries.${SummaryReportFields.orderNumber} AND $tableTransactions.${TransactionFields.summaryId} = $tableSummaries.${SummaryFields.id}
+    WHERE $tableSummaries.${SummaryReportFields.orderNumber} = ? 
+    GROUP BY $tableSummaries.${SummaryFields.id}
+    ORDER BY ${SummaryFields.id} ASC
+  ''', [orderNumber]);
+
+    final parsedSummaries = parseSummariesReport(summaryList);
+    return parsedSummaries;
+  }
+
+
+  Future<double> countTotalRespawnWorksByWorkcode(String workcode,String reason) async {
+    final db = await _appDatabase.streamDatabase;
+
+    var summaryList = await db!.rawQuery('''
+    SELECT $tableSummaries.*, SUM($tableSummaries.${SummaryFields.grandTotal}) as ${SummaryFields.grandTotal}, COUNT($tableSummaries.${SummaryFields.coditem}) AS count 
+    FROM $tableSummaries 
+    INNER JOIN $tableWorks ON $tableWorks.${WorkFields.id} = $tableSummaries.${SummaryFields.workId}
+    INNER JOIN ${t.tableTransactions} ON ${t.tableTransactions}.${t.TransactionFields.workId} = $tableWorks.${WorkFields.id}
+    WHERE ${t.tableTransactions}.${t.TransactionFields.status} = '$reason'
+    AND $tableWorks.${WorkFields.workcode} = "$workcode"
+    GROUP BY $tableSummaries.${SummaryFields.orderNumber}
+  ''');
+
+    var summaries = parseSummaries(summaryList);
+    var sum = 0.0;
+
+    for (var value in summaries) {
+      sum += value.grandTotal;
+    }
+    return sum;
   }
 
   Future<bool> resetCantSummaries(int workId, String orderNumber) async {
@@ -143,6 +230,16 @@ class SummaryDao {
     await batch.commit(noResult: true);
 
     return Future.value();
+  }
+
+  Future<int> deleteSummariesByWorkcode(String workcode) async {
+    final db = await _appDatabase.streamDatabase;
+    return db!.rawDelete('''
+      DELETE FROM summaries WHERE id IN (
+        SELECT summaries.id FROM summaries INNER JOIN works ON works.id = summaries.work_id
+        and works.workcode = ?
+      )
+     ''', [workcode]);
   }
 
   Future<void> emptySummaries() async {

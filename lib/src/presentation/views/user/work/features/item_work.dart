@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,8 +18,9 @@ import '../../../../../services/navigation.dart';
 final NavigationService _navigationService = locator<NavigationService>();
 
 class ItemWork extends StatefulWidget {
-  const ItemWork({Key? key, required this.work}) : super(key: key);
+  const ItemWork({Key? key, required this.index, required this.work}) : super(key: key);
 
+  final int index;
   final Work work;
   @override
   ItemWorkState createState() => ItemWorkState();
@@ -45,6 +47,7 @@ class ItemWorkState extends State<ItemWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
     return BlocBuilder<WorkCubit, WorkState>(
         key: ValueKey(widget.work.id),
         builder: (context, state) {
@@ -54,7 +57,10 @@ class ItemWorkState extends State<ItemWork> {
               child: Material(
                   child: Ink(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: ListTile(
@@ -65,9 +71,16 @@ class ItemWorkState extends State<ItemWork> {
                       onTap: null,
                       child: CircleAvatar(
                           backgroundColor:
-                              Colors.primaries[widget.work.color ?? 1],
-                          child: Text('${widget.work.order != null ? widget.work.order! + 1 : 1 }'))),
-                  onTap: () => _navigationService.goTo(summaryRoute,
+                              Colors.primaries[widget.work.color ?? 5],
+                          child: Text(
+                            '${widget.work.order != null ? widget.work.order! + 1 : 1}',
+                            textScaler:
+                                TextScaler.linear(calculatedTextScaleFactor),
+                            style: TextStyle(
+                                color:
+                                    Theme.of(context).colorScheme.onSecondary),
+                          ))),
+                  onTap: () => _navigationService.goTo(AppRoutes.summary,
                       arguments: SummaryArgument(work: widget.work)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
@@ -86,13 +99,19 @@ class ItemWorkState extends State<ItemWork> {
                         '${widget.work.address}',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 14),
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.scrim),
                       )),
                       Row(
                         children: [
-                          Icon(Icons.move_to_inbox, color: Colors.brown[300]),
+                          const Icon(Icons.move_to_inbox, color: Colors.brown),
                           Text(widget.work.count.toString(),
-                              style: const TextStyle(fontSize: 14))
+                              textScaler:
+                                  TextScaler.linear(calculatedTextScaleFactor),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.scrim))
                         ],
                       )
                     ],

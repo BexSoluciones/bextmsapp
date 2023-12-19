@@ -67,7 +67,7 @@ class PartialCubit extends BaseCubit<PartialState, List<ReasonProduct>?> {
       } else {
         arguments.summaries = state.summaries;
         arguments.r = state.products;
-        _navigationService.goTo(collectionRoute, arguments: arguments);
+        _navigationService.goTo(AppRoutes.collection, arguments: arguments);
       }
     });
   }

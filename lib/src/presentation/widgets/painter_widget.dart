@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -41,6 +42,7 @@ class TouchControl extends StatefulWidget {
 List<OffsetDraw?> _points = [];
 
 class TouchControlState extends State<TouchControl> {
+  final helperFunctions = HelperFunctions();
   double xPos = 0.0;
   double yPos = 0.0;
   ByteData? imgBytes;
@@ -99,63 +101,65 @@ class TouchControlState extends State<TouchControl> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _points = <OffsetDraw>[];
-                    imgBytes = null;
-                  });
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: const [
-                    Text('LIMPIAR', style: TextStyle(fontSize: 20)),
-                    Icon(
-                      Icons.edit_off,
-                      color: kPrimaryColor,
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
-          imgBytes != null
-              ? Center(
-                  child: Image.memory(
-                  Uint8List.view(imgBytes!.buffer),
-                  width: widget.width,
-                  height: widget.height - 220,
-                ))
-              : ConstrainedBox(
-                  constraints: BoxConstraints.expand(
-                      height: widget.height - 220, width: widget.width),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onPanDown: _handlePanDown,
-                    onPanUpdate: _handlePanUpdate,
-                    onPanStart: _handlePanStart,
-                    onPanEnd: _handlePanEnd,
-                    child: CustomPaint(
-                      size: Size(xPos, yPos),
-                      painter:
-                          TouchControlPainter(xPos, yPos, _points, context),
+    return SingleChildScrollView(
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _points = <OffsetDraw>[];
+                      imgBytes = null;
+                    });
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text('LIMPIAR', style: TextStyle(fontSize: 20)),
+                      Icon(
+                        Icons.edit_off,
+                        color: kPrimaryColor,
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+            imgBytes != null
+                ? Center(
+                    child: Image.memory(
+                    Uint8List.view(imgBytes!.buffer),
+                    width: widget.width,
+                    height: widget.height - 220,
+                  ))
+                : ConstrainedBox(
+                    constraints: BoxConstraints.expand(
+                        height: widget.height - 220, width: widget.width),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onPanDown: _handlePanDown,
+                      onPanUpdate: _handlePanUpdate,
+                      onPanStart: _handlePanStart,
+                      onPanEnd: _handlePanEnd,
+                      child: CustomPaint(
+                        size: Size(xPos, yPos),
+                        painter:
+                            TouchControlPainter(xPos, yPos, _points, context),
+                      ),
                     ),
                   ),
-                ),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: DefaultButton(
-                  widget: const Text('Confirmar',
-                      style: TextStyle(color: Colors.white, fontSize: 20)),
-                  press: saveImageFirm))
-        ]);
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: DefaultButton(
+                    widget: const Text('Confirmar',
+                        style: TextStyle(color: Colors.white, fontSize: 20)),
+                    press: saveImageFirm))
+          ]),
+    );
   }
 
   Future<void> generateImage() async {
@@ -197,7 +201,7 @@ class TouchControlState extends State<TouchControl> {
   void saveImageFirm() async {
     await generateImage().then((_) {
       if (imgBytes != null) {
-        // helperFunctions.saveFirm('firm-${widget.orderNumber}', 'firm-${widget.orderNumber}', imgBytes!);
+        helperFunctions.saveFirm('firm-${widget.orderNumber}', 'firm-${widget.orderNumber}', imgBytes!);
       }
     }).catchError((onError) {
       if (kDebugMode) {

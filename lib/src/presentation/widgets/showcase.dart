@@ -58,7 +58,7 @@ class _BuildShowcaseIconButtonState extends State<BuildShowcaseIconButton> {
       description: widget.description,
       child: IconButton(
         onPressed: widget.onPressed,
-        icon: Icon(widget.iconData, size: 35),
+        icon: Icon(widget.iconData, size: 35,color: Theme.of(context).colorScheme.shadow),
       ),
     );
   }
@@ -103,7 +103,7 @@ Widget buildMapShowcase(BuildContext context, Work work, GlobalKey three) {
           );
         }
       },
-      icon: const Icon(Icons.directions, size: 35),
+      icon:  Icon(Icons.directions, size: 35,color: Theme.of(context).colorScheme.shadow),
     ),
   );
 }
@@ -134,7 +134,7 @@ Widget buildPublishShowcase(GlobalKey four, int summaryId) {
     onPressed: () {
       issuesBloc.add(GetIssuesList(
           currentStatus: 'summary', workId: null, summaryId: summaryId));
-      navigationService.goTo(issueRoute);
+      navigationService.goTo(AppRoutes.issue);
     },
   );
 }

@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -18,12 +19,6 @@ import '../../../../widgets/skeleton_loader_widget.dart';
 
 //extensions
 import '../../../../../utils/extensions/scroll_controller_extension.dart';
-
-//services
-import '../../../../../locator.dart';
-import '../../../../../services/storage.dart';
-
-final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class ListViewWork extends StatefulWidget {
   const ListViewWork({Key? key, required this.workcode, required this.six})
@@ -58,6 +53,8 @@ class ListViewWorkState extends State<ListViewWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(18);
     final workCubit = BlocProvider.of<WorkCubit>(context);
     final scrollController = ScrollController();
 
@@ -71,7 +68,7 @@ class ListViewWorkState extends State<ListViewWork> {
           return const SkeletonLoading(cant: 10);
         case WorkSuccess:
           return _buildWork(scrollController, widget.workcode, state.works,
-              state.noMoreData);
+              state.noMoreData, calculatedTextScaleFactor, calculatedFon);
         default:
           return const SizedBox();
       }
@@ -79,11 +76,12 @@ class ListViewWorkState extends State<ListViewWork> {
   }
 
   Widget _buildWork(
-    ScrollController scrollController,
-    String workcode,
-    List<Work> works,
-    bool noMoreData,
-  ) {
+      ScrollController scrollController,
+      String workcode,
+      List<Work> works,
+      bool noMoreData,
+      double calculatedTextScaleFactor,
+      double calculatedFon) {
     return Padding(
       padding: const EdgeInsets.all(kDefaultPadding),
       child: CustomScrollView(
@@ -96,8 +94,11 @@ class ListViewWorkState extends State<ListViewWork> {
                   width: double.infinity,
                   child: Center(
                       child: Text('SERVICIO: $workcode',
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold))))),
+                          textScaler:
+                              TextScaler.linear(calculatedTextScaleFactor),
+                          style: TextStyle(
+                              fontSize: calculatedFon,
+                              fontWeight: FontWeight.bold))))),
           buildStaticBody(works),
           if (!noMoreData)
             const SliverToBoxAdapter(
@@ -128,9 +129,9 @@ class ListViewWorkState extends State<ListViewWork> {
           (context, index) {
             final work = works[index];
             if (index == 0) {
-              return showCaseClientTile(context, work);
+              return showCaseClientTile(context, work, index);
             } else {
-              return ItemWork(work: work);
+              return ItemWork(index: index, work: work);
             }
           },
           childCount: works.length,
@@ -139,11 +140,11 @@ class ListViewWorkState extends State<ListViewWork> {
     }
   }
 
-  Widget showCaseClientTile(BuildContext context, work) {
+  Widget showCaseClientTile(BuildContext context, work, index) {
     return Showcase(
         key: widget.six,
         disableMovingAnimation: true,
         description: 'Este en tu primer cliente, click para ver sus facturas!',
-        child: ItemWork(work: work));
+        child: ItemWork(index: index, work: work));
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
 //services
@@ -19,7 +20,6 @@ class Logging extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
-      print(options.baseUrl);
       print('REQUEST[${options.method}] => PATH: ${options.path}');
     }
     try {
@@ -37,8 +37,6 @@ class Logging extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-
-    print(response.statusCode);
     if (kDebugMode) {
       print(
         'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',
@@ -48,7 +46,7 @@ class Logging extends Interceptor {
   }
 
   @override
-  void onError(DioError err, ErrorInterceptorHandler handler) async {
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (_shouldRetryOnHttpException(err)) {
       try {
         handler.resolve(await DioHttpRequestRetrier(dio: dio)
@@ -56,16 +54,17 @@ class Logging extends Interceptor {
             .catchError((e) {
           handler.next(err);
         }));
-      } catch (e) {
+      } catch (e,stackTrace) {
         handler.next(err);
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
     } else {
       handler.next(err);
     }
   }
 
-  bool _shouldRetryOnHttpException(DioError err) {
-    return err.type == DioErrorType.unknown &&
+  bool _shouldRetryOnHttpException(DioException err) {
+    return err.type == DioExceptionType.unknown &&
         ((err.error is HttpException &&
             err.message!.contains(
                 'Connection closed before full header was received')));

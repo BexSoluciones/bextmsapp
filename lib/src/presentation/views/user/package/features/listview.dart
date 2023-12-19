@@ -9,7 +9,6 @@ import '../../../../../domain/models/arguments.dart';
 //feature
 import 'item.dart';
 
-
 class ListViewPackage extends StatefulWidget {
   const ListViewPackage({Key? key, required this.arguments, required this.two})
       : super(key: key);

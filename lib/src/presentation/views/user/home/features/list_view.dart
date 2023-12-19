@@ -23,14 +23,15 @@ class HomeListView extends StatefulWidget {
 }
 
 class _HomeListViewState extends State<HomeListView> {
-
   late HomeCubit homeCubit;
 
   @override
   void initState() {
     homeCubit = BlocProvider.of<HomeCubit>(context);
+    homeCubit.getAllWorks();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, HomeState>(
@@ -57,29 +58,25 @@ class _HomeListViewState extends State<HomeListView> {
       separatorBuilder: (context, index) => const SizedBox(height: 16.0),
       itemBuilder: (context, index) {
         final work = works[index];
-        if (index == 0) {
-          return showCaseServiceTile(context, work);
-        } else {
-          if (work.active == true && work.status != 'complete') {
-            return ItemWork(work: work);
+        if (work.active == true && work.status != 'complete') {
+          if (index == 0) {
+            return showCaseServiceTile(context, work);
           } else {
-            return Container();
+            return ItemWork(work: work);
           }
+        } else {
+          return Container();
         }
       },
     );
   }
 
   Widget showCaseServiceTile(BuildContext context, Work work) {
-    if (work.active == true && work.status != 'complete') {
-      return Showcase(
-          key: widget.five,
-          disableMovingAnimation: true,
-          description:
-              'Este en tu primera planilla, click para ver sus clientes!',
-          child: ItemWork(work: work));
-    } else {
-      return Container();
-    }
+    return Showcase(
+        key: widget.five,
+        disableMovingAnimation: true,
+        description:
+            'Este en tu primera planilla, click para ver sus clientes!',
+        child: ItemWork(work: work));
   }
 }

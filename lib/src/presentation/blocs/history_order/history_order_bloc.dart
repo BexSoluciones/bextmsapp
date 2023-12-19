@@ -48,7 +48,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
   ) async {
     if (_storageService.getBool('${event.work.workcode}-oneOrMoreFinished') ==
         true) {
-      await _navigationService.goTo(workRoute,
+      await _navigationService.goTo(AppRoutes.work,
           arguments: WorkArgument(
             work: event.work,
           ));
@@ -57,7 +57,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
     emit(HistoryOrderLoading());
 
     historyOrder = await _databaseRepository.getHistoryOrder(
-        event.work.workcode!, event.work.zoneId!);
+        event.work.workcode!, event.work.zoneId ?? 0);
 
     if (historyOrder != null) {
       emit(HistoryOrderShow(historyOrder: historyOrder));
@@ -66,11 +66,11 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
       showAgain = _storageService.getBool('${event.work.workcode}-showAgain');
 
       (historyOrder != null && showAgain == false)
-          ? await _navigationService.goTo(historyRoute, arguments: historyOrder)
-          : await _navigationService.goTo(workRoute,
+          ? await _navigationService.goTo(AppRoutes.history, arguments: historyOrder)
+          : await _navigationService.goTo(AppRoutes.work,
               arguments: WorkArgument(work: event.work));
     } else {
-      await _navigationService.goTo(workRoute,
+      await _navigationService.goTo(AppRoutes.work,
           arguments: WorkArgument(work: event.work));
 
       emit(HistoryOrderError(error: 'Error obteniendo el historico'));
@@ -89,7 +89,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
 
     emit(HistoryOrderChanged(historyOrder: historyOrder));
 
-    await _navigationService.goTo(workRoute,
+    await _navigationService.goTo(AppRoutes.work,
         arguments: WorkArgument(work: event.work));
   }
 
@@ -100,7 +100,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
     var processingQueue = ProcessingQueue(
       body: jsonEncode({'workcode': workcode, 'history_id': historyId}),
       task: 'incomplete',
-      code: 'SDAJBVKJAD',
+      code: 'post_new_routing',
       createdAt: now(),
       updatedAt: now(),
     );
@@ -111,7 +111,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
     processingQueue = ProcessingQueue(
         body: jsonEncode({'workcode': workcode, 'count': 1}),
         task: 'incomplete',
-        code: '90QQOINCQW',
+        code: 'update_history_order',
         createdAt: now(),
         updatedAt: now());
 

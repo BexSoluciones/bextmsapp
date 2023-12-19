@@ -40,6 +40,14 @@ class PhotoDao {
     return _appDatabase.update(tablePhotos, photo.toJson(), 'id', photo.id!);
   }
 
+  Future<int> deletePhoto(Photo photo){
+    return _appDatabase.delete(tablePhotos, 'id', photo.id!);
+  }
+
+  Future<int> deleteAll(int photoId){
+    return _appDatabase.delete(tablePhotos, 'id', photoId);
+  }
+
   Future<void> insertPhotos(List<Photo> photos) async {
     final db = await _appDatabase.streamDatabase;
     var batch = db!.batch();

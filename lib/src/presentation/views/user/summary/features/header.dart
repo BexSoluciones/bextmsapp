@@ -19,97 +19,99 @@ class HeaderSummary extends StatelessWidget {
     return SizedBox(
       // color: Theme.of(context).colorScheme.primary,
       width: size.width,
-      height: size.height / 3.8,
+      height: size.height / 4.5,
       child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: kDefaultPadding),
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      const TextSpan(
-                        text: 'SERVICIO: ',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(
-                          text: arguments.work.workcode,
-                          style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      const TextSpan(
-                        text: 'NIT: ',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(
-                          text: arguments.work.numberCustomer,
-                          style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  arguments.work.customer!,
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal),
-                ),
-                const SizedBox(height: 10),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      const TextSpan(
-                        text: 'DIR: ',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(
-                          text: ' ${arguments.work.address}',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                arguments.work.cellphone != null
-                    ? Text.rich(
+          child: SingleChildScrollView(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text.rich(
+                    TextSpan(
+                      children: [
                         TextSpan(
-                          children: [
-                            const TextSpan(
-                              text: 'CEL: ',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            TextSpan(
-                                text: arguments.work.cellphone,
-                                style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.normal)),
-                          ],
+                          text: 'SERVICIO: ',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                         ),
-                      )
-                    : Container(),
-                arguments.work.cellphone != null
-                    ? const SizedBox(height: 10)
-                    : Container(),
-              ],
-            ),
+                        TextSpan(
+                            text: arguments.work.workcode,
+                            style:  TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'NIT: ',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                        ),
+                        TextSpan(
+                            text: arguments.work.numberCustomer,
+                            style:  TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    arguments.work.customer!,
+                    style:  TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer),
+                  ),
+                  const SizedBox(height: 10),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                         TextSpan(
+                          text: 'DIR: ',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                        ),
+                        TextSpan(
+                            text: ' ${arguments.work.address}',
+                            style:  TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  arguments.work.cellphone != null
+                      ? Text.rich(
+                          TextSpan(
+                            children: [
+                               TextSpan(
+                                text: 'CEL: ',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                              ),
+                              TextSpan(
+                                  text: arguments.work.cellphone,
+                                  style:  TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                            ],
+                          ),
+                        )
+                      : Container(),
+                  arguments.work.cellphone != null
+                      ? const SizedBox(height: 10)
+                      : Container(),
+                ],
+              ),
+          ),
           ),
     );
   }

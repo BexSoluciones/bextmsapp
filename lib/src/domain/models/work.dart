@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'summary.dart';
+import 'warehouse.dart';
 
 const String tableWorks = 'works';
 
@@ -33,7 +34,7 @@ class WorkFields {
     status,
     duration,
     distance,
-    geometry,
+    //geometry,
     zoneId,
     warehouseId,
     createdAt,
@@ -70,7 +71,7 @@ class WorkFields {
   static const String active = 'active';
   static const String duration = 'duration';
   static const String distance = 'distance';
-  static const String geometry = 'geometry';
+  //static const String geometry = 'geometry';
   static const String zoneId = 'zone_id';
   static const String warehouseId = 'warehouse_id';
   static const String createdAt = 'created_at';
@@ -83,14 +84,22 @@ class WorkAdditional {
     required this.orderNumber,
     required this.totalSummary,
     required this.totalPayment,
-    this.status
+    this.summary,
+    this.status,
+    this.type,
+    this.latitude,
+    this.longitude
   });
 
   final Work work;
   final String orderNumber;
+  final Summary? summary;
   final double totalSummary;
   final double totalPayment;
   final String? status;
+  final String? type;
+  final double? latitude;
+  final double? longitude;
 }
 
 class WorkTypes {
@@ -140,7 +149,7 @@ class Work {
         this.status,
         this.distance,
         this.duration,
-        this.geometry,
+        //this.geometry,
         this.right,
         this.left,
         this.hasCompleted,
@@ -226,7 +235,7 @@ class Work {
   String? status;
   String? distance;
   String? duration;
-  String? geometry;
+  //String? geometry;
   String? createdAt;
   String? updatedAt;
   int? right;
@@ -235,6 +244,7 @@ class Work {
   int? hasCompleted;
   List<Summary>? summaries;
   int? warehouseId;
+  Warehouse? warehouse;
 
   // ignore: sort_constructors_first
   Work.fromJson(Map<String, dynamic> json) {
@@ -274,7 +284,7 @@ class Work {
     status = json['status'];
     distance = json['distance'];
     duration = json['duration'];
-    geometry = json['geometry'];
+    //geometry = json['geometry'];
     right = json['right'];
     left = json['left'];
     hasCompleted = json['has_completed'];
@@ -284,6 +294,9 @@ class Work {
     warehouseId = json['warehouse_id'];
     if(json['summaries'] != null){
       summaries =  json['summaries'].map<Summary>((e) => Summary.fromJson(e)).toList();
+    }
+    if(json['warehouse'] != null ){
+      warehouse = Warehouse.fromJson(json['warehouse']);
     }
 
   }
@@ -320,7 +333,7 @@ class Work {
     data['active'] = active != null && active! ? 1 : 0;
     data['distance'] = distance;
     data['duration'] = duration;
-    data['geometry'] = geometry;
+    //data['geometry'] = geometry;
     data['zone_id'] = zoneId;
     data['warehouse_id'] = warehouseId;
     data['created_at'] = createdAt;

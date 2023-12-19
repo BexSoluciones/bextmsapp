@@ -1,6 +1,7 @@
 import 'dart:io' show HttpStatus;
 
 import 'package:dio/dio.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:meta/meta.dart';
 
 import '../../../utils/resources/data_state.dart';
@@ -16,13 +17,14 @@ abstract class BaseApiRepository {
       if (httpResponse.statusCode == HttpStatus.ok || httpResponse.statusCode == HttpStatus.created) {
         return DataSuccess(httpResponse.data as T);
       } else {
-        throw DioError(
+        throw DioException(
           response: httpResponse,
           requestOptions: httpResponse.requestOptions,
         );
       }
-    } on DioError catch (error) {
+    } on DioException catch (error,stackTrace) {
       final errorMessage = DioExceptions.fromDioError(error, 'SM-A33G').toString();
+      await FirebaseCrashlytics.instance.recordError(error, stackTrace);
       return DataFailed(errorMessage);
     }
   }

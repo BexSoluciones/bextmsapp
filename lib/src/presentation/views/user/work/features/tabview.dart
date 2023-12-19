@@ -1,11 +1,13 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //cubit
 import '../../../../cubits/work/work_cubit.dart';
 
-class TabViewWork extends StatefulWidget  implements PreferredSizeWidget {
-  const TabViewWork({super.key,  required this.tabController, required this.workcode });
+class TabViewWork extends StatefulWidget implements PreferredSizeWidget {
+  const TabViewWork(
+      {super.key, required this.tabController, required this.workcode});
 
   final TabController tabController;
   final String workcode;
@@ -18,30 +20,43 @@ class TabViewWork extends StatefulWidget  implements PreferredSizeWidget {
 }
 
 class _TabViewWorkState extends State<TabViewWork> {
-
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<WorkCubit, WorkState>(
-      builder: (context, state) {
-        return TabBar(
-          controller: widget.tabController,
-          isScrollable: true,
-          labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
-          tabs: [
-            Tab(
-                text: 'NO VISITADOS (${state.notVisited.length.toString()})',
-                icon: const Icon(Icons.emoji_people)),
-            Tab(
-                text: 'VISITADOS (${state.visited.length.toString()})',
-                icon:
-                const Icon(Icons.nature_people_outlined)),
-            Tab(
-                text: 'NO GEOREFERENCIADOS (${state.notGeoreferenced.length.toString()})',
-                icon: const Icon(Icons.location_off))
-
-          ],
-        );
-      }
-    );
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    return BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
+      return TabBar(
+        controller: widget.tabController,
+        isScrollable: true,
+        labelStyle: TextStyle(
+            fontSize:
+                (calculatedTextScaleFactor > 0 && calculatedTextScaleFactor < 2)
+                    ? 10
+                    : 5),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
+        tabs: [
+          Tab(
+              icon: Icon(Icons.emoji_people,
+                  color: Theme.of(context).colorScheme.shadow),
+              child: Text(
+                'NO VISITADOS (${state.notVisited.length.toString()})',
+                style: TextStyle(color: Theme.of(context).colorScheme.shadow),
+              )),
+          Tab(
+              icon: Icon(Icons.nature_people_outlined,
+                  color: Theme.of(context).colorScheme.shadow),
+              child: Text(
+                'VISITADOS (${state.visited.length.toString()})',
+                style: TextStyle(color: Theme.of(context).colorScheme.shadow),
+              )),
+          Tab(
+              icon: Icon(Icons.location_off,
+                  color: Theme.of(context).colorScheme.shadow),
+              child: Text(
+                'NO GEOREFERENCIADOS (${state.notGeoreferenced.length.toString()})',
+                style: TextStyle(color: Theme.of(context).colorScheme.shadow),
+              ))
+        ],
+      );
+    });
   }
 }

@@ -1,18 +1,39 @@
+import 'dart:convert';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 
+//core
+import '../../../../core/helpers/index.dart';
+
+//blocs
+import '../../blocs/gps/gps_bloc.dart';
+import '../../blocs/processing_queue/processing_queue_bloc.dart';
+
 //domain
+import '../../../domain/models/news.dart';
 import '../../../domain/models/reason.dart';
+import '../../../domain/models/processing_queue.dart';
 import '../../../domain/repositories/database_repository.dart';
+import '../../../domain/abstracts/format_abstract.dart';
+
+//services
+import '../../../locator.dart';
+import '../../../services/storage.dart';
 
 part 'issues_event.dart';
 part 'issues_state.dart';
 
-class IssuesBloc extends Bloc<IssuesEvent, IssuesState> {
+final LocalStorageService _storageService = locator<LocalStorageService>();
 
+class IssuesBloc extends Bloc<IssuesEvent, IssuesState> with FormatDate {
   final DatabaseRepository _databaseRepository;
+  final ProcessingQueueBloc _processingQueueBloc;
+  final GpsBloc gpsBloc;
+  final helperFunctions = HelperFunctions();
 
-  IssuesBloc(this._databaseRepository) : super(IssuesState()) {
+  IssuesBloc(this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
+      : super(IssuesState()) {
     on<GetIssuesList>(_getIssuesList);
     on<GetUserId>(_getUserId);
     on<SelectIssue>(_selectIssue);
@@ -21,6 +42,7 @@ class IssuesBloc extends Bloc<IssuesEvent, IssuesState> {
     on<ChangeObservations>(_changeObservations);
     on<ChangeFirm>(_changeFirm);
     on<ChangePhotos>(_changePhotos);
+    on<DataIssue>(send);
   }
 
   void _getIssuesList(GetIssuesList event, Emitter emit) async {
@@ -100,5 +122,82 @@ class IssuesBloc extends Bloc<IssuesEvent, IssuesState> {
     }).toList();
 
     emit(state.copyWith(issuesList: result));
+  }
+
+  void send(DataIssue event, Emitter emit) async {
+    var location = gpsBloc.state.lastKnownLocation;
+
+    var firmApplication = await helperFunctions.getFirm(
+        'firm-${(state.status == 'work') ? state.workId.toString() + state.codmotvis! : (state.status == 'summary') ? state.selectedSummaryId.toString() + state.codmotvis! : _storageService.getInt('user_id')!.toString() + state.codmotvis!}');
+
+    var images = await helperFunctions.getImages((state.status == 'work')
+        ? state.workId.toString() + state.codmotvis!
+        : (state.status == 'summary')
+            ? state.selectedSummaryId.toString() + state.codmotvis!
+            : _storageService.getInt('user_id')!.toString() + state.codmotvis!);
+
+    var imagesPath = <String>[];
+    var firmApplicationPath = <String>[];
+
+    if (firmApplication != null) {
+      List<int> imageBytes =
+      firmApplication.readAsBytesSync();
+      var base64Image = base64Encode(imageBytes);
+      firmApplicationPath.add(base64Image);
+    }
+
+    if (images.isNotEmpty) {
+      for (var element in images) {
+        List<int> imageBytes = element.readAsBytesSync();
+        var base64Image = base64Encode(imageBytes);
+        imagesPath.add(base64Image);
+      }
+    }
+
+    var news = News(
+        status: state.status!,
+        userId: _storageService.getInt('user_id')!,
+        workId: (state.status == 'summary' || state.status == 'general')
+            ? null
+            : state.workId,
+        summaryId: (state.status == 'work' || state.status == 'general')
+            ? null
+            : state.selectedSummaryId,
+        nommotvis: state.nommotvis!,
+        codmotvis: state.codmotvis!,
+        latitude: location!.latitude.toString(),
+        longitude: location.longitude.toString(),
+        images: imagesPath,
+        firm: firmApplicationPath,
+        observation: state.observations!.text);
+
+     _databaseRepository.insertNews(news);
+
+    var processingQueue = ProcessingQueue(
+        body: jsonEncode(news.toJson()),
+        task: 'incomplete',
+        code: 'store_news',
+        createdAt: now(),
+        updatedAt: now());
+
+    _processingQueueBloc.inAddPq.add(processingQueue);
+    await helperFunctions.deleteImages("");
+    await helperFunctions.deleteFirm('');
+
+    if (news.firm != null) {
+      news.firm = jsonEncode(firmApplicationPath);
+    }
+    if (news.images != null) {
+      news.images = jsonEncode(imagesPath);
+    }
+
+    if (state.selectedIssue?.tipocliente != null &&
+        state.selectedIssue?.tipocliente.toLowerCase() == 'unlock' &&
+        state.selectedIssue!.codmotvis == '01') {
+      _storageService.setBool(
+          '${state.selectedSummaryId}-distance_ignore', true);
+    }
+
+
   }
 }

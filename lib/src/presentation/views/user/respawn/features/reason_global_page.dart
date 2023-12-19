@@ -9,10 +9,10 @@ import 'refused.dart';
 class ReasonsGlobal extends StatefulWidget {
   const ReasonsGlobal(
       {super.key,
-        required this.reasons,
-        required this.context,
-        required this.setState,
-        required this.typeAheadController});
+      required this.reasons,
+      required this.context,
+      required this.setState,
+      required this.typeAheadController});
 
   final List<Reason> reasons;
   final dynamic context, setState;
@@ -23,7 +23,6 @@ class ReasonsGlobal extends StatefulWidget {
 }
 
 class _ReasonsGlobalState extends State<ReasonsGlobal> {
-
   @override
   void setState(fn) {
     if (mounted) {
@@ -41,9 +40,9 @@ class _ReasonsGlobalState extends State<ReasonsGlobal> {
       title: const Text('SELECCIONE UN MOTIVO'),
       subtitle: (widget.typeAheadController.text == '')
           ? Text(
-        'Sin motivo asignado',
-        style: TextStyle(color: Colors.red.shade700),
-      )
+              'Sin motivo asignado',
+              style: TextStyle(color: Colors.red.shade700),
+            )
           : Text(widget.typeAheadController.text),
       trailing: (widget.typeAheadController.text == '')
           ? const Icon(Icons.add)
@@ -54,15 +53,15 @@ class _ReasonsGlobalState extends State<ReasonsGlobal> {
             useSafeArea: true,
             isScrollControlled: true,
             context: widget.context,
-            builder: (BuildContext context) => WillPopScope(
-              onWillPop: () async => true,
-              child: RefusedOrder(
-                reasons: widget.reasons,
-                controllerMotiveItem: widget.typeAheadController,
-                action: 'redespacho',
-                callback: reload,
-              ),
-            ));
+            builder: (BuildContext context) => PopScope(
+                  canPop: true,
+                  child: RefusedOrder(
+                    reasons: widget.reasons,
+                    controllerMotiveItem: widget.typeAheadController,
+                    action: 'redespacho',
+                    callback: reload,
+                  ),
+                ));
       },
     );
   }

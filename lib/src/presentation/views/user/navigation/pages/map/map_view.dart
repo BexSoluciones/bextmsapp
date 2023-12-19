@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -24,7 +23,6 @@ import '../../../../../../domain/models/enterprise_config.dart';
 //widgets
 import '../../../../../widgets/loading_indicator_widget.dart';
 import '../../../../../widgets/lottie_widget.dart';
-import '../../../../../widgets/location_error_widget.dart';
 import '../../features/carousel_card.dart';
 
 //services
@@ -54,7 +52,6 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-
   late NavigationCubit navigationCubit;
   late LocationBloc locationBloc;
   late NetworkBloc networkCubit;
@@ -67,7 +64,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     networkCubit = BlocProvider.of<NetworkBloc>(context);
-    networkCubit.add(NetworkObserve(processingQueueBloc: context.read<ProcessingQueueBloc>()));
+    networkCubit.add(NetworkObserve());
 
     navigationCubit = BlocProvider.of<NavigationCubit>(context);
     navigationCubit.getAllWorksByWorkcode(widget.workcode);
@@ -90,8 +87,7 @@ class _MapPageState extends State<MapPage> {
     navigationCubit.getAllWorksByWorkcode(widget.workcode);
 
     networkCubit = BlocProvider.of<NetworkBloc>(context);
-    networkCubit.add(NetworkObserve(
-        processingQueueBloc: context.read<ProcessingQueueBloc>()));
+    networkCubit.add(NetworkObserve());
     super.didChangeDependencies();
   }
 
@@ -130,10 +126,30 @@ class _MapPageState extends State<MapPage> {
 
   AppBar get buildAppBar => AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => _navigationService.goBack(),
-        ),
-        title: Text('Cientes a visitar: ${navigationCubit.state.works.length}'),
+            icon: const Icon(Icons.arrow_back_ios_new),
+            onPressed: () {
+              _navigationService.goBack();
+              context.read<NavigationCubit>().clean();
+            }),
+      title: BlocBuilder<NavigationCubit, NavigationState>(
+        builder: (context, navigationState) {
+          if (navigationState is NavigationLoading) {
+            // Show loading indicator
+            return const Row(
+              children: [
+                CupertinoActivityIndicator(),
+
+              ],
+            );
+          } else if (navigationState is NavigationSuccess) {
+            // Show client count
+            return Text('Clientes a visitar: ${navigationState.works.length}');
+          } else {
+            // Handle other states or return an empty widget
+            return const SizedBox();
+          }
+        },
+      ),
         actions: [
           Showcase(
               key: widget.one,
@@ -142,11 +158,13 @@ class _MapPageState extends State<MapPage> {
               description:
                   'Ingresa a la navegación completa y deja que te guiemos!',
               child: IconButton(
-                  icon: const Icon(Icons.directions), onPressed: () {
+                  icon: const Icon(Icons.directions),
+                  onPressed: () {
                     var navigationCubit = context.read<NavigationCubit>();
-                    var work = navigationCubit.state.works[navigationCubit.state.pageIndex];
-                context.read<NavigationCubit>().showMaps(context, work);
-              })),
+                    var work = navigationCubit
+                        .state.works[navigationCubit.state.pageIndex];
+                    context.read<NavigationCubit>().showMaps(context, work);
+                  })),
         ],
       );
 
@@ -284,7 +302,10 @@ class _MapPageState extends State<MapPage> {
                               )
                           : NetworkNoRetryTileProvider(),
                     ),
-                    ...state.layer,
+                    //...state.layer,
+                    PolylineLayer(
+                      polylines: state.Polylines,
+                    ),
                     MarkerLayer(
                       markers: state.markers,
                     ),
@@ -299,12 +320,12 @@ class _MapPageState extends State<MapPage> {
             ? CarouselSlider(
                 items: List<Widget>.generate(
                     state.carouselData.length,
-                    (index) => carouselCard(
-                        state.works[index] ?? 999,
-                        state.carouselData[index]['index'],
-                        state.carouselData[index]['distance'],
-                        state.carouselData[index]['duration'],
-                        context)),
+                    (index) => CarouselCard(
+                        work:  state.works[index] ?? 999,
+                        index: state.carouselData[index]['index'],
+                        distance:state.carouselData[index]['distance'],
+                        duration:  state.carouselData[index]['duration'],
+                        context: context)),
                 carouselController: state.buttonCarouselController,
                 options: CarouselOptions(
                   height: 100,

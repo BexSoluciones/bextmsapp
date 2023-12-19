@@ -12,23 +12,28 @@ class ProcessingQueueCardDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     var items = <Widget>[];
 
-    jsonDecode(processingQueue.body).forEach((final String key, final value) {
+    var values = jsonDecode(processingQueue.body);
+
+    if (values is Map<String, dynamic>) {
+      values.forEach((final String key, final value) {
+        items.add(ListTile(
+          title: Text(key),
+          subtitle:
+              value != null ? Text(value.toString()) : const Text('Sin data'),
+        ));
+      });
+    } else if (values is List) {
       items.add(ListTile(
-        title: Text(key),
-        subtitle: value != null ? Text(value.toString()) : const Text('Sin data'),
+        title: Text('localizaciones'),
+        subtitle: Text(values.toString()),
       ));
-    });
+    }
 
     return Scaffold(
       appBar: AppBar(),
-      body: Center(
-        child: ListView(
-          children: items
-        )
-      ),
+      body: Center(child: ListView(children: items)),
     );
   }
 }

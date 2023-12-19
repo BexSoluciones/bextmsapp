@@ -1,4 +1,5 @@
 import 'package:bexdeliveries/src/presentation/blocs/issues/issues_bloc.dart';
+import 'package:bexdeliveries/src/presentation/widgets/drawe.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,7 +32,7 @@ Drawer drawer(BuildContext context, User? user) {
       children: <Widget>[
         UserAccountsDrawerHeader(
           accountName: Text(
-            user != null ? '${user.username} - ${user.name}' : 'No User',
+            user != null ? '${user.name}' : 'No User',
           ),
           accountEmail: Text(
             user != null ? user.email! : 'no-repy@bexsoluciones.com',
@@ -54,12 +55,12 @@ Drawer drawer(BuildContext context, User? user) {
             ),
           ),
         ),
-        _createDrawerItem(
+        createDrawerItem(
             context: context,
             icon: Icons.business,
-            text: _storageService.getString('company_name')!.toUpperCase(),
+            text: _storageService.getString('company')!.toUpperCase(),
             onTap: null),
-        _createDrawerItem(
+        createDrawerItem(
             context: context,
             icon: Icons.help_center,
             text: 'Ver tutorial.',
@@ -71,52 +72,57 @@ Drawer drawer(BuildContext context, User? user) {
               _storageService.setBool('inventory-is-init', false);
               _navigationService.goBack();
             }),
-        _createDrawerItem(
+        createDrawerItem(
             context: context,
             icon: Icons.import_export,
             text: 'Exportar base de datos.',
-            onTap: () => _navigationService.goTo(databaseRoute)),
-        _createDrawerItem(
+            onTap: () => _navigationService.goTo(AppRoutes.database)),
+        createDrawerItem(
             context: context,
             icon: Icons.query_builder,
             text: 'Consultas.',
-            onTap: () => _navigationService.goTo(queryRoute)),
-        _createDrawerItem(
+            onTap: () => _navigationService.goTo(AppRoutes.query)),
+        createDrawerItem(
             context: context,
             icon: Icons.transfer_within_a_station,
             text: 'Transacciones.',
-            onTap: () => _navigationService.goTo(transactionRoute)),
-        _createDrawerItem(
+            onTap: () => _navigationService.goTo(AppRoutes.transaction)),
+        createDrawerItem(
             context: context,
             icon: Icons.warning_rounded,
             text: 'Reportar un problema.',
             onTap: () async {
               issuesBloc.add(GetIssuesList(
                   currentStatus: 'general', summaryId: null, workId: null));
-              await _navigationService.goTo(issueRoute);
+              await _navigationService.goTo(AppRoutes.issue);
             }),
         if (kDebugMode) const Divider(),
         if (kDebugMode) ... [
-          _createDrawerItem(
+          createDrawerItem(
               context: context,
               icon: Icons.queue,
               text: 'Cola de procesamiento.',
-              onTap: () => _navigationService.goTo(processingQueueRoute)),
-          _createDrawerItem(
+              onTap: () => _navigationService.goTo(AppRoutes.processingQueue)),
+          createDrawerItem(
               context: context,
               icon: Icons.location_history,
               text: 'Localizaciones.',
-              onTap: () => _navigationService.goTo(locationsRoute)),
-          _createDrawerItem(
+              onTap: () => _navigationService.goTo(AppRoutes.locations)),
+          createDrawerItem(
               context: context,
               icon: Icons.photo,
               text: 'Fotos.',
-              onTap: () => _navigationService.goTo(photoRoute)),
-          _createDrawerItem(
+              onTap: () => _navigationService.goTo(AppRoutes.photo)),
+          createDrawerItem(
               context: context,
               icon: Icons.notifications,
               text: 'Notificaciones.',
-              onTap: () => _navigationService.goTo(notificationsRoute)),
+              onTap: () => _navigationService.goTo(AppRoutes.notifications)),
+          createDrawerItem(
+              context: context,
+              icon: Icons.list_alt,
+              text: 'Transacciones.',
+              onTap: () => _navigationService.goTo(AppRoutes.transactions)),
         ],
         const Divider(),
         FutureBuilder(
@@ -146,7 +152,7 @@ Widget _createDrawerItem(
   return ListTile(
     title: Row(
       children: <Widget>[
-        Icon(icon),
+        Icon(icon,color: Theme.of(context).colorScheme.outline,),
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Text(text),

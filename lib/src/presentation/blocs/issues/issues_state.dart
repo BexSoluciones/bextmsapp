@@ -77,3 +77,5 @@ class IssuesState {
         images: images ?? this.images,
       );
 }
+
+class IssueStateSuccess extends IssuesState {}

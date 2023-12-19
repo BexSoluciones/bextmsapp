@@ -59,6 +59,10 @@ class ReasonDao {
     return Future.value();
   }
 
+  Future<int> insertNews(News news) async {
+    return _appDatabase.insert(tableNews, news.toJson());
+  }
+
   Future<void> emptyReasons() async {
     final db = await _appDatabase.streamDatabase;
     await db!.delete(tableReasons, where: 'id > 0');

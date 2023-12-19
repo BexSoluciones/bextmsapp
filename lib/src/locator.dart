@@ -1,4 +1,5 @@
 
+import 'package:bexdeliveries/src/services/remote_config.dart';
 import 'package:get_it/get_it.dart';
 import 'package:location_repository/location_repository.dart';
 
@@ -16,9 +17,6 @@ import 'domain/repositories/database_repository.dart';
 //services
 import 'services/storage.dart';
 import 'services/navigation.dart';
-import 'services/location.dart';
-import 'services/isolate.dart';
-import 'services/timer.dart';
 import 'services/notifications.dart';
 import 'services/analytics.dart';
 import 'services/logger.dart';
@@ -38,14 +36,11 @@ Future<void> initializeDependencies() async {
   final notification = await NotificationService.getInstance();
   locator.registerSingleton<NotificationService>(notification!);
 
+  final remoteConfig = await RemoteConfigService.getInstance();
+  locator.registerSingleton<RemoteConfigService>(remoteConfig!);
+
   // final isolate = IsolateService();
   // locator.registerSingleton<IsolateService>(isolate);
-
-  final location = await LocationService.getInstance();
-  locator.registerSingleton<LocationService>(location!);
-
-  final timer = await TimerService.getInstance();
-  locator.registerSingleton<TimerService>(timer!);
 
   final logger = LoggerService();
   locator.registerSingleton<LoggerService>(logger);

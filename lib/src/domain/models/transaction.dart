@@ -50,26 +50,25 @@ class TransactionFields {
 class Transaction {
   Transaction(
       {this.id,
-        required this.workId,
-        this.summaryId,
-        this.orderNumber,
-        this.workcode,
-        required this.status,
-        this.codmotvis,
-        this.reason,
-        this.payments,
-        this.images,
-        this.observation,
-        this.delivery,
-        this.file,
-        this.firm,
-        this.operativeCenter,
-        this.start,
-        this.end,
-        this.latitude,
-        this.longitude,
-        this.historyId
-      });
+      required this.workId,
+      this.summaryId,
+      this.orderNumber,
+      this.workcode,
+      required this.status,
+      this.codmotvis,
+      this.reason,
+      this.payments,
+      this.images,
+      this.observation,
+      this.delivery,
+      this.file,
+      this.firm,
+      this.operativeCenter,
+      this.start,
+      this.end,
+      this.latitude,
+      this.longitude,
+      this.historyId});
 
   Transaction copy({
     int? id,
@@ -92,8 +91,7 @@ class Transaction {
           firm: firm,
           start: start,
           end: end,
-          historyId: historyId
-      );
+          historyId: historyId);
 
   int? id;
   late int workId;
@@ -126,19 +124,21 @@ class Transaction {
     status = json['status'];
     codmotvis = json['codmotvis'];
     reason = json['reason'];
-    if(json['payments'] != null){
+    if (json['payments'] != null) {
       payments = [];
-      if(json['payments'] is String && json['payments'].contains('[]')){
-        jsonDecode(json['payments']).forEach((payment) => payments?.add(Payment.fromJson(payment)));
-      } else if(json['payments'] is List) {
-        json['payments'].forEach((payment) => payments?.add(Payment.fromJson(payment)));
+      if (json['payments'] is String && json['payments'] != 'null') {
+        jsonDecode(json['payments'])
+            .forEach((payment) => payments?.add(Payment.fromJson(payment)));
+      } else if (json['payments'] is List) {
+        json['payments']
+            .forEach((payment) => payments?.add(Payment.fromJson(payment)));
       }
     } else {
       payments = [];
     }
-    if(json['images'] != null) {
+    if (json['images'] != null) {
       images = [];
-      if(json['images'] is String) {
+      if (json['images'] is String) {
         jsonDecode(json['images']).forEach((image) => image);
       } else {
         json['images'].forEach((image) => image);
@@ -160,6 +160,7 @@ class Transaction {
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
+    data['id'] = id;
     data['work_id'] = workId;
     data['summary_id'] = summaryId;
     data['workcode'] = workcode;
@@ -167,7 +168,8 @@ class Transaction {
     data['status'] = status;
     data['codmotvis'] = codmotvis;
     data['reason'] = reason;
-    data['payments'] = payments != null ? jsonEncode(payments!) : jsonEncode([]);
+    data['payments'] =
+        payments != null ? jsonEncode(payments!) : jsonEncode([]);
     data['delivery'] = delivery;
     data['file'] = file;
     data['firm'] = firm;

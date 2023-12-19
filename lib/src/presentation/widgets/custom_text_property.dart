@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomTextProperty {
   Color? color = Colors.black;
-  double? textSize=15.0;
+  double? textSize = 15.0;
   FontWeight? fontWeight = FontWeight.normal;
 
   CustomTextProperty({
@@ -11,16 +11,16 @@ class CustomTextProperty {
     this.fontWeight,
   });
 
-  CustomTextProperty.header1(BuildContext context):
-        fontWeight = FontWeight.bold,
+  CustomTextProperty.header1(BuildContext context)
+      : fontWeight = FontWeight.bold,
         textSize = MediaQuery.of(context).size.height * 0.05;
 
-  CustomTextProperty.header2(BuildContext context):
-        fontWeight = FontWeight.bold,
+  CustomTextProperty.header2(BuildContext context)
+      : fontWeight = FontWeight.bold,
         textSize = MediaQuery.of(context).size.height * 0.04;
 
-  CustomTextProperty.header3(BuildContext context):
-        fontWeight = FontWeight.bold,
+  CustomTextProperty.header3(BuildContext context)
+      : fontWeight = FontWeight.bold,
         textSize = MediaQuery.of(context).size.height * 0.02;
 
   CustomTextProperty copyWith({
@@ -34,5 +34,4 @@ class CustomTextProperty {
       fontWeight: fontWeight ?? fontWeight,
     );
   }
-
 }

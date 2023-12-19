@@ -1,5 +1,7 @@
 import 'dart:async';
-
+import 'package:bexdeliveries/src/config/size.dart';
+import 'package:bexdeliveries/src/domain/models/enterprise_config.dart';
+import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -40,12 +42,22 @@ class HomeViewState extends State<HomeView>
   final GlobalKey five = GlobalKey();
 
   late HomeCubit homeCubit;
+  late GpsBloc gpsBloc;
 
   @override
   void initState() {
+    var storedConfig = _storageService.getObject('config');
+    var enterpriseConfig = EnterpriseConfig.fromMap(storedConfig!);
     startHomeWidget();
     homeCubit = BlocProvider.of<HomeCubit>(context);
+    gpsBloc = BlocProvider.of<GpsBloc>(context);
     homeCubit.getAllWorks();
+    homeCubit.getUser();
+    gpsBloc.startFollowingUser();
+    if (enterpriseConfig.background_location!) {
+      helperFunctions.initLocationService();
+      gpsBloc.startFollowingUser();
+    }
     super.initState();
   }
 
@@ -70,13 +82,14 @@ class HomeViewState extends State<HomeView>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async {
-          return false;
-        },
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(16);
+    return PopScope(
+        canPop: false,
         child: Scaffold(
           drawer: drawer(context, homeCubit.state.user),
           appBar: AppBar(
+            iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
             actions: [
               StatusBar(one: one),
               const VerticalDivider(
@@ -87,9 +100,10 @@ class HomeViewState extends State<HomeView>
               SearchBar(three: three),
               LogoutBar(four: four)
             ],
-            title: const Text(
+            title:  Text(
               'Servicios',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textScaler: TextScaler.linear(calculatedTextScaleFactor),
+              style: TextStyle(fontSize: calculatedFon, fontWeight: FontWeight.bold),
             ),
             notificationPredicate: (ScrollNotification notification) {
               return notification.depth == 1;

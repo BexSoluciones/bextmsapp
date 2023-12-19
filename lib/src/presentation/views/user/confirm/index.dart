@@ -8,17 +8,8 @@ import '../../../cubits/confirm/confirm_cubit.dart';
 //domain
 import '../../../../domain/models/arguments.dart';
 
-//utils
-import '../../../../utils/constants/colors.dart';
-
 //widgets
 import '../../../widgets/default_button_widget.dart';
-
-//services
-import '../../../../locator.dart';
-import '../../../../services/navigation.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
 
 class ConfirmWorkView extends StatefulWidget {
   const ConfirmWorkView({Key? key, required this.arguments}) : super(key: key);
@@ -78,7 +69,7 @@ class ConfirmWorkViewState extends State<ConfirmWorkView> {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: '¿Realmente deseas iniciar \nel servicio ',
+                      text: '¿Realmente deseas iniciar \nel servicio',
                       style:
                           TextStyle(fontSize: 20, color: Colors.grey.shade800),
                     ),

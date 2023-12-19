@@ -1,5 +1,7 @@
 part of '../app_database.dart';
 
+final LocalStorageService _storageService = locator<LocalStorageService>();
+
 class ProcessingQueueDao {
   final AppDatabase _appDatabase;
 
@@ -26,7 +28,12 @@ class ProcessingQueueDao {
     final db = await _appDatabase.streamDatabase;
     final processingQueueList = await db!.query(tableProcessingQueues,
         where: 'task != ? AND code != ? AND code != ? AND code != ?',
-        whereArgs: ['done', 'VNAIANBTLM', 'ASJBVKJDFS', 'AB5A8E10Y3']);
+        whereArgs: [
+          'done',
+          'store_locations',
+          'store_logout',
+          'get_prediction'
+        ]);
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues.length;
   }
@@ -44,7 +51,12 @@ class ProcessingQueueDao {
     final db = await _appDatabase.streamDatabase;
     final processingQueueList = await db!.query(tableProcessingQueues,
         where: 'task = ? AND code != ? AND code != ? AND code != ?',
-        whereArgs: ['incomplete', 'VNAIANBTLM', 'ASJBVKJDFS', 'AB5A8E10Y3']);
+        whereArgs: [
+          'incomplete',
+          'store_locations',
+          'store_logout',
+          'get_prediction'
+        ]);
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues.isNotEmpty;
   }
@@ -60,7 +72,47 @@ class ProcessingQueueDao {
 
   Future<void> emptyProcessingQueue() async {
     final db = await _appDatabase.streamDatabase;
-    await db!.delete(tableProcessingQueues, where: 'code = "VNAIANBTLM"');
+    await db!.delete(tableProcessingQueues, where: 'code = "store_locations"');
+    await db!.delete(tableProcessingQueues, where: 'code = "store_locations"');
     return Future.value();
+  }
+
+  Future<int> deleteProcessingQueueByDays() async {
+    final db = await _appDatabase.streamDatabase;
+    var today = DateTime.now();
+    var limitDaysWork = _storageService.getInt('limit_days_works') ?? 3;
+    var datesToValidate = today.subtract(Duration(days: limitDaysWork));
+    List<Map<String, dynamic>> tasksToDelete;
+
+    var formattedToday = DateTime(today.year, today.month, today.day);
+    var formattedDatesToValidate = DateTime(
+        datesToValidate.year, datesToValidate.month, datesToValidate.day);
+    var formattedTodayStr = formattedToday.toIso8601String().split('T')[0];
+    var formattedDatesToValidateStr =
+        formattedDatesToValidate.toIso8601String().split('T')[0];
+
+    tasksToDelete = await db!.query(
+      tableProcessingQueues,
+      where: 'substr(updated_at, 1, 10) <= ? and task = ?',
+      whereArgs: [formattedDatesToValidateStr, 'done'],
+    );
+
+    for (var task in tasksToDelete) {
+      var createdAt = DateTime.parse(task['updated_at']);
+      var differenceInDays = formattedToday.difference(createdAt).inDays;
+      if (differenceInDays > limitDaysWork) {
+        await db.delete(
+          tableProcessingQueues,
+          where: 'id = ?',
+          whereArgs: [task['id']],
+        );
+      }
+    }
+
+    return await db.delete(
+      tableProcessingQueues,
+      where: 'substr(updated_at, 1, 10) <= ? and task = ?',
+      whereArgs: [formattedDatesToValidateStr, 'done'],
+    );
   }
 }

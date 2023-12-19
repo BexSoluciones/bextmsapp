@@ -57,8 +57,9 @@ class _RespawnViewState extends State<RespawnView> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
+          icon: Icon(Icons.arrow_back_ios_new,color:Theme.of(context).colorScheme.secondaryContainer),
           onPressed: () => _navigationService.goBack(),
         ),
       ),
@@ -67,7 +68,7 @@ class _RespawnViewState extends State<RespawnView> {
           SizedBox(
             height: size.height * 0.25,
             width: size.width,
-            child: HeaderRespawn(arguments: widget.arguments),
+            child: Container(color:Theme.of(context).colorScheme.primary,child: HeaderRespawn(arguments: widget.arguments)),
           ),
           BlocBuilder<RespawnCubit, RespawnState>(builder: (context, state) {
             switch (state.runtimeType) {
@@ -88,7 +89,7 @@ class _RespawnViewState extends State<RespawnView> {
 
   SizedBox buildBody(Size size, RespawnState state) {
     return SizedBox(
-      height: size.height / 1.5,
+      height: size.height / 1.6,
       width: size.width,
       child: Padding(
         padding: const EdgeInsets.all(kDefaultPadding),
@@ -100,7 +101,7 @@ class _RespawnViewState extends State<RespawnView> {
                 color: Theme.of(context)
                     .colorScheme
                     .primaryContainer
-                    .withOpacity(0.7),
+                    .withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: const ListTile(

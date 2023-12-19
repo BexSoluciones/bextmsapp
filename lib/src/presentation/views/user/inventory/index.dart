@@ -80,8 +80,8 @@ class InventoryViewState extends State<InventoryView> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async => false,
+    return PopScope(
+        canPop: false,
         child: BlocBuilder<InventoryCubit, InventoryState>(builder: (context, state) {
           return Scaffold(
               resizeToAvoidBottomInset: true,

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:bexdeliveries/src/domain/models/transaction_validate.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
@@ -5,22 +8,32 @@ import 'package:sqlbrite/sqlbrite.dart';
 import 'package:synchronized/synchronized.dart';
 
 //utils
-import 'package:bexdeliveries/src/utils/constants/strings.dart';
+import '../../../domain/abstracts/format_abstract.dart';
+import '../../../domain/models/confirm.dart';
+import '../../../domain/models/zone.dart';
+import '../../../utils/constants/strings.dart';
 
 //models
-import 'package:bexdeliveries/src/domain/models/work.dart';
-import 'package:bexdeliveries/src/domain/models/warehouse.dart';
-import 'package:bexdeliveries/src/domain/models/summary.dart';
-import 'package:bexdeliveries/src/domain/models/transaction.dart' as t;
-import 'package:bexdeliveries/src/domain/models/transaction_summary.dart';
-import 'package:bexdeliveries/src/domain/models/location.dart';
-import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
-import 'package:bexdeliveries/src/domain/models/reason.dart';
-import 'package:bexdeliveries/src/domain/models/history_order.dart';
-import 'package:bexdeliveries/src/domain/models/photo.dart';
-import 'package:bexdeliveries/src/domain/models/client.dart';
-import 'package:bexdeliveries/src/domain/models/account.dart';
-import 'package:bexdeliveries/src/domain/models/news.dart';
+import '../../../domain/models/work.dart';
+import '../../../domain/models/warehouse.dart';
+import '../../../domain/models/summary.dart';
+import '../../../domain/models/transaction.dart' as t;
+import '../../../domain/models/transaction_summary.dart';
+import '../../../domain/models/location.dart';
+import '../../../domain/models/processing_queue.dart';
+import '../../../domain/models/reason.dart';
+import '../../../domain/models/history_order.dart';
+import '../../../domain/models/photo.dart';
+import '../../../domain/models/client.dart';
+import '../../../domain/models/account.dart';
+import '../../../domain/models/news.dart';
+import '../../../domain/models/notification.dart';
+import '../../../domain/models/summary_report.dart';
+import '../../../domain/models/transaction.dart';
+
+//services
+import '../../../locator.dart';
+import '../../../services/storage.dart';
 
 //daos
 part '../local/dao/work_dao.dart';
@@ -36,6 +49,7 @@ part '../local/dao/photo_dao.dart';
 part '../local/dao/client_dao.dart';
 part '../local/dao/account_dao.dart';
 part '../local/dao/news_dao.dart';
+part '../local/dao/notification_dao.dart';
 
 class AppDatabase {
   static BriteDatabase? _streamDatabase;
@@ -50,7 +64,7 @@ class AppDatabase {
 
   final initialScript = [
     '''
-        CREATE TABLE $tableWorks (
+        CREATE TABLE IF NOT EXISTS $tableWorks (
         ${WorkFields.id} INTEGER PRIMARY KEY,
         ${WorkFields.workcode} TEXT DEFAULT NULL,
         ${WorkFields.numberCompany} INTEGER DEFAULT NULL,
@@ -81,7 +95,6 @@ class AppDatabase {
         ${WorkFields.active} BOOLEAN DEFAULT NULL,
         ${WorkFields.duration} TEXT DEFAULT NULL,
         ${WorkFields.distance} TEXT DEFAULT NULL,
-        ${WorkFields.geometry} TEXT DEFAULT NULL,
         ${WorkFields.zoneId} INTEGER DEFAULT NULL,
         ${WorkFields.warehouseId} INTEGER DEFAULT NULL,
         ${WorkFields.createdAt} TEXT DEFAULT NULL,
@@ -89,7 +102,7 @@ class AppDatabase {
       )
     ''',
     '''
-      CREATE TABLE $tableSummaries (
+      CREATE TABLE IF NOT EXISTS $tableSummaries (
         ${SummaryFields.id} INTEGER PRIMARY KEY,
         ${SummaryFields.workId} INTEGER DEFAULT NULL,
         ${SummaryFields.orderNumber} TEXT DEFAULT NULL,
@@ -123,7 +136,7 @@ class AppDatabase {
       )
     ''',
     '''
-       CREATE TABLE ${t.tableTransactions} (
+       CREATE TABLE IF NOT EXISTS ${t.tableTransactions} (
         ${t.TransactionFields.id} INTEGER PRIMARY KEY,
         ${t.TransactionFields.workId} INTEGER DEFAULT NULL,
         ${t.TransactionFields.summaryId} INTEGER DEFAULT 999,
@@ -147,7 +160,7 @@ class AppDatabase {
       )
     ''',
     '''
-      CREATE TABLE $tableTransactionSummaries (
+      CREATE TABLE IF NOT EXISTS $tableTransactionSummaries (
         ${TransactionSummaryFields.id} INTEGER PRIMARY KEY,
         ${TransactionSummaryFields.transactionId} INTEGER DEFAULT NULL,
         ${TransactionSummaryFields.summaryId} INTEGER DEFAULT NULL,
@@ -162,7 +175,7 @@ class AppDatabase {
       )
     ''',
     '''
-      CREATE TABLE $tableLocations ( 
+      CREATE TABLE IF NOT EXISTS $tableLocations ( 
         ${LocationFields.id} INTEGER PRIMARY KEY, 
         ${LocationFields.latitude} REAL DEFAULT NULL,
         ${LocationFields.longitude} REAL DEFAULT NULL,
@@ -173,22 +186,27 @@ class AppDatabase {
         ${LocationFields.heading} REAL DEFAULT NULL,
         ${LocationFields.isMock} BOOLEAN DEFAULT NULL,
         ${LocationFields.userId} INTEGER DEFAULT NULL,
-        ${LocationFields.time} TEXT DEFAULT NULL
-      )  
-    ''',
-    '''
-      CREATE TABLE $tableProcessingQueues (
-        ${ProcessingQueueFields.id} INTEGER PRIMARY KEY,
-        ${ProcessingQueueFields.body} TEXT DEFAULT NULL,
-        ${ProcessingQueueFields.task} TEXT DEFAULT NULL,
-        ${ProcessingQueueFields.code} TEXT DEFAULT NULL,
-        ${ProcessingQueueFields.error} TEXT DEFAULT NULL,
-        ${ProcessingQueueFields.createdAt} TEXT DEFAULT NULL,
-        ${ProcessingQueueFields.updatedAt} TEXT DEFAULT NULL
+        ${LocationFields.time} TEXT DEFAULT NULL,
+        ${LocationFields.type} TEXT DEFAULT NULL,
+        ${LocationFields.workcode} TEXT DEFAULT NULL,
+        ${LocationFields.send} TEXT DEFAULT 0
       )
     ''',
     '''
-      CREATE TABLE $tableReasons (
+      CREATE TABLE IF NOT EXISTS $tableHistoryOrders (
+        ${HistoryOrderFields.id} INTEGER PRIMARY KEY,
+        ${HistoryOrderFields.workId} INTEGER NOT NULL,
+        ${HistoryOrderFields.workcode} TEXT NOT NULL ,
+        ${HistoryOrderFields.zoneId} INTEGER DEFAULT NULL,
+        ${HistoryOrderFields.likelihood} REAL DEFAULT NULL,
+        ${HistoryOrderFields.used} BOOLEAN DEFAULT NULL,
+        ${HistoryOrderFields.listOrder} TEXT NOT NULL,
+        ${HistoryOrderFields.works} TEXT NOT NULL,
+        ${HistoryOrderFields.different} TEXT NOT NULL
+      )
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tableReasons (
         ${ReasonFields.id} INTEGER PRIMARY KEY,
         ${ReasonFields.codmotvis} TEXT DEFAULT NULL,
         ${ReasonFields.nommotvis} TEXT DEFAULT NULL,
@@ -202,21 +220,50 @@ class AppDatabase {
         ${ReasonFields.updatedAt} TEXT DEFAULT NULL 
       )
     ''',
-  ];
-
-  final migrations = [
     '''
-      CREATE INDEX workcode_index ON $tableWorks(${WorkFields.workcode});
-    ''',
-    '''
-      CREATE TABLE $tablePhotos (
-        ${PhotoFields.id} INTEGER PRIMARY KEY,
-        ${PhotoFields.name} TEXT DEFAULT NULL,
-        ${PhotoFields.path} TEXT DEFAULT NULL
+      CREATE TABLE IF NOT EXISTS $tableZone (
+        ${ZoneFields.id} INTEGER PRIMARY KEY,
+        ${ZoneFields.city} TEXT NOT NULL ,
+        ${ZoneFields.departament} TEXT NOT NULL,
+        ${ZoneFields.southwestlat} TEXT NOT NULL,
+        ${ZoneFields.southwestlng} TEXT NOT NULL,
+        ${ZoneFields.northestlat} TEXT NOT NULL,
+        ${ZoneFields.northestlng} TEXT NOT NULL
       )
     ''',
     '''
-      CREATE TABLE $tableClients (
+      CREATE TABLE IF NOT EXISTS $tableNotifications (
+        ${NotificationFields.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${NotificationFields.id_from_server} TEXT,
+        ${NotificationFields.title} TEXT,
+        ${NotificationFields.body} TEXT,
+        ${NotificationFields.date} TEXT,
+        ${NotificationFields.with_click_action} TEXT,
+        ${NotificationFields.read_at} TEXT 
+      )
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tableProcessingQueues (
+        ${ProcessingQueueFields.id} INTEGER PRIMARY KEY,
+        ${ProcessingQueueFields.body} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.task} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.code} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.error} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.createdAt} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.updatedAt} TEXT DEFAULT NULL
+      )
+    ''',
+    '''
+       CREATE TABLE $tableConfirms (
+        ${ConfirmFields.id} INTEGER PRIMARY KEY,
+        ${ConfirmFields.workcode} TEXT NOT NULL,
+        ${ConfirmFields.latitude} TEXT NOT NULL,
+        ${ConfirmFields.longitude} TEXT NOT NULL,
+        ${ConfirmFields.createdAt} TEXT NOT NULL 
+      );
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tableClients (
         ${ClientFields.id} INTEGER PRIMARY KEY,
         ${ClientFields.nit} TEXT DEFAULT NULL,
         ${ClientFields.operativeCenter} TEXT DEFAULT NULL,
@@ -227,20 +274,20 @@ class AppDatabase {
       )
     ''',
     '''
-      CREATE TABLE $tableHistoryOrders (
-        ${HistoryOrderFields.id} INTEGER PRIMARY KEY,
-        ${HistoryOrderFields.workId} INTEGER NOT NULL,
-        ${HistoryOrderFields.workcode} TEXT NOT NULL ,
-        ${HistoryOrderFields.zoneId} INTEGER DEFAULT NULL,
-        ${HistoryOrderFields.likelihood} REAL DEFAULT NULL,
-        ${HistoryOrderFields.used} BOOLEAN DEFAULT NULL,
-        ${HistoryOrderFields.listOrder} TEXT NOT NULL,
-        ${HistoryOrderFields.works} TEXT NOT NULL,
-        ${HistoryOrderFields.different} TEXT NOT NULL
+      CREATE TABLE IF NOT EXISTS $tableWarehouses ( 
+        ${WarehouseFields.id} INTEGER PRIMARY KEY, 
+        ${WarehouseFields.name} TEXT NOT NULL,
+        ${WarehouseFields.latitude} TEXT NOT NULL,
+        ${WarehouseFields.longitude} TEXT NOT NULL,
+        ${WarehouseFields.description} TEXT DEFAULT NULL,
+        ${WarehouseFields.createdAt} TEXT NOT NULL,
+        ${WarehouseFields.updatedAt} TEXT NOT NULL,
+        ${WarehouseFields.principal} TEXT NOT NULL,
+        ${WarehouseFields.codeWarehouse} TEXT DEFAULT NULL
       )
     ''',
     '''
-      CREATE TABLE $tableNews (
+      CREATE TABLE IF NOT EXISTS $tableNews (
         ${NewsFields.id} INTEGER PRIMARY KEY,
         ${NewsFields.userId} INTEGER NOT NULL,
         ${NewsFields.workId} INTEGER DEFAULT NULL,
@@ -254,17 +301,46 @@ class AppDatabase {
         ${NewsFields.firm} TEXT DEFAULT NULL,
         ${NewsFields.observation} TEXT DEFAULT NULL,
         ${NewsFields.createdAt} TEXT DEFAULT NULL,
-        ${NewsFields.updatedAt} TEXT DEFAULT NULL)
+        ${NewsFields.updatedAt} TEXT DEFAULT NULL
+      )
     ''',
     '''
-       CREATE TABLE $tableAccount (
+       CREATE TABLE IF NOT EXISTS $tableAccount (
         ${AccountFields.id} INTEGER PRIMARY KEY,
+        ${AccountFields.idAccount} INTEGER NOT NULL ,
         ${AccountFields.accountId} INTEGER DEFAULT NULL,
         ${AccountFields.name} TEXT DEFAULT NULL,
         ${AccountFields.bankId} INTEGER DEFAULT NULL,
         ${AccountFields.accountNumber} INTEGER DEFAULT NULL,
+        ${AccountFields.code_qr} TEXT DEFAULT NULL,
         ${AccountFields.createdAt} TEXT DEFAULT NULL
       )
+    '''
+  ];
+
+  final migrations = [
+    '''
+      CREATE INDEX workcode_index ON $tableWorks(${WorkFields.workcode})
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tablePhotos (
+        ${PhotoFields.id} INTEGER PRIMARY KEY,
+        ${PhotoFields.name} TEXT DEFAULT NULL,
+        ${PhotoFields.path} TEXT DEFAULT NULL
+      )
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS polylines (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        workcode TEXT,
+        polylines TEXT
+      )
+    ''',
+    '''
+      ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relationId} INTEGER DEFAULT NULL
+    ''',
+    '''
+      ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL
     '''
   ];
 
@@ -277,9 +353,7 @@ class AppDatabase {
   }
 
   Future<Database?> get database async {
-    // var company = _storageService.getString('company');
-    var dbName = databaseName;
-
+    var dbName = _storageService.getString('company');
     if (_database != null) return _database;
     await lock.synchronized(() async {
       if (_database == null) {
@@ -317,6 +391,16 @@ class AppDatabase {
     return db!.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 
+  Future<bool> listenForTableChanges(
+      String table, String column, String value) async {
+    final db = await instance.streamDatabase;
+
+    var result = await db!
+        .query(table, where: '$column = ?', whereArgs: [value], limit: 1);
+
+    return result.isNotEmpty;
+  }
+
   WorkDao get workDao => WorkDao(instance);
 
   WarehouseDao get warehouseDao => WarehouseDao(instance);
@@ -340,6 +424,8 @@ class AppDatabase {
   AccountDao get accountDao => AccountDao(instance);
 
   NewsDao get newsDao => NewsDao(instance);
+
+  NotificationDao get notificationDao => NotificationDao(instance);
 
   void close() {
     _database = null;

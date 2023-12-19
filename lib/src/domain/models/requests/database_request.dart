@@ -1,4 +1,5 @@
 class DatabaseRequest {
   final String path;
-  DatabaseRequest({required this.path});
+  final String tableName;
+  DatabaseRequest({required this.path, required this.tableName});
 }

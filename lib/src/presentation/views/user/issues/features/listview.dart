@@ -32,7 +32,7 @@ class IssuesListView extends StatelessWidget {
               onTap: () {
                 issuesBloc.add(
                     SelectIssue(newSelectedIssue: state.issuesList![index]));
-                _navigationService.goTo(fillIssueRoute);
+                _navigationService.goTo(AppRoutes.fillIssue);
               },
               //reasonCallbacks
             );

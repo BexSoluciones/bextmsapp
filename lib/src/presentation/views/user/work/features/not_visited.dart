@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,7 +20,8 @@ import '../../../../../utils/extensions/scroll_controller_extension.dart';
 import 'sub-item.dart';
 
 class NotVisitedViewWork extends StatefulWidget {
-  const NotVisitedViewWork({Key? key, required this.workcode}) : super(key: key);
+  const NotVisitedViewWork({Key? key, required this.workcode})
+      : super(key: key);
 
   final String workcode;
 
@@ -39,6 +41,7 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
     final workCubit = BlocProvider.of<WorkCubit>(context);
     final scrollController = ScrollController();
 
@@ -53,7 +56,7 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
           return const Center(child: CupertinoActivityIndicator());
         case WorkSuccess:
           return _buildWork(scrollController, widget.workcode, state.notVisited,
-              state.noMoreData, state.started);
+              state.noMoreData, state.started, calculatedTextScaleFactor);
         default:
           return const SizedBox();
       }
@@ -66,9 +69,10 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
       List<Work> works,
       bool noMoreData,
       bool isStarted,
-      ) {
+      double calculatedTextScaleFactor) {
     return Padding(
-        padding: const EdgeInsets.only(left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
+        padding: const EdgeInsets.only(
+            left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
         child: Column(
           children: [
             SizedBox(
@@ -76,10 +80,15 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
               width: double.infinity,
               child: Center(
                   child: Text('SERVICIO: ${widget.workcode}',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold))),
+                      textScaler: TextScaler.linear(calculatedTextScaleFactor),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary))),
             ),
-            Flexible(flex: 16, child: buildStaticBody(works, scrollController, isStarted)),
+            Flexible(
+                flex: 16,
+                child: buildStaticBody(works, scrollController, isStarted)),
             if (!noMoreData)
               const Padding(
                 padding: EdgeInsets.only(top: 14, bottom: 32),
@@ -89,13 +98,14 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
         ));
   }
 
-  Widget buildStaticBody(List<Work> works, ScrollController scrollController, bool isStarted) {
+  Widget buildStaticBody(
+      List<Work> works, ScrollController scrollController, bool isStarted) {
     if (works.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Lottie.asset('assets/animations/36499-page-not-found.json'),
-          const Text('Ocurrio un error, por favor sincroniza de nuevo.')
+          const Text('No tienes clientes por entregar.')
         ],
       );
     } else {
@@ -105,7 +115,7 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
         itemCount: works.length,
         itemBuilder: (context, index) {
           final work = works[index];
-          return SubItemWork(work: work, enabled: isStarted);
+          return SubItemWork(index: index, work: work, enabled: isStarted);
         },
       );
     }

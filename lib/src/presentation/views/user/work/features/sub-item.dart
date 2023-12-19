@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 
 //helpers
@@ -14,9 +15,10 @@ import '../../../../../services/navigation.dart';
 final NavigationService _navigationService = locator<NavigationService>();
 
 class SubItemWork extends StatefulWidget {
-  const SubItemWork({Key? key, required this.work, required this.enabled})
+  const SubItemWork({Key? key, required this.index, required this.work, required this.enabled})
       : super(key: key);
 
+  final int index;
   final Work work;
   final bool enabled;
 
@@ -45,13 +47,18 @@ class SubItemWorkState extends State<SubItemWork> {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(14);
     return Padding(
         key: ValueKey(widget.work.id),
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: Material(
             child: Ink(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: ListTile(
@@ -59,15 +66,24 @@ class SubItemWorkState extends State<SubItemWork> {
                   leading: GestureDetector(
                       onTap: null,
                       child: CircleAvatar(
-                          backgroundColor: Colors.primaries[widget.work.color ?? 1],
-                          child: Text('${widget.work.order ?? 0 + 1}'))),
-                  onTap: () => _navigationService.goTo(summaryRoute,
+                          backgroundColor:
+                              Colors.primaries[widget.work.color ?? 5],
+                          child: Text(
+                            '${widget.work.order ?? 0 + 1}',
+                            textScaler:
+                                TextScaler.linear(calculatedTextScaleFactor),
+                            style: TextStyle(
+                                color:
+                                    Theme.of(context).colorScheme.onSecondary),
+                          ))),
+                  onTap: () => _navigationService.goTo(AppRoutes.summary,
                       arguments: SummaryArgument(work: widget.work)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   title: Text(
                     widget.work.customer!,
+                    textScaler: TextScaler.linear(calculatedTextScaleFactor),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 16),
@@ -78,15 +94,23 @@ class SubItemWorkState extends State<SubItemWork> {
                       Flexible(
                           child: Text(
                         widget.work.address!,
+                        textScaler:
+                            TextScaler.linear(calculatedTextScaleFactor),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 14),
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.scrim),
                       )),
                       Row(
                         children: [
-                          Icon(Icons.move_to_inbox, color: Colors.brown[300]),
+                          const Icon(Icons.move_to_inbox, color: Colors.brown),
                           Text(widget.work.count.toString(),
-                              style: const TextStyle(fontSize: 14))
+                              textScaler:
+                                  TextScaler.linear(calculatedTextScaleFactor),
+                              style: TextStyle(
+                                  fontSize: calculatedFon,
+                                  color: Theme.of(context).colorScheme.scrim))
                         ],
                       )
                     ],

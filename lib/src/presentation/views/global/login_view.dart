@@ -1,5 +1,8 @@
+import 'package:bexdeliveries/src/utils/constants/colors.dart';
+import 'package:bexdeliveries/src/utils/extensions/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:location/location.dart';
 import 'package:lottie/lottie.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -35,6 +38,8 @@ class LoginViewState extends State<LoginView> {
 
   Enterprise? enterprise;
   bool passwordVisible = true;
+  List<String> errors = [];
+  bool remember = false;
 
   final formKey = GlobalKey<FormState>();
 
@@ -62,6 +67,12 @@ class LoginViewState extends State<LoginView> {
         password.text = passwordStorage;
       });
     }
+
+    if (usernameStorage != null && passwordStorage != null) {
+      setState(() {
+        remember = true;
+      });
+    }
   }
 
   @override
@@ -71,26 +82,13 @@ class LoginViewState extends State<LoginView> {
     loginCubit = BlocProvider.of<LoginCubit>(context);
 
     return Scaffold(
-      appBar: buildAppBar,
       body: BlocBuilder<LoginCubit, LoginState>(
         builder: (context, state) => buildBlocConsumer(size),
       ),
     );
   }
 
-  AppBar get buildAppBar => AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => context.read<LoginCubit>().goToCompany(),
-        ),
-        scrolledUnderElevation: 5.0,
-        shadowColor: Theme.of(context).colorScheme.shadow,
-        notificationPredicate: (ScrollNotification notification) {
-          return notification.depth == 1;
-        },
-      );
-
-  Widget _buildBody(Size size, state) {
+  Widget _buildBody(Size size, LoginState state) {
     return SafeArea(
       child: SizedBox(
           height: size.height,
@@ -109,64 +107,124 @@ class LoginViewState extends State<LoginView> {
                 ),
               );
             } else if (networkState is NetworkSuccess) {
-              return ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                children: [
-                  const SizedBox(height: 20.0),
-                  SizedBox(
-                    height: size.height / 4,
-                    width: size.width,
+              return Scaffold(
+                body: SingleChildScrollView(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                          Colors.white,
+                          Colors.white54,
+                        ])),
                     child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  state.enterprise != null &&
-                                          state.enterprise!.name != null
-                                      ? state.enterprise!.name!
-                                      : 'demo',
-                                  maxLines: 2,
-                                  style: const TextStyle(
-                                      fontSize: 40,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const Text(
-                                  'bexsoluciones.com',
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        const SizedBox(
+                          height: 50,
+                        ),
+                        Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle, // Forma circular
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  spreadRadius: 5,
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
                                 ),
                               ],
                             ),
-                            CircleAvatar(
-                              backgroundColor: Theme.of(context).primaryColor,
-                              radius: 50,
-                              child: CachedNetworkImage(
-                                width: double.infinity,
-                                height: 100.0,
-                                imageUrl: state.enterprise != null &&
-                                        state.enterprise!.logo != null
-                                    ? 'https://bexdeliveries.com/${state.enterprise!.logo}'
-                                    : '',
-                                placeholder: (context, url) =>
-                                    const CircularProgressIndicator(),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error),
+                            child: ClipOval(
+                              child: CircleAvatar(
+                                backgroundColor: Theme.of(context).primaryColor,
+                                radius: 50,
+                                child: CachedNetworkImage(
+                                  width: double.infinity,
+                                  height: 100.0,
+                                  imageUrl: state.enterprise != null &&
+                                          state.enterprise!.logo != null
+                                      ? 'https://bexdeliveries.com/${state.enterprise!.logo}'
+                                      : '',
+                                  placeholder: (context, url) =>
+                                      const CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                ),
                               ),
-                            )
-                          ],
-                        )
+                            )),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          width: 325,
+                          height: 460,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(35)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                spreadRadius: 5,
+                                blurRadius: 20,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              Text(
+                                state.enterprise != null &&
+                                        state.enterprise!.name != null
+                                    ? state.enterprise!.name!
+                                    : 'demo',
+                                maxLines: 2,
+                                style: const TextStyle(
+                                    fontSize: 40, fontWeight: FontWeight.bold),
+                              ),
+                              const Text(
+                                'bexsoluciones.com',
+                                maxLines: 2,
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              buildForm(context, state),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 60),
+                        Center(
+                            child: TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    context.read<LoginCubit>().goToCompany();
+                                  });
+                                },
+                                child: Text(
+                                  "Desea cambiar de empresa?",
+                                  style: TextStyle(
+                                      color: context.theme.colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20),
+                                )))
                       ],
                     ),
                   ),
-                  const SizedBox(height: 80.0),
-                  buildForm(context, state)
-                ],
+                ),
               );
             } else {
               return const Center(
@@ -183,6 +241,21 @@ class LoginViewState extends State<LoginView> {
               );
             }
           })),
+    );
+  }
+
+  SizedBox buildRememberSession() {
+    return SizedBox(
+      width: 260,
+      height: 60,
+      child: CheckboxListTile(
+          title: const Text('Recuérdame'),
+          value: remember,
+          onChanged: (val) {
+            setState(() {
+              remember = val!;
+            });
+          }),
     );
   }
 
@@ -210,11 +283,13 @@ class LoginViewState extends State<LoginView> {
       key: formKey,
       child: Column(
         children: [
-          buildTextField(username),
+          buildTextField(username, 'Correo o código'),
           const SizedBox(height: 10.0),
-          buildTextField(password),
-          const SizedBox(height: 120.0),
-          buildButton(context, state),
+          buildPasswordFormField(password),
+          const SizedBox(height: 10.0),
+          buildRememberSession(),
+          const SizedBox(height: 20.0),
+          buildButton(context, state, remember),
         ],
       ),
     );

@@ -17,23 +17,22 @@ class WorkDao {
   Future<List<Work>> getAllWorks() async {
     final db = await _appDatabase.streamDatabase;
 
-    final workList = await db!.rawQuery(
-        '''
-        SELECT works.*, 
+    final workList = await db!.rawQuery('''
+        SELECT works.id, works.workcode, works.latitude, works.longitude,
+        works.active, works.status,
         COUNT(DISTINCT number_customer || code_place) as count,
-        COUNT(DISTINCT summaries.order_number) as left,
-        COUNT(DISTINCT transactions.order_number) as right
-        FROM $tableWorks 
+        COUNT(DISTINCT summaries.order_number || works.number_customer || works.code_place) as left,
+        COUNT(DISTINCT transactions.order_number || works.number_customer || works.code_place) as right
+        FROM $tableWorks
         INNER JOIN $tableSummaries ON $tableSummaries.${SummaryFields.workId} = $tableWorks.${WorkFields.id}
         LEFT JOIN ${t.tableTransactions} ON (
           ${t.tableTransactions}.${t.TransactionFields.workId} = $tableWorks.${WorkFields.id} AND
           ${t.tableTransactions}.${t.TransactionFields.status} != 'start' AND
           ${t.tableTransactions}.${t.TransactionFields.status} != 'arrived' AND
           ${t.tableTransactions}.${t.TransactionFields.status} != 'summary'
-        )
+        )  
         GROUP BY $tableWorks.${WorkFields.workcode}
-        '''
-    );
+    ''');
     return parseWorks(workList);
   }
 
@@ -62,11 +61,13 @@ class WorkDao {
 
   Future<int> countAllWorksByWorkcode(String workcode) async {
     final db = await _appDatabase.streamDatabase;
-    final workList = await db!.rawQuery('''SELECT * FROM $tableWorks WHERE ${WorkFields.workcode} = "$workcode" ''');
+    final workList = await db!.rawQuery(
+        '''SELECT * FROM $tableWorks WHERE ${WorkFields.workcode} = "$workcode" ''');
     return workList.length;
   }
 
-  Future<List<Work>> findAllWorksPaginatedByWorkcode(String workcode, int page) async {
+  Future<List<Work>> findAllWorksPaginatedByWorkcode(
+      String workcode, int page) async {
     final db = await _appDatabase.streamDatabase;
     final workList = await db!.rawQuery('''
         SELECT $tableWorks.*, 
@@ -91,7 +92,6 @@ class WorkDao {
     return works;
   }
 
-
   Future<int> insertWork(Work work) {
     return _appDatabase.insert(tableWorks, work.toJson());
   }
@@ -102,7 +102,7 @@ class WorkDao {
 
   Future<int> updateStatusWork(String workcode, String status) async {
     final db = await _appDatabase.streamDatabase;
-    return db!.update(tableWorks, {'status': status },
+    return db!.update(tableWorks, {'status': status},
         where: 'workcode = ?', whereArgs: [workcode]);
   }
 
@@ -113,12 +113,14 @@ class WorkDao {
 
     if (works.isNotEmpty) {
       await Future.forEach(works, (work) async {
-        var d = await db.query(tableWorks, where: 'id = ?', whereArgs: [work.id]);
+        var d =
+            await db.query(tableWorks, where: 'id = ?', whereArgs: [work.id]);
         var w = parseWorks(d);
         if (w.isEmpty) {
           batch.insert(tableWorks, work.toJson());
         } else {
-          batch.update(tableWorks, work.toJson(), where: 'id = ?', whereArgs: [work.id]);
+          batch.update(tableWorks, work.toJson(),
+              where: 'id = ?', whereArgs: [work.id]);
         }
       });
     }
@@ -128,10 +130,57 @@ class WorkDao {
     return Future.value();
   }
 
+  Future<int> insertPolylines(String workcode, List<LatLng> data) async {
+    final db = await _appDatabase.streamDatabase;
+    var batch = db!.batch();
+    var existingData = await db
+        .query('polylines', where: 'workcode = ?', whereArgs: [workcode]);
+    var parsedData = parseWorks(existingData);
+
+    if (parsedData.isEmpty) {
+      List<Map<String, dynamic>> coordinatesList = [];
+      if (data.isNotEmpty) {
+        for (var latLng in data) {
+          coordinatesList.add(latLng.toJson());
+        }
+        String coordinatesString = jsonEncode(coordinatesList);
+        batch.insert('polylines',
+            {'workcode': workcode, 'polylines': coordinatesString});
+      }
+    }
+    List<dynamic> results = await batch.commit();
+    return results.length;
+  }
+
+  Future<List<LatLng>> getPolylines(String workcode) async {
+    final db = await _appDatabase.streamDatabase;
+    var existingData = await db!
+        .query('polylines', where: 'workcode = ?', whereArgs: [workcode]);
+
+    if (existingData.isNotEmpty) {
+      String polylinesString = existingData[0]['polylines'].toString();
+      List<dynamic> coordinatesList = jsonDecode(polylinesString);
+
+      List<LatLng> polylines = [];
+      for (var coordinate in coordinatesList) {
+        List<double> coordinates = List<double>.from(coordinate['coordinates']);
+        LatLng latLng = LatLng(coordinates[1], coordinates[0]);
+        polylines.add(latLng);
+      }
+      return polylines;
+    } else {
+      return [];
+    }
+  }
+
+  Future<int> deleteWorksByWorkcode(String workcode) async {
+    final db = await _appDatabase.streamDatabase;
+    return db!.delete(tableWorks, where: 'workcode = ?', whereArgs: [workcode]);
+  }
+
   Future<void> emptyWorks() async {
     final db = await _appDatabase.streamDatabase;
     await db!.delete(tableWorks, where: 'id > 0');
     return Future.value();
   }
-
 }

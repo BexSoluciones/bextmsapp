@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 //service
 import '../../../locator.dart';
 import '../../../services/storage.dart';
+import '../../../utils/constants/strings.dart';
 
 part 'splash_event.dart';
 part 'splash_state.dart';
@@ -20,13 +21,18 @@ class SplashScreenBloc extends Bloc<SplashScreenEvent, SplashScreenState> {
     await Future.delayed(const Duration(seconds: 2));
     await isFirstTime().then((firstTime) async {
       if (firstTime == null || firstTime == false) {
-        emit(const Loaded(route: '/politics'));
+        print('********aqui******');
+        emit(const Loaded(route: AppRoutes.politics));
       } else {
         var token = _storageService.getString('token');
+        var company = _storageService.getString('company');
+
         if (token != null) {
-          emit(const Loaded(route: '/home'));
+          emit(const Loaded(route: AppRoutes.home));
+        } else if(company != null) {
+          emit(const Loaded(route: AppRoutes.login));
         } else {
-          emit(const Loaded(route: '/login'));
+          emit(const Loaded(route: AppRoutes.company));
         }
       }
     });
@@ -55,10 +61,13 @@ class SplashScreenBloc extends Bloc<SplashScreenEvent, SplashScreenState> {
 
   Stream<Loaded> validateSession() async* {
     var token = _storageService.getString('token');
+    var company = _storageService.getString('company');
     if (token != null) {
-      yield const Loaded(route: '/home');
+      yield const Loaded(route: AppRoutes.home);
+    } else if(company != null) {
+      yield const Loaded(route: AppRoutes.login);
     } else {
-      yield const Loaded(route: '/initial');
+      yield const Loaded(route: AppRoutes.company);
     }
   }
 

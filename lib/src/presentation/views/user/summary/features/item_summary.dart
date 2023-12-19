@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -45,10 +46,11 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
 
   @override
   Widget build(BuildContext context) {
+    final calculatedTextScaleFactor = textScaleFactor(context);
     return Material(
       child: Ink(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: ListTile(
@@ -66,6 +68,7 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                 children: [
                   Text(
                     '${widget.summary.type} - ${widget.summary.orderNumber} - ${widget.summary.id}',
+                    textScaleFactor: calculatedTextScaleFactor,
                     style: const TextStyle(fontSize: 16),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -73,7 +76,8 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                   if (widget.summary.expedition != null)
                     Text(
                       'Expedición: ${widget.summary.expedition}',
-                      style: const TextStyle(fontSize: 16),
+                      textScaleFactor: calculatedTextScaleFactor,
+                      style: TextStyle(fontSize: 16,color: Theme.of(context).colorScheme.scrim),
                     ),
                 ],
               ),
@@ -85,7 +89,8 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text(
                   'Items: ${widget.summary.count.toString()}',
-                  style: const TextStyle(fontSize: 14),
+                  textScaleFactor: calculatedTextScaleFactor,
+                  style: TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
                 ),
               ]),
               Row(
@@ -93,11 +98,13 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                 children: [
                   Text(
                     'Total:  ${formatter.format(widget.summary.grandTotalCopy)}',
-                    style: const TextStyle(fontSize: 14),
+                    textScaleFactor: calculatedTextScaleFactor,
+                    style:  TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
                   ),
                   Text(
                     'Tipo: ${widget.summary.typeOfCharge}',
-                    style: const TextStyle(fontSize: 14),
+                    textScaleFactor: calculatedTextScaleFactor,
+                    style:  TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
                   ),
                 ],
               )
@@ -106,8 +113,8 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
           trailing: widget.summary.loading!
               ? const CupertinoActivityIndicator()
               : widget.summary.typeTransaction == 'entrega'
-                  ? const Icon(Icons.local_shipping)
-                  : const Icon(Icons.hail),
+                  ?  Icon(Icons.local_shipping,color: Theme.of(context).colorScheme.scrim)
+                  :  Icon(Icons.hail,color: Theme.of(context).colorScheme.scrim),
         ),
       ),
     );

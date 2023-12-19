@@ -1,8 +1,9 @@
-import 'package:bexdeliveries/src/presentation/blocs/issues/issues_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:showcaseview/showcaseview.dart';
+
+//blocs
+import '../../../blocs/issues/issues_bloc.dart';
 
 //cubit
 import '../../../cubits/work/work_cubit.dart';
@@ -18,7 +19,7 @@ import '../../../../utils/constants/strings.dart';
 import 'features/tabview.dart';
 import 'features/visited.dart';
 import 'features/not_visited.dart';
-import 'features/not-georeferenced.dart';
+import 'features/not-geo-reference.dart';
 import 'features/search_delegate.dart';
 
 //services
@@ -118,15 +119,16 @@ class WorkViewState extends State<WorkView>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async => false,
+    return PopScope(
+        canPop: false,
         child: BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
           return Scaffold(
               key: Key(state.key.toString()),
               appBar: AppBar(
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new),
-                  onPressed: () => _navigationService.replaceTo(homeRoute),
+                  icon: Icon(Icons.arrow_back_ios_new,
+                      color: Theme.of(context).colorScheme.primary),
+                  onPressed: () => _navigationService.replaceTo(AppRoutes.home),
                 ),
                 actions: [
                   const IconConnection(),
@@ -147,7 +149,7 @@ class WorkViewState extends State<WorkView>
                           child: IconButton(
                               icon: const Icon(Icons.near_me),
                               onPressed: () async {
-                                await _navigationService.goTo(navigationRoute,
+                                await _navigationService.goTo(AppRoutes.navigation,
                                     arguments: widget.arguments.work.workcode);
                               }))),
                   Showcase(
@@ -180,7 +182,7 @@ class WorkViewState extends State<WorkView>
                                     currentStatus: 'work',
                                     summaryId: null,
                                     workId: widget.arguments.work.id));
-                                await _navigationService.goTo(issueRoute);
+                                await _navigationService.goTo(AppRoutes.issue);
                               }))),
                 ],
                 bottom: state.started
@@ -208,7 +210,7 @@ class WorkViewState extends State<WorkView>
                       visible: !state.started,
                       child: FloatingActionButton(
                         child: const Icon(Icons.play_arrow),
-                        onPressed: () => _navigationService.goTo(confirmRoute,
+                        onPressed: () => _navigationService.goTo(AppRoutes.confirm,
                             arguments: widget.arguments),
                       ))));
         }));

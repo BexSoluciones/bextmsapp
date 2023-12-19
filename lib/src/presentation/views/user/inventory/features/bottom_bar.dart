@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
 
@@ -11,12 +12,8 @@ import '../../../../../utils/constants/strings.dart';
 //services
 import '../../../../../locator.dart';
 import '../../../../../services/navigation.dart';
-import '../../../../../services/storage.dart';
-import '../../../../../utils/constants/nums.dart';
-import '../../../../widgets/default_button_widget.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class BottomBarInventory extends StatefulWidget {
   const BottomBarInventory(
@@ -60,6 +57,8 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final calculatedTextScaleFactor = textScaleFactor(context);
+    final calculatedFon = getProportionateScreenHeight(14);
 
     return widget.isArrived == false
         ? SizedBox(
@@ -70,35 +69,45 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
             ? SizedBox(
                 height: 65,
                 child: InkWell(
-                  onTap: () => _navigationService.goTo(rejectRoute,
+                  onTap: () => _navigationService.goTo(AppRoutes.reject,
                       arguments: widget.arguments),
-                  child: const Padding(
-                    padding: EdgeInsets.only(top: 8.0),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
                     child: Column(
                       children: <Widget>[
-                        Icon(Icons.cancel_outlined, color: kPrimaryColor),
-                        Text('Rechazado', style: TextStyle(fontSize: 14)),
+                        const Icon(Icons.cancel_outlined, color: kPrimaryColor),
+                        Text('Rechazado',
+                            textScaleFactor: calculatedTextScaleFactor,
+                            style: TextStyle(fontSize: calculatedFon)),
                       ],
                     ),
                   ),
                 ))
             : widget.isPartial
                 ? SizedBox(
-                    height: 65,
+                    height: hasNavigationBar()
+                        ? MediaQuery.of(context).size.height * 0.1
+                        : MediaQuery.of(context).size.height * 0.06,
                     child: InkWell(
-                      onTap: () => _navigationService.goTo(partialRoute,
+                      onTap: () => _navigationService.goTo(AppRoutes.partial,
                           arguments: widget.arguments),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
+                      child: Padding(
+                        padding: EdgeInsets.all(
+                            MediaQuery.of(context).size.width * 0.01),
                         child: Column(
                           children: <Widget>[
-                            Icon(Icons.all_inbox_outlined,
+                            const Icon(Icons.all_inbox_outlined,
                                 color: kPrimaryColor),
-                            Text('Parcial', style: TextStyle(fontSize: 14)),
+                            Text(
+                              'Parcial',
+                              textScaleFactor: calculatedTextScaleFactor,
+                              style: const TextStyle(fontSize: 14),
+                            ),
                           ],
                         ),
                       ),
-                    ))
+                    ),
+                  )
                 : Showcase(
                     key: widget.four,
                     disableMovingAnimation: true,
@@ -115,29 +124,40 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
 
                           switch (currentIndex) {
                             case 0:
-                              _navigationService.goTo(collectionRoute,
+                              _navigationService.goTo(AppRoutes.collection,
                                   arguments: widget.arguments);
                               break;
                             case 1:
-                              _navigationService.goTo(rejectRoute,
+                              _navigationService.goTo(AppRoutes.reject,
                                   arguments: widget.arguments);
                               break;
                             case 2:
-                              _navigationService.goTo(respawnRoute,
+                              _navigationService.goTo(AppRoutes.respawn,
                                   arguments: widget.arguments);
                               break;
                           }
                         },
-                        items: const [
+                        items: [
                           BottomNavigationBarItem(
                               label: 'Entrega',
-                              icon: Icon(Icons.delivery_dining_outlined)),
+                              icon: Icon(Icons.delivery_dining_outlined,
+                                  color:
+                                      Theme.of(context).colorScheme.primary)),
                           BottomNavigationBarItem(
                               label: 'Rechazado',
-                              icon: Icon(Icons.cancel_outlined)),
+                              icon: Icon(Icons.cancel_outlined,
+                                  color:
+                                      Theme.of(context).colorScheme.primary)),
                           BottomNavigationBarItem(
                               label: 'Redespacho',
-                              icon: Icon(Icons.receipt_long))
+                              icon: Icon(Icons.receipt_long,
+                                  color: Theme.of(context).colorScheme.primary))
                         ])));
+  }
+
+  bool hasNavigationBar() {
+    var window = WidgetsBinding.instance.window;
+    var padding = window.viewPadding;
+    return padding.bottom > 0;
   }
 }

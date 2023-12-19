@@ -114,7 +114,7 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
     var processingQueue = ProcessingQueue(
         body: jsonEncode(transaction.toJson()),
         task: 'incomplete',
-        code: 'Z8RPOZDTJB',
+        code: 'store_transaction',
         createdAt: now(),
         updatedAt: now());
 
@@ -127,10 +127,10 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
     emit(RespawnSuccess(reasons: reasons, enterpriseConfig: enterpriseConfig));
 
     if (validate == false) {
-      await _navigationService.goTo(summaryRoute,
+      await _navigationService.goTo(AppRoutes.summary,
           arguments: SummaryArgument(work: arguments.work));
     } else {
-      await _navigationService.goTo(workRoute,
+      await _navigationService.goTo(AppRoutes.work,
           arguments: WorkArgument(work: arguments.work));
     }
   }

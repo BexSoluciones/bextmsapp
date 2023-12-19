@@ -1,9 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+//core
+import '../../../../core/helpers/index.dart';
+
+//blocs
+import '../network/network_bloc.dart';
+
 //utils
+import '../../../utils/constants/strings.dart';
 import '../../../utils/resources/data_state.dart';
 
 //domain
@@ -11,7 +19,9 @@ import '../../../domain/models/processing_queue.dart';
 import '../../../domain/models/isolate.dart';
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/client.dart';
+import '../../../domain/models/history_order.dart';
 import '../../../domain/models/transaction_summary.dart';
+import '../../../domain/models/requests/prediction_request.dart';
 
 //request
 import '../../../domain/models/requests/transaction_request.dart';
@@ -19,19 +29,36 @@ import '../../../domain/models/requests/transaction_summary_request.dart';
 import '../../../domain/models/requests/logout_request.dart';
 import '../../../domain/models/requests/status_request.dart';
 import '../../../domain/models/requests/client_request.dart';
+import '../../../domain/models/requests/send_token.dart';
+import '../../../domain/models/requests/locations_request.dart';
+import '../../../domain/models/requests/reason_m_request.dart';
+import '../../../domain/models/requests/history_order_saved_request.dart';
+import '../../../domain/models/requests/history_order_updated_request.dart';
+import '../../../domain/models/requests/routing_request.dart';
 //repositories
 import '../../../domain/repositories/api_repository.dart';
 import '../../../domain/repositories/database_repository.dart';
 //abstract
 import '../../../domain/abstracts/format_abstract.dart';
 
+//service
+import '../../../locator.dart';
+import '../../../services/logger.dart';
+import '../../../services/storage.dart';
+
+
 part 'processing_queue_event.dart';
 part 'processing_queue_state.dart';
+
+final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class ProcessingQueueBloc
     extends Bloc<ProcessingQueueEvent, ProcessingQueueState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ApiRepository _apiRepository;
+  final helperFunctions = HelperFunctions();
+
+  NetworkBloc? networkBloc;
 
   final _processingQueueController =
       StreamController<List<ProcessingQueue>>.broadcast();
@@ -44,13 +71,15 @@ class ProcessingQueueBloc
       _processingQueueController.sink;
   StreamSink<ProcessingQueue> get inAddPq => _addProcessingQueueController.sink;
 
-  ProcessingQueueBloc(this._databaseRepository, this._apiRepository)
+  ProcessingQueueBloc(
+      this._databaseRepository, this._apiRepository, this.networkBloc)
       : super(ProcessingQueueInitial()) {
+
     on<ProcessingQueueAdd>(_add);
     on<ProcessingQueueObserve>(_observe);
     on<ProcessingQueueSender>(_sender);
     on<ProcessingQueueCancel>(_cancel);
-    // _addProcessingQueueController.stream.listen(_handleAddProcessingQueue);
+
     _addProcessingQueueController.stream.listen((p) async {
       await _databaseRepository.insertProcessingQueue(p);
       await Future.value([
@@ -77,6 +106,20 @@ class ProcessingQueueBloc
     }
   }
 
+  Stream get resolve {
+    return Stream.periodic(const Duration(seconds: 30), (int value) async {
+      final timer0 = logTimerStart(headerDeveloperLogger, 'Starting...',
+          level: LogLevel.info);
+      var result = await _databaseRepository.listenForTableChanges(
+          'works', 'status', 'complete');
+      logDebugFine(headerDeveloperLogger, result.toString());
+      if (result) await _getProcessingQueue();
+      logTimerStop(headerDeveloperLogger, timer0, 'Initialization completed',
+          level: LogLevel.success);
+      return true;
+    });
+  }
+
   Stream<List<ProcessingQueue>> get todos {
     return _databaseRepository.getAllProcessingQueues();
   }
@@ -91,8 +134,12 @@ class ProcessingQueueBloc
   }
 
   Future<void> _getProcessingQueue() async {
-    final queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
-    _inProcessingQueue.add(queues);
+    if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
+      logDebugFine(headerDeveloperLogger, 'activating pq');
+      final queues =
+          await _databaseRepository.getAllProcessingQueuesIncomplete();
+      _inProcessingQueue.add(queues);
+    }
   }
 
   void _add(event, emit) {
@@ -101,32 +148,32 @@ class ProcessingQueueBloc
   }
 
   void _observe(event, emit) {
-    _getProcessingQueue();
+    if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
+      _getProcessingQueue();
+    }
     emit(ProcessingQueueSuccess());
   }
 
-  void _sender(event, emit) {
+  void _sender(event, emit) async {
     emit(ProcessingQueueSending());
-    _getProcessingQueue().then((_) => emit(ProcessingQueueSuccess()));
+    await _getProcessingQueue()
+        .whenComplete(() => emit(ProcessingQueueSuccess()));
   }
 
   void _cancel(event, emit) {
     emit(ProcessingQueueSuccess());
   }
 
-  // void _handleAddProcessingQueue(ProcessingQueue processingQueue) async {
-  //   await _databaseRepository.insertProcessingQueue(processingQueue);
-  //   _getProcessingQueue();
-  // }
-
   void sendProcessingQueue(List<ProcessingQueue> queues) async {
     await Future.forEach(queues, (queue) async {
       queue.updatedAt = now();
 
       switch (queue.code) {
-        case 'YDASBDCUDD':
+        case 'store_transaction_start':
           try {
             var body = jsonDecode(queue.body);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final response = await _apiRepository.start(
@@ -135,18 +182,26 @@ class ProcessingQueueBloc
               queue.task = 'done';
             } else {
               queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
+            var body = jsonDecode(queue.body);
+            body['start'] = now();
+            queue.body = jsonEncode(body);
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'LLKFNVLKNE':
+        case 'store_transaction_arrived':
           try {
             var body = jsonDecode(queue.body);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final response = await _apiRepository.arrived(
@@ -155,19 +210,27 @@ class ProcessingQueueBloc
               queue.task = 'done';
             } else {
               queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
+            var body = jsonDecode(queue.body);
+            body['start'] = now();
+            queue.body = jsonEncode(body);
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
 
           break;
-        case 'PISADJOFJO':
+        case 'store_transaction_summary':
           try {
             var body = jsonDecode(queue.body);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final response = await _apiRepository.summary(
@@ -176,38 +239,52 @@ class ProcessingQueueBloc
               queue.task = 'done';
             } else {
               queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
+            var body = jsonDecode(queue.body);
+            body['start'] = now();
+            queue.body = jsonEncode(body);
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'Z8RPOZDTJB':
+        case 'store_transaction':
           try {
             var body = jsonDecode(queue.body);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
+            //TODO:: verify if transaction exists
+
+
             final response = await _apiRepository.index(
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'LIALIVNRAA':
+        case 'store_transaction_product':
+          var body = jsonDecode(queue.body);
           try {
-            var body = jsonDecode(queue.body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final res = await _apiRepository.transaction(
@@ -226,28 +303,62 @@ class ProcessingQueueBloc
               }
             } else {
               queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
               queue.error = res.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            body['start'] = now();
+            queue.body = jsonEncode(body);
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'VNAIANBTLM':
+        case 'store_locations':
           try {
-            var body = jsonDecode(queue.body);
             queue.task = 'processing';
+            final response = await _apiRepository.locations(
+                request: LocationsRequest(queue.body));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
 
           break;
-        case 'EBSVAEKRJB':
+
+        case 'store_news':
+          try {
+            queue.task = 'processing';
+            final response =
+                await _apiRepository.reason(request: ReasonMRequest(queue));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+
+          break;
+        case 'store_work_status':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
@@ -261,61 +372,132 @@ class ProcessingQueueBloc
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'A48NDIVKJF':
+        case 'store_history_order':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
+            final response = await _apiRepository.historyOrderSaved(
+                request: HistoryOrderSavedRequest(body['work_id']));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case '90QQOINCQW':
+        case 'update_history_order':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
+            final response = await _apiRepository.historyOrderUpdated(
+                request: HistoryOrderUpdatedRequest(body['workcode'], 1));
+
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'AB5A8E10Y3':
+        case 'get_prediction':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
+            final response = await _apiRepository.prediction(
+                request: PredictionRequest(
+                    int.parse(body['zone_id']), body['workcode']));
+            if (response is DataSuccess) {
+              var prediction = response.data;
+
+              var historyOrder = HistoryOrder(
+                  id: prediction?.id,
+                  workId: prediction!.workId,
+                  workcode: body['workcode'],
+                  zoneId: prediction.zoneId,
+                  listOrder: prediction.listOrders,
+                  works: prediction.works,
+                  different: prediction.differences,
+                  likelihood: prediction.likelihood,
+                  used: prediction.used);
+
+              await _databaseRepository.insertHistory(historyOrder);
+
+              if (historyOrder.used!) {
+                _storageService.setBool(
+                    '${historyOrder.workcode}-usedHistoric', true);
+                _storageService.setBool(
+                    '${historyOrder.workcode}-recentlyUpdated', true);
+                _storageService.setBool('${historyOrder.workcode}-showAgain', true);
+                _storageService.setBool(
+                    '${historyOrder.workcode}-oneOrMoreFinished', true);
+
+
+                await helperFunctions.useHistoricFromSync(
+                    workcode: historyOrder.workcode!,
+                    historyId: historyOrder.id!,
+                    queue: queue);
+              } else {
+                _storageService.setBool('${historyOrder.workcode}-showAgain', false);
+                queue.task = 'done';
+              }
+
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
 
           break;
-        case 'SDAJBVKJAD':
+        case 'post_new_routing':
           try {
             var body = jsonDecode(queue.body);
-
             queue.task = 'processing';
+            final response = await _apiRepository.routing(
+                request: RoutingRequest(body['history_id'], body['workcode']));
+            if (response is DataSuccess) {
+              await _databaseRepository.insertWorks(response.data!.works);
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
-        case 'UWEBBEVWDC':
+        case 'update_client':
           try {
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
@@ -329,61 +511,57 @@ class ProcessingQueueBloc
               queue.error = response.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
 
           break;
-        case 'OERINVOIEF':
-          try {
-            var body = jsonDecode(queue.body);
-
-            queue.task = 'processing';
-            await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
-            queue.task = 'error';
-            queue.error = e.toString();
-            await _databaseRepository.updateProcessingQueue(queue);
-          }
-          break;
-        case 'QWPJCPQKNE':
-          try {
-            var body = jsonDecode(queue.body);
-
-            queue.task = 'processing';
-            await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
-            queue.task = 'error';
-            queue.error = e.toString();
-            await _databaseRepository.updateProcessingQueue(queue);
-          }
-
-          break;
-        case 'ASJBVKJDFS':
+        case 'post_logout':
           try {
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-
             var response =
                 await _apiRepository.logout(request: LogoutRequest());
-
             if (response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
               queue.error = response.error;
             }
-
             await _databaseRepository.updateProcessingQueue(queue);
-          } catch (e) {
+          } catch (e, stackTrace) {
             queue.task = 'error';
             queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
           break;
 
+        case 'post_firebase_token':
+          try {
+            var body = jsonDecode(queue.body);
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+            var response = await _apiRepository.sendFCMToken(
+                request: SendTokenRequest(
+                    int.parse(body['user_id']), body['fcm_token']));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
         default:
       }
     });
@@ -391,24 +569,32 @@ class ProcessingQueueBloc
 
   Future<void> validateIfServiceIsCompleted(ProcessingQueue p) async {
     try {
-      if (p.code == 'Z8RPOZDTJB') {
-        var workcode = jsonDecode(p.body)['workcode'];
+      if (p.code == 'store_transaction' ||
+          p.code == 'store_transaction_product') {
+        var body = jsonDecode(p.body);
+        var workcode = body['workcode'];
+
         var isLast = await _databaseRepository.checkLastTransaction(workcode);
         if (isLast) {
-          var processingQueue = ProcessingQueue(
-            body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
-            task: 'incomplete',
-            code: 'EBSVAEKRJB',
-            createdAt: now(),
-            updatedAt: now(),
-          );
-          await _databaseRepository.insertProcessingQueue(processingQueue);
+          var isPartial = body['status'] == 'partial';
+          if (isPartial){
+            //TODO:: [Heider Zapa] check if last product to send
+
+          } else {
+            var processingQueue = ProcessingQueue(
+              body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
+              task: 'incomplete',
+              code: 'store_work_status',
+              createdAt: now(),
+              updatedAt: now(),
+            );
+            await _databaseRepository.insertProcessingQueue(processingQueue);
+          }
+          await _databaseRepository.updateStatusWork(workcode, 'complete');
         }
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
     }
   }
 }
