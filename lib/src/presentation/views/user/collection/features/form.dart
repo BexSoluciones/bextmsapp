@@ -58,12 +58,27 @@ class _FormCollectionState extends State<FormCollection>
             key: widget.formKey,
             child: Column(
               children: [
-                const Row(
+                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(children: [
                         Text('EFECTIVO', style: TextStyle(fontSize: 14)),
                         Icon(Icons.money, color: Colors.green),
+                        SizedBox( width: MediaQuery.of(context).size.width / 2,),
+                        IconButton(
+                            icon: const Icon(Icons.camera_alt,
+                                size: 32, color: kPrimaryColor),
+                            onPressed: () => widget.collectionCubit
+                                .goToCamera(widget.orderNumber)),
+                        widget.state.enterpriseConfig != null &&
+                            widget.state.enterpriseConfig!.codeQr !=
+                                null
+                            ? IconButton(
+                            icon: const Icon(Icons.qr_code_2,
+                                size: 32, color: kPrimaryColor),
+                            onPressed: () =>
+                                widget.collectionCubit.goToCodeQR())
+                            : Container(),
                       ]),
                     ]),
                 TextFormField(
