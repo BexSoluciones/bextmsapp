@@ -51,7 +51,7 @@ class TransactionDao {
   }
 
   Future<List<WorkAdditional>> getClientsResJetDel(
-      String workcode, String reanson) async {
+      String workcode, String reason) async {
     final db = await _appDatabase.streamDatabase;
     final transactionList = await db!.rawQuery('''
     SELECT
@@ -70,7 +70,7 @@ class TransactionDao {
       $tableTransactions.${TransactionFields.workId} = $tableWorks.${WorkFields.id} AND 
       $tableSummaries.${SummaryFields.id} = $tableTransactions.${TransactionFields.summaryId} 
     WHERE
-      $tableTransactions.${TransactionFields.status} = '$reanson'
+      $tableTransactions.${TransactionFields.status} = '$reason'
       AND $tableTransactions.${TransactionFields.workcode} = ?
   ''', [workcode]);
 
@@ -308,6 +308,22 @@ class TransactionDao {
     var countTransactions = transactions[0]['count'] as int;
 
     if ((countSummaries - countTransactions) == 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<bool> checkLastProduct(int transactionId) async {
+    final db = await _appDatabase.streamDatabase;
+
+    var validateIsLastProduct = await db!.rawQuery('''
+      select id from processing_queues
+      where relation_id = $transactionId
+      order by id desc
+    ''');
+
+    if (validateIsLastProduct.last['status'] == 'processing') {
       return true;
     } else {
       return false;
