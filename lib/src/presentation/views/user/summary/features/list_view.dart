@@ -31,6 +31,7 @@ final NavigationService _navigationService = locator<NavigationService>();
 class ListViewSummary extends StatefulWidget {
   const ListViewSummary(
       {Key? key,
+      required this.summaryCubit,
       required this.arguments,
       required this.one,
       required this.two,
@@ -39,6 +40,7 @@ class ListViewSummary extends StatefulWidget {
       required this.five})
       : super(key: key);
 
+  final SummaryCubit summaryCubit;
   final SummaryArgument arguments;
   final GlobalKey one, two, three, four, five;
 
@@ -98,8 +100,9 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
             child: _buildList(state.isArrived, state.summaries),
           ),
           BlocSelector<SummaryCubit, SummaryState, bool>(
+              bloc: widget.summaryCubit,
               selector: (state) =>
-                  state.isGeoReference == false && state.isArrived == true,
+                  state.isArrived == true && state.isGeoReference == false,
               builder: (c, x) {
                 return x
                     ? Padding(
@@ -115,6 +118,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                     : Container();
               }),
           BlocSelector<SummaryCubit, SummaryState, bool>(
+              bloc: widget.summaryCubit,
               selector: (state) => state.isArrived == false,
               builder: (c, x) {
                 return x
@@ -134,10 +138,8 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                                   latitude: null,
                                   longitude: null,
                                   firm: null);
-                              context
-                                  .read<SummaryCubit>()
-                                  .sendTransactionArrived(
-                                      widget.arguments.work, transaction);
+                              widget.summaryCubit.sendTransactionArrived(
+                                  widget.arguments.work, transaction);
                             }),
                       )
                     : Container();
@@ -188,7 +190,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                         latitude: null,
                         longitude: null,
                       );
-                      context.read<SummaryCubit>().sendTransactionSummary(
+                      widget.summaryCubit.sendTransactionSummary(
                           widget.arguments.work, summary, transaction);
                     });
               }
@@ -218,7 +220,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                 latitude: null,
                 longitude: null,
               );
-              context.read<SummaryCubit>().sendTransactionSummary(
+              widget.summaryCubit.sendTransactionSummary(
                   widget.arguments.work, summary, transaction);
             }));
   }

@@ -80,10 +80,16 @@ class ProcessingQueueBloc
 
     _addProcessingQueueController.stream.listen((p) async {
       await _databaseRepository.insertProcessingQueue(p);
-      await Future.value([
-        _getProcessingQueue(),
-        validateIfServiceIsCompleted(p),
-      ]);
+      if(p.code != 'store_transaction_product'){
+        await Future.value([
+          _getProcessingQueue(),
+          validateIfServiceIsCompleted(p),
+        ]);
+      } else {
+        await Future.value([
+          validateIfServiceIsCompleted(p),
+        ]);
+      }
     }, onError: (error) {
       if (kDebugMode) {
         print('error');
@@ -259,23 +265,27 @@ class ProcessingQueueBloc
             queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            bool transactionExists = await _databaseRepository.verifyTransactionExistence(body['work_id'],
-                body['order_number']);
-            if (!transactionExists) {
-              final response = await _apiRepository.index(
-                  request: TransactionRequest(Transaction.fromJson(body)));
-              if (response is DataSuccess) {
-                queue.task = 'done';
-              } else {
-                queue.task = 'error';
-                body['start'] = now();
-                queue.body = jsonEncode(body);
-                queue.error = response.error;
-              }
+            // bool transactionExists = await _databaseRepository.verifyTransactionExistence(body['work_id'],
+            //     body['order_number']);
+
+            print('****************sending transaction***************');
+            final response = await _apiRepository.index(
+                request: TransactionRequest(Transaction.fromJson(body)));
+            if (response is DataSuccess) {
+              queue.task = 'done';
             } else {
               queue.task = 'error';
-              queue.error = 'La transacción no existe';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
+              queue.error = response.error;
             }
+
+            // if (!transactionExists) {
+            //
+            // } else {
+            //   queue.task = 'error';
+            //   queue.error = 'La transacción no existe';
+            // }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -427,10 +437,11 @@ class ProcessingQueueBloc
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             final response = await _apiRepository.prediction(
-                request: PredictionRequest(
-                    int.parse(body['zone_id']), body['workcode']));
+                request: PredictionRequest(body['zone_id'], body['workcode']));
             if (response is DataSuccess) {
               var prediction = response.data;
+
+              print(prediction);
 
               var historyOrder = HistoryOrder(
                   id: prediction?.id,
@@ -575,17 +586,27 @@ class ProcessingQueueBloc
       if (p.code == 'store_transaction' ||
           p.code == 'store_transaction_product') {
         var body = jsonDecode(p.body);
-        var workcode = body['workcode'];
+        String? workcode = body['workcode'];
+        if(workcode != null) {
+          var isLast = await _databaseRepository.checkLastTransaction(workcode);
+          if (isLast) {
+            var isPartial = body['status'] == 'partial';
+            if (isPartial) {
+              //TODO:: [Heider Zapa] check if last product to send
+              var toSend = await _databaseRepository
+                  .checkLastProduct(int.parse(p.relationId!));
 
-        var isLast = await _databaseRepository.checkLastTransaction(workcode);
-        if (isLast) {
-          var isPartial = body['status'] == 'partial';
-          if (isPartial) {
-            //TODO:: [Heider Zapa] check if last product to send
-            var toSend = await _databaseRepository
-                .checkLastProduct(int.parse(p.relationId!));
-
-            if (toSend) {
+              if (toSend) {
+                var processingQueue = ProcessingQueue(
+                  body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
+                  task: 'incomplete',
+                  code: 'store_work_status',
+                  createdAt: now(),
+                  updatedAt: now(),
+                );
+                await _databaseRepository.insertProcessingQueue(processingQueue);
+              }
+            } else {
               var processingQueue = ProcessingQueue(
                 body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
                 task: 'incomplete',
@@ -595,17 +616,8 @@ class ProcessingQueueBloc
               );
               await _databaseRepository.insertProcessingQueue(processingQueue);
             }
-          } else {
-            var processingQueue = ProcessingQueue(
-              body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
-              task: 'incomplete',
-              code: 'store_work_status',
-              createdAt: now(),
-              updatedAt: now(),
-            );
-            await _databaseRepository.insertProcessingQueue(processingQueue);
+            await _databaseRepository.updateStatusWork(workcode, 'complete');
           }
-          await _databaseRepository.updateStatusWork(workcode, 'complete');
         }
       }
     } catch (e, stackTrace) {

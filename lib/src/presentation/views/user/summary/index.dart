@@ -53,14 +53,12 @@ class SummaryViewState extends State<SummaryView> {
 
   @override
   void initState() {
-    print('*******init*******');
     summaryCubit = BlocProvider.of<SummaryCubit>(context);
     summaryCubit.getAllSummariesByOrderNumber(widget.arguments.work.id!);
 
     startWidgetSummary();
     super.initState();
   }
-
 
   void startWidgetSummary() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -83,7 +81,6 @@ class SummaryViewState extends State<SummaryView> {
 
   @override
   void dispose() {
-    print('dispose');
     super.dispose();
   }
 
@@ -91,60 +88,70 @@ class SummaryViewState extends State<SummaryView> {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        child: BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
+        child:
+            BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
           return Scaffold(
-            resizeToAvoidBottomInset: true,
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              leading: IconButton(
-                  onPressed: () {
-                    if (widget.arguments.origin != null &&
-                        widget.arguments.origin == 'navigation') {
-                      _navigationService.goBack();
-                    } else {
-                      _navigationService.goTo(AppRoutes.work,
-                          arguments: WorkArgument(work: widget.arguments.work));
-                    }
-                  },
-                  icon:  Icon(Icons.arrow_back_ios_new,color:Theme.of(context).colorScheme.secondaryContainer)),
-              actions: [
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: IconConnection(),
-                ),
-                state.time != null
-                    ? GestureDetector(
-                        onTap: () async => await summaryCubit
-                            .getDiffTime(widget.arguments.work.id!),
-                        child: Text('Tiempo ${state.time}',
-                            style:  TextStyle(fontSize: 18,color:Theme.of(context).colorScheme.secondaryContainer)))
-                    : Container(),
-              ],
-              shadowColor: Theme.of(context).colorScheme.shadow,
-              notificationPredicate: (ScrollNotification notification) {
-                return notification.depth == 1;
-              },
-            ),
-            body: _buildBody()
-          );
+              resizeToAvoidBottomInset: true,
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                leading: IconButton(
+                    onPressed: () {
+                      if (widget.arguments.origin != null &&
+                          widget.arguments.origin == 'navigation') {
+                        _navigationService.goBack();
+                      } else {
+                        _navigationService.goTo(AppRoutes.work,
+                            arguments:
+                                WorkArgument(work: widget.arguments.work));
+                      }
+                    },
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        color:
+                            Theme.of(context).colorScheme.secondaryContainer)),
+                actions: [
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: IconConnection(),
+                  ),
+                  state.time != null
+                      ? GestureDetector(
+                          onTap: () async => await summaryCubit
+                              .getDiffTime(widget.arguments.work.id!),
+                          child: Text('Tiempo ${state.time}',
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .secondaryContainer)))
+                      : Container(),
+                ],
+                shadowColor: Theme.of(context).colorScheme.shadow,
+                notificationPredicate: (ScrollNotification notification) {
+                  return notification.depth == 1;
+                },
+              ),
+              body: _buildBody());
         }));
   }
 
   Widget _buildBody() {
     return SafeArea(
         child: Center(
-          child: ListView(
-            children: [
-              Container(color:Theme.of(context).colorScheme.primary,child: HeaderSummary(arguments: widget.arguments)),
-              ListViewSummary(
-                  arguments: widget.arguments,
-                  one: one,
-                  two: two,
-                  three: three,
-                  four: four,
-                  five: five)
-            ],
-          ),
-        ));
+      child: ListView(
+        children: [
+          Container(
+              color: Theme.of(context).colorScheme.primary,
+              child: HeaderSummary(arguments: widget.arguments)),
+          ListViewSummary(
+              summaryCubit: summaryCubit,
+              arguments: widget.arguments,
+              one: one,
+              two: two,
+              three: three,
+              four: four,
+              five: five)
+        ],
+      ),
+    ));
   }
 }

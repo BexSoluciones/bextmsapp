@@ -58,9 +58,6 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         await _databaseRepository.validateTransactionArrived(workId, 'arrived');
     var isGeoReferenced = await _databaseRepository.validateClient(workId);
 
-    print('**********');
-    print(isGeoReferenced);
-
     return SummarySuccess(
         summaries: summaries,
         origin: state.origin,
@@ -143,6 +140,9 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     var isArrived = await _databaseRepository.validateTransactionArrived(
         transaction.workId, 'arrived');
 
+    var isGeoReferenced =
+        await _databaseRepository.validateClient(transaction.workId);
+
     var processingQueue = ProcessingQueue(
         body: jsonEncode(transaction.toJson()),
         task: 'incomplete',
@@ -161,7 +161,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         origin: state.origin,
         time: state.time,
         isArrived: isArrived,
-        isGeoReference: state.isGeoReference));
+        isGeoReference: isGeoReferenced));
   }
 
   Future<void> showMaps(

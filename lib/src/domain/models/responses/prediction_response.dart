@@ -30,13 +30,17 @@ class PredictionResponse extends Equatable {
   factory PredictionResponse.fromMap(Map<String, dynamic> map) {
     return PredictionResponse(
       id: map['id'],
-      likelihood: map['likelihood'],
+      likelihood: map['likelihood'] ?? map['likehood'] is int
+          ? map['likehood'].toDouble()
+          : map['likehood'],
       workId: map['work_id'],
       zoneId: map['zone_id'],
       workcode: map['workcode'],
-      listOrders: map['list_orders'],
-      works: map['works'],
-      differences: map['differents'],
+      listOrders: List<ListOrder>.from(
+          map['list_order'].map((x) => ListOrder.fromJson(x))),
+      works: List<Work>.from(map['works'].map((x) => Work.fromJson(x))),
+      differences: List<Different>.from(
+          map['differents'].map((x) => Different.fromJson(x))),
       used: map['used'],
     );
   }

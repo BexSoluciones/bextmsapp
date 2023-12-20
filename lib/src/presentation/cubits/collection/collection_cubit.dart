@@ -130,6 +130,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   Future<CollectionState> _getCollection(int workId, String orderNumber) async {
     var totalSummary =
         await _databaseRepository.getTotalSummaries(workId, orderNumber);
+    total = 0;
     dateController.text = date(null);
     return CollectionInitial(
         totalSummary: totalSummary,
