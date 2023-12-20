@@ -335,8 +335,13 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   //PROCESSING QUEUE
   @override
-  Stream<List<ProcessingQueue>> getAllProcessingQueues() {
+  Future<List<ProcessingQueue>> getAllProcessingQueues() {
     return _appDatabase.processingQueueDao.getAllProcessingQueues();
+  }
+
+  @override
+  Stream<List<ProcessingQueue>> watchAllProcessingQueues() {
+    return _appDatabase.processingQueueDao.watchAllProcessingQueues();
   }
 
   @override

@@ -80,7 +80,7 @@ class ProcessingQueueBloc
 
     _addProcessingQueueController.stream.listen((p) async {
       await _databaseRepository.insertProcessingQueue(p);
-      if(p.code != 'store_transaction_product'){
+      if (p.code != 'store_transaction_product') {
         await Future.value([
           _getProcessingQueue(),
           validateIfServiceIsCompleted(p),
@@ -104,6 +104,28 @@ class ProcessingQueueBloc
     _processingQueueController.stream.listen(sendProcessingQueue);
   }
 
+  final itemsFilter = [
+    {'key': 'all', 'value': 'Todos'},
+    {'key': 'processing', 'value': 'Procesando'},
+    {'key': 'error', 'value': 'Error'},
+    {'key': 'incomplete', 'value': 'Incompleto'},
+    {'key': 'done', 'value': 'Enviado'},
+  ];
+
+  final itemsState = [
+    {'key': 'all', 'value': 'Todos'},
+    {'key': 'store_transaction_start', 'value': 'Transacción inicio'},
+    {'key': 'store_transaction_arrived', 'value': 'Transacción de llegada'},
+    {'key': 'store_transaction_summary', 'value': 'Transacción de factura'},
+    {'key': 'store_transaction', 'value': 'Transacción'},
+    {'key': 'store_transaction_product', 'value': 'Transacción de producto'},
+    {'key': 'store_locations', 'value': 'Localizaciones'},
+    {'key': 'get_prediction', 'value': 'Predicción'},
+  ];
+
+  String? dropdownFilterValue;
+  String? dropdownStateValue;
+
   static void heavyTask(IsolateModel model) {
     for (var i = 0; i < model.iteration; i++) {
       model.functions[i];
@@ -125,7 +147,29 @@ class ProcessingQueueBloc
   }
 
   Stream<List<ProcessingQueue>> get todos {
-    return _databaseRepository.getAllProcessingQueues();
+    return _databaseRepository.watchAllProcessingQueues();
+  }
+
+  Stream<List<ProcessingQueue>> get todosFilter async* {
+    var processingQueueList = await _databaseRepository.getAllProcessingQueues();
+    if (dropdownFilterValue != null && dropdownFilterValue != 'all') {
+      processingQueueList
+          .where((element) => element.task == dropdownFilterValue);
+    } else if (dropdownFilterValue != null &&
+        dropdownStateValue != null &&
+        dropdownFilterValue != 'all' &&
+        dropdownStateValue != 'all') {
+      processingQueueList.where((element) =>
+          element.task == dropdownFilterValue &&
+          element.code == dropdownStateValue);
+    } else if (dropdownFilterValue == null &&
+        dropdownStateValue != null &&
+        dropdownStateValue != 'all') {
+      processingQueueList
+          .where((element) => element.code == dropdownStateValue);
+    }
+
+    yield processingQueueList;
   }
 
   Future<int> countProcessingQueueIncompleteToTransactions() {
@@ -441,8 +485,6 @@ class ProcessingQueueBloc
             if (response is DataSuccess) {
               var prediction = response.data;
 
-              print(prediction);
-
               var historyOrder = HistoryOrder(
                   id: prediction?.id,
                   workId: prediction!.workId,
@@ -587,7 +629,7 @@ class ProcessingQueueBloc
           p.code == 'store_transaction_product') {
         var body = jsonDecode(p.body);
         String? workcode = body['workcode'];
-        if(workcode != null) {
+        if (workcode != null) {
           var isLast = await _databaseRepository.checkLastTransaction(workcode);
           if (isLast) {
             var isPartial = body['status'] == 'partial';
@@ -598,13 +640,15 @@ class ProcessingQueueBloc
 
               if (toSend) {
                 var processingQueue = ProcessingQueue(
-                  body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
+                  body:
+                      jsonEncode({'workcode': workcode, 'status': 'complete'}),
                   task: 'incomplete',
                   code: 'store_work_status',
                   createdAt: now(),
                   updatedAt: now(),
                 );
-                await _databaseRepository.insertProcessingQueue(processingQueue);
+                await _databaseRepository
+                    .insertProcessingQueue(processingQueue);
               }
             } else {
               var processingQueue = ProcessingQueue(

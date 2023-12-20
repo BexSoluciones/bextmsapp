@@ -17,7 +17,14 @@ class ProcessingQueueDao {
     return processingQueues;
   }
 
-  Stream<List<ProcessingQueue>> getAllProcessingQueues() async* {
+  Future<List<ProcessingQueue>> getAllProcessingQueues() async {
+    final db = await _appDatabase.streamDatabase;
+    final processingQueueList = await db!.query(tableProcessingQueues);
+    final processingQueues = parseProcessingQueues(processingQueueList);
+    return processingQueues;
+  }
+
+  Stream<List<ProcessingQueue>> watchAllProcessingQueues() async* {
     final db = await _appDatabase.streamDatabase;
     final processingQueueList = await db!.query(tableProcessingQueues);
     final processingQueues = parseProcessingQueues(processingQueueList);
@@ -72,7 +79,6 @@ class ProcessingQueueDao {
 
   Future<void> emptyProcessingQueue() async {
     final db = await _appDatabase.streamDatabase;
-    await db!.delete(tableProcessingQueues, where: 'code = "store_locations"');
     await db!.delete(tableProcessingQueues, where: 'code = "store_locations"');
     return Future.value();
   }

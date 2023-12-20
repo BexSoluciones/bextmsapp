@@ -25,7 +25,7 @@ class ProcessingQueueCard extends StatelessWidget {
                 ProcessingQueueCardDetail(processingQueue: processingQueue))),
         title: Text(
           'CODIGO: ${processingQueue.code}',
-          style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

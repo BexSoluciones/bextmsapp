@@ -103,7 +103,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
 
   Widget _buildHome() {
     return StreamBuilder<List<ProcessingQueue>>(
-        stream: processingQueueBloc.todos,
+        stream: processingQueueBloc.todosFilter,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
             var queues = snapshot.data;
@@ -145,7 +145,9 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                         item(
                             'Transacciones pendientes',
                             queues
-                                .where((queue) => queue.task == "pending" || queue.task == "incomplete")
+                                .where((queue) =>
+                                    queue.task == "pending" ||
+                                    queue.task == "incomplete")
                                 .length,
                             Colors.orange),
                         const SizedBox(height: 16),
