@@ -259,17 +259,22 @@ class ProcessingQueueBloc
             queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            //TODO:: verify if transaction exists
-
-            final response = await _apiRepository.index(
-                request: TransactionRequest(Transaction.fromJson(body)));
-            if (response is DataSuccess) {
-              queue.task = 'done';
+            bool transactionExists = await _databaseRepository.verifyTransactionExistence(body['work_id'],
+                body['order_number']);
+            if (!transactionExists) {
+              final response = await _apiRepository.index(
+                  request: TransactionRequest(Transaction.fromJson(body)));
+              if (response is DataSuccess) {
+                queue.task = 'done';
+              } else {
+                queue.task = 'error';
+                body['start'] = now();
+                queue.body = jsonEncode(body);
+                queue.error = response.error;
+              }
             } else {
               queue.task = 'error';
-              body['start'] = now();
-              queue.body = jsonEncode(body);
-              queue.error = response.error;
+              queue.error = 'La transacción no existe';
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {

@@ -80,6 +80,8 @@ abstract class DatabaseRepository {
   Future<void> emptyTransactions();
   Future<void> deleteTransactionsByWorkcode(String workcode);
   Future<int> countLeftClients(String workcode);
+  Future<bool> verifyTransactionExistence(int workId,String orderNumber);
+
 
 
   //REASONS
