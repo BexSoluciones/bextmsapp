@@ -261,6 +261,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     return _appDatabase.transactionDao.countLeftClients(workcode);
   }
 
+  @override
+  Future<bool> verifyTransactionExistence(int workId, String orderNumber){
+    return _appDatabase.transactionDao.verifyTransactionExistence(workId,orderNumber);
+  }
+
   //REASONS
   @override
   Future<List<Reason>> getAllReasons() async {

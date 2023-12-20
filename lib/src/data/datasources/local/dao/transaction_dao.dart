@@ -193,6 +193,18 @@ class TransactionDao {
     return clients.toInt();
   }
 
+  Future<bool> verifyTransactionExistence(
+      int workId, String orderNumber) async {
+    final db = await _appDatabase.streamDatabase;
+    List<Map<String, dynamic>> result = await db!.rawQuery(
+      'SELECT COUNT(*) FROM transactions WHERE work_Id = ? AND order_number = ? AND status != ?',
+      [workId, orderNumber, 'summary'],
+    );
+
+    int count = Sqflite.firstIntValue(result)!;
+    return count > 1;
+  }
+
   Future<List<t.Transaction>> getAllTransactions() async {
     final db = await _appDatabase.streamDatabase;
     final transactionList = await db!.rawQuery('''
