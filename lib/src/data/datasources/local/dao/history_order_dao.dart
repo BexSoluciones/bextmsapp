@@ -17,7 +17,7 @@ class HistoryOrderDao {
   Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId) async {
     final db = await _appDatabase.streamDatabase;
     final historyList = await db!.query(tableHistoryOrders,
-        where: 'workcode != ? AND zone_id = ?', whereArgs: [workcode, zoneId]);
+        where: 'workcode = ? AND zone_id = ?', whereArgs: [workcode, zoneId]);
     final histories = parseHistories(historyList);
     if (histories.isNotEmpty) {
       return histories.first;

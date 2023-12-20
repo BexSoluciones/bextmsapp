@@ -19,7 +19,7 @@ class WorkDao {
 
     final workList = await db!.rawQuery('''
         SELECT works.id, works.workcode, works.latitude, works.longitude,
-        works.active, works.status,
+        works.active, works.status, works.zone_id,
         COUNT(DISTINCT number_customer || code_place) as count,
         COUNT(DISTINCT summaries.order_number || works.number_customer || works.code_place) as left,
         COUNT(DISTINCT transactions.order_number || works.number_customer || works.code_place) as right
