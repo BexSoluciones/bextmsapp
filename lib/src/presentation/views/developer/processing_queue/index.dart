@@ -29,6 +29,9 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
   @override
   void initState() {
     processingQueueBloc = context.read<ProcessingQueueBloc>();
+
+    processingQueueBloc.add(ProcessingQueueAll());
+
     processingQueueBloc.dropdownFilterValue =
         processingQueueBloc.itemsFilter.first['key'];
     processingQueueBloc.dropdownStateValue =
@@ -39,11 +42,11 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
   }
 
   void changeFilterValue(String? value) {
-    processingQueueBloc.dropdownFilterValue = value;
+    processingQueueBloc.add(ProcessingQueueSearchFilter(value: value));
   }
 
   void changeStateValue(String? value) {
-    processingQueueBloc.dropdownStateValue = value;
+    processingQueueBloc.add(ProcessingQueueSearchState(value: value));
   }
 
   @override
@@ -95,18 +98,17 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
         ),
       ],
       // The content of the scroll view
-      body: StreamBuilder<List<ProcessingQueue>>(
-        stream: processingQueueBloc.todosFilter,
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
+      body: BlocConsumer<ProcessingQueueBloc, ProcessingQueueState>(
+        // listenWhen: (current, previous) => current != previous,
+        listener: (context, state) {
+          print(state);
+        },
+        builder: (BuildContext context, ProcessingQueueState state) {
           return ListView.builder(
-            itemCount: snapshot.data.length,
+            itemCount: state.processingQueues!.length,
             itemBuilder: (BuildContext context, int index) {
               return ProcessingQueueCard(
-                processingQueue: snapshot.data[index],
+                processingQueue: processingQueueBloc.processingQueues[index],
               );
             },
           );

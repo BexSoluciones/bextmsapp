@@ -10,21 +10,18 @@ part 'location_event.dart';
 part 'location_state.dart';
 
 class LocationBloc extends Bloc<LocationEvent, LocationState> {
-
   final LocationRepository locationRepository;
   final DatabaseRepository databaseRepository;
 
-  LocationBloc({
-    required this.locationRepository,
-    required this.databaseRepository
-  }) : super(LocationState()) {
+  LocationBloc(
+      {required this.locationRepository, required this.databaseRepository})
+      : super(LocationState()) {
     on<GetLocation>(_getLocationEvent);
   }
 
   Stream<List<l.Location>> get locations {
     return databaseRepository.watchAllLocations();
   }
-
 
   void _getLocationEvent(GetLocation event, Emitter<LocationState> emit) async {
     try {

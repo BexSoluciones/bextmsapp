@@ -103,7 +103,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
 
   Widget _buildHome() {
     return StreamBuilder<List<ProcessingQueue>>(
-        stream: processingQueueBloc.todosFilter,
+        stream: processingQueueBloc.todos,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
             var queues = snapshot.data;

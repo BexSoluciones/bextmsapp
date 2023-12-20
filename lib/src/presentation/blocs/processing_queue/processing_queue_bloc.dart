@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,12 +56,13 @@ class ProcessingQueueBloc
     extends Bloc<ProcessingQueueEvent, ProcessingQueueState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ApiRepository _apiRepository;
-  final helperFunctions = HelperFunctions();
+  final NetworkBloc? networkBloc;
 
-  NetworkBloc? networkBloc;
+  final helperFunctions = HelperFunctions();
 
   final _processingQueueController =
       StreamController<List<ProcessingQueue>>.broadcast();
+
   final _addProcessingQueueController =
       StreamController<ProcessingQueue>.broadcast();
 
@@ -77,6 +79,9 @@ class ProcessingQueueBloc
     on<ProcessingQueueObserve>(_observe);
     on<ProcessingQueueSender>(_sender);
     on<ProcessingQueueCancel>(_cancel);
+    on<ProcessingQueueAll>(_all);
+    on<ProcessingQueueSearchFilter>(_searchFilter);
+    on<ProcessingQueueSearchState>(_searchState);
 
     _addProcessingQueueController.stream.listen((p) async {
       await _databaseRepository.insertProcessingQueue(p);
@@ -123,6 +128,7 @@ class ProcessingQueueBloc
     {'key': 'get_prediction', 'value': 'Predicción'},
   ];
 
+  List<ProcessingQueue> processingQueues = [];
   String? dropdownFilterValue;
   String? dropdownStateValue;
 
@@ -150,28 +156,6 @@ class ProcessingQueueBloc
     return _databaseRepository.watchAllProcessingQueues();
   }
 
-  Stream<List<ProcessingQueue>> get todosFilter async* {
-    var processingQueueList = await _databaseRepository.getAllProcessingQueues();
-    if (dropdownFilterValue != null && dropdownFilterValue != 'all') {
-      processingQueueList
-          .where((element) => element.task == dropdownFilterValue);
-    } else if (dropdownFilterValue != null &&
-        dropdownStateValue != null &&
-        dropdownFilterValue != 'all' &&
-        dropdownStateValue != 'all') {
-      processingQueueList.where((element) =>
-          element.task == dropdownFilterValue &&
-          element.code == dropdownStateValue);
-    } else if (dropdownFilterValue == null &&
-        dropdownStateValue != null &&
-        dropdownStateValue != 'all') {
-      processingQueueList
-          .where((element) => element.code == dropdownStateValue);
-    }
-
-    yield processingQueueList;
-  }
-
   Future<int> countProcessingQueueIncompleteToTransactions() {
     return _databaseRepository.countProcessingQueueIncompleteToTransactions();
   }
@@ -190,26 +174,47 @@ class ProcessingQueueBloc
     }
   }
 
+  void _all(event, emit) async {
+    processingQueues = await _databaseRepository.getAllProcessingQueues();
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
+  }
+
   void _add(event, emit) {
     _addProcessingQueueController.add(event.processingQueue);
-    emit(ProcessingQueueSuccess());
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
   }
 
   void _observe(event, emit) {
     if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
       _getProcessingQueue();
     }
-    emit(ProcessingQueueSuccess());
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
   }
 
   void _sender(event, emit) async {
     emit(ProcessingQueueSending());
     await _getProcessingQueue()
-        .whenComplete(() => emit(ProcessingQueueSuccess()));
+        .whenComplete(() => emit(ProcessingQueueSuccess(processingQueues: processingQueues)));
   }
 
   void _cancel(event, emit) {
-    emit(ProcessingQueueSuccess());
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
+  }
+
+  void _searchFilter(ProcessingQueueSearchFilter event, emit) {
+    dropdownFilterValue = event.value;
+    if (dropdownFilterValue != null && event.value != 'all') {
+      processingQueues.where((element) => element.task == event.value);
+    }
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
+  }
+
+  void _searchState(ProcessingQueueSearchState event, emit) {
+    dropdownStateValue = event.value;
+    if (dropdownStateValue != null && dropdownFilterValue != 'all') {
+      processingQueues.where((element) => element.code == event.value);
+    }
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
   }
 
   void sendProcessingQueue(List<ProcessingQueue> queues) async {
