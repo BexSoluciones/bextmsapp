@@ -69,7 +69,7 @@ class SubItemWorkState extends State<SubItemWork> {
                           backgroundColor:
                               Colors.primaries[widget.work.color ?? 5],
                           child: Text(
-                            '${widget.index + 1}',
+                            '${widget.work.order ?? 0 + 1}',
                             textScaler:
                                 TextScaler.linear(calculatedTextScaleFactor),
                             style: TextStyle(

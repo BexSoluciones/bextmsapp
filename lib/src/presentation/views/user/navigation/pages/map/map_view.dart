@@ -320,7 +320,7 @@ class _MapPageState extends State<MapPage> {
             ? CarouselSlider(
                 items: List<Widget>.generate(
                     state.carouselData.length,
-                    (index) => carouselCard(
+                    (index) => CarouselCard(
                         work:  state.works[index] ?? 999,
                         index: state.carouselData[index]['index'],
                         distance:state.carouselData[index]['distance'],

@@ -23,9 +23,10 @@ class WarehouseDao {
 
   Future<Warehouse?> findWarehouse(int id) async {
     final db = await _appDatabase.streamDatabase;
-    final warehouseList = await db!.query(tableWarehouses, where: 'id = ?', whereArgs: [id]);
+    final warehouseList =
+        await db!.query(tableWarehouses, where: 'id = ?', whereArgs: [id]);
     final warehouses = parseWarehouses(warehouseList);
-    if(warehouses.isEmpty){
+    if (warehouses.isEmpty) {
       return null;
     }
     return warehouses.first;
@@ -36,7 +37,8 @@ class WarehouseDao {
   }
 
   Future<int> updateWarehouse(Warehouse warehouse) {
-    return _appDatabase.update(tableWarehouses, warehouse.toJson(), 'id', warehouse.id!);
+    return _appDatabase.update(
+        tableWarehouses, warehouse.toJson(), 'id', warehouse.id!);
   }
 
   Future<void> insertWarehouses(List<Warehouse> warehouses) async {
@@ -45,12 +47,14 @@ class WarehouseDao {
 
     if (warehouses.isNotEmpty) {
       await Future.forEach(warehouses, (warehouse) async {
-        var d = await db.query(tableWarehouses, where: 'id = ?', whereArgs: [warehouse.id]);
+        var d = await db.query(tableWarehouses,
+            where: 'id = ?', whereArgs: [warehouse.id]);
         var w = parseWarehouses(d);
         if (w.isEmpty) {
           batch.insert(tableWarehouses, warehouse.toJson());
         } else {
-          batch.update(tableWarehouses, warehouse.toJson(), where: 'id = ?', whereArgs: [warehouse.id]);
+          batch.update(tableWarehouses, warehouse.toJson(),
+              where: 'id = ?', whereArgs: [warehouse.id]);
         }
       });
     }

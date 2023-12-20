@@ -61,14 +61,6 @@ class SummaryViewState extends State<SummaryView> {
     super.initState();
   }
 
-  @override
-  void didChangeDependencies() {
-    print('*******changed*******');
-    summaryCubit = BlocProvider.of<SummaryCubit>(context);
-    summaryCubit.getAllSummariesByOrderNumber(widget.arguments.work.id!);
-    super.didChangeDependencies();
-  }
-
 
   void startWidgetSummary() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -91,6 +83,7 @@ class SummaryViewState extends State<SummaryView> {
 
   @override
   void dispose() {
+    print('dispose');
     super.dispose();
   }
 

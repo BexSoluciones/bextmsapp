@@ -118,7 +118,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
               builder: (ctx) => GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   child: Stack(alignment: Alignment.center, children: <Widget>[
-                    Image.asset('assets/icons/point.png', color: Colors.blue),
+                    Image.asset('assets/icons/point.png', color: Colors.purple),
                     const Icon(Icons.location_on, size: 14, color: Colors.white),
                   ]))),
         );

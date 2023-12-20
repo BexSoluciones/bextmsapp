@@ -73,7 +73,7 @@ class ItemWorkState extends State<ItemWork> {
                           backgroundColor:
                               Colors.primaries[widget.work.color ?? 5],
                           child: Text(
-                            '${widget.index + 1}',
+                            '${widget.work.order != null ? widget.work.order! + 1 : 1}',
                             textScaler:
                                 TextScaler.linear(calculatedTextScaleFactor),
                             style: TextStyle(

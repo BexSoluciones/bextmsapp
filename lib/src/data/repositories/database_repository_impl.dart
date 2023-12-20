@@ -220,6 +220,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<bool> checkLastProduct(int transactionId) {
+    return _appDatabase.transactionDao.checkLastProduct(transactionId);
+  }
+
+  @override
   Future<String?> getDiffTime(int workId) async {
     return _appDatabase.transactionDao.getDiffTime(workId);
   }
@@ -485,6 +490,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId) async {
     return _appDatabase.historyOrderDao.getHistoryOrder(workcode, zoneId);
+  }
+
+  @override
+  Future<int> insertHistory(HistoryOrder historyOrder) async {
+    return _appDatabase.historyOrderDao.insertHistory(historyOrder);
   }
 
   //WORK TYPE

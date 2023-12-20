@@ -24,9 +24,11 @@ import '../../blocs/processing_queue/processing_queue_bloc.dart';
 //utils
 import '../../../utils/resources/data_state.dart';
 import '../../../utils/constants/strings.dart';
+import '../../../utils/extensions/list_extension.dart';
 
 //domain
 import '../../../domain/models/work.dart';
+import '../../../domain/models/warehouse.dart';
 import '../../../domain/models/user.dart';
 import '../../../domain/models/summary.dart';
 import '../../../domain/models/transaction.dart';
@@ -219,11 +221,13 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           });
 
           var worksF = groupBy(responseWorks.data!.works, (Work o) => o.workcode);
-
+          var warehouses = <Warehouse>[];
           for(var w in worksF.keys){
             var wn = responseWorks.data!.works.where((element) => element.workcode == w);
-            await _databaseRepository.insertWarehouse(wn.first.warehouse!);
+            warehouses.add(wn.first.warehouse!);
           }
+          final distinct = warehouses.unique((x) => x.id);
+          await _databaseRepository.insertWarehouses(distinct);
 
           //TODO:: refactoring
           var workcodes = groupBy(works, (Work work) => work.workcode);

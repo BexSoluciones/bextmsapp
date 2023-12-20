@@ -17,26 +17,33 @@ import '../../../../cubits/navigation/navigation_cubit.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
 
+class CarouselCard extends StatefulWidget {
+  final Work work;
+  final int index;
+  final num distance;
+  final num duration;
+  final BuildContext context;
 
-class carouselCard extends StatefulWidget {
-  Work work;
-  int index;
-  num distance;
-  num duration;
-  BuildContext context;
-   carouselCard({super.key, required this.work,required this.index,required this.distance, required this.duration,required this.context});
+  const CarouselCard(
+      {super.key,
+      required this.work,
+      required this.index,
+      required this.distance,
+      required this.duration,
+      required this.context});
 
   @override
-  State<carouselCard> createState() => _carouselCardState();
+  State<CarouselCard> createState() => _CarouselCardState();
 }
 
-class _carouselCardState extends State<carouselCard> {
+class _CarouselCardState extends State<CarouselCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () async {
           context.read<NavigationCubit>().clean();
-          if (widget.work.hasCompleted != null && widget.work.hasCompleted == 0) {
+          if (widget.work.hasCompleted != null &&
+              widget.work.hasCompleted == 0) {
             _navigationService.goTo(AppRoutes.summary,
                 arguments: SummaryArgument(work: widget.work));
           }
@@ -50,7 +57,7 @@ class _carouselCardState extends State<carouselCard> {
               children: [
                 CircleAvatar(
                     backgroundColor: Colors.primaries[widget.work.color ?? 1],
-                    child: Text('${widget.index + 1}')),
+                    child: Text('${widget.work.order != null ? widget.work.order! + 1 : 1}')),
                 const SizedBox(width: 10),
                 Expanded(
                   flex: 2,
@@ -83,4 +90,3 @@ class _carouselCardState extends State<carouselCard> {
         ));
   }
 }
-
