@@ -193,26 +193,35 @@ class ProcessingQueueBloc
 
   void _sender(event, emit) async {
     emit(ProcessingQueueSending());
-    await _getProcessingQueue()
-        .whenComplete(() => emit(ProcessingQueueSuccess(processingQueues: processingQueues)));
+    await _getProcessingQueue().whenComplete(
+        () => emit(ProcessingQueueSuccess(processingQueues: processingQueues)));
   }
 
   void _cancel(event, emit) {
     emit(ProcessingQueueSuccess(processingQueues: processingQueues));
   }
 
-  void _searchFilter(ProcessingQueueSearchFilter event, emit) {
+  void _searchFilter(ProcessingQueueSearchFilter event, emit) async {
     dropdownFilterValue = event.value;
-    if (dropdownFilterValue != null && event.value != 'all') {
-      processingQueues.where((element) => element.task == event.value);
+    if (dropdownFilterValue != null && dropdownFilterValue != 'all') {
+      processingQueues = processingQueues
+          .where((element) => element.task == event.value)
+          .toList(growable: false);
+      print(processingQueues.length);
+    } else {
+      processingQueues = await _databaseRepository.getAllProcessingQueues();
     }
     emit(ProcessingQueueSuccess(processingQueues: processingQueues));
   }
 
-  void _searchState(ProcessingQueueSearchState event, emit) {
+  void _searchState(ProcessingQueueSearchState event, emit) async {
     dropdownStateValue = event.value;
-    if (dropdownStateValue != null && dropdownFilterValue != 'all') {
-      processingQueues.where((element) => element.code == event.value);
+    if (dropdownStateValue != null && dropdownStateValue != 'all') {
+      processingQueues = processingQueues
+          .where((element) => element.code == event.value)
+          .toList(growable: false);
+    } else {
+      processingQueues = await _databaseRepository.getAllProcessingQueues();
     }
     emit(ProcessingQueueSuccess(processingQueues: processingQueues));
   }
