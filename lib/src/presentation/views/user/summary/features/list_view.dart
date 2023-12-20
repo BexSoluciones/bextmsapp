@@ -97,38 +97,51 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
             flex: 3,
             child: _buildList(state.isArrived, state.summaries),
           ),
-          state.isGeoReference == false && state.isArrived == true
-              ? Padding(
-                  padding: const EdgeInsets.all(kDefaultPadding),
-                  child: DefaultButton(
-                      widget: const Text('¿Quieres georeferenciarlo?',
-                          style: TextStyle(color: Colors.white, fontSize: 18)),
-                      press: () => _navigationService.goTo(
-                          AppRoutes.summaryGeoReference,
-                          arguments: widget.arguments)),
-                )
-              : Container(),
-          state.isArrived == false
-              ? Padding(
-                  padding: const EdgeInsets.all(kDefaultPadding),
-                  child: DefaultButton(
-                      widget: const Text('¿Llegaste donde el cliente?',
-                          style: TextStyle(color: Colors.white, fontSize: 18)),
-                      press: () async {
-                        var transaction = Transaction(
-                            workId: widget.arguments.work.id!,
-                            workcode: widget.arguments.work.workcode!,
-                            status: 'arrived',
-                            start: now(),
-                            end: now(),
-                            latitude: null,
-                            longitude: null,
-                            firm: null);
-                        context.read<SummaryCubit>().sendTransactionArrived(
-                            widget.arguments.work, transaction);
-                      }),
-                )
-              : Container()
+          BlocSelector<SummaryCubit, SummaryState, bool>(
+              selector: (state) =>
+                  state.isGeoReference == false && state.isArrived == true,
+              builder: (c, x) {
+                return x
+                    ? Padding(
+                        padding: const EdgeInsets.all(kDefaultPadding),
+                        child: DefaultButton(
+                            widget: const Text('¿Quieres georeferenciarlo?',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18)),
+                            press: () => _navigationService.goTo(
+                                AppRoutes.summaryGeoReference,
+                                arguments: widget.arguments)),
+                      )
+                    : Container();
+              }),
+          BlocSelector<SummaryCubit, SummaryState, bool>(
+              selector: (state) => state.isArrived == false,
+              builder: (c, x) {
+                return x
+                    ? Padding(
+                        padding: const EdgeInsets.all(kDefaultPadding),
+                        child: DefaultButton(
+                            widget: const Text('¿Llegaste donde el cliente?',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18)),
+                            press: () async {
+                              var transaction = Transaction(
+                                  workId: widget.arguments.work.id!,
+                                  workcode: widget.arguments.work.workcode!,
+                                  status: 'arrived',
+                                  start: now(),
+                                  end: now(),
+                                  latitude: null,
+                                  longitude: null,
+                                  firm: null);
+                              context
+                                  .read<SummaryCubit>()
+                                  .sendTransactionArrived(
+                                      widget.arguments.work, transaction);
+                            }),
+                      )
+                    : Container();
+              }),
         ],
       ),
     );
