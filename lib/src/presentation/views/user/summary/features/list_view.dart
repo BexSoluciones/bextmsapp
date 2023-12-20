@@ -97,7 +97,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
             flex: 3,
             child: _buildList(state.isArrived, state.summaries),
           ),
-          state.isGeoreference == false && state.isArrived == true
+          state.isGeoReference == false && state.isArrived == true
               ? Padding(
                   padding: const EdgeInsets.all(kDefaultPadding),
                   child: DefaultButton(

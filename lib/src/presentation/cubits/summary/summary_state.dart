@@ -4,19 +4,19 @@ abstract class SummaryState extends Equatable {
   final List<Summary> summaries;
   final String? origin;
   final String? time;
-  final bool isArrived;
-  final bool isGeoreference;
+  final bool? isArrived;
+  final bool? isGeoReference;
 
   const SummaryState(
       {this.summaries = const [],
       this.origin,
       this.time,
-      this.isArrived = true,
-      this.isGeoreference = false});
+      this.isArrived,
+      this.isGeoReference});
 
   @override
   List<Object?> get props =>
-      [summaries, origin, time, isArrived, isGeoreference];
+      [summaries, origin, time, isArrived, isGeoReference];
 }
 
 class SummaryLoading extends SummaryState {
@@ -33,5 +33,5 @@ class SummarySuccess extends SummaryState {
       super.origin,
       super.time,
       super.isArrived,
-      super.isGeoreference});
+      super.isGeoReference});
 }

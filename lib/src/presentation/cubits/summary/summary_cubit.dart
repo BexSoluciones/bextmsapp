@@ -66,7 +66,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         origin: state.origin,
         time: time,
         isArrived: isArrived,
-        isGeoreference: isGeoReferenced);
+        isGeoReference: isGeoReferenced);
   }
 
   Future<void> getDiffTime(int workId) async {
@@ -76,7 +76,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         origin: state.origin,
         time: time,
         isArrived: state.isArrived,
-        isGeoreference: state.isGeoreference));
+        isGeoReference: state.isGeoReference));
   }
 
   Future<void> sendTransactionSummary(
@@ -117,7 +117,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         origin: state.origin,
         time: state.time,
         isArrived: isArrived,
-        isGeoreference: state.isGeoreference));
+        isGeoReference: state.isGeoReference));
 
     _navigationService.goTo(AppRoutes.inventory,
         arguments: InventoryArgument(
@@ -161,7 +161,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         origin: state.origin,
         time: state.time,
         isArrived: isArrived,
-        isGeoreference: state.isGeoreference));
+        isGeoReference: state.isGeoReference));
   }
 
   Future<void> showMaps(
