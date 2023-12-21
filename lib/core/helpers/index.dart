@@ -309,6 +309,39 @@ class HelperFunctions {
     }
   }
 
+
+  Future<void> showMapDirectionWaze(BuildContext context, Work work,
+      CurrentUserLocationEntity? location) async {
+    final availableMaps = await MapLauncher.installedMaps;
+    AvailableMap? waze;
+
+    location ??= await _locationRepository.getCurrentLocation();
+
+    for (final map in availableMaps) {
+      if (map.mapType == MapType.waze) {
+        waze = map;
+        break;
+      }
+    }
+
+    if (waze != null) {
+      await waze.showDirections(
+        destination: Coords(
+          double.parse(work.latitude!),
+          double.parse(work.longitude!),
+        ),
+        destinationTitle: work.customer,
+        origin: Coords(location.latitude, location.longitude),
+        originTitle: 'Origen',
+        waypoints: null,
+        directionsMode: DirectionsMode.driving,
+      );
+    } else {
+      print('Waze no está instalado en el dispositivo.');
+    }
+  }
+
+
   Future<void> initLocationService() async {
     final bool serviceEnabled = await checkAndEnableLocationService();
     if (!serviceEnabled) {
