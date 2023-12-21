@@ -159,8 +159,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     _navigationService.goTo(AppRoutes.camera, arguments: orderNumber);
   }
 
-  void goToCodeQR() {
-    _navigationService.goTo(AppRoutes.codeQr);
+  void goToCodeQR(String? qr) {
+    _navigationService.goTo(AppRoutes.codeQr, arguments: qr);
   }
 
   void goToSummary(work) {

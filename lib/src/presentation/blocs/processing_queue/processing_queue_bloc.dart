@@ -139,13 +139,14 @@ class ProcessingQueueBloc
   }
 
   Stream get resolve {
-    return Stream.periodic(const Duration(seconds: 30), (int value) async {
+    return Stream.periodic(const Duration(minutes: 2), (int value) async {
       final timer0 = logTimerStart(headerDeveloperLogger, 'Starting...',
           level: LogLevel.info);
-      var result = await _databaseRepository.listenForTableChanges(
-          'works', 'status', 'complete');
-      logDebugFine(headerDeveloperLogger, result.toString());
-      if (result) await _getProcessingQueue();
+      // var result = await _databaseRepository.listenForTableChanges(
+      //     'works', 'status', 'complete');
+      // logDebugFine(headerDeveloperLogger, result.toString());
+      // if (result)
+        await _getProcessingQueue();
       logTimerStop(headerDeveloperLogger, timer0, 'Initialization completed',
           level: LogLevel.success);
       return true;
@@ -643,35 +644,18 @@ class ProcessingQueueBloc
         if (workcode != null) {
           var isLast = await _databaseRepository.checkLastTransaction(workcode);
           if (isLast) {
-            var isPartial = body['status'] == 'partial';
-            if (isPartial) {
-              //TODO:: [Heider Zapa] check if last product to send
-              var toSend = await _databaseRepository
-                  .checkLastProduct(int.parse(p.relationId!));
-
-              if (toSend) {
-                var processingQueue = ProcessingQueue(
-                  body:
-                      jsonEncode({'workcode': workcode, 'status': 'complete'}),
-                  task: 'incomplete',
-                  code: 'store_work_status',
-                  createdAt: now(),
-                  updatedAt: now(),
-                );
-                await _databaseRepository
-                    .insertProcessingQueue(processingQueue);
-              }
-            } else {
-              var processingQueue = ProcessingQueue(
-                body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
-                task: 'incomplete',
-                code: 'store_work_status',
-                createdAt: now(),
-                updatedAt: now(),
-              );
-              await _databaseRepository.insertProcessingQueue(processingQueue);
+            var processingQueue = ProcessingQueue(
+              body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
+              task: 'incomplete',
+              code: 'store_work_status',
+              createdAt: now(),
+              updatedAt: now(),
+            );
+            await _databaseRepository.insertProcessingQueue(processingQueue);
+            var cmh = _storageService.getBool('can_make_history');
+            if (cmh == null || cmh == false) {
+              await _databaseRepository.updateStatusWork(workcode, 'complete');
             }
-            await _databaseRepository.updateStatusWork(workcode, 'complete');
           }
         }
       }

@@ -18,5 +18,5 @@ Map<String, RouteType> coreRoutes = {
   AppRoutes.photo: (context, settings) => const PhotoView(),
   AppRoutes.detailPhoto: (context, settings) =>
       DetailPhotoView(photo: settings.arguments as Photo),
-  AppRoutes.codeQr: (context, settings) => const QrView(),
+  AppRoutes.codeQr: (context, settings) => QrView(codeQr: settings.arguments as String?),
 };

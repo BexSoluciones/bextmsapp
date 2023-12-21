@@ -248,8 +248,6 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
   }
 
   void _onTap(BuildContext context, Work work) {
-    print('*********************');
-
     showDialog(
       context: context,
       builder: (BuildContext context) => const Center(

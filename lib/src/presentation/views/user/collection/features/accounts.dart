@@ -98,7 +98,9 @@ class _AccountsCollectionState extends State<AccountsCollection>
                       ? IconButton(
                           icon: const Icon(Icons.qr_code_2,
                               size: 32, color: kPrimaryColor),
-                          onPressed: () => widget.collectionCubit.goToCodeQR())
+                          onPressed: () => widget.collectionCubit.goToCodeQR(
+                              widget.state.enterpriseConfig!.codeQr
+                          ))
                       : Container()
                 ],
               ),
@@ -151,7 +153,9 @@ class _AccountsCollectionState extends State<AccountsCollection>
                     children: [
                       IconButton(
                         icon: const Icon(Icons.qr_code_2),
-                        onPressed: () => widget.collectionCubit.goToCodeQR(),
+                        onPressed: () => widget.collectionCubit.goToCodeQR(
+                          widget.collectionCubit.selectedAccount?.code_qr
+                        ),
                       ),
                     ],
                   )
