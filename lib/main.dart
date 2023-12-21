@@ -435,12 +435,6 @@ class _MyAppState extends State<MyApp> {
                 BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
-            create: (_) => CameraBloc(
-                cameraUtils: CameraUtils(),
-                databaseRepository: locator<DatabaseRepository>())
-              ..add(CameraInitialized()),
-          ),
-          BlocProvider(
             create: (context) => AccountBloc(locator<DatabaseRepository>()),
           ),
           BlocProvider(
