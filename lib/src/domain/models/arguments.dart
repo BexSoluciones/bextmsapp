@@ -81,10 +81,10 @@ class HistoryArgument {
   HistoryArgument({
     required this.work,
     required this.likelihood,
-    required this.different,
+    required this.differents,
   });
 
   final Work work;
-  final double? likelihood;
-  final List<Different> different;
+  final double likelihood;
+  final List<Different> differents;
 }

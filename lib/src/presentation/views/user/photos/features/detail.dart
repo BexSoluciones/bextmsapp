@@ -85,7 +85,7 @@ class _DetailPhotoViewState extends State<DetailPhotoView> {
 
   Future<Photo?> _cropImage() async {
     final sourcePath = _currentPhoto!.path;
-    if (await File(sourcePath).exists()) {
+    if (await File(sourcePath).exists() && context.mounted) {
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: sourcePath,
         compressFormat: ImageCompressFormat.jpg,
@@ -117,7 +117,7 @@ class _DetailPhotoViewState extends State<DetailPhotoView> {
         ],
       );
 
-      if (croppedFile != null) {
+      if (croppedFile != null && context.mounted) {
         final originalPhoto = _currentPhoto!;
         final updatedPhoto = Photo(name: originalPhoto.name, path: croppedFile.path);
         BlocProvider.of<PhotosBloc>(context).add(PhotosAdded(photo: updatedPhoto));

@@ -61,8 +61,6 @@ class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
         loginCubit.updateEnterpriseState(enterprise);
 
         var token = _notificationService.token;
-        print('token from initial');
-        print(token);
         emit(InitialSuccess(enterprise: enterprise, token: token));
       } else if (response is DataFailed) {
         _storageService.setString('company', null);

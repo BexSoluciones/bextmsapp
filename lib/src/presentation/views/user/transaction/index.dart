@@ -145,7 +145,9 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                         item(
                             'Transacciones pendientes',
                             queues
-                                .where((queue) => queue.task == "pending" || queue.task == "incomplete")
+                                .where((queue) =>
+                                    queue.task == "pending" ||
+                                    queue.task == "incomplete")
                                 .length,
                             Colors.orange),
                         const SizedBox(height: 16),

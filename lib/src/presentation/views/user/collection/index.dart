@@ -100,7 +100,6 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   }
 
   void buildBlocListener(BuildContext context, CollectionState state) async {
-    print(state);
     if (state is CollectionSuccess) {
       if (state.validate != null && state.validate == true) {
         collectionCubit.goToWork(state.work);
@@ -130,8 +129,6 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
               context: context,
             );
           });
-    } else if (state is CollectionModalClosed) {
-      print(collectionCubit.total);
     }
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,12 +56,13 @@ class ProcessingQueueBloc
     extends Bloc<ProcessingQueueEvent, ProcessingQueueState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ApiRepository _apiRepository;
-  final helperFunctions = HelperFunctions();
+  final NetworkBloc? networkBloc;
 
-  NetworkBloc? networkBloc;
+  final helperFunctions = HelperFunctions();
 
   final _processingQueueController =
       StreamController<List<ProcessingQueue>>.broadcast();
+
   final _addProcessingQueueController =
       StreamController<ProcessingQueue>.broadcast();
 
@@ -77,13 +79,22 @@ class ProcessingQueueBloc
     on<ProcessingQueueObserve>(_observe);
     on<ProcessingQueueSender>(_sender);
     on<ProcessingQueueCancel>(_cancel);
+    on<ProcessingQueueAll>(_all);
+    on<ProcessingQueueSearchFilter>(_searchFilter);
+    on<ProcessingQueueSearchState>(_searchState);
 
     _addProcessingQueueController.stream.listen((p) async {
       await _databaseRepository.insertProcessingQueue(p);
-      await Future.value([
-        _getProcessingQueue(),
-        validateIfServiceIsCompleted(p),
-      ]);
+      if (p.code != 'store_transaction_product') {
+        await Future.value([
+          _getProcessingQueue(),
+          validateIfServiceIsCompleted(p),
+        ]);
+      } else {
+        await Future.value([
+          validateIfServiceIsCompleted(p),
+        ]);
+      }
     }, onError: (error) {
       if (kDebugMode) {
         print('error');
@@ -97,6 +108,29 @@ class ProcessingQueueBloc
 
     _processingQueueController.stream.listen(sendProcessingQueue);
   }
+
+  final itemsFilter = [
+    {'key': 'all', 'value': 'Todos'},
+    {'key': 'processing', 'value': 'Procesando'},
+    {'key': 'error', 'value': 'Error'},
+    {'key': 'incomplete', 'value': 'Incompleto'},
+    {'key': 'done', 'value': 'Enviado'},
+  ];
+
+  final itemsState = [
+    {'key': 'all', 'value': 'Todos'},
+    {'key': 'store_transaction_start', 'value': 'Transacción inicio'},
+    {'key': 'store_transaction_arrived', 'value': 'Transacción de llegada'},
+    {'key': 'store_transaction_summary', 'value': 'Transacción de factura'},
+    {'key': 'store_transaction', 'value': 'Transacción'},
+    {'key': 'store_transaction_product', 'value': 'Transacción de producto'},
+    {'key': 'store_locations', 'value': 'Localizaciones'},
+    {'key': 'get_prediction', 'value': 'Predicción'},
+  ];
+
+  List<ProcessingQueue> processingQueues = [];
+  String? dropdownFilterValue;
+  String? dropdownStateValue;
 
   static void heavyTask(IsolateModel model) {
     for (var i = 0; i < model.iteration; i++) {
@@ -119,7 +153,7 @@ class ProcessingQueueBloc
   }
 
   Stream<List<ProcessingQueue>> get todos {
-    return _databaseRepository.getAllProcessingQueues();
+    return _databaseRepository.watchAllProcessingQueues();
   }
 
   Future<int> countProcessingQueueIncompleteToTransactions() {
@@ -140,26 +174,55 @@ class ProcessingQueueBloc
     }
   }
 
+  void _all(event, emit) async {
+    processingQueues = await _databaseRepository.getAllProcessingQueues();
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
+  }
+
   void _add(event, emit) {
     _addProcessingQueueController.add(event.processingQueue);
-    emit(ProcessingQueueSuccess());
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
   }
 
   void _observe(event, emit) {
     if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
       _getProcessingQueue();
     }
-    emit(ProcessingQueueSuccess());
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
   }
 
   void _sender(event, emit) async {
     emit(ProcessingQueueSending());
-    await _getProcessingQueue()
-        .whenComplete(() => emit(ProcessingQueueSuccess()));
+    await _getProcessingQueue().whenComplete(
+        () => emit(ProcessingQueueSuccess(processingQueues: processingQueues)));
   }
 
   void _cancel(event, emit) {
-    emit(ProcessingQueueSuccess());
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
+  }
+
+  void _searchFilter(ProcessingQueueSearchFilter event, emit) async {
+    dropdownFilterValue = event.value;
+    if (dropdownFilterValue != null && dropdownFilterValue != 'all') {
+      processingQueues = processingQueues
+          .where((element) => element.task == event.value)
+          .toList(growable: false);
+    } else {
+      processingQueues = await _databaseRepository.getAllProcessingQueues();
+    }
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
+  }
+
+  void _searchState(ProcessingQueueSearchState event, emit) async {
+    dropdownStateValue = event.value;
+    if (dropdownStateValue != null && dropdownStateValue != 'all') {
+      processingQueues = processingQueues
+          .where((element) => element.code == event.value)
+          .toList(growable: false);
+    } else {
+      processingQueues = await _databaseRepository.getAllProcessingQueues();
+    }
+    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
   }
 
   void sendProcessingQueue(List<ProcessingQueue> queues) async {
@@ -259,23 +322,25 @@ class ProcessingQueueBloc
             queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            bool transactionExists = await _databaseRepository.verifyTransactionExistence(body['work_id'],
-                body['order_number']);
-            if (!transactionExists) {
-              final response = await _apiRepository.index(
-                  request: TransactionRequest(Transaction.fromJson(body)));
-              if (response is DataSuccess) {
-                queue.task = 'done';
-              } else {
-                queue.task = 'error';
-                body['start'] = now();
-                queue.body = jsonEncode(body);
-                queue.error = response.error;
-              }
+            // bool transactionExists = await _databaseRepository.verifyTransactionExistence(body['work_id'],
+            //     body['order_number']);
+            final response = await _apiRepository.index(
+                request: TransactionRequest(Transaction.fromJson(body)));
+            if (response is DataSuccess) {
+              queue.task = 'done';
             } else {
               queue.task = 'error';
-              queue.error = 'La transacción no existe';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
+              queue.error = response.error;
             }
+
+            // if (!transactionExists) {
+            //
+            // } else {
+            //   queue.task = 'error';
+            //   queue.error = 'La transacción no existe';
+            // }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -427,8 +492,7 @@ class ProcessingQueueBloc
             var body = jsonDecode(queue.body);
             queue.task = 'processing';
             final response = await _apiRepository.prediction(
-                request: PredictionRequest(
-                    int.parse(body['zone_id']), body['workcode']));
+                request: PredictionRequest(body['zone_id'], body['workcode']));
             if (response is DataSuccess) {
               var prediction = response.data;
 
@@ -575,17 +639,29 @@ class ProcessingQueueBloc
       if (p.code == 'store_transaction' ||
           p.code == 'store_transaction_product') {
         var body = jsonDecode(p.body);
-        var workcode = body['workcode'];
+        String? workcode = body['workcode'];
+        if (workcode != null) {
+          var isLast = await _databaseRepository.checkLastTransaction(workcode);
+          if (isLast) {
+            var isPartial = body['status'] == 'partial';
+            if (isPartial) {
+              //TODO:: [Heider Zapa] check if last product to send
+              var toSend = await _databaseRepository
+                  .checkLastProduct(int.parse(p.relationId!));
 
-        var isLast = await _databaseRepository.checkLastTransaction(workcode);
-        if (isLast) {
-          var isPartial = body['status'] == 'partial';
-          if (isPartial) {
-            //TODO:: [Heider Zapa] check if last product to send
-            var toSend = await _databaseRepository
-                .checkLastProduct(int.parse(p.relationId!));
-
-            if (toSend) {
+              if (toSend) {
+                var processingQueue = ProcessingQueue(
+                  body:
+                      jsonEncode({'workcode': workcode, 'status': 'complete'}),
+                  task: 'incomplete',
+                  code: 'store_work_status',
+                  createdAt: now(),
+                  updatedAt: now(),
+                );
+                await _databaseRepository
+                    .insertProcessingQueue(processingQueue);
+              }
+            } else {
               var processingQueue = ProcessingQueue(
                 body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
                 task: 'incomplete',
@@ -595,17 +671,8 @@ class ProcessingQueueBloc
               );
               await _databaseRepository.insertProcessingQueue(processingQueue);
             }
-          } else {
-            var processingQueue = ProcessingQueue(
-              body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
-              task: 'incomplete',
-              code: 'store_work_status',
-              createdAt: now(),
-              updatedAt: now(),
-            );
-            await _databaseRepository.insertProcessingQueue(processingQueue);
+            await _databaseRepository.updateStatusWork(workcode, 'complete');
           }
-          await _databaseRepository.updateStatusWork(workcode, 'complete');
         }
       }
     } catch (e, stackTrace) {

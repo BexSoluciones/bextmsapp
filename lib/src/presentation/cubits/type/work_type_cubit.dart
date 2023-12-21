@@ -19,10 +19,8 @@ class WorkTypeCubit extends BaseCubit<WorkTypeState, List<WorkTypes>?> {
     await run(() async {
       try {
         final workTypes = await _databaseRepository.getWorkTypesFromWorkcode(workCode);
-
         emit(WorkTypeCubitSuccess(workTypes:workTypes));
       } catch (error, stackTrace) {
-        print('Error getWorkTypesFromWork data: $error');
         await FirebaseCrashlytics.instance.recordError(error, stackTrace);
         emit(WorkTypeCubitFailed(error: error.toString()));
       }

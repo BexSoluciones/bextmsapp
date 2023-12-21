@@ -146,6 +146,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       final File compressedImage = File(imagePath)
         ..writeAsBytesSync(img.encodeJpg(image, quality: 80));
     } catch (error) {
+
       print('Error al comprimir la imagen: $error');
     }
   }

@@ -130,6 +130,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   Future<CollectionState> _getCollection(int workId, String orderNumber) async {
     var totalSummary =
         await _databaseRepository.getTotalSummaries(workId, orderNumber);
+    total = 0;
     dateController.text = date(null);
     return CollectionInitial(
         totalSummary: totalSummary,
@@ -449,8 +450,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
                 workId: arguments.work.id!,
                 codmotvis: re!.codmotvis,
                 reason: reason[0].controller.text,
-                createdAt: DateTime.now().toString(),
-                updatedAt: DateTime.now().toString());
+                createdAt: now(),
+                updatedAt: now());
 
             var id = await _databaseRepository
                 .insertTransactionSummary(transactionSummary);

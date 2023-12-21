@@ -113,9 +113,7 @@ class _PartialViewState extends State<PartialView> {
             Expanded(
                 flex: 4,
                 child: BlocListener<PartialCubit, PartialState>(
-                    listener: (context, state) {
-                      print(state);
-                    },
+                    listener: (context, state) {},
                     child: ReasonsGlobal(
                       context: context,
                       r: state.products,

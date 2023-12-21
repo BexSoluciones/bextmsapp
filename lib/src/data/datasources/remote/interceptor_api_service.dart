@@ -49,11 +49,11 @@ class Logging extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (_shouldRetryOnHttpException(err)) {
       try {
-        handler.resolve(await DioHttpRequestRetrier(dio: dio)
-            .requestRetry(err.requestOptions)
-            .catchError((e) {
-          handler.next(err);
-        }));
+        // handler.resolve(await DioHttpRequestRetrier(dio: dio)
+        //     .requestRetry(err.requestOptions)
+        //     .catchError((e) {
+        //   handler.next(err);
+        // }));
       } catch (e,stackTrace) {
         handler.next(err);
         await FirebaseCrashlytics.instance.recordError(e, stackTrace);
@@ -72,37 +72,37 @@ class Logging extends Interceptor {
 }
 
 /// Retrier
-class DioHttpRequestRetrier {
-  DioHttpRequestRetrier({
-    required this.dio,
-  });
-
-  final Dio dio;
-
-  Future<Response> requestRetry(RequestOptions requestOptions) async {
-    return dio.request(
-      requestOptions.path,
-      cancelToken: requestOptions.cancelToken,
-      data: requestOptions.data,
-      onReceiveProgress: requestOptions.onReceiveProgress,
-      onSendProgress: requestOptions.onSendProgress,
-      queryParameters: requestOptions.queryParameters,
-      options: Options(
-        contentType: requestOptions.contentType,
-        headers: requestOptions.headers,
-        sendTimeout: requestOptions.sendTimeout,
-        receiveTimeout: requestOptions.receiveTimeout,
-        extra: requestOptions.extra,
-        followRedirects: requestOptions.followRedirects,
-        listFormat: requestOptions.listFormat,
-        maxRedirects: requestOptions.maxRedirects,
-        method: requestOptions.method,
-        receiveDataWhenStatusError: requestOptions.receiveDataWhenStatusError,
-        requestEncoder: requestOptions.requestEncoder,
-        responseDecoder: requestOptions.responseDecoder,
-        responseType: requestOptions.responseType,
-        validateStatus: requestOptions.validateStatus,
-      ),
-    );
-  }
-}
+// class DioHttpRequestRetrier {
+//   DioHttpRequestRetrier({
+//     required this.dio,
+//   });
+//
+//   final Dio dio;
+//
+//   Future<Response> requestRetry(RequestOptions requestOptions) async {
+//     return dio.request(
+//       requestOptions.path,
+//       cancelToken: requestOptions.cancelToken,
+//       data: requestOptions.data,
+//       onReceiveProgress: requestOptions.onReceiveProgress,
+//       onSendProgress: requestOptions.onSendProgress,
+//       queryParameters: requestOptions.queryParameters,
+//       options: Options(
+//         contentType: requestOptions.contentType,
+//         headers: requestOptions.headers,
+//         sendTimeout: requestOptions.sendTimeout,
+//         receiveTimeout: requestOptions.receiveTimeout,
+//         extra: requestOptions.extra,
+//         followRedirects: requestOptions.followRedirects,
+//         listFormat: requestOptions.listFormat,
+//         maxRedirects: requestOptions.maxRedirects,
+//         method: requestOptions.method,
+//         receiveDataWhenStatusError: requestOptions.receiveDataWhenStatusError,
+//         requestEncoder: requestOptions.requestEncoder,
+//         responseDecoder: requestOptions.responseDecoder,
+//         responseType: requestOptions.responseType,
+//         validateStatus: requestOptions.validateStatus,
+//       ),
+//     );
+//   }
+// }
