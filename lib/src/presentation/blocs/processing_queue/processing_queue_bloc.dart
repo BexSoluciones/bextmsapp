@@ -207,7 +207,6 @@ class ProcessingQueueBloc
       processingQueues = processingQueues
           .where((element) => element.task == event.value)
           .toList(growable: false);
-      print(processingQueues.length);
     } else {
       processingQueues = await _databaseRepository.getAllProcessingQueues();
     }
@@ -325,11 +324,6 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
             // bool transactionExists = await _databaseRepository.verifyTransactionExistence(body['work_id'],
             //     body['order_number']);
-
-            print('el error esta aqui');
-            print(body['images'] is String);
-
-            print('****************sending transaction***************');
             final response = await _apiRepository.index(
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {

@@ -283,8 +283,6 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                 true;
 
         if (state.historyOrder != null && showAgain == false) {
-
-          print('navigating');
           _navigationService.goTo(AppRoutes.history,
               arguments: HistoryArgument(
                   work: work,

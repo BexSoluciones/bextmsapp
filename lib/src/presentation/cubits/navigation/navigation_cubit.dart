@@ -312,7 +312,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         emit(NavigationFailed(error: error.toString()));
       });
     } else {
-      print("Invalid index: $index");
       // Handle the case when 'index' is out of range.
     }
   }

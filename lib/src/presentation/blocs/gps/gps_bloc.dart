@@ -124,7 +124,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
           add(OnNewUserLocationEvent(position,
               LatLng(position.latitude, position.longitude)));
         });
-        print('StartFollowingUser');
       }
     } catch (e, stackTrace) {
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);
@@ -136,7 +135,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       final position = await Geolocator.getCurrentPosition();
       add(OnNewUserLocationEvent(position,
           LatLng(position.latitude, position.longitude)));
-      print('Position: ${position.latitude}-${position.longitude}');
     } catch (e) {
       print('Error getCurrentPosition: GPS:${e.toString()}');
     }
@@ -145,7 +143,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   void stopFollowingUser() {
     add(OnStopFollowingUser());
     positionStream?.cancel();
-    print('stopFollowingUser');
   }
 
   Future<void> _init() async {

@@ -378,10 +378,7 @@ class TransactionDao {
       });
     }
 
-    var results = await batch.commit(noResult: false, continueOnError: true);
-
-    print(results);
-
+    await batch.commit(noResult: false, continueOnError: true);
     return Future.value();
   }
 
