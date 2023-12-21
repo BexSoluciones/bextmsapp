@@ -8,8 +8,7 @@ class SingleImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw Center(
+    return Center(
         child: FutureBuilder<File>(
             future: DefaultCacheManager().getSingleFile(qr),
             builder: (context, snapshot) {

@@ -68,7 +68,7 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                 children: [
                   Text(
                     '${widget.summary.type} - ${widget.summary.orderNumber} - ${widget.summary.id}',
-                    textScaleFactor: calculatedTextScaleFactor,
+                    textScaler: TextScaler.linear(calculatedTextScaleFactor),
                     style: const TextStyle(fontSize: 16),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -76,7 +76,7 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                   if (widget.summary.expedition != null)
                     Text(
                       'Expedición: ${widget.summary.expedition}',
-                      textScaleFactor: calculatedTextScaleFactor,
+                      textScaler: TextScaler.linear(calculatedTextScaleFactor),
                       style: TextStyle(fontSize: 16,color: Theme.of(context).colorScheme.scrim),
                     ),
                 ],
@@ -89,7 +89,7 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text(
                   'Items: ${widget.summary.count.toString()}',
-                  textScaleFactor: calculatedTextScaleFactor,
+                  textScaler: TextScaler.linear(calculatedTextScaleFactor),
                   style: TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
                 ),
               ]),
@@ -98,12 +98,12 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                 children: [
                   Text(
                     'Total:  ${formatter.format(widget.summary.grandTotalCopy)}',
-                    textScaleFactor: calculatedTextScaleFactor,
+                    textScaler: TextScaler.linear(calculatedTextScaleFactor),
                     style:  TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
                   ),
                   Text(
                     'Tipo: ${widget.summary.typeOfCharge}',
-                    textScaleFactor: calculatedTextScaleFactor,
+                    textScaler: TextScaler.linear(calculatedTextScaleFactor),
                     style:  TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
                   ),
                 ],
