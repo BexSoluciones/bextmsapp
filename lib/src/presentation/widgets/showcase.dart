@@ -87,19 +87,18 @@ Widget buildMapShowcase(BuildContext context, Work work, GlobalKey three) {
         '¿Te perdiste? ¡Usa esta opción para ver al cliente en Google Maps!',
     child: IconButton(
       onPressed: () async {
-        ModalNavegationMaps(context,work,three);
-//         if (work.latitude != '0' && work.longitude != '0') {
-//           _navigationService.goTo(AppRoutes.summaryNavigation, arguments: SummaryNavigationArgument(work: work));
-//         } else {
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             const SnackBar(
-//               content: Text(
-//                 'No tiene geolocalización 🚨',
-//                 style: TextStyle(fontSize: 16),
-//               ),
-//             ),
-//           );
-//         }
+        if (work.latitude != '0' && work.longitude != '0') {
+          _navigationService.goTo(AppRoutes.summaryNavigation, arguments: SummaryNavigationArgument(work: work));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'No tiene geolocalización 🚨',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          );
+        }
 
       },
       icon:  Icon(Icons.directions, size: 35,color: Theme.of(context).colorScheme.shadow),

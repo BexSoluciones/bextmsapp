@@ -96,8 +96,6 @@ final NotificationService _notificationService = locator<NotificationService>();
 final RemoteConfigService _remoteConfigService = locator<RemoteConfigService>();
 final LoggerService _loggerService = locator<LoggerService>();
 
-List<CameraDescription> cameras = [];
-
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
