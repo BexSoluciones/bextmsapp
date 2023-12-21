@@ -1,28 +1,20 @@
-import 'dart:convert';
-
-import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
 import 'package:bexdeliveries/src/locator.dart';
-import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
-import 'package:bexdeliveries/src/services/storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 //domain
-import '../../src/domain/models/notification.dart'  as notificationModel;
+import '../../src/domain/models/notification.dart';
 
 //widgets
 import '../domain/repositories/database_repository.dart';
 import '../utils/constants/colors.dart';
 
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final ProcessingQueueBloc _processingQueueBloc = locator<ProcessingQueueBloc>();
 
 Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Got a message whilst in the background!');
-  if (message.notification != null) {
+  if (message.notification != null && kDebugMode) {
     print('Notification Title: ${message.notification!.title}');
     print('Notification Body: ${message.notification!.body}');
     print('Notification data: ${message.data}');
@@ -81,7 +73,7 @@ class NotificationService {
     if (message.notification != null) {
       print('Message also contained a notification: ${message.notification}');
 
-      _databaseRepository.insertNotification(notificationModel.PushNotification(
+      _databaseRepository.insertNotification(PushNotification(
           id_from_server: message.data['notification_id'],
           title: message.notification?.title,
           body: message.notification?.body,

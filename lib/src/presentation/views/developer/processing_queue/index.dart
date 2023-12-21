@@ -157,9 +157,7 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
       // The content of the scroll view
       body: BlocConsumer<ProcessingQueueBloc, ProcessingQueueState>(
         // listenWhen: (current, previous) => current != previous,
-        listener: (context, state) {
-          print(state);
-        },
+        listener: (context, state) {},
         builder: (BuildContext context, ProcessingQueueState state) {
           return ListView.builder(
             itemCount: processingQueues.length,

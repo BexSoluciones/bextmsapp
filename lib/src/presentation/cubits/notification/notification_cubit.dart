@@ -22,7 +22,6 @@ class NotificationCubit extends BaseCubit<NotificationState, List<PushNotificati
         final notificationCubit = await _databaseRepository.getNotifications();
         emit(NotificationCubitSuccess(notification: notificationCubit));
       } catch (error) {
-        print('Error getWorkTypesFromWork data: $error');
         emit(NotificationCubitFailed(error: error.toString()));
       }
     });

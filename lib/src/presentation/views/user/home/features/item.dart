@@ -260,9 +260,6 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
     var used = _storageService.getBool('${work.workcode}-used');
     var uploaded = _storageService.getBool('${work.workcode}-uploaded');
 
-    print(used);
-    print(uploaded);
-
     if (used != null && uploaded != null && !uploaded) {
       historyOrderBloc.add(ChangeCurrentWork(work: work));
       _storageService.setBool('${work.workcode}-uploaded', true);

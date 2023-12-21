@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +67,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
 
   Stream<List<l.Location>> get locations {
     return _databaseRepository.watchAllLocations();
-}
+  }
 
   Future<void> startFollowingUser() async {
     add(OnStartFollowingUser());
@@ -120,9 +121,8 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
             }
           }
 
-
-          add(OnNewUserLocationEvent(position,
-              LatLng(position.latitude, position.longitude)));
+          add(OnNewUserLocationEvent(
+              position, LatLng(position.latitude, position.longitude)));
         });
       }
     } catch (e, stackTrace) {
@@ -133,10 +133,12 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   Future getCurrentPosition() async {
     try {
       final position = await Geolocator.getCurrentPosition();
-      add(OnNewUserLocationEvent(position,
-          LatLng(position.latitude, position.longitude)));
+      add(OnNewUserLocationEvent(
+          position, LatLng(position.latitude, position.longitude)));
     } catch (e) {
-      print('Error getCurrentPosition: GPS:${e.toString()}');
+      if (kDebugMode) {
+        print('Error getCurrentPosition: GPS:${e.toString()}');
+      }
     }
   }
 
@@ -251,8 +253,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     }
   }
 
-  Future<void> saveLocation(
-      String type, Position position) async {
+  Future<void> saveLocation(String type, Position position) async {
     try {
       var lastLocation = await _databaseRepository.getLastLocation();
 
@@ -266,7 +267,8 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
           speed: position.speed,
           speedAccuracy: position.speedAccuracy,
           userId: _storageService.getInt('user_id') ?? 0,
-          time: DateTime.now(), send: 0);
+          time: DateTime.now(),
+          send: 0);
 
       if (lastLocation != null) {
         var currentPosition = LatLng(location.latitude, location.longitude);
@@ -300,7 +302,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
 
       var count = await _databaseRepository.countLocationsManager();
 
-      if(count){
+      if (count) {
         var processingQueue = ProcessingQueue(
             body: await _databaseRepository.getLocationsToSend(),
             task: 'incomplete',

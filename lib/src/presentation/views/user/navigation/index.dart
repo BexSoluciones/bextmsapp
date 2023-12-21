@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -152,7 +153,7 @@ class _NavigationScreenState extends State<NavigationView> {
   }
 
   void onMapEvent(MapEvent mapEvent) {
-    if (mapEvent is! MapEventMove && mapEvent is! MapEventRotate) {
+    if (mapEvent is! MapEventMove && mapEvent is! MapEventRotate && kDebugMode) {
       debugPrint(mapEvent.toString());
     }
   }
