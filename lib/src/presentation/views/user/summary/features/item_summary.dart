@@ -89,7 +89,7 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${widget.summary.type} - ${widget.summary.orderNumber} - ${widget.summary.id}',
+                    '${widget.summary.type} - ${widget.summary.orderNumber}',
                     textScaler: TextScaler.linear(calculatedTextScaleFactor),
                     style: const TextStyle(fontSize: 16),
                     maxLines: 1,

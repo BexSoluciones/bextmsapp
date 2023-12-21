@@ -33,11 +33,19 @@ class ItemInventory extends StatefulWidget {
 }
 
 class ItemInventoryState extends State<ItemInventory> with FormatNumber {
+  late InventoryCubit inventoryCubit;
+
   @override
   void setState(fn) {
     if (mounted) {
       super.setState(fn);
     }
+  }
+
+  @override
+  void initState() {
+    inventoryCubit = BlocProvider.of<InventoryCubit>(context);
+    super.initState();
   }
 
   @override
@@ -53,42 +61,54 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
   }
 
   Future<void> minus() async {
-    BlocProvider.of<InventoryCubit>(context).minus(widget.summary,
-        widget.arguments.work.id!, widget.arguments.orderNumber);
+    inventoryCubit.minus(widget.summary, widget.arguments.work.id!,
+        widget.arguments.orderNumber);
   }
 
   Future<void> longMinus() async {
-    BlocProvider.of<InventoryCubit>(context).longMinus(widget.summary,
-        widget.arguments.work.id!, widget.arguments.orderNumber);
+    inventoryCubit.longMinus(widget.summary, widget.arguments.work.id!,
+        widget.arguments.orderNumber);
   }
 
   Future<void> increment() async {
-    BlocProvider.of<InventoryCubit>(context).increment(widget.summary,
-        widget.arguments.work.id!, widget.arguments.orderNumber);
+    inventoryCubit.increment(widget.summary, widget.arguments.work.id!,
+        widget.arguments.orderNumber);
   }
 
   Future<void> longIncrement() async {
-    BlocProvider.of<InventoryCubit>(context).longIncrement(widget.summary,
-        widget.arguments.work.id!, widget.arguments.orderNumber);
+    inventoryCubit.longIncrement(widget.summary, widget.arguments.work.id!,
+        widget.arguments.orderNumber);
   }
 
   @override
   Widget build(BuildContext context) {
-    final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(14);
     return Material(
         child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
             child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: ListTile(
                   onTap: () {
                     if (widget.summary.idPacking != null &&
                         widget.summary.packing != null) {
-                      //navigate to package
+                      var arguments = PackageArgument(
+                          work: widget.arguments.work,
+                          summaryId: widget.summary.id,
+                          typeOfCharge: widget.summary.typeOfCharge!,
+                          orderNumber: widget.summary.orderNumber,
+                          operativeCenter: widget.summary.operativeCenter!,
+                          idPacking: widget.summary.idPacking!,
+                          expedition: widget.summary.expedition,
+                          packing: widget.summary.packing!
+                      );
+                      inventoryCubit.goToPackage(arguments);
                     }
                   },
                   shape: RoundedRectangleBorder(
@@ -107,13 +127,11 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                         widget.summary.packing != null
                                     ? Text(
                                         '${widget.summary.packing} - ${widget.summary.idPacking}',
-                                        textScaleFactor: calculatedTextScaleFactor,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       )
                                     : Text(
                                         '${widget.summary.coditem} - ${widget.summary.nameItem}',
-                                        textScaleFactor: calculatedTextScaleFactor,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       )),
@@ -121,7 +139,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                     widget.summary.idPacking != null
                                 ? Row(
                                     children: [
-                                      Icon(Icons.info,color: Colors.grey[500]),
+                                      Icon(Icons.info, color: Colors.grey[500]),
                                       Text('(${widget.summary.count})')
                                     ],
                                   )
@@ -133,7 +151,6 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                             ? Container()
                             : Text(
                                 'U.M. ${double.parse(widget.summary.unitOfMeasurement).toStringAsFixed(2)} - N.M ${widget.summary.nameOfMeasurement}',
-                                textScaleFactor: calculatedTextScaleFactor,
                                 style: TextStyle(color: Colors.grey[500]),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -162,9 +179,10 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                                       Future.wait(
                                                           [vibrate(), minus()]);
                                                     },
-                                                    icon:  Icon(
-                                                      Icons.exposure_minus_1,color: Colors.grey[500]
-                                                    )))
+                                                    icon: Icon(
+                                                        Icons.exposure_minus_1,
+                                                        color:
+                                                            Colors.grey[500])))
                                             : Container(),
                                         GestureDetector(
                                             onTap: () => widget.isArrived &&
@@ -180,7 +198,6 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                             child: Text(
                                               widget.summary.cant
                                                   .toStringAsFixed(0),
-                                              textScaleFactor: calculatedTextScaleFactor,
                                             )),
                                         widget.summary.minus != 0 &&
                                                 widget.enterpriseConfig
@@ -200,15 +217,17 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                                         increment()
                                                       ]);
                                                     },
-                                                    icon:  Icon(
-                                                        Icons.exposure_plus_1,color: Colors.grey[500])))
+                                                    icon: Icon(
+                                                        Icons.exposure_plus_1,
+                                                        color:
+                                                            Colors.grey[500])))
                                             : Container()
                                       ])),
                               Text(
                                 'TOTAL: \$${formatter.format(widget.summary.grandTotal)}',
-                                textScaleFactor: calculatedTextScaleFactor,
-                                style:  TextStyle(
-                                    fontSize: calculatedFon, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                    fontSize: calculatedFon,
+                                    fontWeight: FontWeight.bold),
                               )
                             ]),
                       ],

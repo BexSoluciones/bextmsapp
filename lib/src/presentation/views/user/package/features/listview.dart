@@ -5,9 +5,15 @@ import 'package:lottie/lottie.dart';
 //domain
 import '../../../../../domain/models/summary.dart';
 import '../../../../../domain/models/arguments.dart';
+import '../../../../../domain/repositories/database_repository.dart';
 
 //feature
 import 'item.dart';
+
+//services
+import '../../../../../locator.dart';
+
+final DatabaseRepository databaseRepository = locator<DatabaseRepository>();
 
 class ListViewPackage extends StatefulWidget {
   const ListViewPackage({Key? key, required this.arguments, required this.two})
@@ -21,8 +27,6 @@ class ListViewPackage extends StatefulWidget {
 }
 
 class ListViewPackageState extends State<ListViewPackage> {
-  List<Summary> summaries = [];
-
   @override
   void setState(fn) {
     if (mounted) {
@@ -32,39 +36,40 @@ class ListViewPackageState extends State<ListViewPackage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
-    // return StreamBuilder<List<Summary>>(
-    //     stream: database.watchAllInventoryConsultaItem(
-    //         widget.arguments.packing!,
-    //         widget.arguments.idPacking!,
-    //         widget.arguments.orderNumber),
-    //     builder: (BuildContext context, AsyncSnapshot snapshot) {
-    //       if (snapshot.hasData == false) {
-    //         return SliverToBoxAdapter(
-    //             child: Center(
-    //                 child: Lottie.asset(
-    //                   'lib/assets/animations/36499-page-not-found.json',
-    //                 )));
-    //       } else {
-    //         summaries = snapshot.data;
-    //         return SliverList(
-    //           delegate: SliverChildBuilderDelegate(
-    //                 (BuildContext context, int index) {
-    //               if (index == 0) {
-    //                 return Showcase(
-    //                     key: widget.two,
-    //                     disableMovingAnimation: true,
-    //                     description:
-    //                     'Estos son los productos que contiene esta caja!',
-    //                     child: ItemProduct(summary: summaries[index]));
-    //               } else {
-    //                 return ItemProduct(summary: summaries[index]);
-    //               }
-    //             },
-    //             childCount: summaries.length,
-    //           ),
-    //         );
-    //       }
-    //     });
+    return FutureBuilder<List<Summary>>(
+        future: databaseRepository.watchAllItemsPackage(
+            widget.arguments.orderNumber,
+            widget.arguments.packing!,
+            widget.arguments.idPacking!),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData == false) {
+            return SliverToBoxAdapter(
+                child: Center(
+                    child: Lottie.asset(
+              'assets/animations/36499-page-not-found.json',
+            )));
+          } else {
+
+            print(snapshot.data.length);
+
+            return SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  if (index == 0) {
+                    return Showcase(
+                        key: widget.two,
+                        disableMovingAnimation: true,
+                        description:
+                            'Estos son los productos que contiene esta caja!',
+                        child: ItemProduct(summary: snapshot.data[index]));
+                  } else {
+                    return ItemProduct(summary: snapshot.data[index]);
+                  }
+                },
+                childCount: snapshot.data.length,
+              ),
+            );
+          }
+        });
   }
 }

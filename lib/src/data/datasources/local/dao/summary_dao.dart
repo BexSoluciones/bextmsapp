@@ -56,6 +56,20 @@ class SummaryDao {
     return parseSummaries(summaryList);
   }
 
+  Future<List<Summary>> watchAllItemsPackage(
+      String orderNumber, String packing, String idPacking) async {
+    final db = await _appDatabase.streamDatabase;
+
+    var summaryList = await db!.rawQuery('''
+      SELECT * FROM $tableSummaries 
+      WHERE order_number="$orderNumber" 
+      AND packing="$packing" 
+      AND id_packing="$idPacking"
+    ''');
+
+    return parseSummaries(summaryList);
+  }
+
   Future<List<Summary>> getAllSummariesByOrderNumberMoved(
       int workId, String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
@@ -88,17 +102,17 @@ class SummaryDao {
       String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
     final summaryList = await db!.rawQuery('''
-    SELECT  $tableSummaries.* ,
-    CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
-    THEN 'REDESPACHO'
-    ELSE transactions.reason
-    END AS reason
-    FROM summaries
-    INNER JOIN transactions ON (transactions.order_number = summaries.order_number AND transactions.work_id = summaries.work_id AND transactions.`status` = 'respawn')
-    WHERE summaries.order_number = $orderNumber
-    GROUP BY summaries.name_item
-   ORDER BY summaries.id ASC;
-  ''');
+      SELECT  $tableSummaries.* ,
+      CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
+      THEN 'REDESPACHO'
+      ELSE transactions.reason
+      END AS reason
+      FROM summaries
+      INNER JOIN transactions ON (transactions.order_number = summaries.order_number AND transactions.work_id = summaries.work_id AND transactions.`status` = 'respawn')
+      WHERE summaries.order_number = $orderNumber
+      GROUP BY summaries.name_item
+     ORDER BY summaries.id ASC;
+    ''');
 
     final parsedSummaries = parseSummariesReport(summaryList);
     return parsedSummaries;
@@ -108,17 +122,17 @@ class SummaryDao {
       String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
     final summaryList = await db!.rawQuery('''
-    SELECT  $tableSummaries.* ,
-    CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
-    THEN 'RECHAZADO'
-    ELSE transactions.reason
-    END AS reason
-    FROM summaries
-    INNER JOIN transactions ON (transactions.order_number = summaries.order_number AND transactions.work_id = summaries.work_id AND transactions.`status` = 'reject')
-    WHERE summaries.order_number = $orderNumber
-    GROUP BY summaries.name_item
-   ORDER BY summaries.id ASC;
-  ''');
+      SELECT  $tableSummaries.* ,
+      CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
+      THEN 'RECHAZADO'
+      ELSE transactions.reason
+      END AS reason
+      FROM summaries
+      INNER JOIN transactions ON (transactions.order_number = summaries.order_number AND transactions.work_id = summaries.work_id AND transactions.`status` = 'reject')
+      WHERE summaries.order_number = $orderNumber
+      GROUP BY summaries.name_item
+      ORDER BY summaries.id ASC;
+    ''');
 
     final parsedSummaries = parseSummariesReport(summaryList);
     return parsedSummaries;
@@ -128,13 +142,13 @@ class SummaryDao {
       String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
     final summaryList = await db!.rawQuery('''
-    SELECT $tableSummaries.*, COALESCE(MAX($tableTransactions.${TransactionFields.reason}), 'ENTREGADO') AS reason
-    FROM $tableSummaries
-    LEFT JOIN $tableTransactions ON $tableTransactions.${TransactionFields.workId} = $tableSummaries.${SummaryReportFields.workId} AND $tableTransactions.${TransactionFields.orderNumber} = $tableSummaries.${SummaryReportFields.orderNumber} AND $tableTransactions.${TransactionFields.summaryId} = $tableSummaries.${SummaryFields.id}
-    WHERE $tableSummaries.${SummaryReportFields.orderNumber} = ? 
-    GROUP BY $tableSummaries.${SummaryFields.id}
-    ORDER BY ${SummaryFields.id} ASC
-  ''', [orderNumber]);
+      SELECT $tableSummaries.*, COALESCE(MAX($tableTransactions.${TransactionFields.reason}), 'ENTREGADO') AS reason
+      FROM $tableSummaries
+      LEFT JOIN $tableTransactions ON $tableTransactions.${TransactionFields.workId} = $tableSummaries.${SummaryReportFields.workId} AND $tableTransactions.${TransactionFields.orderNumber} = $tableSummaries.${SummaryReportFields.orderNumber} AND $tableTransactions.${TransactionFields.summaryId} = $tableSummaries.${SummaryFields.id}
+      WHERE $tableSummaries.${SummaryReportFields.orderNumber} = ? 
+      GROUP BY $tableSummaries.${SummaryFields.id}
+      ORDER BY ${SummaryFields.id} ASC
+    ''', [orderNumber]);
 
     final parsedSummaries = parseSummariesReport(summaryList);
     return parsedSummaries;

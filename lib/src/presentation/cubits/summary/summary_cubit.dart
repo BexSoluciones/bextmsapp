@@ -50,14 +50,9 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     emit(await _getAllSummariesByOrderNumber(workId));
   }
 
-
-
   Future<SummaryState> _getAllSummariesByOrderNumber(int workId) async {
     final summaries =
         await _databaseRepository.getAllSummariesByOrderNumber(workId);
-
-
-
 
     var time = await _databaseRepository.getDiffTime(workId);
     var isArrived =

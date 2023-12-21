@@ -1,13 +1,13 @@
 import 'dart:async';
+import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:location_repository/location_repository.dart';
 
 //core
 import '../../../../core/helpers/index.dart';
 
-//bloc
-import '../../blocs/processing_queue/processing_queue_bloc.dart';
+//utils
+import '../../../utils/constants/strings.dart';
 
 //domain
 import '../../../domain/models/summary.dart';
@@ -27,13 +27,10 @@ final NavigationService _navigationService = locator<NavigationService>();
 
 class InventoryCubit extends Cubit<InventoryState> with FormatDate {
   final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
 
   final helperFunctions = HelperFunctions();
 
-  InventoryCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc)
+  InventoryCubit(this._databaseRepository)
       : super(const InventoryLoading());
 
   Future<void> getAllInventoryByOrderNumber(
@@ -126,5 +123,7 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
     await _databaseRepository.updateSummary(summary);
     emit(await _getAllInventoryByOrderNumber(workId, orderNumber));
   }
+
+  void goToPackage(PackageArgument argument) => _navigationService.goTo(AppRoutes.package, arguments: argument);
 
 }

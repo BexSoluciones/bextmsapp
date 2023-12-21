@@ -377,10 +377,7 @@ class _MyAppState extends State<MyApp> {
                 BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
-            create: (context) => InventoryCubit(
-                locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+            create: (context) => InventoryCubit(locator<DatabaseRepository>()),
           ),
           BlocProvider(
             create: (context) => PartialCubit(
