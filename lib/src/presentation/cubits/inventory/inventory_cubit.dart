@@ -40,10 +40,6 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
   Future<InventoryState> _getAllInventoryByOrderNumber(
       int validate, int workId, String orderNumber) async {
     var summaries = <Summary>[];
-
-    print(validate);
-
-
     if (validate == 1) {
       summaries = await _databaseRepository.getAllInventoryByPackage(
           workId, orderNumber);
