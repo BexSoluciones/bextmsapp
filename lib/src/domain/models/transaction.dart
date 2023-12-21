@@ -139,9 +139,12 @@ class Transaction {
     if (json['images'] != null) {
       images = [];
       if (json['images'] is String) {
-        jsonDecode(json['images']).forEach((image) => image);
+        var pictures = jsonDecode(json['images']);
+        pictures.forEach((picture) {
+          images?.add(picture);
+        });
       } else {
-        json['images'].forEach((image) => image);
+        images = json['images'].map<String>((image) => image).toList();
       }
     } else {
       images = [];

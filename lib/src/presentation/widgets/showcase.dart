@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -21,7 +22,7 @@ import '../../locator.dart';
 import '../../services/navigation.dart';
 
 final helperFunctions = HelperFunctions();
-final NavigationService navigationService = locator<NavigationService>();
+final NavigationService _navigationService = locator<NavigationService>();
 
 class BuildShowcaseIconButton extends StatefulWidget {
   const BuildShowcaseIconButton(
@@ -87,11 +88,7 @@ Widget buildMapShowcase(BuildContext context, Work work, GlobalKey three) {
     child: IconButton(
       onPressed: () async {
         if (work.latitude != '0' && work.longitude != '0') {
-          await helperFunctions.showMapDirection(
-            context,
-            work,
-            null,
-          );
+          _navigationService.goTo(AppRoutes.summaryNavigation, arguments: SummaryNavigationArgument(work: work));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -134,7 +131,7 @@ Widget buildPublishShowcase(GlobalKey four, int summaryId) {
     onPressed: () {
       issuesBloc.add(GetIssuesList(
           currentStatus: 'summary', workId: null, summaryId: summaryId));
-      navigationService.goTo(AppRoutes.issue);
+      _navigationService.goTo(AppRoutes.issue);
     },
   );
 }

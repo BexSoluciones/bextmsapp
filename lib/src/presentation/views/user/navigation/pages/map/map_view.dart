@@ -8,16 +8,19 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:showcaseview/showcaseview.dart';
 
+//utils
+import '../../../../../../utils/constants/strings.dart';
+
 //blocs
 import '../../../../../blocs/location/location_bloc.dart';
 import '../../../../../blocs/network/network_bloc.dart';
-import '../../../../../blocs/processing_queue/processing_queue_bloc.dart';
 
 //cubit
 import '../../../../../cubits/navigation/navigation_cubit.dart';
 import '../../../../../cubits/general/general_cubit.dart';
 
 //domain
+import '../../../../../../domain/models/arguments.dart';
 import '../../../../../../domain/models/enterprise_config.dart';
 
 //widgets
@@ -131,40 +134,57 @@ class _MapPageState extends State<MapPage> {
               _navigationService.goBack();
               context.read<NavigationCubit>().clean();
             }),
-      title: BlocBuilder<NavigationCubit, NavigationState>(
-        builder: (context, navigationState) {
-          if (navigationState is NavigationLoading) {
-            // Show loading indicator
-            return const Row(
-              children: [
-                CupertinoActivityIndicator(),
-
-              ],
-            );
-          } else if (navigationState is NavigationSuccess) {
-            // Show client count
-            return Text('Clientes a visitar: ${navigationState.works.length}');
-          } else {
-            // Handle other states or return an empty widget
-            return const SizedBox();
-          }
-        },
-      ),
+        title: BlocBuilder<NavigationCubit, NavigationState>(
+          builder: (context, navigationState) {
+            if (navigationState is NavigationLoading) {
+              // Show loading indicator
+              return const Row(
+                children: [
+                  CupertinoActivityIndicator(),
+                ],
+              );
+            } else if (navigationState is NavigationSuccess) {
+              // Show client count
+              return Text(
+                  'Clientes a visitar: ${navigationState.works.length}');
+            } else {
+              // Handle other states or return an empty widget
+              return const SizedBox();
+            }
+          },
+        ),
         actions: [
-          Showcase(
-              key: widget.one,
-              disableMovingAnimation: true,
-              title: 'Navegación completa!',
-              description:
-                  'Ingresa a la navegación completa y deja que te guiemos!',
-              child: IconButton(
-                  icon: const Icon(Icons.directions),
-                  onPressed: () {
-                    var navigationCubit = context.read<NavigationCubit>();
-                    var work = navigationCubit
-                        .state.works[navigationCubit.state.pageIndex];
-                    context.read<NavigationCubit>().showMaps(context, work);
-                  })),
+          BlocBuilder<NavigationCubit, NavigationState>(
+            builder: (context, navigationState) {
+              if (navigationState is NavigationLoading) {
+                // Show loading indicator
+                return const Row(
+                  children: [
+                    CupertinoActivityIndicator(),
+                  ],
+                );
+              } else if (navigationState is NavigationSuccess) {
+                // Show client count
+                return Showcase(
+                    key: widget.one,
+                    disableMovingAnimation: true,
+                    title: 'Navegación completa!',
+                    description:
+                        'Ingresa a la navegación completa y deja que te guiemos!',
+                    child: IconButton(
+                        icon: const Icon(Icons.directions),
+                        onPressed: () {
+                          var navigationCubit = context.read<NavigationCubit>();
+                          var work = navigationCubit
+                              .state.works[navigationCubit.state.pageIndex];
+                          _navigationService.goTo(AppRoutes.summaryNavigation, arguments: SummaryNavigationArgument(work: work));
+                        }));
+              } else {
+                // Handle other states or return an empty widget
+                return const SizedBox();
+              }
+            },
+          ),
         ],
       );
 
@@ -321,10 +341,10 @@ class _MapPageState extends State<MapPage> {
                 items: List<Widget>.generate(
                     state.carouselData.length,
                     (index) => CarouselCard(
-                        work:  state.works[index] ?? 999,
+                        work: state.works[index] ?? 999,
                         index: state.carouselData[index]['index'],
-                        distance:state.carouselData[index]['distance'],
-                        duration:  state.carouselData[index]['duration'],
+                        distance: state.carouselData[index]['distance'],
+                        duration: state.carouselData[index]['duration'],
                         context: context)),
                 carouselController: state.buttonCarouselController,
                 options: CarouselOptions(

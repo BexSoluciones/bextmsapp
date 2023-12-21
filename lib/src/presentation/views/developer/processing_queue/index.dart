@@ -57,7 +57,8 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
         context.watch<ProcessingQueueBloc>().dropdownFilterValue;
     var dropdownStateValue =
         context.watch<ProcessingQueueBloc>().dropdownStateValue;
-    var processingQueues = context.watch<ProcessingQueueBloc>().processingQueues;
+    var processingQueues =
+        context.watch<ProcessingQueueBloc>().processingQueues;
 
     return Scaffold(
         body: NestedScrollView(
@@ -86,18 +87,19 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
                 children: [
                   DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
-                        
-                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey, width: 2.0),
+                          borderSide:
+                              BorderSide(color: Colors.grey, width: 2.0),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: kPrimaryColor, width: 2.0),
+                              BorderSide(color: kPrimaryColor, width: 2.0),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: kPrimaryColor, width: 2.0),
+                              BorderSide(color: kPrimaryColor, width: 2.0),
                         ),
                         hintStyle: TextStyle(
                           color: Colors.orange,
@@ -117,18 +119,19 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
                   gapH12,
                   DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
-
-                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey, width: 2.0),
+                          borderSide:
+                              BorderSide(color: Colors.grey, width: 2.0),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: kPrimaryColor, width: 2.0),
+                              BorderSide(color: kPrimaryColor, width: 2.0),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: kPrimaryColor, width: 2.0),
+                              BorderSide(color: kPrimaryColor, width: 2.0),
                         ),
                         hintStyle: TextStyle(
                           color: Colors.orange,

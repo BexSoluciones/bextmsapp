@@ -138,11 +138,7 @@ class TransactionDao {
     for (var value in transactions) {
       if (value.payments != null) {
         for (var element in value.payments!) {
-          try {
-            sum += double.parse(element.paid.toString());
-          } catch (e) {
-            print('Error paid:$e');
-          }
+          sum += double.parse(element.paid.toString());
         }
       }
     }
@@ -158,10 +154,10 @@ class TransactionDao {
       ''');
 
     var sum = 0.0;
-    summaryList.forEach((element) {
+    for (var element in summaryList) {
       var summary = Summary.fromJson(element);
       sum += summary.grandTotalCopy!;
-    });
+    }
     return sum;
   }
 
@@ -368,20 +364,14 @@ class TransactionDao {
   Future<void> insertTransactions(List<t.Transaction> transactions) async {
     final db = await _appDatabase.streamDatabase;
     var batch = db!.batch();
-
-    print(db.path);
-
     if (transactions.isNotEmpty) {
       await Future.forEach(transactions, (transaction) async {
         var d = await db.query(t.tableTransactions,
             where: 'id = ?', whereArgs: [transaction.id]);
         var w = parseTransactions(d);
         if (w.isEmpty) {
-          print('inserting');
-          print(transaction.toJson());
           batch.insert(t.tableTransactions, transaction.toJson());
         } else {
-          print('updating');
           batch.update(t.tableTransactions, transaction.toJson(),
               where: 'id = ?', whereArgs: [transaction.id]);
         }

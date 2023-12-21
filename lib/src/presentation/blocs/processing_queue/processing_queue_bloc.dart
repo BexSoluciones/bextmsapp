@@ -326,6 +326,9 @@ class ProcessingQueueBloc
             // bool transactionExists = await _databaseRepository.verifyTransactionExistence(body['work_id'],
             //     body['order_number']);
 
+            print('el error esta aqui');
+            print(body['images'] is String);
+
             print('****************sending transaction***************');
             final response = await _apiRepository.index(
                 request: TransactionRequest(Transaction.fromJson(body)));

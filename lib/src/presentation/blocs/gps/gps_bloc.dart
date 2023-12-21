@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -16,10 +15,14 @@ import '../../../domain/models/processing_queue.dart';
 import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
+//utils
+import '../../../utils/constants/strings.dart';
+
 //services
 import '../../../locator.dart';
 import '../../../services/navigation.dart';
 import '../../../services/storage.dart';
+import '../../../services/logger.dart';
 
 //widgets
 import '../../widgets/error_alert_dialog.dart';
@@ -97,15 +100,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
             Geolocator.getPositionStream(locationSettings: locationSettings)
                 .listen((event) {
           final position = event;
-
-          print(
-              'Las known location :${state.lastKnownLocation?.latitude}${state.lastKnownLocation?.longitude}}');
-          print('position: ${position.latitude},${position.longitude}');
-          //TODO:: [Heider Zapa] activate processing queue
-
           if (enterpriseConfig.background_location!) {
-
-            print('entro aqui');
             if (lastRecordedLocation != null) {
               final distance = Geolocator.distanceBetween(
                 lastRecordedLocation!.latitude,
@@ -114,13 +109,11 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
                 position.longitude,
               );
               if (distance >= distances) {
-                print('entro aqui2');
                 lastRecordedLocation =
                     LatLng(position.latitude, position.longitude);
                 saveLocation('location', position);
               }
             } else {
-              print('entro aqui3');
               lastRecordedLocation =
                   LatLng(position.latitude, position.longitude);
               saveLocation('location', position);
@@ -134,8 +127,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
         print('StartFollowingUser');
       }
     } catch (e, stackTrace) {
-      print('Error GPS:${e.toString()}');
-      //await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
     }
   }
 
@@ -303,7 +295,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
 
           await _databaseRepository.insertLocation(location);
         } else {
-          print('no se ha movido');
+          logDebugFine(headerDeveloperLogger, 'no se ha movido');
         }
       } else {
         await _databaseRepository.insertLocation(location);
@@ -322,11 +314,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
         await _databaseRepository.insertProcessingQueue(processingQueue);
         await _databaseRepository.updateLocationsManager();
       }
-
-
-
     } catch (e, stackTrace) {
-      print('error saving ---- $e');
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);
     }
   }

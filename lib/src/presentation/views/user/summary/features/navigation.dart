@@ -1,14 +1,15 @@
-import 'package:bexdeliveries/src/presentation/cubits/summary/summary_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:map_launcher/map_launcher.dart';
 
+//cubit
+import '../../../../cubits/summary/summary_cubit.dart';
+
 //domain
 import '../../../../../domain/models/arguments.dart';
 
 //utils
-import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/nums.dart';
 
 //widget
