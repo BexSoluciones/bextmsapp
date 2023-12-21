@@ -128,12 +128,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
     _navigationService.goTo(AppRoutes.inventory,
         arguments: InventoryArgument(
-            work: work,
-            summaryId: summary.id,
-            typeOfCharge: summary.typeOfCharge!,
-            orderNumber: summary.orderNumber,
-            operativeCenter: summary.operativeCenter!,
-            summaries: summaries));
+            work: work, summary: summary, summaries: summaries));
   }
 
   Future<void> sendTransactionArrived(

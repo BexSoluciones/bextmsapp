@@ -38,9 +38,9 @@ class ListViewPackageState extends State<ListViewPackage> {
   Widget build(BuildContext context) {
     return FutureBuilder<List<Summary>>(
         future: databaseRepository.watchAllItemsPackage(
-            widget.arguments.orderNumber,
-            widget.arguments.packing!,
-            widget.arguments.idPacking!),
+            widget.arguments.summary.orderNumber,
+            widget.arguments.summary.packing!,
+            widget.arguments.summary.idPacking!),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData == false) {
             return SliverToBoxAdapter(

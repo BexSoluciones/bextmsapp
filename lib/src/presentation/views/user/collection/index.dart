@@ -50,7 +50,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
     context.read<AccountBloc>().add(LoadAccountListEvent());
     collectionCubit = BlocProvider.of<CollectionCubit>(context);
     collectionCubit.getCollection(
-        widget.arguments.work.id!, widget.arguments.orderNumber);
+        widget.arguments.work.id!, widget.arguments.summary.orderNumber);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       collectionCubit.cashController.addListener(() {
         collectionCubit.listenForCash();
@@ -159,14 +159,14 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
         width: size.width,
         child: Column(children: [
           HeaderCollection(
-              type: widget.arguments.typeOfCharge,
+              type: widget.arguments.summary.typeOfCharge!,
               total: state.totalSummary ?? 0.0),
           SizedBox(height: size.height * 0.02),
           FormCollection(
               formKey: _formKey,
               collectionCubit: collectionCubit,
               state: state,
-              orderNumber: widget.arguments.orderNumber),
+              orderNumber: widget.arguments.summary.orderNumber),
           Padding(
               padding: const EdgeInsets.only(
                   left: kDefaultPadding, right: kDefaultPadding),
@@ -174,7 +174,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
                   widget: const Icon(Icons.edit, color: Colors.white),
                   press: () => context
                       .read<CollectionCubit>()
-                      .goToFirm(widget.arguments.orderNumber))),
+                      .goToFirm(widget.arguments.summary.orderNumber))),
           SizedBox(height: size.height * 0.05),
           BlocSelector<CollectionCubit, CollectionState, bool>(
               selector: (state) => state is CollectionLoading,

@@ -199,7 +199,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
               error: 'Selecciona un numero de cuenta'));
         }
 
-        if (arguments.typeOfCharge == 'CREDITO' && total == 0) {
+        if (arguments.summary.typeOfCharge == 'CREDITO' && total == 0) {
           _storageService.setBool('firmRequired', false);
           _storageService.setBool('photoRequired', false);
           confirmTransaction(arguments);
@@ -380,14 +380,15 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       var currentLocation = gpsBloc.state.lastKnownLocation;
 
       String? firm;
-      var firmApplication =
-          await helperFunctions.getFirm('firm-${arguments.orderNumber}');
+      var firmApplication = await helperFunctions
+          .getFirm('firm-${arguments.summary.orderNumber}');
       if (firmApplication != null) {
         var base64Firm = firmApplication.readAsBytesSync();
         firm = base64Encode(base64Firm);
       }
 
-      var images = await helperFunctions.getImages(arguments.orderNumber);
+      var images =
+          await helperFunctions.getImages(arguments.summary.orderNumber);
       var imagesServer = <String>[];
       if (images.isNotEmpty) {
         for (var element in images) {
@@ -398,14 +399,14 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       }
 
       var totalSummary = await _databaseRepository.getTotalSummaries(
-          arguments.work.id!, arguments.orderNumber);
+          arguments.work.id!, arguments.summary.orderNumber);
 
       var transaction = Transaction(
           workId: arguments.work.id!,
-          summaryId: arguments.summaryId,
+          summaryId: arguments.summary.id,
           workcode: arguments.work.workcode,
-          orderNumber: arguments.orderNumber,
-          operativeCenter: arguments.operativeCenter,
+          orderNumber: arguments.summary.orderNumber,
+          operativeCenter: arguments.summary.operativeCenter,
           status: status,
           payments: payments,
           firm: firm,
@@ -472,8 +473,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         });
       }
 
-      await helperFunctions.deleteImages(arguments.orderNumber);
-      await helperFunctions.deleteFirm('firm-${arguments.orderNumber}');
+      await helperFunctions.deleteImages(arguments.summary.orderNumber);
+      await helperFunctions.deleteFirm('firm-${arguments.summary.orderNumber}');
 
       var v = await _databaseRepository.validateTransaction(arguments.work.id!);
 

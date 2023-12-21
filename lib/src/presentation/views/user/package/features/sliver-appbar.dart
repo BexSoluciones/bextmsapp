@@ -46,17 +46,11 @@ class AppBarInventory extends StatelessWidget {
     return SliverAppBar(
       leading: IconButton(
           onPressed: () {
-            context
-                .read<InventoryCubit>()
-                .reset(arguments.work.id!, arguments.orderNumber);
+            context.read<InventoryCubit>().reset(arguments.summary.validate!,
+                arguments.work.id!, arguments.summary.orderNumber);
             _navigationService.goTo(AppRoutes.inventory,
                 arguments: InventoryArgument(
-                  work: arguments.work,
-                  summaryId: arguments.summaryId,
-                  typeOfCharge: arguments.typeOfCharge,
-                  orderNumber: arguments.orderNumber,
-                  operativeCenter: arguments.operativeCenter,
-                ));
+                    work: arguments.work, summary: arguments.summary));
           },
           icon: const Icon(Icons.arrow_back_ios_new)),
       actions: [
@@ -72,8 +66,10 @@ class AppBarInventory extends StatelessWidget {
                     onPressed: () async {
                       await vibrate();
                       if (context.mounted) {
-                        BlocProvider.of<InventoryCubit>(context)
-                            .reset(arguments.work.id!, arguments.orderNumber);
+                        BlocProvider.of<InventoryCubit>(context).reset(
+                            arguments.summary.validate!,
+                            arguments.work.id!,
+                            arguments.summary.orderNumber);
                       }
                     },
                     icon: const Icon(Icons.change_circle_outlined)))
@@ -104,7 +100,7 @@ class AppBarInventory extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (arguments.expedition != null)
+                                  if (arguments.summary.expedition != null)
                                     Text.rich(
                                       TextSpan(
                                         children: [
@@ -115,7 +111,8 @@ class AppBarInventory extends StatelessWidget {
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           TextSpan(
-                                              text: arguments.expedition,
+                                              text:
+                                                  arguments.summary.expedition,
                                               style: const TextStyle(
                                                   fontSize: 16,
                                                   fontWeight:
@@ -134,7 +131,7 @@ class AppBarInventory extends StatelessWidget {
                                         ),
                                         TextSpan(
                                             text:
-                                                '${arguments.work.type}-${arguments.orderNumber}',
+                                                '${arguments.work.type}-${arguments.summary.orderNumber}',
                                             style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.normal)),

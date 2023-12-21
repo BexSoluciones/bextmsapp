@@ -56,7 +56,6 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(14);
 

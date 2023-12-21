@@ -21,7 +21,7 @@ class HeaderRespawn extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (arguments.expedition != null)
+                  if (arguments.summary.expedition != null)
                     Text.rich(
                       TextSpan(
                         children: [
@@ -32,7 +32,7 @@ class HeaderRespawn extends StatelessWidget {
                                 fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                           ),
                           TextSpan(
-                              text: arguments.expedition,
+                              text: arguments.summary.expedition,
                               style:  TextStyle(
                                   fontSize: 16,
                                   fontWeight:
@@ -50,7 +50,7 @@ class HeaderRespawn extends StatelessWidget {
                               fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                         ),
                         TextSpan(
-                            text: '${arguments.work.type}-${arguments.orderNumber}',
+                            text: '${arguments.work.type}-${arguments.summary.orderNumber}',
                             style:  TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),

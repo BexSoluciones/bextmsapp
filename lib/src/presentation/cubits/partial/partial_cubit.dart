@@ -28,11 +28,8 @@ final NavigationService _navigationService = locator<NavigationService>();
 
 class PartialCubit extends BaseCubit<PartialState, List<ReasonProduct>?> {
   final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
 
-  PartialCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc)
+  PartialCubit(this._databaseRepository)
       : super(const PartialLoading(), null);
 
   Future<void> init(InventoryArgument arguments) async {
@@ -41,7 +38,7 @@ class PartialCubit extends BaseCubit<PartialState, List<ReasonProduct>?> {
     await run(() async {
       final summaries =
           await _databaseRepository.getAllSummariesByOrderNumberMoved(
-              arguments.work.id!, arguments.orderNumber);
+              arguments.work.id!, arguments.summary.orderNumber);
 
       final reasons = await _databaseRepository.getAllReasons();
 

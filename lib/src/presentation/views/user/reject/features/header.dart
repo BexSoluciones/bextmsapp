@@ -21,39 +21,51 @@ class HeaderReject extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (arguments.expedition != null)
+                  if (arguments.summary.expedition != null)
                     Text.rich(
                       TextSpan(
                         children: [
-                           TextSpan(
+                          TextSpan(
                             text: 'EXPEDICIÓN: ',
                             style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer),
                           ),
                           TextSpan(
-                              text: arguments.expedition,
-                              style:  TextStyle(
+                              text: arguments.summary.expedition,
+                              style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight:
-                                  FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                                  fontWeight: FontWeight.normal,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .secondaryContainer)),
                         ],
                       ),
                     ),
                   Text.rich(
                     TextSpan(
                       children: [
-                         TextSpan(
+                        TextSpan(
                           text: 'DOCUMENTO: ',
                           style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer),
                         ),
                         TextSpan(
-                            text: '${arguments.work.type}-${arguments.orderNumber}',
-                            style:  TextStyle(
+                            text:
+                                '${arguments.work.type}-${arguments.summary.orderNumber}',
+                            style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                                fontWeight: FontWeight.normal,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer)),
                       ],
                     ),
                   ),
@@ -61,26 +73,34 @@ class HeaderReject extends StatelessWidget {
                   Text.rich(
                     TextSpan(
                       children: [
-                         TextSpan(
+                        TextSpan(
                           text: 'NIT: ',
                           style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer),
                         ),
                         TextSpan(
                             text: arguments.work.numberCustomer,
-                            style:  TextStyle(
+                            style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                                fontWeight: FontWeight.normal,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     arguments.work.customer!,
-                    style:  TextStyle(
+                    style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer),
+                        fontWeight: FontWeight.normal,
+                        color:
+                            Theme.of(context).colorScheme.secondaryContainer),
                   ),
                   const SizedBox(height: 10),
                   Text.rich(
@@ -90,38 +110,47 @@ class HeaderReject extends StatelessWidget {
                           text: 'DIR: ',
                           style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer),
                         ),
                         TextSpan(
                             text: arguments.work.address,
                             style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                                fontWeight: FontWeight.normal,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 10),
                   arguments.work.cellphone != null
                       ? Text.rich(
-                    TextSpan(
-                      children: [
-                         TextSpan(
-                          text: 'CEL: ',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight:
-                              FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
-                        ),
-                        TextSpan(
-                            text:
-                            arguments.work.cellphone,
-                            style:  TextStyle(
-                                fontSize: 16,
-                                fontWeight:
-                                FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
-                      ],
-                    ),
-                  )
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'CEL: ',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondaryContainer),
+                              ),
+                              TextSpan(
+                                  text: arguments.work.cellphone,
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.normal,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondaryContainer)),
+                            ],
+                          ),
+                        )
                       : Container(),
                 ],
               ),

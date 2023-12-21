@@ -380,10 +380,7 @@ class _MyAppState extends State<MyApp> {
             create: (context) => InventoryCubit(locator<DatabaseRepository>()),
           ),
           BlocProvider(
-            create: (context) => PartialCubit(
-                locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+            create: (context) => PartialCubit(locator<DatabaseRepository>()),
           ),
           BlocProvider(
             create: (context) => RejectCubit(

@@ -61,23 +61,26 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
   }
 
   Future<void> minus() async {
-    inventoryCubit.minus(widget.summary, widget.arguments.work.id!,
-        widget.arguments.orderNumber);
+    inventoryCubit.minus(widget.summary, widget.arguments.summary.validate!,
+        widget.arguments.work.id!, widget.arguments.summary.orderNumber);
   }
 
   Future<void> longMinus() async {
-    inventoryCubit.longMinus(widget.summary, widget.arguments.work.id!,
-        widget.arguments.orderNumber);
+    inventoryCubit.longMinus(widget.summary, widget.arguments.summary.validate!,
+        widget.arguments.work.id!, widget.arguments.summary.orderNumber);
   }
 
   Future<void> increment() async {
-    inventoryCubit.increment(widget.summary, widget.arguments.work.id!,
-        widget.arguments.orderNumber);
+    inventoryCubit.increment(widget.summary, widget.arguments.summary.validate!,
+        widget.arguments.work.id!, widget.arguments.summary.orderNumber);
   }
 
   Future<void> longIncrement() async {
-    inventoryCubit.longIncrement(widget.summary, widget.arguments.work.id!,
-        widget.arguments.orderNumber);
+    inventoryCubit.longIncrement(
+        widget.summary,
+        widget.arguments.summary.validate!,
+        widget.arguments.work.id!,
+        widget.arguments.summary.orderNumber);
   }
 
   @override
@@ -100,14 +103,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                         widget.summary.packing != null) {
                       var arguments = PackageArgument(
                           work: widget.arguments.work,
-                          summaryId: widget.summary.id,
-                          typeOfCharge: widget.summary.typeOfCharge!,
-                          orderNumber: widget.summary.orderNumber,
-                          operativeCenter: widget.summary.operativeCenter!,
-                          idPacking: widget.summary.idPacking!,
-                          expedition: widget.summary.expedition,
-                          packing: widget.summary.packing!
-                      );
+                          summary: widget.arguments.summary);
                       inventoryCubit.goToPackage(arguments);
                     }
                   },
@@ -140,7 +136,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                 ? Row(
                                     children: [
                                       Icon(Icons.info, color: Colors.grey[500]),
-                                      Text('(${widget.summary.count})')
+                                      Text('(${widget.summary.count ?? 1})')
                                     ],
                                   )
                                 : Container(),

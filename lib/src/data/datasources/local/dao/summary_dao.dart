@@ -48,6 +48,21 @@ class SummaryDao {
       int workId, String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
     var summaryList = await db!.rawQuery('''
+      SELECT $tableSummaries.*,
+      SUM($tableSummaries.${SummaryFields.grandTotal}) as ${SummaryFields.grandTotal},
+      COUNT($tableSummaries.${SummaryFields.coditem}) AS count
+      FROM $tableSummaries
+      WHERE $tableSummaries.${SummaryFields.workId} = $workId 
+      AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
+      GROUP BY $tableSummaries.${SummaryFields.idPacking}, $tableSummaries.${SummaryFields.packing}
+    ''');
+    return parseSummaries(summaryList);
+  }
+
+  Future<List<Summary>> getAllInventoryByPackage(
+      int workId, String orderNumber) async {
+    final db = await _appDatabase.streamDatabase;
+    var summaryList = await db!.rawQuery('''
             SELECT $tableSummaries.*
             FROM $tableSummaries
             WHERE $tableSummaries.${SummaryFields.workId} = $workId 

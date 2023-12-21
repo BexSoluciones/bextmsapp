@@ -30,17 +30,24 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
 
   final helperFunctions = HelperFunctions();
 
-  InventoryCubit(this._databaseRepository)
-      : super(const InventoryLoading());
+  InventoryCubit(this._databaseRepository) : super(const InventoryLoading());
 
   Future<void> getAllInventoryByOrderNumber(
-      int workId, String orderNumber) async {
-    emit(await _getAllInventoryByOrderNumber(workId, orderNumber));
+      int validate, int workId, String orderNumber) async {
+    emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
-  Future<InventoryState> _getAllInventoryByOrderNumber(int workId, String orderNumber) async {
-    final summaries = await _databaseRepository.getAllInventoryByOrderNumber(
-        workId, orderNumber);
+  Future<InventoryState> _getAllInventoryByOrderNumber(
+      int validate, int workId, String orderNumber) async {
+    var summaries = <Summary>[];
+
+    if (validate == 1) {
+      summaries = await _databaseRepository.getAllInventoryByPackage(
+          workId, orderNumber);
+    } else {
+      summaries = await _databaseRepository.getAllInventoryByOrderNumber(
+          workId, orderNumber);
+    }
 
     var totalSummaries =
         await _databaseRepository.getTotalSummaries(workId, orderNumber);
@@ -62,12 +69,12 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
             : null);
   }
 
-  Future<void> reset(int workId, String orderNumber) async {
+  Future<void> reset(int validate, int workId, String orderNumber) async {
     await _databaseRepository.resetCantSummaries(workId, orderNumber);
-    emit(await _getAllInventoryByOrderNumber(workId, orderNumber));
+    emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
-  Future<void> minus(Summary summary, int workId, String orderNumber) async {
+  Future<void> minus(Summary summary, int validate, int workId, String orderNumber) async {
     if (summary.cant > 0) {
       summary.minus++;
       summary.cant--;
@@ -75,11 +82,11 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
           (summary.cant * double.parse(summary.unitOfMeasurement));
     }
     await _databaseRepository.updateSummary(summary);
-    emit(await _getAllInventoryByOrderNumber(workId, orderNumber));
+    emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
   Future<void> longMinus(
-      Summary summary, int workId, String orderNumber) async {
+      Summary summary, int validate, int workId, String orderNumber) async {
     if (summary.cant > 0) {
       summary.minus = double.parse(summary.amount) ~/
           double.parse(summary.unitOfMeasurement);
@@ -88,11 +95,11 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
           (summary.cant * double.parse(summary.unitOfMeasurement));
     }
     await _databaseRepository.updateSummary(summary);
-    emit(await _getAllInventoryByOrderNumber(workId, orderNumber));
+    emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
   Future<void> increment(
-      Summary summary, int workId, String orderNumber) async {
+      Summary summary, int validate, int workId, String orderNumber) async {
     if (summary.cant <
         (double.parse(summary.amount) /
             double.parse(summary.unitOfMeasurement))) {
@@ -106,11 +113,11 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
           (summary.cant * double.parse(summary.unitOfMeasurement));
     }
     await _databaseRepository.updateSummary(summary);
-    emit(await _getAllInventoryByOrderNumber(workId, orderNumber));
+    emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
   Future<void> longIncrement(
-      Summary summary, int workId, String orderNumber) async {
+      Summary summary, int validate, int workId, String orderNumber) async {
     if (summary.cant <=
         (double.parse(summary.amount) /
             double.parse(summary.unitOfMeasurement))) {
@@ -121,9 +128,9 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
           (summary.cant * double.parse(summary.unitOfMeasurement));
     }
     await _databaseRepository.updateSummary(summary);
-    emit(await _getAllInventoryByOrderNumber(workId, orderNumber));
+    emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
-  void goToPackage(PackageArgument argument) => _navigationService.goTo(AppRoutes.package, arguments: argument);
-
+  void goToPackage(PackageArgument argument) =>
+      _navigationService.goTo(AppRoutes.package, arguments: argument);
 }
