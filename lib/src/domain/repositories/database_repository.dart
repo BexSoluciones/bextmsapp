@@ -58,6 +58,8 @@ abstract class DatabaseRepository {
   Future<double> countTotalRespawnWorksByWorkcode(String workcode,String reason);
   Future<bool> resetCantSummaries(int workId, String orderNumber);
   Future<double> getTotalSummaries(int workId, String orderNumber);
+  Future<int> getTotalPackageSummaries(String orderNumber);
+  Future<int> getTotalPackageSummariesLoose(String orderNumber);
   Future<int> insertSummary(Summary summary);
   Future<int> updateSummary(Summary summary);
   Future<void> insertSummaries(List<Summary> summaries);
@@ -81,7 +83,6 @@ abstract class DatabaseRepository {
   Future<void> deleteTransactionsByWorkcode(String workcode);
   Future<int> countLeftClients(String workcode);
   Future<bool> verifyTransactionExistence(int workId,String orderNumber);
-
 
 
   //REASONS

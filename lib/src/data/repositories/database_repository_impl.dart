@@ -149,6 +149,16 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<int> getTotalPackageSummaries(String orderNumber) async {
+    return _appDatabase.summaryDao.getTotalPackageSummaries(orderNumber);
+  }
+
+  @override
+  Future<int> getTotalPackageSummariesLoose(String orderNumber) async {
+    return _appDatabase.summaryDao.getTotalPackageSummariesLoose(orderNumber);
+  }
+
+  @override
   Future<bool> resetCantSummaries(int workId, String orderNumber) {
     return _appDatabase.summaryDao.resetCantSummaries(workId, orderNumber);
   }
@@ -267,8 +277,9 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
-  Future<bool> verifyTransactionExistence(int workId, String orderNumber){
-    return _appDatabase.transactionDao.verifyTransactionExistence(workId,orderNumber);
+  Future<bool> verifyTransactionExistence(int workId, String orderNumber) {
+    return _appDatabase.transactionDao
+        .verifyTransactionExistence(workId, orderNumber);
   }
 
   //REASONS
@@ -377,7 +388,6 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   Stream<List<Location>> watchAllLocations() {
     return _appDatabase.locationDao.watchAllLocations();
   }
-
 
   @override
   Future<List<Location>> getAllLocations() async {

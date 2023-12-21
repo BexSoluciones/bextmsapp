@@ -1,6 +1,8 @@
 import 'package:bexdeliveries/src/config/size.dart';
+import 'package:bexdeliveries/src/presentation/cubits/summary/summary_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 //domain
 import '../../../../../domain/models/summary.dart';
@@ -26,6 +28,10 @@ class ItemSummary extends StatefulWidget {
 }
 
 class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
+  late SummaryCubit summaryCubit;
+
+  int totalSummary = 0;
+  int totalLooseSummary = 0;
 
   @override
   void setState(fn) {
@@ -36,7 +42,22 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
 
   @override
   void initState() {
+    summaryCubit = BlocProvider.of<SummaryCubit>(context);
+
+    if (widget.summary.expedition != null) {
+      countBox();
+    }
+
     super.initState();
+  }
+
+  Future<void> countBox() async {
+    var response = await summaryCubit.countBox(widget.summary.orderNumber);
+
+    setState(() {
+      totalSummary = response[0] as int;
+      totalLooseSummary = response[1] as int;
+    });
   }
 
   @override
@@ -50,7 +71,8 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
     return Material(
       child: Ink(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+          color:
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: ListTile(
@@ -77,7 +99,9 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                     Text(
                       'Expedición: ${widget.summary.expedition}',
                       textScaler: TextScaler.linear(calculatedTextScaleFactor),
-                      style: TextStyle(fontSize: 16,color: Theme.of(context).colorScheme.scrim),
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).colorScheme.scrim),
                     ),
                 ],
               ),
@@ -88,9 +112,10 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text(
-                  'Items: ${widget.summary.count.toString()}',
+                  'Items: ${widget.summary.expedition != null ? (totalSummary + totalLooseSummary) : widget.summary.count.toString()}',
                   textScaler: TextScaler.linear(calculatedTextScaleFactor),
-                  style: TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
+                  style: TextStyle(
+                      fontSize: 14, color: Theme.of(context).colorScheme.scrim),
                 ),
               ]),
               Row(
@@ -99,12 +124,16 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                   Text(
                     'Total:  ${formatter.format(widget.summary.grandTotalCopy)}',
                     textScaler: TextScaler.linear(calculatedTextScaleFactor),
-                    style:  TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.scrim),
                   ),
                   Text(
                     'Tipo: ${widget.summary.typeOfCharge}',
                     textScaler: TextScaler.linear(calculatedTextScaleFactor),
-                    style:  TextStyle(fontSize: 14,color: Theme.of(context).colorScheme.scrim),
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.scrim),
                   ),
                 ],
               )
@@ -113,8 +142,10 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
           trailing: widget.summary.loading!
               ? const CupertinoActivityIndicator()
               : widget.summary.typeTransaction == 'entrega'
-                  ?  Icon(Icons.local_shipping,color: Theme.of(context).colorScheme.scrim)
-                  :  Icon(Icons.hail,color: Theme.of(context).colorScheme.scrim),
+                  ? Icon(Icons.local_shipping,
+                      color: Theme.of(context).colorScheme.scrim)
+                  : Icon(Icons.hail,
+                      color: Theme.of(context).colorScheme.scrim),
         ),
       ),
     );
