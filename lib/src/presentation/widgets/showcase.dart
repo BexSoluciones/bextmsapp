@@ -87,21 +87,134 @@ Widget buildMapShowcase(BuildContext context, Work work, GlobalKey three) {
         '¿Te perdiste? ¡Usa esta opción para ver al cliente en Google Maps!',
     child: IconButton(
       onPressed: () async {
-        if (work.latitude != '0' && work.longitude != '0') {
-          _navigationService.goTo(AppRoutes.summaryNavigation, arguments: SummaryNavigationArgument(work: work));
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'No tiene geolocalización 🚨',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          );
-        }
+        ModalNavegationMaps(context,work,three);
+//         if (work.latitude != '0' && work.longitude != '0') {
+//           _navigationService.goTo(AppRoutes.summaryNavigation, arguments: SummaryNavigationArgument(work: work));
+//         } else {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             const SnackBar(
+//               content: Text(
+//                 'No tiene geolocalización 🚨',
+//                 style: TextStyle(fontSize: 16),
+//               ),
+//             ),
+//           );
+//         }
+
       },
       icon:  Icon(Icons.directions, size: 35,color: Theme.of(context).colorScheme.shadow),
     ),
+  );
+}
+
+void ModalNavegationMaps(BuildContext context, Work work, GlobalKey threeas) {
+  showModalBottomSheet(
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    context: context,
+    builder: (BuildContext builder) {
+      return Container(
+        height: 480,
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '¡Bienvenido!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Selecciona una opción:',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () async{
+                  if (work.latitude != '0' && work.longitude != '0') {
+                    await helperFunctions.showMapDirection(
+                      context,
+                      work,
+                      null,
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'No tiene geolocalización 🚨',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Image.asset(
+                    'assets/images/maps.png',
+                    width: 80,
+                    height: 80,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              GestureDetector(
+                onTap: () async{
+                  if (work.latitude != '0' && work.longitude != '0') {
+                    await helperFunctions.showMapDirectionWaze(
+                      context,
+                      work,
+                      null,
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'No tiene geolocalización 🚨',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Image.asset(
+                    'assets/images/waze.png',
+                    width: 80,
+                    height: 80,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
   );
 }
 
