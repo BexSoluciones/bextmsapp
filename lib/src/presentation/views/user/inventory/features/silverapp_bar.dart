@@ -50,9 +50,8 @@ class AppBarInventory extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.primary,
       leading: IconButton(
           onPressed: () {
-            context
-                .read<InventoryCubit>()
-                .reset(arguments.work.id!, arguments.orderNumber);
+            context.read<InventoryCubit>().reset(arguments.summary.validate!,
+                arguments.work.id!, arguments.summary.orderNumber);
             _navigationService.goTo(AppRoutes.summary,
                 arguments: SummaryArgument(work: arguments.work));
           },
@@ -71,8 +70,10 @@ class AppBarInventory extends StatelessWidget {
                     onPressed: () async {
                       await vibrate();
                       if (context.mounted) {
-                        BlocProvider.of<InventoryCubit>(context)
-                            .reset(arguments.work.id!, arguments.orderNumber);
+                        BlocProvider.of<InventoryCubit>(context).reset(
+                            arguments.summary.validate!,
+                            arguments.work.id!,
+                            arguments.summary.orderNumber);
                       }
                     },
                     icon: Icon(Icons.change_circle_outlined,
@@ -105,7 +106,7 @@ class AppBarInventory extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (arguments.expedition != null)
+                                  if (arguments.summary.expedition != null)
                                     Text.rich(
                                       TextSpan(
                                         children: [
@@ -119,7 +120,8 @@ class AppBarInventory extends StatelessWidget {
                                                     .secondaryContainer),
                                           ),
                                           TextSpan(
-                                              text: arguments.expedition,
+                                              text:
+                                                  arguments.summary.expedition,
                                               style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.normal,
@@ -143,7 +145,7 @@ class AppBarInventory extends StatelessWidget {
                                         ),
                                         TextSpan(
                                             text:
-                                                '${arguments.work.type}-${arguments.orderNumber}',
+                                                '${arguments.work.type}-${arguments.summary.orderNumber}',
                                             style: TextStyle(
                                                 fontSize: calculatedFon,
                                                 fontWeight: FontWeight.normal,
@@ -246,7 +248,6 @@ class AppBarInventory extends StatelessWidget {
                     ])),
           )),
       title: Text(arguments.work.workcode!,
-          textScaleFactor: calculatedTextScaleFactor,
           textAlign: TextAlign.center,
           style: TextStyle(
               fontSize: calculatedFon,

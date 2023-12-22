@@ -96,8 +96,6 @@ final NotificationService _notificationService = locator<NotificationService>();
 final RemoteConfigService _remoteConfigService = locator<RemoteConfigService>();
 final LoggerService _loggerService = locator<LoggerService>();
 
-List<CameraDescription> cameras = [];
-
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
@@ -379,16 +377,10 @@ class _MyAppState extends State<MyApp> {
                 BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
-            create: (context) => InventoryCubit(
-                locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+            create: (context) => InventoryCubit(locator<DatabaseRepository>()),
           ),
           BlocProvider(
-            create: (context) => PartialCubit(
-                locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+            create: (context) => PartialCubit(locator<DatabaseRepository>()),
           ),
           BlocProvider(
             create: (context) => RejectCubit(
@@ -435,12 +427,6 @@ class _MyAppState extends State<MyApp> {
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
                 BlocProvider.of<GpsBloc>(context)),
-          ),
-          BlocProvider(
-            create: (_) => CameraBloc(
-                cameraUtils: CameraUtils(),
-                databaseRepository: locator<DatabaseRepository>())
-              ..add(CameraInitialized()),
           ),
           BlocProvider(
             create: (context) => AccountBloc(locator<DatabaseRepository>()),

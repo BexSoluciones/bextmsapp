@@ -1,6 +1,8 @@
-import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+
+//repositories
+import '../../domain/repositories/database_repository.dart';
 
 //domain
 import '../../domain/models/photo.dart';

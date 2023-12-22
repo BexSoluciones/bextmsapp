@@ -39,9 +39,6 @@ Future<void> initializeDependencies() async {
   final remoteConfig = await RemoteConfigService.getInstance();
   locator.registerSingleton<RemoteConfigService>(remoteConfig!);
 
-  // final isolate = IsolateService();
-  // locator.registerSingleton<IsolateService>(isolate);
-
   final logger = LoggerService();
   locator.registerSingleton<LoggerService>(logger);
 

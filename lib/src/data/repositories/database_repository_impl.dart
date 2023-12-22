@@ -135,6 +135,13 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<List<Summary>> getAllInventoryByPackage(
+      int workId, String orderNumber) async {
+    return _appDatabase.summaryDao
+        .getAllInventoryByPackage(workId, orderNumber);
+  }
+
+  @override
   Future<List<Summary>> getAllPackageByOrderNumber(
       int workId, String orderNumber) async {
     return _appDatabase.summaryDao
@@ -142,10 +149,27 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<List<Summary>> watchAllItemsPackage(
+      String orderNumber, String packing, String idPacking) {
+    return _appDatabase.summaryDao
+        .watchAllItemsPackage(orderNumber, packing, idPacking);
+  }
+
+  @override
   Future<List<Summary>> getAllSummariesByOrderNumberMoved(
       int workId, String orderNumber) async {
     return _appDatabase.summaryDao
         .getAllSummariesByOrderNumberMoved(workId, orderNumber);
+  }
+
+  @override
+  Future<int> getTotalPackageSummaries(String orderNumber) async {
+    return _appDatabase.summaryDao.getTotalPackageSummaries(orderNumber);
+  }
+
+  @override
+  Future<int> getTotalPackageSummariesLoose(String orderNumber) async {
+    return _appDatabase.summaryDao.getTotalPackageSummariesLoose(orderNumber);
   }
 
   @override
@@ -267,8 +291,9 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
-  Future<bool> verifyTransactionExistence(int workId, String orderNumber){
-    return _appDatabase.transactionDao.verifyTransactionExistence(workId,orderNumber);
+  Future<bool> verifyTransactionExistence(int workId, String orderNumber) {
+    return _appDatabase.transactionDao
+        .verifyTransactionExistence(workId, orderNumber);
   }
 
   //REASONS
@@ -377,7 +402,6 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   Stream<List<Location>> watchAllLocations() {
     return _appDatabase.locationDao.watchAllLocations();
   }
-
 
   @override
   Future<List<Location>> getAllLocations() async {

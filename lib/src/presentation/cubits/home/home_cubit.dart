@@ -15,11 +15,11 @@ import '../../../domain/models/requests/enterprise_config_request.dart';
 import '../../../domain/models/requests/reason_request.dart';
 import '../../../domain/models/responses/enterprise_config_response.dart';
 import '../../../domain/models/responses/reason_response.dart';
-import '../../blocs/gps/gps_bloc.dart';
 import '../base/base_cubit.dart';
 
 //blocs
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
+import '../../blocs/gps/gps_bloc.dart';
 
 //utils
 import '../../../utils/resources/data_state.dart';

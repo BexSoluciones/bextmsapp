@@ -93,10 +93,10 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
 
     var transaction = Transaction(
       workId: arguments.work.id!,
-      summaryId: arguments.summaryId,
+      summaryId: arguments.summary.id,
       workcode: arguments.work.workcode,
-      orderNumber: arguments.orderNumber,
-      operativeCenter: arguments.operativeCenter,
+      orderNumber: arguments.summary.orderNumber,
+      operativeCenter: arguments.summary.operativeCenter,
       delivery: arguments.total.toString(),
       status: 'respawn',
       codmotvis: reason?.codmotvis,

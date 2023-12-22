@@ -1,4 +1,6 @@
 //domain
+
+
 import '../../../domain/models/arguments.dart';
 import '../../../domain/models/work.dart';
 //utils
@@ -10,6 +12,7 @@ import '../../../presentation/views/user/summary/index.dart';
 import '../../../presentation/views/user/summary/features/geo-reference.dart';
 import '../../../presentation/views/user/summary/features/navigation.dart';
 import '../../../presentation/views/user/inventory/index.dart';
+import '../../../presentation/views/user/package/index.dart';
 
 Map<String, RouteType> summaryRoutes = {
   AppRoutes.summary: (context, settings) =>
@@ -20,4 +23,6 @@ Map<String, RouteType> summaryRoutes = {
       arguments: settings.arguments as SummaryNavigationArgument),
   AppRoutes.inventory: (context, settings) => InventoryView(
       arguments: settings.arguments as InventoryArgument),
+  AppRoutes.package: (context, settings) => PackageView(
+      arguments: settings.arguments as PackageArgument),
 };

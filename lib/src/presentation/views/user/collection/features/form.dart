@@ -58,26 +58,28 @@ class _FormCollectionState extends State<FormCollection>
             key: widget.formKey,
             child: Column(
               children: [
-                 Row(
+                Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(children: [
                         const Text('EFECTIVO', style: TextStyle(fontSize: 14)),
                         const Icon(Icons.money, color: Colors.green),
-                        SizedBox( width: MediaQuery.of(context).size.width / 2,),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 2,
+                        ),
                         IconButton(
                             icon: const Icon(Icons.camera_alt,
                                 size: 32, color: kPrimaryColor),
                             onPressed: () => widget.collectionCubit
                                 .goToCamera(widget.orderNumber)),
                         widget.state.enterpriseConfig != null &&
-                            widget.state.enterpriseConfig!.codeQr !=
-                                null
+                                widget.state.enterpriseConfig!.codeQr != null
                             ? IconButton(
-                            icon: const Icon(Icons.qr_code_2,
-                                size: 32, color: kPrimaryColor),
-                            onPressed: () =>
-                                widget.collectionCubit.goToCodeQR())
+                                icon: const Icon(Icons.qr_code_2,
+                                    size: 32, color: kPrimaryColor),
+                                onPressed: () => widget.collectionCubit
+                                    .goToCodeQR(
+                                        widget.state.enterpriseConfig!.codeQr))
                             : Container(),
                       ]),
                     ]),
@@ -122,7 +124,7 @@ class _FormCollectionState extends State<FormCollection>
                     ),
                   ),
                   validator: (value) {
-                    if(value!.startsWith('.') || value.endsWith('.')) {
+                    if (value!.startsWith('.') || value.endsWith('.')) {
                       return 'valor no válido';
                     }
                     if (value.contains(',')) {
@@ -131,7 +133,6 @@ class _FormCollectionState extends State<FormCollection>
                     return null;
                   },
                 ),
-                //TODO:: [Heider Zapa] fix multiple accounts
                 const SizedBox(height: 10),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     bloc: widget.collectionCubit,
@@ -162,8 +163,9 @@ class _FormCollectionState extends State<FormCollection>
                                     ? IconButton(
                                         icon: const Icon(Icons.qr_code_2,
                                             size: 32, color: kPrimaryColor),
-                                        onPressed: () =>
-                                            widget.collectionCubit.goToCodeQR())
+                                        onPressed: () => widget.collectionCubit
+                                            .goToCodeQR(widget.state
+                                                .enterpriseConfig!.codeQr))
                                     : Container()
                               ],
                             )
@@ -222,7 +224,8 @@ class _FormCollectionState extends State<FormCollection>
                                 ),
                               ),
                               validator: (value) {
-                                if(value!.startsWith('.') || value.endsWith('.')) {
+                                if (value!.startsWith('.') ||
+                                    value.endsWith('.')) {
                                   return 'valor no válido';
                                 }
                                 if (value.contains(',')) {

@@ -208,7 +208,7 @@ class _MapPageState extends State<MapPage> {
               final String urlTemplate = generalState.currentStore != null &&
                       metadata.data != null
                   ? metadata.data!['sourceURL']!
-                  : 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}@2x?access_token={accessToken}';
+                  : 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png';
 
               return BlocBuilder<NavigationCubit, NavigationState>(
                   builder: (context, state) => SingleChildScrollView(

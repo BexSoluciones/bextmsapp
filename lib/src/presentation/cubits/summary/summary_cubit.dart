@@ -53,6 +53,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   Future<SummaryState> _getAllSummariesByOrderNumber(int workId) async {
     final summaries =
         await _databaseRepository.getAllSummariesByOrderNumber(workId);
+
     var time = await _databaseRepository.getDiffTime(workId);
     var isArrived =
         await _databaseRepository.validateTransactionArrived(workId, 'arrived');
@@ -64,6 +65,15 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         time: time,
         isArrived: isArrived,
         isGeoReference: isGeoReferenced);
+  }
+
+  Future<List> countBox(String orderNumber) async {
+    final summaryFutures = await Future.wait([
+      _databaseRepository.getTotalPackageSummaries(orderNumber),
+      _databaseRepository.getTotalPackageSummariesLoose(orderNumber),
+    ]);
+
+    return summaryFutures;
   }
 
   Future<void> getDiffTime(int workId) async {
@@ -118,12 +128,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
     _navigationService.goTo(AppRoutes.inventory,
         arguments: InventoryArgument(
-            work: work,
-            summaryId: summary.id,
-            typeOfCharge: summary.typeOfCharge!,
-            orderNumber: summary.orderNumber,
-            operativeCenter: summary.operativeCenter!,
-            summaries: summaries));
+            work: work, summary: summary, summaries: summaries));
   }
 
   Future<void> sendTransactionArrived(

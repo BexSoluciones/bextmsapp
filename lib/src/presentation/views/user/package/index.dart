@@ -44,16 +44,18 @@ class PackageViewState extends State<PackageView> with WidgetsBindingObserver {
   void startPackageWidget() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _isFirstLaunch().then((result) {
-        if (!result) {
+        if (result == null || result == false) {
           ShowCaseWidget.of(context).startShowCase([one, two]);
         }
       });
     });
   }
 
-  Future<bool> _isFirstLaunch() async {
-    var isFirstLaunch = _storageService.getBool('package-is-init');
-    if (!isFirstLaunch!) _storageService.setBool('package-is-init', true);
+  Future<bool?> _isFirstLaunch() async {
+    var isFirstLaunch = _storageService.getBool('work-is-init');
+    if (isFirstLaunch == null || isFirstLaunch == false) {
+      _storageService.setBool('work-is-init', true);
+    }
     return isFirstLaunch;
   }
 
@@ -67,8 +69,8 @@ class PackageViewState extends State<PackageView> with WidgetsBindingObserver {
     return PopScope(
         canPop: false,
         child: Scaffold(
-          body: SafeArea(
-              child: CustomScrollView(
+          resizeToAvoidBottomInset: true,
+          body: CustomScrollView(
             slivers: <Widget>[
               AppBarInventory(
                 arguments: widget.arguments,
@@ -80,7 +82,7 @@ class PackageViewState extends State<PackageView> with WidgetsBindingObserver {
                 two: two,
               )
             ],
-          )),
+          ),
         ));
   }
 }

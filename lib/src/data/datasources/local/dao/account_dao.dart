@@ -37,12 +37,12 @@ class AccountDao {
     var batch = db!.batch();
     if (accounts.isNotEmpty) {
       await Future.forEach(accounts, (account) async {
-        var d = await db.query(tableAccount, where: 'id = ?', whereArgs: [account.id]);
+        var d = await db.query(tableAccount, where: 'account_id = ?', whereArgs: [account.accountId]);
         var w = parseAccounts(d);
         if (w.isEmpty) {
           batch.insert(tableAccount, account.toJson());
         } else {
-          batch.update(tableAccount, account.toJson(), where: 'id = ?', whereArgs: [account.id]);
+          batch.update(tableAccount, account.toJson(), where: 'account_id = ?', whereArgs: [account.accountId]);
         }
       });
     }
