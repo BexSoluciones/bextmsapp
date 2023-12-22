@@ -59,6 +59,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
+  bool _isLoggingOut = false;
+  bool _isSyncing = false;
 
   StreamSubscription? locationSubscription;
   CurrentUserLocationEntity? currentLocation;
@@ -117,199 +119,217 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   }
 
   Future<void> sync() async {
-    if (false) return;
+    try {
+      if (_isSyncing) return;
+      _isSyncing = true;
 
-    await run(() async {
-      emit(const HomeLoading());
+      await run(() async {
+        emit(const HomeLoading());
 
-      final timer0 =
-          logTimerStart(headerHomeLogger, 'Starting...', level: LogLevel.info);
+        final timer0 = logTimerStart(headerHomeLogger, 'Starting...',
+            level: LogLevel.info);
 
-      var currentLocation = gpsBloc.state.lastKnownLocation;
+        var currentLocation = gpsBloc.state.lastKnownLocation;
 
-      final user = _storageService.getObject('user') != null
-          ? User.fromJson(_storageService.getObject('user')!)
-          : null;
+        final user = _storageService.getObject('user') != null
+            ? User.fromJson(_storageService.getObject('user')!)
+            : null;
 
-      final results = await Future.wait([
-        _apiRepository.getConfigEnterprise(request: EnterpriseConfigRequest()),
-        _apiRepository.reasons(request: ReasonRequest()),
-      ]);
+        final results = await Future.wait([
+          _apiRepository.getConfigEnterprise(
+              request: EnterpriseConfigRequest()),
+          _apiRepository.reasons(request: ReasonRequest()),
+        ]);
 
-      if (results.isNotEmpty) {
-        if (results[0] is DataSuccess) {
-          var data = results[0].data as EnterpriseConfigResponse;
-          _storageService.setObject('config', data.enterpriseConfig.toMap());
-          _storageService.setBool('can_make_history', data.enterpriseConfig.canMakeHistory);
-          if (data.enterpriseConfig.specifiedAccountTransfer == true) {
-            var response =
-                await _apiRepository.accounts(request: AccountRequest());
-            if (response is DataSuccess) {
-              logDebugFine(headerHomeLogger, '${response.data!.accounts.length}');
+        if (results.isNotEmpty) {
+          if (results[0] is DataSuccess) {
+            var data = results[0].data as EnterpriseConfigResponse;
+            _storageService.setObject('config', data.enterpriseConfig.toMap());
+            _storageService.setBool(
+                'can_make_history', data.enterpriseConfig.canMakeHistory);
+            if (data.enterpriseConfig.specifiedAccountTransfer == true) {
+              var response =
+              await _apiRepository.accounts(request: AccountRequest());
+              if (response is DataSuccess) {
+                logDebugFine(
+                    headerHomeLogger, '${response.data!.accounts.length}');
 
-              await _databaseRepository.insertAccounts(response.data!.accounts);
-            }
-          }
-        }
-
-        if (results[1] is DataSuccess) {
-          var data = results[1].data as ReasonResponse;
-          _databaseRepository.insertReasons(data.reasons);
-        }
-      }
-
-      final response = await _apiRepository.login(
-        request: LoginRequest(_storageService.getString('username')!,
-            _storageService.getString('password')!),
-      );
-
-      if (response is DataSuccess) {
-        final login = response.data!.login;
-        var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
-        var version = yaml['version'];
-        _storageService.setString('token', response.data!.login.token);
-        _storageService.setObject('user', response.data!.login.user!.toJson());
-        _storageService.setInt('user_id', response.data!.login.user!.id);
-
-        var device = await helperFunctions.getDevice();
-
-        final responseWorks = await _apiRepository.works(
-            request: WorkRequest(
-                login.user!.id!,
-                device != null ? device['id'] : null,
-                device != null ? device['model'] : null,
-                version,
-                currentLocation?.latitude.toString(),
-                currentLocation?.longitude.toString(),
-                DateTime.now().toIso8601String(),
-                'sync'));
-
-        if (responseWorks is DataSuccess) {
-          var works = <Work>[];
-          var summaries = <Summary>[];
-          var transactions = <Transaction>[];
-
-          await Future.forEach(responseWorks.data!.works, (work) async {
-            works.add(work);
-            if (work.summaries != null) {
-              await Future.forEach(work.summaries as Iterable<Object?>,
-                  (element) {
-                var summary = element as Summary;
-                if (summary.idPacking != null && summary.packing != null) {
-                  summary.cant = 1;
-                } else {
-                  summary.cant = ((double.parse(summary.amount) *
-                              100.0 /
-                              double.parse(summary.unitOfMeasurement))
-                          .round() /
-                      100);
-                }
-                summary.grandTotalCopy = summary.grandTotal;
-                if (summary.transaction != null) {
-                  transactions.add(summary.transaction!);
-                }
-                summaries.add(summary);
-              });
-
-              var found = work.summaries!
-                  .where((element) => element.transaction != null);
-
-              if (found.isNotEmpty) {
-                _storageService.setBool('${work.workcode}-started', true);
-                _storageService.setBool('${work..workcode}-confirm', true);
-                _storageService.setBool('${work.workcode}-blocked', false);
+                await _databaseRepository
+                    .insertAccounts(response.data!.accounts);
               }
             }
-          });
-
-          var worksF = groupBy(responseWorks.data!.works, (Work o) => o.workcode);
-          var warehouses = <Warehouse>[];
-          for(var w in worksF.keys){
-            var wn = responseWorks.data!.works.where((element) => element.workcode == w);
-            warehouses.add(wn.first.warehouse!);
-          }
-          final distinct = warehouses.unique((x) => x.id);
-          await _databaseRepository.insertWarehouses(distinct);
-
-          //TODO:: refactoring
-          var workcodes = groupBy(works, (Work work) => work.workcode);
-          if (workcodes.isNotEmpty) {
-            var localWorks = await _databaseRepository.getAllWorks();
-            var localWorkcode = groupBy(localWorks, (Work obj) => obj.workcode);
-            await differenceWorks(
-                localWorkcode.keys.toList(), workcodes.keys.toList());
           }
 
-          for (var key in groupBy(works, (Work obj) => obj.workcode).keys) {
-            var worksF = works.where((element) => element.workcode == key);
+          if (results[1] is DataSuccess) {
+            var data = results[1].data as ReasonResponse;
+            _databaseRepository.insertReasons(data.reasons);
+          }
+        }
 
-            if (worksF.first.status == 'unsync') {
-              var processingQueueWork = ProcessingQueue(
-                  body: jsonEncode({'workcode': key, 'status': 'sync'}),
-                  task: 'incomplete',
-                  code: 'store_work_status',
-                  createdAt: now(),
-                  updatedAt: now());
+        final response = await _apiRepository.login(
+          request: LoginRequest(_storageService.getString('username')!,
+              _storageService.getString('password')!),
+        );
 
-              _processingQueueBloc.add(
-                  ProcessingQueueAdd(processingQueue: processingQueueWork));
+        if (response is DataSuccess) {
+          final login = response.data!.login;
+          var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
+          var version = yaml['version'];
+          _storageService.setString('token', response.data!.login.token);
+          _storageService.setObject(
+              'user', response.data!.login.user!.toJson());
+          _storageService.setInt('user_id', response.data!.login.user!.id);
 
-              if (worksF.first.zoneId != null) {
-                var processingQueueHistoric = ProcessingQueue(
-                    body: jsonEncode({
-                      'zone_id': worksF.first.zoneId!,
-                      'workcode': worksF.first.workcode
-                    }),
+          var device = await helperFunctions.getDevice();
+
+          final responseWorks = await _apiRepository.works(
+              request: WorkRequest(
+                  login.user!.id!,
+                  device != null ? device['id'] : null,
+                  device != null ? device['model'] : null,
+                  version,
+                  currentLocation?.latitude.toString(),
+                  currentLocation?.longitude.toString(),
+                  DateTime.now().toIso8601String(),
+                  'sync'));
+
+          if (responseWorks is DataSuccess) {
+            var works = <Work>[];
+            var summaries = <Summary>[];
+            var transactions = <Transaction>[];
+
+            await Future.forEach(responseWorks.data!.works, (work) async {
+              works.add(work);
+              if (work.summaries != null) {
+                await Future.forEach(work.summaries as Iterable<Object?>,
+                        (element) {
+                      var summary = element as Summary;
+                      if (summary.idPacking != null && summary.packing != null) {
+                        summary.cant = 1;
+                      } else {
+                        summary.cant = ((double.parse(summary.amount) *
+                            100.0 /
+                            double.parse(summary.unitOfMeasurement))
+                            .round() /
+                            100);
+                      }
+                      summary.grandTotalCopy = summary.grandTotal;
+                      if (summary.transaction != null) {
+                        transactions.add(summary.transaction!);
+                      }
+                      summaries.add(summary);
+                    });
+
+                var found = work.summaries!
+                    .where((element) => element.transaction != null);
+
+                if (found.isNotEmpty) {
+                  _storageService.setBool('${work.workcode}-started', true);
+                  _storageService.setBool('${work..workcode}-confirm', true);
+                  _storageService.setBool('${work.workcode}-blocked', false);
+                }
+              }
+            });
+
+            var worksF =
+            groupBy(responseWorks.data!.works, (Work o) => o.workcode);
+            var warehouses = <Warehouse>[];
+            for (var w in worksF.keys) {
+              var wn = responseWorks.data!.works
+                  .where((element) => element.workcode == w);
+              warehouses.add(wn.first.warehouse!);
+            }
+            final distinct = warehouses.unique((x) => x.id);
+            await _databaseRepository.insertWarehouses(distinct);
+
+            //TODO:: refactoring
+            var workcodes = groupBy(works, (Work work) => work.workcode);
+            if (workcodes.isNotEmpty) {
+              var localWorks = await _databaseRepository.getAllWorks();
+              var localWorkcode =
+              groupBy(localWorks, (Work obj) => obj.workcode);
+              await differenceWorks(
+                  localWorkcode.keys.toList(), workcodes.keys.toList());
+            }
+
+            for (var key in groupBy(works, (Work obj) => obj.workcode).keys) {
+              var worksF = works.where((element) => element.workcode == key);
+
+              if (worksF.first.status == 'unsync') {
+                var processingQueueWork = ProcessingQueue(
+                    body: jsonEncode({'workcode': key, 'status': 'sync'}),
                     task: 'incomplete',
-                    code: 'get_prediction',
+                    code: 'store_work_status',
                     createdAt: now(),
                     updatedAt: now());
 
-                _processingQueueBloc.add(ProcessingQueueAdd(
-                    processingQueue: processingQueueHistoric));
+                _processingQueueBloc.add(
+                    ProcessingQueueAdd(processingQueue: processingQueueWork));
+
+                if (worksF.first.zoneId != null) {
+                  var processingQueueHistoric = ProcessingQueue(
+                      body: jsonEncode({
+                        'zone_id': worksF.first.zoneId!,
+                        'workcode': worksF.first.workcode
+                      }),
+                      task: 'incomplete',
+                      code: 'get_prediction',
+                      createdAt: now(),
+                      updatedAt: now());
+
+                  _processingQueueBloc.add(ProcessingQueueAdd(
+                      processingQueue: processingQueueHistoric));
+                }
               }
             }
+
+            await _databaseRepository.insertWorks(works);
+            await _databaseRepository.insertSummaries(summaries);
+            await _databaseRepository.insertTransactions(transactions);
+            //DELETE
+            await _databaseRepository.deleteProcessingQueueByDays();
+            await _databaseRepository.deleteLocationsByDays();
+            await _databaseRepository.deleteNotificationsByDays();
+
+            logTimerStop(headerHomeLogger, timer0, 'Initialization completed',
+                level: LogLevel.success);
+
+            for (var work in works) {
+              await helperFunctions.deleteWorks(work);
+            }
+            emit(await _getAllWorks());
+          } else {
+            emit(HomeFailed(error: responseWorks.error, user: user));
           }
-
-          await _databaseRepository.insertWorks(works);
-          await _databaseRepository.insertSummaries(summaries);
-          await _databaseRepository.insertTransactions(transactions);
-          //DELETE
-          await _databaseRepository.deleteProcessingQueueByDays();
-          await _databaseRepository.deleteLocationsByDays();
-          await _databaseRepository.deleteNotificationsByDays();
-
-          logTimerStop(headerHomeLogger, timer0, 'Initialization completed',
-              level: LogLevel.success);
-
-          for (var work in works) {
-            await helperFunctions.deleteWorks(work);
-          }
-          emit(await _getAllWorks());
-        } else {
-          emit(HomeFailed(error: responseWorks.error, user: user));
+        } else if (response is DataFailed) {
+          emit(HomeFailed(error: response.error, user: user));
         }
-      } else if (response is DataFailed) {
-        emit(HomeFailed(error: response.error, user: user));
-      }
-    });
+      });
+    } catch (e, stackTrace) {
+      print("Error during sync: $e");
+      print(stackTrace);
+    } finally {
+      _isSyncing = false;
+    }
   }
 
   Future<void> logout() async {
-    if (isBusy) return;
-
-    await run(() async {
+    if (_isLoggingOut) return;
+    try {
+      _isLoggingOut = true;
       emit(const HomeLoading());
-
       await _databaseRepository.emptyWorks();
       await _databaseRepository.emptySummaries();
       await _databaseRepository.emptyTransactions();
       await _databaseRepository.emptyReasons();
-
       _storageService.remove('user');
       _storageService.remove('token');
-
       await _navigationService.goTo(AppRoutes.login);
-    });
+    } catch (e, stackTrace) {
+      print("Error during logout: $e");
+      print(stackTrace);
+    } finally {
+      _isLoggingOut = false;
+    }
   }
 }

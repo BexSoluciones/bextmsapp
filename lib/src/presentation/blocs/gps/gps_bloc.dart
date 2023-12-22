@@ -56,7 +56,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     on<OnStopFollowingUser>(
         (event, emit) => emit(state.copyWith(followingUser: false)));
     on<OnNewUserLocationEvent>((event, emit) {
-      saveLocation('location', event.currentPosition);
+      //('location', event.currentPosition);
       emit(state.copyWith(
         lastKnownLocation: event.newLocation,
         myLocationHistory: [...state.myLocationHistory, event.newLocation],
