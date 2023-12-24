@@ -38,7 +38,7 @@ class _HomeListViewState extends State<HomeListView> {
       builder: (_, state) {
         switch (state.runtimeType) {
           case HomeLoading:
-            return const SkeletonLoading(cant: 10);
+            return const Center(child: CupertinoActivityIndicator());
           case HomeSuccess:
             return _buildHome(
               state.works,

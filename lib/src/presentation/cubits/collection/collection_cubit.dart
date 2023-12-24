@@ -334,6 +334,17 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     });
   }
 
+  void error() async {
+    if (isBusy) return;
+    await run(() async {
+      emit(CollectionFailed(
+          totalSummary: state.totalSummary,
+          enterpriseConfig: state.enterpriseConfig,
+          error: 'Por favor selecciona una cuenta'
+      ));
+    });
+  }
+
   Future<void> confirmTransaction(InventoryArgument arguments) async {
     var status =
         arguments.r != null && arguments.r!.isNotEmpty ? 'partial' : 'delivery';
@@ -342,7 +353,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
     if (cashController.text.isNotEmpty) {
       payments.add(Payment(
-        method: 'cash',
+        method: 'efecty',
         paid: cashController.text,
       ));
     }
