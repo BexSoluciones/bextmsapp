@@ -143,6 +143,34 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                             null),
                         const SizedBox(height: 16),
                         item(
+                            'Transacciones',
+                            queues
+                                .where((queue) =>
+                                    queue.code == "store_transaction")
+                                .length,
+                            null),
+                        const SizedBox(height: 16),
+                        item(
+                            'Localizaciones',
+                            queues
+                                .where(
+                                    (queue) => queue.code == "store_locations")
+                                .length,
+                            null),
+                        const SizedBox(height: 16),
+                        item(
+                            'Otras transacciones',
+                            queues
+                                .where((queue) =>
+                                    queue.code != "store_transaction_start" &&
+                                    queue.code != "store_transaction_arrived" &&
+                                    queue.code != "store_transaction_summary" &&
+                                    queue.code != "store_transaction" &&
+                                    queue.code != "store_locations")
+                                .length,
+                            null),
+                        const SizedBox(height: 16),
+                        item(
                             'Transacciones pendientes',
                             queues
                                 .where((queue) =>

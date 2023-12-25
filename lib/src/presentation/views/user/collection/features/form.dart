@@ -256,6 +256,9 @@ class _FormCollectionState extends State<FormCollection>
                               press: () {
                                 widget.collectionCubit.dateController.text =
                                     date(null);
+                                widget.collectionCubit.selectedAccount = null;
+                                widget.collectionCubit.indexToEdit = null;
+                                widget.collectionCubit.isEditing = false;
                                 Future<void> future = showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,

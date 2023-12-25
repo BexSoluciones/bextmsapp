@@ -46,9 +46,12 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   @override
   void initState() {
     super.initState();
-
     context.read<AccountBloc>().add(LoadAccountListEvent());
     collectionCubit = BlocProvider.of<CollectionCubit>(context);
+
+    collectionCubit.initState();
+
+
     collectionCubit.getCollection(
         widget.arguments.work.id!, widget.arguments.summary.orderNumber);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -67,7 +70,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 
   @override
   void dispose() {
-    // collectionCubit.dispose();
+    collectionCubit.dispose();
     super.dispose();
   }
 

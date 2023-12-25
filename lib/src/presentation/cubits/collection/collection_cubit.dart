@@ -51,16 +51,17 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
       : super(const CollectionLoading(), null);
 
-  final TextEditingController transferController = TextEditingController();
-  final TextEditingController multiTransferController = TextEditingController();
-  final TextEditingController cashController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
+  late TextEditingController transferController = TextEditingController();
+  late TextEditingController multiTransferController = TextEditingController();
+  late TextEditingController cashController = TextEditingController();
+  late TextEditingController dateController = TextEditingController();
 
   Account? selectedAccount;
   double total = 0;
   bool isEditing = false;
   int? indexToEdit;
   List<AccountPayment> selectedAccounts = [];
+
 
   void listenForCash() {
     try {
@@ -98,29 +99,35 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
   void listenForTransfer() {
     try {
-      if (!isEditing) {
-        if (cashController.text.isNotEmpty &&
-            transferController.text.isNotEmpty) {
-          total = double.tryParse(transferController.text)! +
-              double.tryParse(cashController.text)!;
-        } else if (transferController.text.isNotEmpty) {
-          total = double.tryParse(transferController.text)!;
-        } else if (cashController.text.isEmpty &&
-            transferController.text.isEmpty) {
-          total = 0;
-        } else if (cashController.text.isNotEmpty &&
-            transferController.text.isEmpty) {
-          total = double.tryParse(cashController.text)!;
-        }
+      if (cashController.text.isNotEmpty &&
+          transferController.text.isNotEmpty) {
+        total = double.tryParse(transferController.text)! +
+            double.tryParse(cashController.text)!;
+      } else if (transferController.text.isNotEmpty) {
+        total = double.tryParse(transferController.text)!;
+      } else if (cashController.text.isEmpty &&
+          transferController.text.isEmpty) {
+        total = 0;
+      } else if (cashController.text.isNotEmpty &&
+          transferController.text.isEmpty) {
+        total = double.tryParse(cashController.text)!;
       }
     } catch (e) {
       logDebugFine(headerDeveloperLogger, e.toString());
     }
   }
 
+  void initState() {
+    transferController = TextEditingController();
+    multiTransferController = TextEditingController();
+    cashController = TextEditingController();
+    dateController = TextEditingController();
+  }
+
   void dispose() {
     cashController.dispose();
     transferController.dispose();
+    multiTransferController.dispose();
   }
 
   Future<void> getCollection(int workId, String orderNumber) async {
@@ -131,6 +138,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     var totalSummary =
         await _databaseRepository.getTotalSummaries(workId, orderNumber);
     total = 0;
+    selectedAccount = null;
+    selectedAccounts = [];
     dateController.text = date(null);
     return CollectionInitial(
         totalSummary: totalSummary,
@@ -267,12 +276,13 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
     await run(() async {
       if (index != null) {
-        selectedAccounts[index].paid = transferController.text;
+        selectedAccounts[index].paid = multiTransferController.text;
         selectedAccounts[index].account = selectedAccount;
         selectedAccounts[index].date = dateController.text;
 
         indexToEdit = null;
         isEditing = false;
+
       } else {
         if (multiTransferController.text.isNotEmpty) {
           if (double.tryParse(multiTransferController.text) != null) {
@@ -316,8 +326,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       isEditing = true;
 
       dateController.text = selectedAccounts[index].date!;
-      transferController.text = selectedAccounts[index].paid!;
       selectedAccount = selectedAccounts[index].account;
+      multiTransferController.text = selectedAccounts[index].paid!;
 
       emit(CollectionEditingPayment(
           totalSummary: state.totalSummary,

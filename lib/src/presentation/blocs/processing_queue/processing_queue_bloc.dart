@@ -139,13 +139,9 @@ class ProcessingQueueBloc
   }
 
   Stream get resolve {
-    return Stream.periodic(const Duration(minutes: 2), (int value) async {
+    return Stream.periodic(const Duration(minutes: 1), (int value) async {
       final timer0 = logTimerStart(headerDeveloperLogger, 'Starting...',
           level: LogLevel.info);
-      // var result = await _databaseRepository.listenForTableChanges(
-      //     'works', 'status', 'complete');
-      // logDebugFine(headerDeveloperLogger, result.toString());
-      // if (result)
         await _getProcessingQueue();
       logTimerStop(headerDeveloperLogger, timer0, 'Initialization completed',
           level: LogLevel.success);
