@@ -69,12 +69,6 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   }
 
   @override
-  void dispose() {
-    collectionCubit.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
