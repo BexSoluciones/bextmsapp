@@ -44,6 +44,14 @@ class SummaryDao {
     return parseSummaries(summaryList);
   }
 
+  Future<List<Summary>> getAllSummariesByWorkcode(
+      int workId, String customer) async {
+    final db = await _appDatabase.streamDatabase;
+    final summaryList = await db!.query(tableSummaries,
+        where: 'work_id = $workId', groupBy: SummaryFields.orderNumber);
+    return parseSummaries(summaryList);
+  }
+
   Future<List<Summary>> getAllInventoryByOrderNumber(
       int workId, String orderNumber) async {
     final db = await _appDatabase.streamDatabase;

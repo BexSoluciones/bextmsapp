@@ -49,6 +49,7 @@ abstract class DatabaseRepository {
 
   //SUMMARIES
   Future<List<Summary>> getAllSummariesByOrderNumber(int workId);
+  Future<List<Summary>> getAllSummariesByWorkcode(int workId, String customer);
   Future<List<Summary>> getAllInventoryByOrderNumber(int workId, String orderNumber);
   Future<List<Summary>> getAllInventoryByPackage(int workId, String orderNumber);
   Future<List<Summary>> getAllPackageByOrderNumber(int workId, String orderNumber);

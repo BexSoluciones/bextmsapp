@@ -128,6 +128,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<List<Summary>> getAllSummariesByWorkcode(int workId, String customer) async {
+    return _appDatabase.summaryDao.getAllSummariesByWorkcode(workId, customer);
+  }
+
+  @override
   Future<List<Summary>> getAllInventoryByOrderNumber(
       int workId, String orderNumber) async {
     return _appDatabase.summaryDao

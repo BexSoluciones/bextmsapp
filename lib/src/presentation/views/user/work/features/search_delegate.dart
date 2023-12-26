@@ -63,9 +63,9 @@ class SearchWorkDelegate extends SearchDelegate<Work?> {
               .toLowerCase()
               .contains(query.trim().toLowerCase()) ||
           element.address!.toLowerCase().contains(query.trim().toLowerCase()) ||
-          element.summaries!
+          (element.summaries != null && element.summaries!
               .where((s) => s.orderNumber.contains(query.trim().toLowerCase()))
-              .isNotEmpty;
+              .isNotEmpty);
     }).toList();
 
     return Padding(
