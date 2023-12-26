@@ -39,26 +39,21 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
   NavigationCubit(
       this._databaseRepository, this._locationRepository, this.gpsBloc)
-      : super(NavigationLoading(), []);
-
-  final mapController = MapController();
-  final buttonCarouselController = CarouselController();
-  var markers = <Marker>[];
-  var carouselData = <Map>[];
-  List<Polyline> Polylines = [];
-  var model = <LayerMoodle>[];
-  var layer = <PolylineLayer>[];
-  var kWorksList = <LatLng>[];
+      : super(const NavigationState(status: NavigationStatus.initial), []);
 
   Future<void> getAllWorksByWorkcode(String workcode) async {
     if (isBusy) return;
-    emit(NavigationLoading());
+    emit(state.copyWith(
+        status: NavigationStatus.loading,
+        mapController: MapController(),
+        carouselController: CarouselController()));
     try {
       await run(() async {
         emit(await _getAllWorksByWorkcode(workcode));
       });
     } catch (error, stackTrace) {
-      emit(NavigationFailed(error: error.toString()));
+      emit(state.copyWith(
+          status: NavigationStatus.failure, error: error.toString()));
       await FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }
   }
@@ -84,9 +79,15 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
       final worksDatabase =
           await _databaseRepository.findAllWorksByWorkcode(workcode);
 
-      var works = <Work>[];
-
       var currentLocation = gpsBloc.state.lastKnownLocation;
+
+      var works = <Work>[];
+      var markers = <Marker>[];
+      var layer = <PolylineLayer>[];
+      var kWorkList = <LatLng>[];
+      var polylines = <Polyline>[];
+      var model = <LayerMoodle>[];
+      var carouselData = <Map>[];
 
       return await Future.forEach(worksDatabase, (work) async {
         if (work.latitude != null && work.longitude != null) {
@@ -101,27 +102,29 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         works.add(work);
       }).then((_) async {
         data = [];
-
         if (data.isEmpty) {
           data.addAll(works);
         }
-
         List<LngLat> waypoints = [];
 
-        markers.add(
-          Marker(
-              height: 25,
-              width: 25,
-              point:
-                  LatLng(currentLocation!.latitude, currentLocation.longitude),
-              builder: (ctx) => GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  child: Stack(alignment: Alignment.center, children: <Widget>[
-                    Image.asset('assets/icons/point.png', color: Colors.purple),
-                    const Icon(Icons.location_on,
-                        size: 14, color: Colors.white),
-                  ]))),
-        );
+        if (currentLocation != null) {
+          markers.add(
+            Marker(
+                height: 25,
+                width: 25,
+                point: LatLng(
+                    currentLocation.latitude, currentLocation.longitude),
+                builder: (ctx) => GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    child:
+                        Stack(alignment: Alignment.center, children: <Widget>[
+                      Image.asset('assets/icons/point.png',
+                          color: Colors.purple),
+                      const Icon(Icons.location_on,
+                          size: 14, color: Colors.white),
+                    ]))),
+          );
+        }
 
         var warehouse =
             await _databaseRepository.findWarehouse(works.first.warehouseId!);
@@ -131,7 +134,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
             Marker(
                 height: 25,
                 width: 25,
-                point: LatLng(double.parse(warehouse!.latitude!),
+                point: LatLng(double.parse(warehouse.latitude!),
                     double.parse(warehouse.longitude!)),
                 builder: (ctx) => GestureDetector(
                     behavior: HitTestBehavior.opaque,
@@ -151,8 +154,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           if (works[index].latitude != null &&
               works[index].longitude != null &&
               works[index].distance != null &&
-              works[index].duration != null
-          ) {
+              works[index].duration != null) {
             try {
               waypoints.add(LngLat(
                   lng: double.parse(works[index].longitude!),
@@ -166,7 +168,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
                     builder: (ctx) => GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
-                          buttonCarouselController.jumpToPage(index);
+                          state.carouselController!.jumpToPage(index);
                         },
                         child: Stack(
                             alignment: Alignment.center,
@@ -184,7 +186,8 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
                 'duration': num.parse(works[index].duration!),
               });
             } on FormatException catch (e, stackTrace) {
-              emit(NavigationFailed(error: e.message));
+              emit(state.copyWith(
+                  status: NavigationStatus.failure, error: e.message));
               await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             }
           }
@@ -200,24 +203,24 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           language: Languages.en,
         );
 
-        List<LatLng> polylines =
+        List<LatLng> polylinesDatabase =
             await _databaseRepository.getPolylines(workcode);
         var polygons = Polyline(
             color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
             strokeWidth: 2,
             points: road.polyline!.map((e) => getPosition(e)).toList());
 
-        if (polylines.isNotEmpty) {
-          Polylines = [
+        if (polylinesDatabase.isNotEmpty) {
+          polylines = [
             Polyline(
-                points: polylines,
+                points: polylinesDatabase,
                 color:
                     Colors.primaries[Random().nextInt(Colors.primaries.length)],
                 strokeWidth: 2),
           ];
         } else {
           _databaseRepository.insertPolylines(workcode, polygons.points);
-          Polylines = [
+          polylines = [
             Polyline(
                 points: polygons.points,
                 color:
@@ -226,49 +229,36 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           ];
         }
 
-        if (carouselData.isNotEmpty) {
-          kWorksList = List<LatLng>.generate(
-              carouselData.length,
-              (index) =>
-                  getLatLngFromWorksData(works, carouselData[index]['index']));
+        if (state.carouselData != null && state.carouselData!.isNotEmpty) {
+          kWorkList = List<LatLng>.generate(
+              state.carouselData!.length,
+              (index) => getLatLngFromWorksData(
+                  works, state.carouselData![index]['index']));
         }
 
-        return NavigationSuccess(
+        return state.copyWith(
+            status: NavigationStatus.success,
             works: data,
-            mapController: mapController,
-            buttonCarouselController: buttonCarouselController,
             layer: layer,
             markers: markers,
-            kWorksList: kWorksList,
+            kWorkList: kWorkList,
             carouselData: carouselData,
             pageIndex: state.pageIndex,
-            Polylines: Polylines,
+            polylines: polylines,
             model: model);
       });
     } catch (e, stackTrace) {
-      print(e);
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);
-      return NavigationFailed(error: e.toString());
+      return state.copyWith(
+          status: NavigationStatus.failure, error: e.toString());
     }
   }
 
   Future<void> getCurrentPosition(double zoom) async {
     var currentLocation = gpsBloc.state.lastKnownLocation;
-
-    mapController.move(
+    state.mapController!.move(
         LatLng(currentLocation!.latitude, currentLocation.longitude), zoom);
-
-    emit(NavigationSuccess(
-        works: data,
-        mapController: mapController,
-        buttonCarouselController: buttonCarouselController,
-        layer: layer,
-        markers: markers,
-        kWorksList: kWorksList,
-        Polylines: Polylines,
-        carouselData: carouselData,
-        pageIndex: state.pageIndex,
-        model: model));
+    emit(state.copyWith(status: NavigationStatus.success));
   }
 
   Future<void> moveController(int index, double zoom) async {
@@ -304,22 +294,11 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
       updateWorkFutures.add(_databaseRepository.updateWork(data[index]));
 
       Future.wait(updateWorkFutures).then((value) {
-        mapController.move(kWorksList[index], zoom);
-
-        emit(NavigationSuccess(
-          works: data,
-          mapController: mapController,
-          buttonCarouselController: buttonCarouselController,
-          layer: layer,
-          markers: markers,
-          kWorksList: kWorksList,
-          carouselData: carouselData,
-          Polylines: Polylines,
-          pageIndex: index,
-          model: model,
-        ));
+        state.mapController!.move(state.kWorksList![index], zoom);
+        emit(state.copyWith(status: NavigationStatus.success));
       }).catchError((error) {
-        emit(NavigationFailed(error: error.toString()));
+        emit(state.copyWith(
+            status: NavigationStatus.failure, error: error.toString()));
       });
     } else {
       // Handle the case when 'index' is out of range.
@@ -334,14 +313,5 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     if (context.mounted) {
       helperFunctions.showMapDirection(context, work, currentLocation!);
     }
-  }
-
-  Future<void> clean() async {
-    carouselData.clear();
-    Polylines.clear();
-    layer.clear();
-    markers = [];
-    kWorksList.clear();
-    model.clear();
   }
 }

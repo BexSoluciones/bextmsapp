@@ -108,10 +108,10 @@ class _MapPageState extends State<MapPage> {
         appBar: buildAppBar,
         body: BlocBuilder<NavigationCubit, NavigationState>(
           builder: (context, navigationState) {
-            if (navigationState.runtimeType == NavigationLoading) {
+            if (navigationState.status == NavigationStatus.loading) {
               return const Center(child: CupertinoActivityIndicator());
-            } else if (navigationState.runtimeType == NavigationSuccess ||
-                navigationState.runtimeType == NavigationFailed) {
+            } else if (navigationState.status == NavigationStatus.success ||
+                navigationState.status == NavigationStatus.failure) {
               return _buildBody(size, navigationState);
             } else {
               return const SizedBox();
@@ -132,21 +132,20 @@ class _MapPageState extends State<MapPage> {
             icon: const Icon(Icons.arrow_back_ios_new),
             onPressed: () {
               _navigationService.goBack();
-              context.read<NavigationCubit>().clean();
             }),
         title: BlocBuilder<NavigationCubit, NavigationState>(
           builder: (context, navigationState) {
-            if (navigationState is NavigationLoading) {
+            if (navigationState.status == NavigationStatus.loading) {
               // Show loading indicator
               return const Row(
                 children: [
                   CupertinoActivityIndicator(),
                 ],
               );
-            } else if (navigationState is NavigationSuccess) {
+            } else if (navigationState.status == NavigationStatus.success) {
               // Show client count
               return Text(
-                  'Clientes a visitar: ${navigationState.works.length}');
+                  'Clientes a visitar: ${navigationState.works!.length}');
             } else {
               // Handle other states or return an empty widget
               return const SizedBox();
@@ -156,14 +155,14 @@ class _MapPageState extends State<MapPage> {
         actions: [
           BlocBuilder<NavigationCubit, NavigationState>(
             builder: (context, navigationState) {
-              if (navigationState is NavigationLoading) {
+              if (navigationState.status == NavigationStatus.loading) {
                 // Show loading indicator
                 return const Row(
                   children: [
                     CupertinoActivityIndicator(),
                   ],
                 );
-              } else if (navigationState is NavigationSuccess) {
+              } else if (navigationState.status == NavigationStatus.success) {
                 // Show client count
                 return Showcase(
                     key: widget.one,
@@ -176,7 +175,7 @@ class _MapPageState extends State<MapPage> {
                         onPressed: () {
                           var navigationCubit = context.read<NavigationCubit>();
                           var work = navigationCubit
-                              .state.works[navigationCubit.state.pageIndex];
+                              .state.works![navigationCubit.state.pageIndex ?? 0];
                           _navigationService.goTo(AppRoutes.summaryNavigation, arguments: SummaryNavigationArgument(work: work));
                         }));
               } else {
@@ -324,7 +323,7 @@ class _MapPageState extends State<MapPage> {
                     ),
                     //...state.layer,
                     PolylineLayer(
-                      polylines: state.Polylines,
+                      polylines: state.polylines,
                     ),
                     MarkerLayer(
                       markers: state.markers,
@@ -346,7 +345,7 @@ class _MapPageState extends State<MapPage> {
                         distance: state.carouselData[index]['distance'],
                         duration: state.carouselData[index]['duration'],
                         context: context)),
-                carouselController: state.buttonCarouselController,
+                carouselController: state.carouselController,
                 options: CarouselOptions(
                   height: 100,
                   viewportFraction: 0.6,
