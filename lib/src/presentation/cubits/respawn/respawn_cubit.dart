@@ -102,6 +102,8 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
       codmotvis: reason?.codmotvis,
       reason: reason?.nommotvis,
       observation: observation,
+      start: now(),
+      end: null,
     );
 
     currentLocation = await _locationRepository.getCurrentLocation();

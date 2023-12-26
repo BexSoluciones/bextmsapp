@@ -134,7 +134,7 @@ class EnterpriseConfig extends Equatable {
           ? map['limit_days_works'] as int
           : null,
       ratio: map['ratio'] != null ? map['ratio'] as int : null,
-      background_location: map['block_partial'] != null
+      background_location: map['background_location'] != null
           ? map['background_location'] is int
               ? map['background_location'] == 1
                   ? true
