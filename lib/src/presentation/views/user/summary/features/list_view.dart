@@ -60,24 +60,41 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
-      switch (state.runtimeType) {
-        case SummaryLoading:
+    return BlocBuilder<SummaryCubit, SummaryState>(
+        builder: (_, state) => _buildBlocConsumer(size));
+  }
+
+  void buildBlocListener(BuildContext context, SummaryState state) async {
+    if (state is SummaryFailed && state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            state.error!,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildBlocConsumer(Size size) {
+    return BlocConsumer<SummaryCubit, SummaryState>(
+      listener: buildBlocListener,
+      builder: (context, state) {
+        if (state is SummaryLoading) {
           return const Align(
             alignment: Alignment.center,
             child: CupertinoActivityIndicator(),
           );
-        case SummarySuccess:
+        } else if (state is SummarySuccess || state is SummaryFailed) {
           return _buildSummary(state, size);
-        case SummaryFailed:
-          return _buildSummary(state, size);
-        default:
+        } else {
           return const SizedBox();
-      }
-    });
+        }
+      },
+    );
   }
-
-
 
   Widget _buildSummary(SummaryState state, Size size) {
     return SizedBox(
@@ -143,7 +160,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                                   longitude: null,
                                   firm: null);
                               widget.summaryCubit.sendTransactionArrived(
-                                  widget.arguments.work, transaction);
+                                  context, widget.arguments.work, transaction);
                             }),
                       )
                     : Container();

@@ -101,7 +101,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
             Geolocator.getPositionStream(locationSettings: locationSettings)
                 .listen((event) {
           final position = event;
-          if (enterpriseConfig.background_location!) {
+          if (enterpriseConfig.backgroundLocation!) {
             if (lastRecordedLocation != null) {
               final distance = Geolocator.distanceBetween(
                 lastRecordedLocation!.latitude,

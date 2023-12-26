@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -7,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,6 +29,8 @@ import '../../src/domain/repositories/database_repository.dart';
 import '../../src/domain/repositories/api_repository.dart';
 
 //utils
+import '../../src/presentation/widgets/custom_dialog.dart';
+import '../../src/utils/constants/colors.dart';
 import '../../src/utils/resources/data_state.dart';
 
 //widgets
@@ -459,5 +464,83 @@ class HelperFunctions with FormatDate {
     queueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue2));
     _storageService.setBool('$workcode-routing', true);
     _storageService.setBool('$workcode-historic', true);
+  }
+
+  double _toRadians(double degrees) {
+    return degrees * (pi / 180);
+  }
+
+  double calculateDistanceInMetersGeo(
+      LatLng currentLocation, double lat, double long) {
+    const earthRadius = 6371.0;
+    var lat1 = currentLocation.latitude;
+    var lon1 = currentLocation.longitude;
+    var lat2 = lat;
+    var lon2 = long;
+    var dLat = _toRadians(lat2 - lat1);
+    var dLon = _toRadians(lon2 - lon1);
+
+    var a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_toRadians(lat1)) *
+            cos(_toRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+
+    var c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    var distanceInKilometers = earthRadius * c;
+    var distanceInMeters = distanceInKilometers * 1000;
+
+    return distanceInMeters;
+  }
+
+  bool isWithinRadiusGeo(Position currentLocation, double lat, double long) {
+    var ratio = _storageService.getInt('ratio');
+    const earthRadius = 6371.0;
+    final radiusInMeters = ratio; // Radio en metros
+    var lat1 = currentLocation.latitude;
+    var lon1 = currentLocation.longitude;
+    var lat2 = lat;
+    var lon2 = long;
+    var dLat = _toRadians(lat2 - lat1);
+    var dLon = _toRadians(lon2 - lon1);
+
+    var a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_toRadians(lat1)) *
+            cos(_toRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+
+    var c = 2 * asin(sqrt(a));
+    var distanceInMeters = earthRadius * c * 1000;
+
+    return distanceInMeters <= radiusInMeters!;
+  }
+
+  void showDialogWithDistance(
+      BuildContext context, double distanceInMeters) async {
+    String distanceRemaining;
+    var ratio = _storageService.getInt('ratio');
+    distanceInMeters = distanceInMeters - ratio!.toDouble();
+    if (distanceInMeters < 1000) {
+      distanceRemaining = '${distanceInMeters.round()} metros';
+    } else {
+      var distanceInKilometers = distanceInMeters / 1000;
+      distanceRemaining = '${distanceInKilometers.toStringAsFixed(2)} km';
+    }
+
+    await showDialog(
+      context: context,
+      builder: (context) => CustomDialog(
+        title: 'No has llegado a la zona',
+        message: 'Te hacen falta: $distanceRemaining',
+        elevatedButton1: kPrimaryColor,
+        elevatedButton2: Colors.green,
+        cancelarButtonText: '',
+        completarButtonText: 'Aceptar',
+        icon: Icons.map,
+        colorIcon: kPrimaryColor,
+      ),
+    );
   }
 }

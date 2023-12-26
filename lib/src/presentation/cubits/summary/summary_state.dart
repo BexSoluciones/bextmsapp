@@ -6,6 +6,7 @@ abstract class SummaryState extends Equatable {
   final String? time;
   final bool? isArrived;
   final bool? isGeoReference;
+  final EnterpriseConfig? enterpriseConfig;
   final String? error;
 
   const SummaryState(
@@ -13,12 +14,20 @@ abstract class SummaryState extends Equatable {
       this.origin,
       this.time,
       this.isArrived,
+      this.enterpriseConfig,
       this.isGeoReference,
       this.error});
 
   @override
-  List<Object?> get props =>
-      [summaries, origin, time, isArrived, isGeoReference, error];
+  List<Object?> get props => [
+        summaries,
+        origin,
+        time,
+        isArrived,
+        isGeoReference,
+        error,
+        enterpriseConfig
+      ];
 }
 
 class SummaryLoading extends SummaryState {
@@ -34,6 +43,7 @@ class SummarySuccess extends SummaryState {
       {super.summaries,
       super.origin,
       super.time,
+      super.enterpriseConfig,
       super.isArrived,
       super.isGeoReference});
 }
@@ -43,6 +53,7 @@ class SummaryFailed extends SummaryState {
       {super.error,
       super.summaries,
       super.origin,
+      super.enterpriseConfig,
       super.time,
       super.isArrived,
       super.isGeoReference});

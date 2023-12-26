@@ -62,7 +62,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   int? indexToEdit;
   List<AccountPayment> selectedAccounts = [];
 
-
   void listenForCash() {
     try {
       if (transferController.text.isNotEmpty &&
@@ -282,7 +281,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
         indexToEdit = null;
         isEditing = false;
-
       } else {
         if (multiTransferController.text.isNotEmpty) {
           if (double.tryParse(multiTransferController.text) != null) {
@@ -350,8 +348,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       emit(CollectionFailed(
           totalSummary: state.totalSummary,
           enterpriseConfig: state.enterpriseConfig,
-          error: 'Por favor selecciona una cuenta'
-      ));
+          error: 'Por favor selecciona una cuenta'));
     });
   }
 
@@ -410,6 +407,14 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
       var images =
           await helperFunctions.getImages(arguments.summary.orderNumber);
+
+      if (state.enterpriseConfig!.hadTakePicture == true && images.isEmpty) {
+        emit(CollectionFailed(
+            totalSummary: state.totalSummary,
+            enterpriseConfig: state.enterpriseConfig,
+            error: 'La foto es es obligatoria.'));
+      }
+
       var imagesServer = <String>[];
       if (images.isNotEmpty) {
         for (var element in images) {
