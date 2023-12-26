@@ -134,12 +134,14 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
             work: work, summary: summary, summaries: summaries));
   }
 
-  bool validateDistance(currentLocation, lat, log, summaryId) {
+  bool validateDistance(
+      currentLocation, double lat, double log, summaryId, int? ratio) {
     if (_storageService.getBool('$summaryId-distance_ignore') != null &&
         _storageService.getBool('$summaryId-distance_ignore') == true) {
       return true;
     } else {
-      return helperFunctions.isWithinRadiusGeo(currentLocation, lat, log);
+      return helperFunctions.isWithinRadiusGeo(
+          currentLocation, lat, log, ratio!);
     }
   }
 
@@ -152,6 +154,15 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     transaction.latitude = currentLocation!.latitude.toString();
     transaction.longitude = currentLocation.longitude.toString();
 
+    final summaries =
+        await _databaseRepository.getAllSummariesByOrderNumber(work.id!);
+
+    var isArrived = await _databaseRepository.validateTransactionArrived(
+        transaction.workId, 'arrived');
+
+    var isGeoReferenced =
+        await _databaseRepository.validateClient(transaction.workId);
+
     final enterpriseConfig = _storageService.getObject('config') != null
         ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
         : null;
@@ -163,19 +174,26 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
           double.tryParse(work.latitude!)!,
           double.tryParse(work.longitude!)!);
 
-      if (!validateDistance(currentLocation, work.latitude, work.longitude,
-          transaction.summaryId) && context.mounted) {
-        helperFunctions.showDialogWithDistance(context, distanceInMeters);
+      if (!validateDistance(
+              currentLocation,
+              double.tryParse(work.latitude!)!,
+              double.tryParse(work.longitude!)!,
+              transaction.summaryId,
+              enterpriseConfig.ratio) &&
+          context.mounted) {
+        helperFunctions.showDialogWithDistance(
+            context, distanceInMeters, enterpriseConfig.ratio!);
+
+        emit(SummarySuccess(
+            summaries: summaries,
+            origin: state.origin,
+            time: state.time,
+            isArrived: isArrived,
+            isGeoReference: isGeoReferenced));
       }
     }
 
     await _databaseRepository.insertTransaction(transaction);
-
-    var isArrived = await _databaseRepository.validateTransactionArrived(
-        transaction.workId, 'arrived');
-
-    var isGeoReferenced =
-        await _databaseRepository.validateClient(transaction.workId);
 
     var processingQueue = ProcessingQueue(
         body: jsonEncode(transaction.toJson()),
@@ -186,9 +204,6 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
     _processingQueueBloc
         .add(ProcessingQueueAdd(processingQueue: processingQueue));
-
-    final summaries =
-        await _databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
     emit(SummarySuccess(
         summaries: summaries,

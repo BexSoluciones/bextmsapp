@@ -494,8 +494,7 @@ class HelperFunctions with FormatDate {
     return distanceInMeters;
   }
 
-  bool isWithinRadiusGeo(Position currentLocation, double lat, double long) {
-    var ratio = _storageService.getInt('ratio');
+  bool isWithinRadiusGeo(LatLng currentLocation, double lat, double long, int ratio) {
     const earthRadius = 6371.0;
     final radiusInMeters = ratio; // Radio en metros
     var lat1 = currentLocation.latitude;
@@ -518,10 +517,9 @@ class HelperFunctions with FormatDate {
   }
 
   void showDialogWithDistance(
-      BuildContext context, double distanceInMeters) async {
+      BuildContext context, double distanceInMeters, int ratio) async {
     String distanceRemaining;
-    var ratio = _storageService.getInt('ratio');
-    distanceInMeters = distanceInMeters - ratio!.toDouble();
+    distanceInMeters = distanceInMeters - ratio.toDouble();
     if (distanceInMeters < 1000) {
       distanceRemaining = '${distanceInMeters.round()} metros';
     } else {
