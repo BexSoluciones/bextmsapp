@@ -108,7 +108,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
         List<LngLat> waypoints = [];
 
-        //TODO::  get current position
         markers.add(
           Marker(
               height: 25,
@@ -128,7 +127,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
             await _databaseRepository.findWarehouse(works.first.warehouseId!);
 
         if (warehouse != null) {
-          //TODO:: get warehouse
           markers.add(
             Marker(
                 height: 25,
@@ -153,7 +151,8 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           if (works[index].latitude != null &&
               works[index].longitude != null &&
               works[index].distance != null &&
-              works[index].duration != null) {
+              works[index].duration != null
+          ) {
             try {
               waypoints.add(LngLat(
                   lng: double.parse(works[index].longitude!),
