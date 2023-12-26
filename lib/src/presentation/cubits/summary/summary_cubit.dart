@@ -180,6 +180,39 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
           context, arguments.work, currentLocation!);
     }
 
-    emit(const SummaryLoading());
+    final summaries = await _databaseRepository
+        .getAllSummariesByOrderNumber(arguments.work.id!);
+
+    var isArrived = await _databaseRepository.validateTransactionArrived(
+        arguments.work.id!, 'arrived');
+
+    var isGeoReferenced =
+        await _databaseRepository.validateClient(arguments.work.id!);
+
+    emit(SummarySuccess(
+        summaries: summaries,
+        origin: state.origin,
+        time: state.time,
+        isArrived: isArrived,
+        isGeoReference: isGeoReferenced));
+  }
+
+  Future<void> error(int id, String error) async {
+    final summaries =
+        await _databaseRepository.getAllSummariesByOrderNumber(id);
+
+    var isArrived =
+        await _databaseRepository.validateTransactionArrived(id, 'arrived');
+
+    var isGeoReferenced =
+        await _databaseRepository.validateClient(id);
+
+    emit(SummaryFailed(
+        error: error,
+        summaries: summaries,
+        origin: state.origin,
+        time: state.time,
+        isArrived: isArrived,
+        isGeoReference: isGeoReferenced));
   }
 }

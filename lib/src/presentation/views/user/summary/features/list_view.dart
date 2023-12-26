@@ -69,11 +69,15 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
           );
         case SummarySuccess:
           return _buildSummary(state, size);
+        case SummaryFailed:
+          return _buildSummary(state, size);
         default:
           return const SizedBox();
       }
     });
   }
+
+
 
   Widget _buildSummary(SummaryState state, Size size) {
     return SizedBox(

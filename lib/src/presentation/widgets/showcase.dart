@@ -1,4 +1,5 @@
 import 'package:bexdeliveries/src/domain/models/arguments.dart';
+import 'package:bexdeliveries/src/presentation/cubits/summary/summary_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -43,12 +44,14 @@ class BuildShowcaseIconButton extends StatefulWidget {
 }
 
 late IssuesBloc issuesBloc;
+late SummaryCubit summaryCubit;
 
 class _BuildShowcaseIconButtonState extends State<BuildShowcaseIconButton> {
   @override
   void initState() {
     super.initState();
     issuesBloc = BlocProvider.of<IssuesBloc>(context);
+    summaryCubit = BlocProvider.of<SummaryCubit>(context);
   }
 
   @override
@@ -74,6 +77,8 @@ Widget buildPhoneShowcase(Work work, GlobalKey one) {
     onPressed: () {
       if (work.cellphone != null && work.cellphone != '0') {
         launchUrl(Uri.parse('tel://${work.cellphone}'));
+      } else {
+        summaryCubit.error(work.id!, 'No tiene número de celular');
       }
     },
   );
@@ -90,130 +95,12 @@ Widget buildMapShowcase(BuildContext context, Work work, GlobalKey three) {
         if (work.latitude != '0' && work.longitude != '0') {
           _navigationService.goTo(AppRoutes.summaryNavigation, arguments: SummaryNavigationArgument(work: work));
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'No tiene geolocalización 🚨',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          );
+          summaryCubit.error(work.id!, 'No tiene geolocalización 🚨');
         }
 
       },
       icon:  Icon(Icons.directions, size: 35,color: Theme.of(context).colorScheme.shadow),
     ),
-  );
-}
-
-void ModalNavegationMaps(BuildContext context, Work work, GlobalKey threeas) {
-  showModalBottomSheet(
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    context: context,
-    builder: (BuildContext builder) {
-      return Container(
-        height: 480,
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '¡Bienvenido!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Selecciona una opción:',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 20),
-              GestureDetector(
-                onTap: () async{
-                  if (work.latitude != '0' && work.longitude != '0') {
-                    await helperFunctions.showMapDirection(
-                      context,
-                      work,
-                      null,
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'No tiene geolocalización 🚨',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    );
-                  }
-                },
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Image.asset(
-                    'assets/images/maps.png',
-                    width: 80,
-                    height: 80,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              GestureDetector(
-                onTap: () async{
-                  if (work.latitude != '0' && work.longitude != '0') {
-                    await helperFunctions.showMapDirectionWaze(
-                      context,
-                      work,
-                      null,
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'No tiene geolocalización 🚨',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    );
-                  }
-                },
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Image.asset(
-                    'assets/images/waze.png',
-                    width: 80,
-                    height: 80,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
   );
 }
 
@@ -229,6 +116,8 @@ Widget buildWhatsAppShowcase(Work work, GlobalKey two) {
           '+57${work.cellphone}',
           'Hola!, ¿Cómo estás?',
         );
+      } else {
+        summaryCubit.error(work.id!, 'No tiene número de celular');
       }
     },
   );
