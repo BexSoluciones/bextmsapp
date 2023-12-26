@@ -34,6 +34,17 @@ class _LogoutBarState extends State<LogoutBar> {
                     onPressed: () async {
                       BlocProvider.of<HomeCubit>(context).logout();
                     }));
+          case HomeFailed:
+            return Showcase(
+                key: widget.four,
+                disableMovingAnimation: true,
+                title: 'Cierra sesión',
+                description: 'Adios vaquero 😢😢😢',
+                child: IconButton(
+                    icon: const Icon(Icons.logout),
+                    onPressed: () async {
+                      BlocProvider.of<HomeCubit>(context).logout();
+                    }));
           default:
             return const SizedBox();
         }

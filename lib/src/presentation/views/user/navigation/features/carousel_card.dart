@@ -1,5 +1,6 @@
 import 'dart:core';
 
+import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -45,7 +46,8 @@ class _CarouselCardState extends State<CarouselCard> {
           if (widget.work.hasCompleted != null &&
               widget.work.hasCompleted == 0) {
             _navigationService.goTo(AppRoutes.summary,
-                arguments: SummaryArgument(work: widget.work));
+                arguments:
+                    SummaryArgument(origin: 'navigation', work: widget.work));
           }
         },
         child: Card(
@@ -57,7 +59,8 @@ class _CarouselCardState extends State<CarouselCard> {
               children: [
                 CircleAvatar(
                     backgroundColor: Colors.primaries[widget.work.color ?? 1],
-                    child: Text('${widget.work.order != null ? widget.work.order! + 1 : 1}')),
+                    child: Text(
+                        '${widget.work.order != null ? widget.work.order! + 1 : 1}')),
                 const SizedBox(width: 10),
                 Expanded(
                   flex: 2,

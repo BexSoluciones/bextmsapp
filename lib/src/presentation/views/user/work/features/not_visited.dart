@@ -106,7 +106,7 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Lottie.asset('assets/animations/36499-page-not-found.json'),
-            const Text('No tienes clientes por entregar.')
+            const Text('No tienes clientes por visitar.')
           ],
         ),
       );

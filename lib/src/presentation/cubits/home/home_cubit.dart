@@ -149,7 +149,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                 'can_make_history', data.enterpriseConfig.canMakeHistory);
             if (data.enterpriseConfig.specifiedAccountTransfer == true) {
               var response =
-              await _apiRepository.accounts(request: AccountRequest());
+                  await _apiRepository.accounts(request: AccountRequest());
               if (response is DataSuccess) {
                 logDebugFine(
                     headerHomeLogger, '${response.data!.accounts.length}');
@@ -202,23 +202,23 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
               works.add(work);
               if (work.summaries != null) {
                 await Future.forEach(work.summaries as Iterable<Object?>,
-                        (element) {
-                      var summary = element as Summary;
-                      if (summary.idPacking != null && summary.packing != null) {
-                        summary.cant = 1;
-                      } else {
-                        summary.cant = ((double.parse(summary.amount) *
-                            100.0 /
-                            double.parse(summary.unitOfMeasurement))
+                    (element) {
+                  var summary = element as Summary;
+                  if (summary.idPacking != null && summary.packing != null) {
+                    summary.cant = 1;
+                  } else {
+                    summary.cant = ((double.parse(summary.amount) *
+                                100.0 /
+                                double.parse(summary.unitOfMeasurement))
                             .round() /
-                            100);
-                      }
-                      summary.grandTotalCopy = summary.grandTotal;
-                      if (summary.transaction != null) {
-                        transactions.add(summary.transaction!);
-                      }
-                      summaries.add(summary);
-                    });
+                        100);
+                  }
+                  summary.grandTotalCopy = summary.grandTotal;
+                  if (summary.transaction != null) {
+                    transactions.add(summary.transaction!);
+                  }
+                  summaries.add(summary);
+                });
 
                 var found = work.summaries!
                     .where((element) => element.transaction != null);
@@ -232,7 +232,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             });
 
             var worksF =
-            groupBy(responseWorks.data!.works, (Work o) => o.workcode);
+                groupBy(responseWorks.data!.works, (Work o) => o.workcode);
             var warehouses = <Warehouse>[];
             for (var w in worksF.keys) {
               var wn = responseWorks.data!.works
@@ -247,7 +247,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             if (workcodes.isNotEmpty) {
               var localWorks = await _databaseRepository.getAllWorks();
               var localWorkcode =
-              groupBy(localWorks, (Work obj) => obj.workcode);
+                  groupBy(localWorks, (Work obj) => obj.workcode);
               await differenceWorks(
                   localWorkcode.keys.toList(), workcodes.keys.toList());
             }
@@ -318,13 +318,30 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
     try {
       _isLoggingOut = true;
       emit(const HomeLoading());
-      await _databaseRepository.emptyWorks();
-      await _databaseRepository.emptySummaries();
-      await _databaseRepository.emptyTransactions();
-      await _databaseRepository.emptyReasons();
-      _storageService.remove('user');
-      _storageService.remove('token');
-      await _navigationService.goTo(AppRoutes.login);
+
+      final user = _storageService.getObject('user') != null
+          ? User.fromJson(_storageService.getObject('user')!)
+          : null;
+
+      var vpq =
+          await _databaseRepository.validateIfProcessingQueueIsIncomplete();
+      if (vpq) {
+        emit(HomeFailed(
+            works: state.works,
+            error:
+                'Existe procesamiento incompleto, porfavor espera para realizar esta acción',
+            user: user));
+      } else {
+        await _databaseRepository.emptyWorks();
+        await _databaseRepository.emptySummaries();
+        await _databaseRepository.emptyTransactions();
+        await _databaseRepository.emptyReasons();
+        _storageService.remove('user');
+        _storageService.remove('token');
+        emit(HomeSuccess(works: const [], user: user));
+
+        await _navigationService.goTo(AppRoutes.login);
+      }
     } catch (e, stackTrace) {
       print("Error during logout: $e");
       print(stackTrace);

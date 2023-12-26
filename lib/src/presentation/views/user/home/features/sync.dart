@@ -27,8 +27,17 @@ class SyncBar extends StatelessWidget {
                     'Sincroniza todas las planillas para que estes al día',
                 child: IconButton(
                     icon: const Icon(Icons.sync),
-                    onPressed: () => context.read<HomeCubit>().sync()
-                    ));
+                    onPressed: () => context.read<HomeCubit>().sync()));
+          case HomeFailed:
+            return Showcase(
+                key: two,
+                disableMovingAnimation: true,
+                title: 'Sincronización!',
+                description:
+                    'Sincroniza todas las planillas para que estes al día',
+                child: IconButton(
+                    icon: const Icon(Icons.sync),
+                    onPressed: () => context.read<HomeCubit>().sync()));
           default:
             return const SizedBox();
         }

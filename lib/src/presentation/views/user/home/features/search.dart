@@ -36,6 +36,20 @@ class SearchBar extends StatelessWidget {
                           context: context,
                           delegate: SearchHomeDelegate(state.works));
                     }));
+          case HomeFailed:
+            return Showcase(
+                key: three,
+                disableMovingAnimation: true,
+                title: 'Busqueda!',
+                description:
+                'Encuentra al cliente que necesitas tanto por nombre, por nit, por dirección o por facturas',
+                child: IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      showSearch(
+                          context: context,
+                          delegate: SearchHomeDelegate(state.works));
+                    }));
           default:
             return const SizedBox();
         }

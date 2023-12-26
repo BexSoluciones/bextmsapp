@@ -24,7 +24,7 @@ class HomeSuccess extends HomeState {
 }
 
 class HomeFailed extends HomeState {
-  const HomeFailed({super.error, super.user});
+  const HomeFailed({ super.works, super.user, super.error});
 }
 
 class UpdateUser extends HomeState {

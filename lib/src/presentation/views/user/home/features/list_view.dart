@@ -35,16 +35,35 @@ class _HomeListViewState extends State<HomeListView> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, HomeState>(
-      builder: (_, state) {
-        switch (state.runtimeType) {
-          case HomeLoading:
-            return const Center(child: CupertinoActivityIndicator());
-          case HomeSuccess:
-            return _buildHome(
-              state.works,
-            );
-          default:
-            return const SizedBox();
+      builder: (_, state) => _buildBlocConsumer(),
+    );
+  }
+
+  void buildBlocListener(BuildContext context, HomeState state) async {
+    if (state is HomeFailed && state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            state.error!,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildBlocConsumer() {
+    return BlocConsumer<HomeCubit, HomeState>(
+      // buildWhen: (previous, current) => previous != current,
+      listener: buildBlocListener,
+      builder: (context, state) {
+        if (state is HomeLoading) {
+          return const Center(child: CupertinoActivityIndicator());
+        } else if (state is HomeSuccess || state is HomeFailed) {
+          return _buildHome(state.works);
+        } else {
+          return const SizedBox();
         }
       },
     );

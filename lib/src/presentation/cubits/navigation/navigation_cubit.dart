@@ -37,8 +37,9 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
   CurrentUserLocationEntity? currentLocation;
 
-  NavigationCubit(this._databaseRepository, this._locationRepository, this.gpsBloc)
-      : super( NavigationLoading(), []);
+  NavigationCubit(
+      this._databaseRepository, this._locationRepository, this.gpsBloc)
+      : super(NavigationLoading(), []);
 
   final mapController = MapController();
   final buttonCarouselController = CarouselController();
@@ -48,7 +49,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   var model = <LayerMoodle>[];
   var layer = <PolylineLayer>[];
   var kWorksList = <LatLng>[];
-  
+
   Future<void> getAllWorksByWorkcode(String workcode) async {
     if (isBusy) return;
     emit(NavigationLoading());
@@ -69,7 +70,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     return LatLng(lat, long);
   }
 
-
   LatLng getLatLngFromString(String latitude, String longitude) {
     return LatLng(double.parse(latitude), double.parse(longitude));
   }
@@ -82,7 +82,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   Future<NavigationState> _getAllWorksByWorkcode(String workcode) async {
     try {
       final worksDatabase =
-      await _databaseRepository.findAllWorksByWorkcode(workcode);
+          await _databaseRepository.findAllWorksByWorkcode(workcode);
 
       var works = <Work>[];
 
@@ -114,46 +114,50 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
               height: 25,
               width: 25,
               point:
-              LatLng(currentLocation!.latitude, currentLocation.longitude),
+                  LatLng(currentLocation!.latitude, currentLocation.longitude),
               builder: (ctx) => GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   child: Stack(alignment: Alignment.center, children: <Widget>[
                     Image.asset('assets/icons/point.png', color: Colors.purple),
-                    const Icon(Icons.location_on, size: 14, color: Colors.white),
+                    const Icon(Icons.location_on,
+                        size: 14, color: Colors.white),
                   ]))),
         );
 
-        var warehouse = await _databaseRepository.findWarehouse(works.first.warehouseId!);
+        var warehouse =
+            await _databaseRepository.findWarehouse(works.first.warehouseId!);
 
-        if(warehouse != null) {
+        if (warehouse != null) {
           //TODO:: get warehouse
           markers.add(
             Marker(
                 height: 25,
                 width: 25,
-                point:
-                LatLng(double.parse(warehouse!.latitude!), double.parse(warehouse.longitude!)),
+                point: LatLng(double.parse(warehouse!.latitude!),
+                    double.parse(warehouse.longitude!)),
                 builder: (ctx) => GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    child: Stack(alignment: Alignment.center, children: <Widget>[
+                    child:
+                        Stack(alignment: Alignment.center, children: <Widget>[
                       Image.asset('assets/icons/point.png', color: Colors.blue),
                       Text(0.toString()),
                     ]))),
           );
 
-          waypoints.add(LngLat(lng: double.parse(warehouse.longitude!), lat: double.parse(warehouse.latitude!)));
+          waypoints.add(LngLat(
+              lng: double.parse(warehouse.longitude!),
+              lat: double.parse(warehouse.latitude!)));
         }
-
-
 
         for (var index = 0; index < works.length; index++) {
           if (works[index].latitude != null &&
               works[index].longitude != null &&
               works[index].distance != null &&
-              works[index].duration != null
-          ) {
+              works[index].duration != null) {
             try {
-              waypoints.add(LngLat(lng: double.parse(works[index].longitude!), lat: double.parse(works[index].latitude!)));
+              waypoints.add(LngLat(
+                  lng: double.parse(works[index].longitude!),
+                  lat: double.parse(works[index].latitude!)));
               markers.add(
                 Marker(
                     height: 25,
@@ -165,12 +169,14 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
                         onTap: () {
                           buttonCarouselController.jumpToPage(index);
                         },
-                        child:
-                        Stack(alignment: Alignment.center, children: <Widget>[
-                          Image.asset('assets/icons/point.png',
-                              color: Colors.primaries[works[index].color ?? 1]),
-                          Text((index + 1).toString()),
-                        ]))),
+                        child: Stack(
+                            alignment: Alignment.center,
+                            children: <Widget>[
+                              Image.asset('assets/icons/point.png',
+                                  color: Colors
+                                      .primaries[works[index].color ?? 1]),
+                              Text((index + 1).toString()),
+                            ]))),
               );
 
               carouselData.add({
@@ -178,14 +184,16 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
                 'distance': num.parse(works[index].distance!),
                 'duration': num.parse(works[index].duration!),
               });
-            } on FormatException catch (e,stackTrace) {
+            } on FormatException catch (e, stackTrace) {
               emit(NavigationFailed(error: e.message));
               await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             }
           }
         }
 
-        final manager = OSRMManager()..generatePath("https://osrm.bexsoluciones.com", waypoints.toString());
+        final manager = OSRMManager()
+          ..generatePath(
+              "https://osrm.bexsoluciones.com", waypoints.toString());
         final road = await manager.getRoad(
           waypoints: waypoints,
           geometries: Geometries.geojson,
@@ -193,31 +201,36 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           language: Languages.en,
         );
 
-        List<LatLng> polylines = await _databaseRepository.getPolylines(workcode);
+        List<LatLng> polylines =
+            await _databaseRepository.getPolylines(workcode);
         var polygons = Polyline(
-            color:
-            Colors.primaries[Random().nextInt(Colors.primaries.length)],
+            color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
             strokeWidth: 2,
-            points: road.polyline!.map((e) => getPosition(e)).toList()
-        );
+            points: road.polyline!.map((e) => getPosition(e)).toList());
 
-        if(polylines.isNotEmpty){
+        if (polylines.isNotEmpty) {
           Polylines = [
-            Polyline(points: polylines, color: Colors.primaries[Random().nextInt(Colors.primaries.length)],strokeWidth: 2
-            ),
+            Polyline(
+                points: polylines,
+                color:
+                    Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                strokeWidth: 2),
           ];
-        }else{
+        } else {
           _databaseRepository.insertPolylines(workcode, polygons.points);
           Polylines = [
-            Polyline(points: polygons.points, color: Colors.primaries[Random().nextInt(Colors.primaries.length)],strokeWidth: 2
-            ),
+            Polyline(
+                points: polygons.points,
+                color:
+                    Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                strokeWidth: 2),
           ];
         }
 
         if (carouselData.isNotEmpty) {
           kWorksList = List<LatLng>.generate(
               carouselData.length,
-                  (index) =>
+              (index) =>
                   getLatLngFromWorksData(works, carouselData[index]['index']));
         }
 
@@ -233,11 +246,10 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
             Polylines: Polylines,
             model: model);
       });
-    } catch(e,stackTrace){
+    } catch (e, stackTrace) {
       print(e);
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       return NavigationFailed(error: e.toString());
-
     }
   }
 
@@ -262,7 +274,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
   Future<void> moveController(int index, double zoom) async {
     if (index >= 0 && index < data.length) {
-
       if (index > 0 && data[index - 1].color == 15) {
         if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
           data[index - 1].color = 5;
@@ -316,7 +327,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     }
   }
 
-
   Future<void> showMaps(
     BuildContext context,
     Work work,
@@ -327,7 +337,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     }
   }
 
-  Future<void> clean()async{
+  Future<void> clean() async {
     carouselData.clear();
     Polylines.clear();
     layer.clear();

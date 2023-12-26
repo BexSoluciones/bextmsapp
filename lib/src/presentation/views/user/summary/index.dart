@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -58,6 +59,12 @@ class SummaryViewState extends State<SummaryView> {
 
     startWidgetSummary();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    logDebugFine(headerSummaryLogger, 'changed');
+    super.didChangeDependencies();
   }
 
   void startWidgetSummary() {

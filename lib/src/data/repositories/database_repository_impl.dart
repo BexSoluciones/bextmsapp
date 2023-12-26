@@ -386,6 +386,12 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<bool> validateIfProcessingQueueIsIncomplete() {
+    return _appDatabase.processingQueueDao
+        .validateIfProcessingQueueIsIncomplete();
+  }
+
+  @override
   Future<int> updateProcessingQueue(ProcessingQueue processingQueue) async {
     return _appDatabase.processingQueueDao
         .updateProcessingQueue(processingQueue);
