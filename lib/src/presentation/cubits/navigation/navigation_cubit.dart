@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:bexdeliveries/src/services/logger.dart';
+import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -43,12 +45,13 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
   Future<void> getAllWorksByWorkcode(String workcode) async {
     if (isBusy) return;
-    emit(state.copyWith(
-        status: NavigationStatus.loading,
-        mapController: MapController(),
-        carouselController: CarouselController()));
     try {
       await run(() async {
+        emit(state.copyWith(
+            status: NavigationStatus.loading,
+            mapController: MapController(),
+            carouselController: CarouselController()));
+
         emit(await _getAllWorksByWorkcode(workcode));
       });
     } catch (error, stackTrace) {
@@ -229,7 +232,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           ];
         }
 
-        if (state.carouselData != null && state.carouselData!.isNotEmpty) {
+        if (carouselData.isNotEmpty) {
           kWorkList = List<LatLng>.generate(
               state.carouselData!.length,
               (index) => getLatLngFromWorksData(
@@ -262,47 +265,59 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   }
 
   Future<void> moveController(int index, double zoom) async {
-    if (index >= 0 && index < data.length) {
-      if (index > 0 && data[index - 1].color == 15) {
-        if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
-          data[index - 1].color = 5;
-        } else {
-          data[index - 1].color = 8;
+    if(isBusy) return;
+
+    await run(() async {
+      logDebugFine(headerNavigationLogger, data.length.toString());
+      if (index >= 0 && index < data.length) {
+        if (index > 0 && data[index - 1].color == 15) {
+          if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
+            data[index - 1].color = 5;
+          } else {
+            data[index - 1].color = 8;
+          }
         }
-      }
 
-      if (index < data.length - 1 && data[index + 1].color == 15) {
-        if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
-          data[index + 1].color = 5;
-        } else {
-          data[index + 1].color = 5;
+        if (index < data.length - 1 && data[index + 1].color == 15) {
+          if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
+            data[index + 1].color = 5;
+          } else {
+            data[index + 1].color = 5;
+          }
         }
-      }
 
-      data[index].color = 15;
+        data[index].color = 15;
 
-      final List<Future<void>> updateWorkFutures = [];
+        final List<Future<void>> updateWorkFutures = [];
 
-      if (index - 1 >= 0) {
-        updateWorkFutures.add(_databaseRepository.updateWork(data[index - 1]));
-      }
+        if (index - 1 >= 0) {
+          updateWorkFutures.add(_databaseRepository.updateWork(data[index - 1]));
+        }
 
-      if (index + 1 < data.length) {
-        updateWorkFutures.add(_databaseRepository.updateWork(data[index + 1]));
-      }
+        if (index + 1 < data.length) {
+          updateWorkFutures.add(_databaseRepository.updateWork(data[index + 1]));
+        }
 
-      updateWorkFutures.add(_databaseRepository.updateWork(data[index]));
+        updateWorkFutures.add(_databaseRepository.updateWork(data[index]));
 
-      Future.wait(updateWorkFutures).then((value) {
-        state.mapController!.move(state.kWorksList![index], zoom);
-        emit(state.copyWith(status: NavigationStatus.success));
-      }).catchError((error) {
+        await Future.wait(updateWorkFutures).then((value) {
+          logDebugFine(headerNavigationLogger, state.mapController.toString());
+          logDebugFine(headerNavigationLogger, state.kWorkList.toString());
+
+          state.mapController!.move(state.kWorkList![index], zoom);
+          emit(state.copyWith(works: data));
+        }).catchError((error) {
+          logDebugFine(headerNavigationLogger, error.toString());
+          emit(state.copyWith(
+              status: NavigationStatus.failure, error: error.toString()));
+        });
+      } else {
+        // Handle the case when 'index' is out of range.
         emit(state.copyWith(
-            status: NavigationStatus.failure, error: error.toString()));
-      });
-    } else {
-      // Handle the case when 'index' is out of range.
-    }
+            status: NavigationStatus.failure, error: 'Ocurrio un erroe'));
+      }
+    });
+
   }
 
   Future<void> showMaps(

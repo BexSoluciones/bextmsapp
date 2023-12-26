@@ -133,30 +133,23 @@ class _MapPageState extends State<MapPage> {
             onPressed: () {
               _navigationService.goBack();
             }),
-        title: BlocBuilder<NavigationCubit, NavigationState>(
-          builder: (context, navigationState) {
-            if (navigationState.status == NavigationStatus.loading) {
-              // Show loading indicator
-              return const Row(
-                children: [
-                  CupertinoActivityIndicator(),
-                ],
-              );
-            } else if (navigationState.status == NavigationStatus.success) {
-              // Show client count
-              return Text(
-                  'Clientes a visitar: ${navigationState.works!.length}');
-            } else {
-              // Handle other states or return an empty widget
-              return const SizedBox();
-            }
+        title: BlocSelector<NavigationCubit, NavigationState, bool>(
+          selector: (state) => state.status == NavigationStatus.success,
+          builder: (context, condition) {
+            var works = context.read<NavigationCubit>().state.works;
+            return condition
+                ? Text('Clientes a visitar: ${works!.length}')
+                : const Row(
+                    children: [
+                      CupertinoActivityIndicator(),
+                    ],
+                  );
           },
         ),
         actions: [
           BlocBuilder<NavigationCubit, NavigationState>(
             builder: (context, navigationState) {
               if (navigationState.status == NavigationStatus.loading) {
-                // Show loading indicator
                 return const Row(
                   children: [
                     CupertinoActivityIndicator(),
@@ -174,9 +167,10 @@ class _MapPageState extends State<MapPage> {
                         icon: const Icon(Icons.directions),
                         onPressed: () {
                           var navigationCubit = context.read<NavigationCubit>();
-                          var work = navigationCubit
-                              .state.works![navigationCubit.state.pageIndex ?? 0];
-                          _navigationService.goTo(AppRoutes.summaryNavigation, arguments: SummaryNavigationArgument(work: work));
+                          var work = navigationCubit.state
+                              .works![navigationCubit.state.pageIndex ?? 0];
+                          _navigationService.goTo(AppRoutes.summaryNavigation,
+                              arguments: SummaryNavigationArgument(work: work));
                         }));
               } else {
                 // Handle other states or return an empty widget
@@ -249,11 +243,11 @@ class _MapPageState extends State<MapPage> {
             }));
   }
 
-  Widget _buildBodyNetworkSuccess(Size size, state, bool offline,
-      String urlTemplate, generalState, metadata) {
+  Widget _buildBodyNetworkSuccess(Size size, NavigationState state,
+      bool offline, String urlTemplate, generalState, metadata) {
     return Stack(
       children: [
-        state.works.isNotEmpty
+        state.works != null && state.works!.isNotEmpty
             ? SizedBox(
                 width: double.infinity,
                 height: MediaQuery.of(context).size.height * 1.0,
@@ -261,7 +255,9 @@ class _MapPageState extends State<MapPage> {
                   mapController: state.mapController,
                   options: MapOptions(
                       keepAlive: true,
-                      center: state.markers[1].point,
+                      center: state.markers != null
+                          ? state.markers![1].point
+                          : null,
                       maxZoom: 18,
                       zoom: 9.2,
                       interactiveFlags:
@@ -299,34 +295,34 @@ class _MapPageState extends State<MapPage> {
                             ? widget.enterpriseConfig!.mapbox!
                             : 'sk.eyJ1IjoiYmV4aXRhY29sMiIsImEiOiJjbDVnc3ltaGYwMm16M21wZ21rMXg1OWd6In0.Dwtkt3r6itc0gCXDQ4CVxg',
                       },
-                      tileProvider: generalState.currentStore != null
-                          ? FMTC.instance(state.currentStore!).getTileProvider(
-                                FMTCTileProviderSettings(
-                                  behavior: CacheBehavior.values
-                                      .byName(metadata.data!['behaviour']!),
-                                  cachedValidDuration: int.parse(
-                                            metadata.data!['validDuration']!,
-                                          ) ==
-                                          0
-                                      ? Duration.zero
-                                      : Duration(
-                                          days: int.parse(
-                                            metadata.data!['validDuration']!,
-                                          ),
-                                        ),
-                                  maxStoreLength: int.parse(
-                                    metadata.data!['maxLength']!,
-                                  ),
-                                ),
-                              )
-                          : NetworkNoRetryTileProvider(),
+                      // tileProvider: generalState.currentStore != null
+                      //     ? FMTC.instance(state.currentStore!).getTileProvider(
+                      //           FMTCTileProviderSettings(
+                      //             behavior: CacheBehavior.values
+                      //                 .byName(metadata.data!['behaviour']!),
+                      //             cachedValidDuration: int.parse(
+                      //                       metadata.data!['validDuration']!,
+                      //                     ) ==
+                      //                     0
+                      //                 ? Duration.zero
+                      //                 : Duration(
+                      //                     days: int.parse(
+                      //                       metadata.data!['validDuration']!,
+                      //                     ),
+                      //                   ),
+                      //             maxStoreLength: int.parse(
+                      //               metadata.data!['maxLength']!,
+                      //             ),
+                      //           ),
+                      //         )
+                      //     : NetworkNoRetryTileProvider(),
                     ),
                     //...state.layer,
                     PolylineLayer(
-                      polylines: state.polylines,
+                      polylines: state.polylines ?? [],
                     ),
                     MarkerLayer(
-                      markers: state.markers,
+                      markers: state.markers ?? [],
                     ),
                   ],
                 ))
@@ -334,16 +330,17 @@ class _MapPageState extends State<MapPage> {
                 path: 'assets/animations/58404-geo-location-icon.json',
                 message: 'No hay clientes con geolocalización.'),
         state.carouselData != null &&
-                state.carouselData.isNotEmpty &&
-                state.works.isNotEmpty
+                state.carouselData!.isNotEmpty &&
+                state.works != null &&
+                state.works!.isNotEmpty
             ? CarouselSlider(
                 items: List<Widget>.generate(
-                    state.carouselData.length,
+                    state.carouselData!.length,
                     (index) => CarouselCard(
-                        work: state.works[index] ?? 999,
-                        index: state.carouselData[index]['index'],
-                        distance: state.carouselData[index]['distance'],
-                        duration: state.carouselData[index]['duration'],
+                        work: state.works![index],
+                        index: state.carouselData![index]['index'],
+                        distance: state.carouselData![index]['distance'],
+                        duration: state.carouselData![index]['duration'],
                         context: context)),
                 carouselController: state.carouselController,
                 options: CarouselOptions(

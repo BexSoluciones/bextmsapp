@@ -18,7 +18,7 @@ class NavigationState extends Equatable {
   final List<Work>? works;
   final List<PolylineLayer>? layer;
   final List<Marker>? markers;
-  final List<LatLng>? kWorksList;
+  final List<LatLng>? kWorkList;
   final List<Map>? carouselData;
   final List<LayerMoodle>? model;
   final List<Polyline>? polylines;
@@ -35,7 +35,7 @@ class NavigationState extends Equatable {
       this.carouselController,
       this.layer,
       this.markers,
-      this.kWorksList,
+      this.kWorkList,
       this.carouselData,
       this.model,
       this.polylines,
@@ -51,7 +51,7 @@ class NavigationState extends Equatable {
         rotation,
         layer,
         markers,
-        kWorksList,
+        kWorkList,
         carouselData,
         model,
         polylines,
@@ -80,7 +80,7 @@ class NavigationState extends Equatable {
       carouselController: carouselController ?? this.carouselController,
       works: works ?? this.works,
       layer: layer ?? this.layer,
-      kWorksList: kWorksList ?? this.kWorksList,
+      kWorkList: kWorkList ?? this.kWorkList,
       markers: markers ?? this.markers,
       polylines: polylines ?? this.polylines,
       carouselData: carouselData ?? this.carouselData,
