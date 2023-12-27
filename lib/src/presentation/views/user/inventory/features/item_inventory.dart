@@ -85,7 +85,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
 
   @override
   Widget build(BuildContext context) {
-    final calculatedFon = getProportionateScreenHeight(13);
+    final calculatedFon = getProportionateScreenHeight(12);
     return Material(
         child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),

@@ -121,9 +121,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
               orderNumber: widget.arguments.summary.orderNumber,
               total: collectionCubit.total,
               totalSummary: state.totalSummary!.toDouble(),
-              validate: () => collectionCubit.validate(
-                widget.arguments,
-              ),
+              arguments: widget.arguments,
               context: context,
             );
           });
@@ -227,7 +225,7 @@ class MyDialog extends StatefulWidget {
       required this.orderNumber,
       required this.totalSummary,
       required this.total,
-      required this.validate,
+      required this.arguments,
       required this.context})
       : super(key: key);
 
@@ -235,7 +233,7 @@ class MyDialog extends StatefulWidget {
   final String orderNumber;
   final double totalSummary;
   final double total;
-  final Function validate;
+  final InventoryArgument arguments;
   final BuildContext context;
 
   @override
@@ -246,6 +244,13 @@ class _MyDialogState extends State<MyDialog> with FormatNumber {
   var seconds = 5;
   var showText = false;
   Timer? timer;
+
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void initState() {
@@ -293,9 +298,16 @@ class _MyDialogState extends State<MyDialog> with FormatNumber {
         ),
         TextButton(
           child: showText ? const Text('Si') : Text(seconds.toString()),
-          onPressed: () {
-            widget.validate();
+          onPressed: ()  {
             Navigator.of(context).pop();
+            context
+                .read<CollectionCubit>()
+                .confirmTransaction(widget.arguments)
+                .then((value) {
+            });
+            context
+                .read<CollectionCubit>()
+                .getCollection(widget.id, widget.orderNumber);
           },
         ),
       ],
