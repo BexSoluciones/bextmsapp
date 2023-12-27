@@ -196,40 +196,47 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           }
         }
 
-        final manager = OSRMManager()
-          ..generatePath(
-              "https://osrm.bexsoluciones.com", waypoints.toString());
-        final road = await manager.getRoad(
-          waypoints: waypoints,
-          geometries: Geometries.geojson,
-          steps: true,
-          language: Languages.en,
-        );
 
-        List<LatLng> polylinesDatabase =
-            await _databaseRepository.getPolylines(workcode);
-        var polygons = Polyline(
-            color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
-            strokeWidth: 2,
-            points: road.polyline!.map((e) => getPosition(e)).toList());
+        try {
+          final manager = OSRMManager()
+            ..generatePath(
+                "https://osrm.bexsoluciones.com", waypoints.toString());
 
-        if (polylinesDatabase.isNotEmpty) {
-          polylines = [
-            Polyline(
-                points: polylinesDatabase,
-                color:
-                    Colors.primaries[Random().nextInt(Colors.primaries.length)],
-                strokeWidth: 2),
-          ];
-        } else {
-          _databaseRepository.insertPolylines(workcode, polygons.points);
-          polylines = [
-            Polyline(
-                points: polygons.points,
-                color:
-                    Colors.primaries[Random().nextInt(Colors.primaries.length)],
-                strokeWidth: 2),
-          ];
+          final road = await manager.getRoad(
+            waypoints: waypoints,
+            geometries: Geometries.geojson,
+            steps: true,
+            language: Languages.en,
+          );
+
+          List<LatLng> polylinesDatabase =
+              await _databaseRepository.getPolylines(workcode);
+          var polygons = Polyline(
+              color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
+              strokeWidth: 2,
+              points: road.polyline!.map((e) => getPosition(e)).toList());
+
+          if (polylinesDatabase.isNotEmpty) {
+            polylines = [
+              Polyline(
+                  points: polylinesDatabase,
+                  color:
+                      Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                  strokeWidth: 2),
+            ];
+          } else {
+            _databaseRepository.insertPolylines(workcode, polygons.points);
+            polylines = [
+              Polyline(
+                  points: polygons.points,
+                  color:
+                      Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                  strokeWidth: 2),
+            ];
+          }
+
+        } on FormatException catch (e, stackTrace) {
+          await FirebaseCrashlytics.instance.recordError(e, stackTrace);
         }
 
         if (carouselData.isNotEmpty) {

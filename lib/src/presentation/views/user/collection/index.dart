@@ -51,7 +51,6 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 
     collectionCubit.initState();
 
-
     collectionCubit.getCollection(
         widget.arguments.work.id!, widget.arguments.summary.orderNumber);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -118,9 +117,11 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
           context: context,
           builder: (_) {
             return MyDialog(
+              id: widget.arguments.work.id!,
+              orderNumber: widget.arguments.summary.orderNumber,
               total: collectionCubit.total,
               totalSummary: state.totalSummary!.toDouble(),
-              confirmTransaction: () => collectionCubit.confirmTransaction(
+              validate: () => collectionCubit.validate(
                 widget.arguments,
               ),
               context: context,
@@ -131,7 +132,6 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 
   Widget _buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionCubit, CollectionState>(
-      // buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
         if (state is CollectionLoading ||
@@ -223,15 +223,19 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 class MyDialog extends StatefulWidget {
   const MyDialog(
       {Key? key,
+      required this.id,
+      required this.orderNumber,
       required this.totalSummary,
       required this.total,
-      required this.confirmTransaction,
+      required this.validate,
       required this.context})
       : super(key: key);
 
+  final int id;
+  final String orderNumber;
   final double totalSummary;
   final double total;
-  final Function confirmTransaction;
+  final Function validate;
   final BuildContext context;
 
   @override
@@ -282,12 +286,15 @@ class _MyDialogState extends State<MyDialog> with FormatNumber {
           child: const Text('Cancelar'),
           onPressed: () {
             Navigator.of(context).pop();
+            context
+                .read<CollectionCubit>()
+                .getCollection(widget.id, widget.orderNumber);
           },
         ),
         TextButton(
           child: showText ? const Text('Si') : Text(seconds.toString()),
           onPressed: () {
-            widget.confirmTransaction(context);
+            widget.validate();
             Navigator.of(context).pop();
           },
         ),

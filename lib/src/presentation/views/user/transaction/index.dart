@@ -94,7 +94,6 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
             var queues = snapshot.data;
-
             return SafeArea(
                 child: Padding(
                     padding: const EdgeInsets.only(

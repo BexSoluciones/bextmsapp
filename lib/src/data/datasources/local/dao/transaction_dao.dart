@@ -138,7 +138,7 @@ class TransactionDao {
     for (var value in transactions) {
       if (value.payments != null) {
         for (var element in value.payments!) {
-          sum += double.parse(element.paid.toString());
+          sum += double.tryParse(element.paid.toString()) ?? 0;
         }
       }
     }

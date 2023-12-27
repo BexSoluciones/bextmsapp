@@ -149,13 +149,15 @@ class _MapPageState extends State<MapPage> {
         actions: [
           BlocBuilder<NavigationCubit, NavigationState>(
             builder: (context, navigationState) {
+              print(navigationState.status);
               if (navigationState.status == NavigationStatus.loading) {
                 return const Row(
                   children: [
                     CupertinoActivityIndicator(),
                   ],
                 );
-              } else if (navigationState.status == NavigationStatus.success) {
+              } else if (navigationState.status == NavigationStatus.success ||
+                  navigationState.status == NavigationStatus.failure) {
                 // Show client count
                 return Showcase(
                     key: widget.one,
