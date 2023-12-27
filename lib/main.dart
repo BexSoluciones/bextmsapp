@@ -411,8 +411,8 @@ class _MyAppState extends State<MyApp> {
                 locator<ApiRepository>(), locator<DatabaseRepository>()),
           ),
           BlocProvider(
-              create: (context) => TransactionCubit(
-                  locator<DatabaseRepository>(), locator<ApiRepository>())),
+              create: (context) =>
+                  TransactionCubit(locator<DatabaseRepository>())),
           BlocProvider(
             create: (context) => GeneralCubit(),
           ),

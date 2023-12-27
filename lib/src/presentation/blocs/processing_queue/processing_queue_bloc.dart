@@ -153,7 +153,7 @@ class ProcessingQueueBloc
     return _databaseRepository.watchAllProcessingQueues();
   }
 
-  Future<int> countProcessingQueueIncompleteToTransactions() {
+  Stream<List<Map<String, dynamic>>> countProcessingQueueIncompleteToTransactions() {
     return _databaseRepository.countProcessingQueueIncompleteToTransactions();
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bexdeliveries/src/utils/constants/gaps.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,29 +33,14 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
   late StreamSubscription subscription;
   int computationCount = 0;
 
-  var works = <Work>[];
-
   @override
   void initState() {
     processingQueueBloc = BlocProvider.of<ProcessingQueueBloc>(context);
-
-    stream = Stream.periodic(const Duration(seconds: 1), (int count) async {
-      return processingQueueBloc.countProcessingQueueIncompleteToTransactions();
-    });
-
-    subscription = stream.listen((event) async {
-      var int = await event;
-      setState(() {
-        computationCount = int;
-      });
-    });
-
     super.initState();
   }
 
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
   }
 
@@ -102,11 +88,13 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
   }
 
   Widget _buildHome() {
-    return StreamBuilder<List<ProcessingQueue>>(
-        stream: processingQueueBloc.todos,
+    return StreamBuilder<List<Map<String, dynamic>>>(
+        stream:
+            processingQueueBloc.countProcessingQueueIncompleteToTransactions(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
             var queues = snapshot.data;
+
             return SafeArea(
                 child: Padding(
                     padding: const EdgeInsets.only(
@@ -115,84 +103,27 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                       right: 16.0,
                       bottom: 20.0,
                     ),
-                    child: ListView(
-                      shrinkWrap: true,
+                    child: Column(
                       children: [
-                        item(
-                            'Transacciones de inicio de planilla',
-                            queues
-                                .where((queue) =>
-                                    queue.code == "store_transaction_start")
-                                .length,
-                            null),
-                        const SizedBox(height: 16),
-                        item(
-                            'Transacciones de llegada de cliente',
-                            queues
-                                .where((queue) =>
-                                    queue.code == "store_transaction_arrived")
-                                .length,
-                            null),
-                        const SizedBox(height: 16),
-                        item(
-                            'Transacciones de facturas vistas',
-                            queues
-                                .where((queue) =>
-                                    queue.code == "store_transaction_summary")
-                                .length,
-                            null),
-                        const SizedBox(height: 16),
-                        item(
-                            'Transacciones',
-                            queues
-                                .where((queue) =>
-                                    queue.code == "store_transaction")
-                                .length,
-                            null),
-                        const SizedBox(height: 16),
-                        item(
-                            'Localizaciones',
-                            queues
-                                .where(
-                                    (queue) => queue.code == "store_locations")
-                                .length,
-                            null),
-                        const SizedBox(height: 16),
-                        item(
-                            'Otras transacciones',
-                            queues
-                                .where((queue) =>
-                                    queue.code != "store_transaction_start" &&
-                                    queue.code != "store_transaction_arrived" &&
-                                    queue.code != "store_transaction_summary" &&
-                                    queue.code != "store_transaction" &&
-                                    queue.code != "store_locations")
-                                .length,
-                            null),
-                        const SizedBox(height: 16),
-                        item(
-                            'Transacciones pendientes',
-                            queues
-                                .where((queue) =>
-                                    queue.task == "pending" ||
-                                    queue.task == "incomplete")
-                                .length,
-                            Colors.orange),
-                        const SizedBox(height: 16),
-                        item(
-                            'Transacciones con error',
-                            queues
-                                .where((queue) => queue.task == "error")
-                                .length,
-                            Colors.red),
-                        const SizedBox(height: 20),
-                        item('Total', queues.length, null),
-                        const SizedBox(height: 20),
+                        Expanded(
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: queues.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return item(
+                                  queues[index]['name'],
+                                  queues[index]['cant'],
+                                  queues[index]['color']);
+                            },
+                            separatorBuilder:
+                                (BuildContext context, int index) => gapH16,
+                          ),
+                        ),
                         queues
                                 .where((queue) =>
-                                    queue.task == "pending" ||
-                                    queue.task == "error" ||
-                                    queue.task == "incomplete")
+                                    queue['task'] == "pending" ||
+                                    queue['task'] == "error" ||
+                                    queue['task'] == "incomplete")
                                 .isNotEmpty
                             ? DefaultButton(
                                 widget: const Text('Enviar transacciones',

@@ -25,6 +25,8 @@
         tools:replace="android:label"
         android:label="bexdeliveries"
         android:allowBackup="false"
+        android:hardwareAccelerated="false"
+        android:largeHeap="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="false"

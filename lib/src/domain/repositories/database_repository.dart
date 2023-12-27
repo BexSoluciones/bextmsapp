@@ -107,7 +107,7 @@ abstract class DatabaseRepository {
   Future<List<ProcessingQueue>> getAllProcessingQueues();
   Stream<List<ProcessingQueue>> watchAllProcessingQueues();
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete();
-  Future<int> countProcessingQueueIncompleteToTransactions();
+  Stream<List<Map<String, dynamic>>> countProcessingQueueIncompleteToTransactions();
   Future<bool> validateIfProcessingQueueIsIncomplete();
   Future<int> updateProcessingQueue(ProcessingQueue processingQueue);
   Future<void> insertProcessingQueue(ProcessingQueue processingQueue);

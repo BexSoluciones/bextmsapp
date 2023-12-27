@@ -31,22 +31,59 @@ class ProcessingQueueDao {
     yield processingQueues;
   }
 
-  Future<int> countProcessingQueueIncompleteToTransactions() async {
+  Stream<List<Map<String, dynamic>>>
+      countProcessingQueueIncompleteToTransactions() async* {
     final db = await _appDatabase.streamDatabase;
-    final processingQueueList = await db!.query(tableProcessingQueues,
-        where: 'task != ? AND code != ? AND code != ? AND code != ?',
-        whereArgs: [
-          'done',
-          'store_locations',
-          'store_logout',
-          'get_prediction'
-        ]);
-    final processingQueues = parseProcessingQueues(processingQueueList);
-    return processingQueues.length;
+    final handleNames = {
+      'store_transaction_start': 'Transacciones de inicio de servicio',
+      'store_transaction_arrived': 'Transacciones de llegada de cliente',
+      'store_transaction_summary': 'Transacciones de facturas vistas',
+      'store_transaction': 'Transacciones',
+      'store_locations': 'Localizaciones',
+      'pending': 'Transacciones pendientes',
+      'incomplete': 'Transacciones incompletas',
+      'error': 'Transacciones con error',
+      'done': 'Total'
+    };
+    final handleColors = {
+      'incomplete': Colors.orange,
+      'error': Colors.red,
+      'done': Colors.green
+    };
+    final processingQueueListCode = await db!.rawQuery('''
+        SELECT count(*) as cant, code FROM $tableProcessingQueues GROUP BY code ORDER BY code DESC; 
+      ''');
+    final processingQueueListStatus = await db.rawQuery('''
+        SELECT count(*) as cant, task FROM $tableProcessingQueues GROUP BY task ORDER BY task DESC; 
+      ''');
+    var pqc = [];
+    var pqs = [];
+
+    for (var p in processingQueueListCode) {
+      if (handleNames[p['code']] != null) {
+        pqc.add({
+          'name': handleNames[p['code']],
+          'code': p['code'],
+          'cant': p['cant']
+        });
+      }
+    }
+    for (var p in processingQueueListStatus) {
+      if (handleNames[p['task']] != null) {
+        pqs.add({
+          'name': handleNames[p['task']],
+          'task': p['task'],
+          'cant': p['cant'],
+          'color': handleColors[p['task']]
+        });
+      }
+    }
+    yield [...pqc, ...pqs];
   }
 
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete() async {
     final db = await _appDatabase.streamDatabase;
+
     final processingQueueList = await db!.query(tableProcessingQueues,
         where: 'task = ? or task = ? or task = ?',
         whereArgs: ['incomplete', 'error', 'processing']);

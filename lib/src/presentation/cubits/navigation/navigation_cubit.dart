@@ -234,9 +234,9 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
         if (carouselData.isNotEmpty) {
           kWorkList = List<LatLng>.generate(
-              state.carouselData!.length,
+              carouselData.length,
               (index) => getLatLngFromWorksData(
-                  works, state.carouselData![index]['index']));
+                  works, carouselData[index]['index']));
         }
 
         return state.copyWith(

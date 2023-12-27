@@ -380,7 +380,7 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
-  Future<int> countProcessingQueueIncompleteToTransactions() {
+  Stream<List<Map<String, dynamic>>> countProcessingQueueIncompleteToTransactions() {
     return _appDatabase.processingQueueDao
         .countProcessingQueueIncompleteToTransactions();
   }
