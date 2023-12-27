@@ -125,7 +125,7 @@ class ProcessingQueueBloc
     {'key': 'store_transaction', 'value': 'Transacción'},
     {'key': 'store_transaction_product', 'value': 'Transacción de producto'},
     {'key': 'store_locations', 'value': 'Localizaciones'},
-    {'key': 'get_prediction', 'value': 'Predicción'},
+    {'key': 'store_work_status', 'value': 'Estado de la planilla'},
   ];
 
   List<ProcessingQueue> processingQueues = [];
@@ -633,12 +633,16 @@ class ProcessingQueueBloc
 
   Future<void> validateIfServiceIsCompleted(ProcessingQueue p) async {
     try {
+
       if (p.code == 'store_transaction' ||
           p.code == 'store_transaction_product') {
+        logDebug(headerDeveloperLogger, 'entro a validar');
         var body = jsonDecode(p.body);
         String? workcode = body['workcode'];
         if (workcode != null) {
+          logDebug(headerDeveloperLogger, 'entro con $workcode');
           var isLast = await _databaseRepository.checkLastTransaction(workcode);
+          logDebug(headerDeveloperLogger, 'is last $isLast');
           if (isLast) {
             var processingQueue = ProcessingQueue(
               body: jsonEncode({'workcode': workcode, 'status': 'complete'}),
