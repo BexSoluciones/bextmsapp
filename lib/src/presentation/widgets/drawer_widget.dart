@@ -96,13 +96,13 @@ Drawer drawer(BuildContext context, User? user) {
                   currentStatus: 'general', summaryId: null, workId: null));
               await _navigationService.goTo(AppRoutes.issue);
             }),
+        createDrawerItem(
+            context: context,
+            icon: Icons.queue,
+            text: 'Cola de procesamiento.',
+            onTap: () => _navigationService.goTo(AppRoutes.processingQueue)),
         if (kDebugMode) const Divider(),
         if (kDebugMode) ... [
-          createDrawerItem(
-              context: context,
-              icon: Icons.queue,
-              text: 'Cola de procesamiento.',
-              onTap: () => _navigationService.goTo(AppRoutes.processingQueue)),
           createDrawerItem(
               context: context,
               icon: Icons.location_history,

@@ -150,6 +150,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
               _storageService.setObject('config', data.enterpriseConfig.toMap());
               _storageService.setBool(
                   'can_make_history', data.enterpriseConfig.canMakeHistory);
+              _storageService.setInt(
+                  'limit_days_works', data.enterpriseConfig.limitDaysWorks);
               if (data.enterpriseConfig.specifiedAccountTransfer == true) {
                 var response =
                 await _apiRepository.accounts(request: AccountRequest());

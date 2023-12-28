@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:bexdeliveries/src/services/logger.dart';
+import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
@@ -17,6 +18,7 @@ import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 import 'package:location/location.dart' as loc;
 
 //blocs
+import '../../src/domain/models/requests/login_request.dart';
 import '../../src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 
 //domain
@@ -29,6 +31,7 @@ import '../../src/domain/repositories/database_repository.dart';
 import '../../src/domain/repositories/api_repository.dart';
 
 //utils
+import '../../src/presentation/cubits/login/login_cubit.dart';
 import '../../src/presentation/widgets/custom_dialog.dart';
 import '../../src/utils/constants/colors.dart';
 import '../../src/utils/resources/data_state.dart';
@@ -77,6 +80,24 @@ class HelperFunctions with FormatDate {
       }
     }
     return null;
+  }
+
+  Future<void> login() async {
+    var username = _storageService.getString('username');
+    var password = _storageService.getString('password');
+
+    var response = await _apiRepository.login(
+        request: LoginRequest(
+      username!,
+      password!,
+    ));
+
+    if (response is DataSuccess) {
+      final login = response.data!.login;
+      _storageService.setString('token', login.token);
+    } else {
+      logDebug(headerDeveloperLogger, response.error!);
+    }
   }
 
   Future<String> get _localPath async {
@@ -494,7 +515,8 @@ class HelperFunctions with FormatDate {
     return distanceInMeters;
   }
 
-  bool isWithinRadiusGeo(LatLng currentLocation, double lat, double long, int ratio) {
+  bool isWithinRadiusGeo(
+      LatLng currentLocation, double lat, double long, int ratio) {
     const earthRadius = 6371.0;
     final radiusInMeters = ratio; // Radio en metros
     var lat1 = currentLocation.latitude;

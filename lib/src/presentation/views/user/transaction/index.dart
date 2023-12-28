@@ -36,6 +36,8 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
   @override
   void initState() {
     processingQueueBloc = BlocProvider.of<ProcessingQueueBloc>(context);
+
+
     super.initState();
   }
 

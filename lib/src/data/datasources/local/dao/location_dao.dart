@@ -99,7 +99,7 @@ class LocationDao with FormatDate {
   Future<int> deleteLocationsByDays() async {
     final db = await _appDatabase.streamDatabase;
     var today = DateTime.now();
-    var limitDaysWork = _storageService.getInt('limit_days_works') ?? 3;
+    var limitDaysWork = _storageService.getInt('limit_days_works') ?? 0;
     var datesToValidate = today.subtract(Duration(days: limitDaysWork));
     List<Map<String, dynamic>> locationToDelete;
 

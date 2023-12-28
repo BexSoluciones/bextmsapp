@@ -139,7 +139,7 @@ class ProcessingQueueBloc
   }
 
   Stream get resolve {
-    return Stream.periodic(const Duration(minutes: 1), (int value) async {
+    return Stream.periodic(const Duration(seconds: 30), (int value) async {
       final timer0 = logTimerStart(headerDeveloperLogger, 'Starting...',
           level: LogLevel.info);
         await _getProcessingQueue();
