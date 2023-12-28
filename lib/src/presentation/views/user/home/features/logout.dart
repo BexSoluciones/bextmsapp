@@ -20,10 +20,10 @@ class _LogoutBarState extends State<LogoutBar> {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (_, state) {
-        switch (state.runtimeType) {
-          case HomeLoading:
+        switch (state.status) {
+          case HomeStatus.loading:
             return const Center(child: CupertinoActivityIndicator());
-          case HomeSuccess:
+          case HomeStatus.success:
             return Showcase(
                 key: widget.four,
                 disableMovingAnimation: true,
@@ -34,7 +34,7 @@ class _LogoutBarState extends State<LogoutBar> {
                     onPressed: () async {
                       BlocProvider.of<HomeCubit>(context).logout();
                     }));
-          case HomeFailed:
+          case HomeStatus.failure:
             return Showcase(
                 key: widget.four,
                 disableMovingAnimation: true,

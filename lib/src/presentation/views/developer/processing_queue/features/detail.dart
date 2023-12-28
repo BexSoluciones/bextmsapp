@@ -14,7 +14,7 @@ class ProcessingQueueCardDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     var items = <Widget>[];
 
-    var values = jsonDecode(processingQueue.body);
+    var values = jsonDecode(processingQueue.body!);
 
     if (values is Map<String, dynamic>) {
       values.forEach((final String key, final value) {
@@ -26,7 +26,7 @@ class ProcessingQueueCardDetail extends StatelessWidget {
       });
     } else if (values is List) {
       items.add(ListTile(
-        title: Text('localizaciones'),
+        title: const Text('localizaciones'),
         subtitle: Text(values.toString()),
       ));
     }

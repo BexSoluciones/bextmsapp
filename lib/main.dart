@@ -347,7 +347,8 @@ class _MyAppState extends State<MyApp> {
                   locator<DatabaseRepository>(),
                   locator<ApiRepository>(),
                   BlocProvider.of<ProcessingQueueBloc>(context),
-                  BlocProvider.of<GpsBloc>(context))),
+                  BlocProvider.of<GpsBloc>(context),
+                  BlocProvider.of<NetworkBloc>(context))),
           BlocProvider(
             create: (context) => HistoryOrderBloc(locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context)),

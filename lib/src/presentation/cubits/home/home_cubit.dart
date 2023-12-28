@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/src/presentation/blocs/network/network_bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
@@ -59,6 +60,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
+  final NetworkBloc networkBloc;
   bool _isLoggingOut = false;
   bool _isSyncing = false;
 
@@ -66,8 +68,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   CurrentUserLocationEntity? currentLocation;
 
   HomeCubit(this._databaseRepository, this._apiRepository,
-      this._processingQueueBloc, this.gpsBloc)
-      : super(const HomeLoading(), null);
+      this._processingQueueBloc, this.gpsBloc, this.networkBloc)
+      : super(const HomeState(status: HomeStatus.initial), null);
 
   Future<void> getAllWorks() async {
     emit(await _getAllWorks());
@@ -100,11 +102,11 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
         ? User.fromJson(_storageService.getObject('user')!)
         : null;
 
-    return HomeSuccess(works: works, user: user);
+    return HomeState(status: HomeStatus.success, works: works, user: user);
   }
 
   void updateUser(User user) {
-    emit(UpdateUser(user));
+    emit(state.copyWith(user: user));
   }
 
   Future<void> differenceWorks(
@@ -124,7 +126,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       _isSyncing = true;
 
       await run(() async {
-        emit(const HomeLoading());
+        emit(state.copyWith(status: HomeStatus.loading));
 
         final timer0 = logTimerStart(headerHomeLogger, 'Starting...',
             level: LogLevel.info);
@@ -242,7 +244,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             final distinct = warehouses.unique((x) => x.id);
             await _databaseRepository.insertWarehouses(distinct);
 
-            //TODO:: refactoring
             var workcodes = groupBy(works, (Work work) => work.workcode);
             if (workcodes.isNotEmpty) {
               var localWorks = await _databaseRepository.getAllWorks();
@@ -299,10 +300,10 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             }
             emit(await _getAllWorks());
           } else {
-            emit(HomeFailed(error: responseWorks.error, user: user));
+            emit(state.copyWith(status: HomeStatus.failure, error: responseWorks.error, user: user));
           }
         } else if (response is DataFailed) {
-          emit(HomeFailed(error: response.error, user: user));
+          emit(state.copyWith(status: HomeStatus.failure, error: response.error, user: user));
         }
       });
     } catch (e, stackTrace) {
@@ -317,30 +318,46 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
     if (_isLoggingOut) return;
     try {
       _isLoggingOut = true;
-      emit(const HomeLoading());
+      emit(state.copyWith(status: HomeStatus.loading));
 
-      final user = _storageService.getObject('user') != null
-          ? User.fromJson(_storageService.getObject('user')!)
-          : null;
+      if (networkBloc.state is NetworkSuccess) {
+        var vpq =
+            await _databaseRepository.validateIfProcessingQueueIsIncomplete();
+        if (vpq) {
+          emit(state.copyWith(
+              status: HomeStatus.failure,
+              error:
+              'Existe procesamiento incompleto, porfavor espera para realizar esta acción'
+          ));
+        } else {
+          var processingQueueWork = ProcessingQueue(
+              body: null,
+              task: 'incomplete',
+              code: 'post_logout',
+              createdAt: now(),
+              updatedAt: now());
 
-      var vpq =
-          await _databaseRepository.validateIfProcessingQueueIsIncomplete();
-      if (vpq) {
-        emit(HomeFailed(
-            works: state.works,
-            error:
-                'Existe procesamiento incompleto, porfavor espera para realizar esta acción',
-            user: user));
+          _processingQueueBloc
+              .add(ProcessingQueueAdd(processingQueue: processingQueueWork));
+
+          await _databaseRepository.emptyWorks();
+          await _databaseRepository.emptySummaries();
+          await _databaseRepository.emptyTransactions();
+          await _databaseRepository.emptyReasons();
+          _storageService.remove('user');
+          _storageService.remove('token');
+          _storageService.remove('can_make_history');
+
+          emit(state.copyWith(status: HomeStatus.success));
+
+          await _navigationService.goTo(AppRoutes.login);
+        }
       } else {
-        await _databaseRepository.emptyWorks();
-        await _databaseRepository.emptySummaries();
-        await _databaseRepository.emptyTransactions();
-        await _databaseRepository.emptyReasons();
-        _storageService.remove('user');
-        _storageService.remove('token');
-        emit(HomeSuccess(works: const [], user: user));
-
-        await _navigationService.goTo(AppRoutes.login);
+        emit(state.copyWith(
+            status: HomeStatus.failure,
+            error:
+            'Porfavor conectate a internet para realizar esta accion'
+        ));
       }
     } catch (e, stackTrace) {
       print("Error during logout: $e");

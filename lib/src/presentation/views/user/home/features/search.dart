@@ -19,10 +19,10 @@ class SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (_, state) {
-        switch (state.runtimeType) {
-          case HomeLoading:
+        switch (state.status) {
+          case HomeStatus.loading:
             return const Center(child: CupertinoActivityIndicator());
-          case HomeSuccess:
+          case HomeStatus.success:
             return Showcase(
                 key: three,
                 disableMovingAnimation: true,
@@ -36,7 +36,7 @@ class SearchBar extends StatelessWidget {
                           context: context,
                           delegate: SearchHomeDelegate(state.works));
                     }));
-          case HomeFailed:
+          case HomeStatus.failure:
             return Showcase(
                 key: three,
                 disableMovingAnimation: true,

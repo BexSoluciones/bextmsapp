@@ -229,7 +229,7 @@ class ProcessingQueueBloc
       switch (queue.code) {
         case 'store_transaction_start':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             body['end'] = now();
             queue.body = jsonEncode(body);
             queue.task = 'processing';
@@ -247,7 +247,7 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             body['start'] = now();
             queue.body = jsonEncode(body);
             queue.error = e.toString();
@@ -257,7 +257,7 @@ class ProcessingQueueBloc
           break;
         case 'store_transaction_arrived':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             body['end'] = now();
             queue.body = jsonEncode(body);
             queue.task = 'processing';
@@ -275,7 +275,7 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             body['start'] = now();
             queue.body = jsonEncode(body);
             queue.error = e.toString();
@@ -286,7 +286,7 @@ class ProcessingQueueBloc
           break;
         case 'store_transaction_summary':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             body['end'] = now();
             queue.body = jsonEncode(body);
             queue.task = 'processing';
@@ -304,7 +304,7 @@ class ProcessingQueueBloc
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             body['start'] = now();
             queue.body = jsonEncode(body);
             queue.error = e.toString();
@@ -314,7 +314,7 @@ class ProcessingQueueBloc
           break;
         case 'store_transaction':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             body['end'] = now();
             queue.body = jsonEncode(body);
             queue.task = 'processing';
@@ -347,7 +347,7 @@ class ProcessingQueueBloc
           }
           break;
         case 'store_transaction_product':
-          var body = jsonDecode(queue.body);
+          var body = jsonDecode(queue.body!);
           try {
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
@@ -385,7 +385,7 @@ class ProcessingQueueBloc
           try {
             queue.task = 'processing';
             final response = await _apiRepository.locations(
-                request: LocationsRequest(queue.body));
+                request: LocationsRequest(queue.body!));
             if (response is DataSuccess) {
               queue.task = 'done';
             } else {
@@ -424,7 +424,7 @@ class ProcessingQueueBloc
           break;
         case 'store_work_status':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final response = await _apiRepository.status(
@@ -445,7 +445,7 @@ class ProcessingQueueBloc
           break;
         case 'store_history_order':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             queue.task = 'processing';
             final response = await _apiRepository.historyOrderSaved(
                 request: HistoryOrderSavedRequest(body['work_id']));
@@ -465,7 +465,7 @@ class ProcessingQueueBloc
           break;
         case 'update_history_order':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             queue.task = 'processing';
             final response = await _apiRepository.historyOrderUpdated(
                 request: HistoryOrderUpdatedRequest(body['workcode'], 1));
@@ -486,7 +486,7 @@ class ProcessingQueueBloc
           break;
         case 'get_prediction':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             queue.task = 'processing';
             final response = await _apiRepository.prediction(
                 request: PredictionRequest(body['zone_id'], body['workcode']));
@@ -542,7 +542,7 @@ class ProcessingQueueBloc
           break;
         case 'post_new_routing':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             queue.task = 'processing';
             final response = await _apiRepository.routing(
                 request: RoutingRequest(body['history_id'], body['workcode']));
@@ -563,7 +563,7 @@ class ProcessingQueueBloc
           break;
         case 'update_client':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             final response = await _apiRepository.georeference(
@@ -606,7 +606,7 @@ class ProcessingQueueBloc
 
         case 'post_firebase_token':
           try {
-            var body = jsonDecode(queue.body);
+            var body = jsonDecode(queue.body!);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
             var response = await _apiRepository.sendFCMToken(
@@ -637,7 +637,7 @@ class ProcessingQueueBloc
       if (p.code == 'store_transaction' ||
           p.code == 'store_transaction_product') {
         logDebug(headerDeveloperLogger, 'entro a validar');
-        var body = jsonDecode(p.body);
+        var body = jsonDecode(p.body!);
         String? workcode = body['workcode'];
         if (workcode != null) {
           logDebug(headerDeveloperLogger, 'entro con $workcode');

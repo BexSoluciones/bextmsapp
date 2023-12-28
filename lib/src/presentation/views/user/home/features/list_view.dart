@@ -10,7 +10,6 @@ import '../../../../../domain/models/work.dart';
 import '../../../../cubits/home/home_cubit.dart';
 
 //widgets
-import '../../../../widgets/skeleton_loader_widget.dart';
 import 'item.dart';
 
 class HomeListView extends StatefulWidget {
@@ -40,7 +39,7 @@ class _HomeListViewState extends State<HomeListView> {
   }
 
   void buildBlocListener(BuildContext context, HomeState state) async {
-    if (state is HomeFailed && state.error != null) {
+    if (state.status == HomeStatus.failure && state.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
@@ -58,9 +57,10 @@ class _HomeListViewState extends State<HomeListView> {
       // buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
-        if (state is HomeLoading) {
+        if (state.status == HomeStatus.loading) {
           return const Center(child: CupertinoActivityIndicator());
-        } else if (state is HomeSuccess || state is HomeFailed) {
+        } else if (state.status == HomeStatus.success ||
+            state.status == HomeStatus.failure) {
           return _buildHome(state.works);
         } else {
           return const SizedBox();

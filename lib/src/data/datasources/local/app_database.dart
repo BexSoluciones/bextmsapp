@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:bexdeliveries/src/domain/models/transaction_validate.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
@@ -7,12 +6,6 @@ import 'package:path/path.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 import 'package:sqlbrite/sqlbrite.dart';
 import 'package:synchronized/synchronized.dart';
-
-//utils
-import '../../../domain/abstracts/format_abstract.dart';
-import '../../../domain/models/confirm.dart';
-import '../../../domain/models/zone.dart';
-import '../../../utils/constants/strings.dart';
 
 //models
 import '../../../domain/models/work.dart';
@@ -31,6 +24,10 @@ import '../../../domain/models/news.dart';
 import '../../../domain/models/notification.dart';
 import '../../../domain/models/summary_report.dart';
 import '../../../domain/models/transaction.dart';
+import '../../../domain/models/confirm.dart';
+import '../../../domain/models/zone.dart';
+import '../../../domain/models/transaction_validate.dart';
+import '../../../domain/abstracts/format_abstract.dart';
 
 //services
 import '../../../locator.dart';
