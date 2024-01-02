@@ -17,9 +17,23 @@ class ProcessingQueueDao {
     return processingQueues;
   }
 
-  Future<List<ProcessingQueue>> getAllProcessingQueues() async {
+  Future<List<ProcessingQueue>> getAllProcessingQueues(
+      String? code, String? task) async {
     final db = await _appDatabase.streamDatabase;
-    final processingQueueList = await db!.query(tableProcessingQueues);
+    var processingQueueList = <Map<String, dynamic>>[];
+    if (code != null) {
+      processingQueueList = await db!
+          .query(tableProcessingQueues, where: 'code = ?', whereArgs: [code]);
+    } else if (task != null) {
+      processingQueueList = await db!
+          .query(tableProcessingQueues, where: 'task = ?', whereArgs: [task]);
+    } else if (code != null && task != null) {
+      processingQueueList = await db!.query(tableProcessingQueues,
+          where: 'task = ? and code = ?', whereArgs: [task, code]);
+    } else {
+      processingQueueList = await db!.query(tableProcessingQueues);
+    }
+
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues;
   }

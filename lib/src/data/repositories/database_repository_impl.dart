@@ -366,8 +366,8 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   //PROCESSING QUEUE
   @override
-  Future<List<ProcessingQueue>> getAllProcessingQueues() {
-    return _appDatabase.processingQueueDao.getAllProcessingQueues();
+  Future<List<ProcessingQueue>> getAllProcessingQueues(String? code, String? task) {
+    return _appDatabase.processingQueueDao.getAllProcessingQueues(code, task);
   }
 
   @override

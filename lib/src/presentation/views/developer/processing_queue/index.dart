@@ -31,14 +31,9 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
   @override
   void initState() {
     processingQueueBloc = context.read<ProcessingQueueBloc>();
-
     processingQueueBloc.add(ProcessingQueueAll());
-
-    processingQueueBloc.dropdownFilterValue =
-        processingQueueBloc.itemsFilter.first['key'];
-    processingQueueBloc.dropdownStateValue =
-        processingQueueBloc.itemsState.first['key'];
-
+    changeFilterValue(processingQueueBloc.itemsFilter.first['key']);
+    changeStateValue(processingQueueBloc.itemsState.first['key']);
     // TODO: implement initState
     super.initState();
   }
@@ -53,11 +48,6 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
 
   @override
   Widget build(BuildContext context) {
-    var dropdownFilterValue =
-        context.watch<ProcessingQueueBloc>().dropdownFilterValue;
-    var dropdownStateValue =
-        context.watch<ProcessingQueueBloc>().dropdownStateValue;
-
     return Scaffold(
         body: NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -106,7 +96,7 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
                       style: const TextStyle(
                         color: kPrimaryColor,
                       ),
-                      value: dropdownFilterValue,
+                      value: processingQueueBloc.state.dropdownFilterValue,
                       items: processingQueueBloc.itemsFilter.map((item) {
                         return DropdownMenuItem(
                           value: item['key'],
@@ -138,7 +128,7 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
                       style: const TextStyle(
                         color: kPrimaryColor,
                       ),
-                      value: dropdownStateValue,
+                      value: processingQueueBloc.state.dropdownStateValue,
                       items: processingQueueBloc.itemsState.map((item) {
                         return DropdownMenuItem(
                           value: item['key'],

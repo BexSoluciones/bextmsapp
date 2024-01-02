@@ -62,14 +62,17 @@ class ProcessingQueueBloc
   ProcessingQueueBloc(
       this._databaseRepository, this._apiRepository, this.networkBloc)
       : super(const ProcessingQueueState(
-            status: ProcessingQueueStatus.initial, processingQueues: [])) {
+            status: ProcessingQueueStatus.initial,
+            processingQueues: [],
+            dropdownFilterValue: 'all',
+            dropdownStateValue: 'all')) {
     on<ProcessingQueueAdd>(_add);
     on<ProcessingQueueObserve>(_observe);
     on<ProcessingQueueSender>(_sender);
     on<ProcessingQueueCancel>(_cancel);
     on<ProcessingQueueAll>(_all);
-    // on<ProcessingQueueSearchFilter>(_searchFilter);
-    // on<ProcessingQueueSearchState>(_searchState);
+    on<ProcessingQueueSearchFilter>(_searchFilter);
+    on<ProcessingQueueSearchState>(_searchState);
   }
 
   final itemsFilter = [
@@ -90,9 +93,6 @@ class ProcessingQueueBloc
     {'key': 'store_locations', 'value': 'Localizaciones'},
     {'key': 'store_work_status', 'value': 'Estado de la planilla'},
   ];
-
-  String? dropdownFilterValue;
-  String? dropdownStateValue;
 
   static void heavyTask(IsolateModel model) {
     for (var i = 0; i < model.iteration; i++) {
@@ -121,14 +121,17 @@ class ProcessingQueueBloc
   }
 
   Future<void> _getProcessingQueue() async {
-    if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
+    if (networkBloc != null &&
+        networkBloc?.state is NetworkSuccess &&
+        state.status != ProcessingQueueStatus.sending) {
       var queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
       sendProcessingQueue(queues);
     }
   }
 
   void _all(event, emit) async {
-    var processingQueues = await _databaseRepository.getAllProcessingQueues();
+    var processingQueues =
+        await _databaseRepository.getAllProcessingQueues(null, null);
     emit(state.copyWith(
         status: ProcessingQueueStatus.success,
         processingQueues: processingQueues));
@@ -170,33 +173,36 @@ class ProcessingQueueBloc
     emit(state.copyWith(status: ProcessingQueueStatus.success));
   }
 
-  // void _searchFilter(ProcessingQueueSearchFilter event, emit) async {
-  //   dropdownFilterValue = event.value;
-  //   if (dropdownFilterValue != null && dropdownFilterValue != 'all') {
-  //     processingQueues = processingQueues
-  //         .where((element) => element.task == event.value)
-  //         .toList(growable: false);
-  //   } else {
-  //     processingQueues = await _databaseRepository.getAllProcessingQueues();
-  //   }
-  //   emit(state.copyWith(
-  //       status: ProcessingQueueStatus.success,
-  //       processingQueues: processingQueues));
-  // }
-  //
-  // void _searchState(ProcessingQueueSearchState event, emit) async {
-  //   dropdownStateValue = event.value;
-  //   if (dropdownStateValue != null && dropdownStateValue != 'all') {
-  //     processingQueues = processingQueues
-  //         .where((element) => element.code == event.value)
-  //         .toList(growable: false);
-  //   } else {
-  //     processingQueues = await _databaseRepository.getAllProcessingQueues();
-  //   }
-  //   emit(state.copyWith(
-  //       status: ProcessingQueueStatus.success,
-  //       processingQueues: processingQueues));
-  // }
+  void _searchFilter(ProcessingQueueSearchFilter event, emit) async {
+    var processingQueues = <ProcessingQueue>[];
+    if (event.value != 'all') {
+      processingQueues = await _databaseRepository.getAllProcessingQueues(
+          state.dropdownFilterValue, state.dropdownFilterValue);
+    } else {
+      processingQueues =
+          await _databaseRepository.getAllProcessingQueues(null, null);
+    }
+
+    emit(state.copyWith(
+        dropdownFilterValue: event.value,
+        status: ProcessingQueueStatus.success,
+        processingQueues: processingQueues));
+  }
+
+  void _searchState(ProcessingQueueSearchState event, emit) async {
+    var processingQueues = <ProcessingQueue>[];
+    if (event.value != 'all') {
+      processingQueues = await _databaseRepository.getAllProcessingQueues(
+          state.dropdownFilterValue, state.dropdownFilterValue);
+    } else {
+      processingQueues =
+          await _databaseRepository.getAllProcessingQueues(null, null);
+    }
+    emit(state.copyWith(
+        dropdownStateValue: event.value,
+        status: ProcessingQueueStatus.success,
+        processingQueues: processingQueues));
+  }
 
   void sendProcessingQueue(List<ProcessingQueue> queues) async {
     print('******************');
