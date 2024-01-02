@@ -1,10 +1,11 @@
-import 'package:bexdeliveries/src/utils/constants/colors.dart';
-import 'package:bexdeliveries/src/utils/extensions/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:location/location.dart';
 import 'package:lottie/lottie.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+
+//core
+import '../../../../core/helpers/index.dart';
 
 //models
 import '../../../domain/models/enterprise.dart';
@@ -14,6 +15,10 @@ import '../../cubits/login/login_cubit.dart';
 
 //blocs
 import '../../blocs/network/network_bloc.dart';
+
+//utils
+import '../../../utils/constants/colors.dart';
+import '../../../utils/extensions/app_theme.dart';
 
 //service
 import '../../../locator.dart';
@@ -34,6 +39,7 @@ class LoginView extends StatefulWidget {
 }
 
 class LoginViewState extends State<LoginView> {
+  final helperFunctions = HelperFunctions();
   late LoginCubit loginCubit;
 
   Enterprise? enterprise;
@@ -49,6 +55,9 @@ class LoginViewState extends State<LoginView> {
   @override
   void initState() {
     rememberSession();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      helperFunctions.versionCheck(context);
+    });
     super.initState();
   }
 

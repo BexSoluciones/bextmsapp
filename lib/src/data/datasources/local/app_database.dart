@@ -320,7 +320,7 @@ class AppDatabase {
 
   final migrations = [
     '''
-      CREATE INDEX workcode_index ON $tableWorks(${WorkFields.workcode})
+      CREATE INDEX IF NOT EXISTS workcode_index ON $tableWorks(${WorkFields.workcode})
     ''',
     '''
       CREATE TABLE IF NOT EXISTS $tablePhotos (

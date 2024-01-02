@@ -63,6 +63,7 @@ class HomeViewState extends State<HomeView>
 
   void startHomeWidget() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      helperFunctions.versionCheck(context);
       await _isFirstLaunch().then((result) {
         if (result == null || result == false) {
           ShowCaseWidget.of(context)

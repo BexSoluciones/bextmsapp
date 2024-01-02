@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
@@ -16,6 +17,7 @@ import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 import 'package:location/location.dart' as loc;
+import 'package:yaml/yaml.dart';
 
 //blocs
 import '../../src/domain/models/requests/login_request.dart';
@@ -31,13 +33,14 @@ import '../../src/domain/repositories/database_repository.dart';
 import '../../src/domain/repositories/api_repository.dart';
 
 //utils
-import '../../src/presentation/cubits/login/login_cubit.dart';
-import '../../src/presentation/widgets/custom_dialog.dart';
+
 import '../../src/utils/constants/colors.dart';
 import '../../src/utils/resources/data_state.dart';
 
 //widgets
 import '../../src/presentation/widgets/show_map_direction_widget.dart';
+import '../../src/presentation/widgets/custom_dialog.dart';
+import '../../src/presentation/widgets/update_dialog_widget.dart';
 
 //locator
 import '../../src/locator.dart';
@@ -98,6 +101,60 @@ class HelperFunctions with FormatDate {
     } else {
       logDebug(headerDeveloperLogger, response.error!);
     }
+  }
+
+  Future<FirebaseRemoteConfig> setupRemoteConfig() async {
+    final remoteConfig = FirebaseRemoteConfig.instance;
+
+    RemoteConfigValue(null, ValueSource.valueStatic);
+    return remoteConfig;
+  }
+
+  void versionCheck(context) async {
+    var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
+    var currentVersion =
+    double.parse(yaml['version'].trim().replaceAll('.', '').split('+')[0]);
+
+    //Get Latest version info from firebase config
+    final remoteConfig = await setupRemoteConfig();
+
+    try {
+      // Using default duration to force fetching from remote server.
+      await remoteConfig.setConfigSettings(RemoteConfigSettings(
+        fetchTimeout: const Duration(seconds: 0),
+        minimumFetchInterval: Duration.zero,
+      ));
+      await remoteConfig.fetchAndActivate();
+
+      var force = remoteConfig.getBool('force_activate');
+      var forceUpdate = remoteConfig.getBool('force_update');
+      var message = remoteConfig.getString('message');
+
+      var newVersion = double.parse(remoteConfig
+          .getString('force_update_current_version')
+          .trim()
+          .replaceAll('.', ''));
+
+      if (force && newVersion > currentVersion) {
+        await UpdateDialog(skipUpdate: forceUpdate, message: message)
+            .showVersionDialog(context);
+      }
+
+    } on PlatformException catch (exception) {
+      print(exception);
+    } catch (exception, stackTrace) {
+      await handleException(exception, stackTrace);
+    }
+  }
+
+  Future<void> handleException(dynamic error, StackTrace stackTrace) async {
+    // var errorData = Errors(
+    //   errorMessage: error.toString(),
+    //   stackTrace: stackTrace.toString(),
+    //   createdAt: DateTime.now().toString(),
+    // );
+    // await _databaseRepository.insertError(errorData);
+    await FirebaseCrashlytics.instance.recordError(e, stackTrace);
   }
 
   Future<String> get _localPath async {
