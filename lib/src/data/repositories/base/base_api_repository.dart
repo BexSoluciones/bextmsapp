@@ -25,12 +25,7 @@ abstract class BaseApiRepository {
         );
       }
     } on DioException catch (error,stackTrace) {
-      logDebug(headerDeveloperLogger, '****************');
-      logDebug(headerDeveloperLogger, error.type.toString());
-      logDebug(headerDeveloperLogger, error.response.toString());
-      logDebug(headerDeveloperLogger, error.error.toString());
-      logDebug(headerDeveloperLogger, error.message.toString());
-
+      //TODO:: [Heider Zapa ] resolve model variable in error
       final errorMessage = DioExceptions.fromDioError(error, 'SM-A33G').toString();
       await FirebaseCrashlytics.instance.recordError(error, stackTrace);
       return DataFailed(errorMessage);

@@ -3,10 +3,10 @@ modulo [HOME]
 * Visualización de historicos o no - Correcto
 * Visualización de buscar y uso - Correcto
 * Sincronizado - Correcto
-* Cerrar sesión - Falta validación
+* Cerrar sesión - Correcto
 modulo [DRAWER]
 * Ver tutorial - Correcto
-* Exportar base de datos - Issue package
+* Exportar base de datos - Correcto
 * Consultas - Correcto
 * Transacciones  - Correcto
 * Reportar un problema - Correcto
@@ -22,14 +22,14 @@ modulo [NAVIGATION]
 * Visualización de cargado  - Correcto
 * Visualización de clientes - Correcto
 * Deslizar entre clientes - Correcto
-* Navegar hacia el cliente - Incorrecto
+* Navegar hacia el cliente - Correcto
 * Posicionarte sobre el cliente - Correcto
 * Usar navegación [GM, WZ] - Correcto
 * Posicionarte sobre tu ubicación - Correcto
 modulo [SUMMARIES]
 * Visualziación de cliente - Correcto
 * Visualización de facturas - Correcto
-* Uso de telefono y whatsapp - Falta mostrar mensaje
+* Uso de telefono y whatsapp - Correcto
 * Uso de navegación - Correcto
 * Reporte de problema - Correcto
 * Llegada del cliente - Correcto
@@ -47,7 +47,6 @@ modulo [INVENTORY]
 * Envio de rechazado con motivos - Correcto
 * Envio de parciales - Correcto
 * Bloqueo de parciales - Correcto
-* No recuerdo que hace la variable [block_reject] investigar no hizo nada dentro de la app
 modulo [COLLECTION]	
 * [disable accounts]
 * Envio de reacudo solo efectivo - Correcto

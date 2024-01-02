@@ -215,16 +215,18 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
               )
             : null;
       } else {
-        main? snackbar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'Perfecto!',
-            message: 'La base de datos se subió con éxito 🥳🥳🥳',
-            contentType: ContentType.success,
-          ),
-        ):null;
+        main
+            ? snackbar = SnackBar(
+                elevation: 0,
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.transparent,
+                content: AwesomeSnackbarContent(
+                  title: 'Perfecto!',
+                  message: 'La base de datos se subió con éxito 🥳🥳🥳',
+                  contentType: ContentType.success,
+                ),
+              )
+            : null;
       }
 
       if (context.mounted && main) {
