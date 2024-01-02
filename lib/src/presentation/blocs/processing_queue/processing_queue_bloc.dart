@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //core
@@ -60,53 +59,17 @@ class ProcessingQueueBloc
 
   final helperFunctions = HelperFunctions();
 
-  final _processingQueueController =
-      StreamController<List<ProcessingQueue>>.broadcast();
-
-  final _addProcessingQueueController =
-      StreamController<ProcessingQueue>.broadcast();
-
-  Stream<List<ProcessingQueue>> get processingQueue =>
-      _processingQueueController.stream;
-  StreamSink<List<ProcessingQueue>> get _inProcessingQueue =>
-      _processingQueueController.sink;
-  StreamSink<ProcessingQueue> get inAddPq => _addProcessingQueueController.sink;
-
   ProcessingQueueBloc(
       this._databaseRepository, this._apiRepository, this.networkBloc)
-      : super(ProcessingQueueInitial()) {
+      : super(const ProcessingQueueState(
+            status: ProcessingQueueStatus.initial, processingQueues: [])) {
     on<ProcessingQueueAdd>(_add);
     on<ProcessingQueueObserve>(_observe);
     on<ProcessingQueueSender>(_sender);
     on<ProcessingQueueCancel>(_cancel);
     on<ProcessingQueueAll>(_all);
-    on<ProcessingQueueSearchFilter>(_searchFilter);
-    on<ProcessingQueueSearchState>(_searchState);
-
-    _addProcessingQueueController.stream.listen((p) async {
-      await _databaseRepository.insertProcessingQueue(p);
-      if (p.code != 'store_transaction_product') {
-        await Future.value([
-          _getProcessingQueue(),
-          validateIfServiceIsCompleted(p),
-        ]);
-      } else {
-        await Future.value([
-          validateIfServiceIsCompleted(p),
-        ]);
-      }
-    }, onError: (error) {
-      if (kDebugMode) {
-        print('error');
-        print(error);
-      }
-    }, onDone: () {
-      if (kDebugMode) {
-        print('done');
-      }
-    });
-
-    _processingQueueController.stream.listen(sendProcessingQueue);
+    // on<ProcessingQueueSearchFilter>(_searchFilter);
+    // on<ProcessingQueueSearchState>(_searchState);
   }
 
   final itemsFilter = [
@@ -128,7 +91,6 @@ class ProcessingQueueBloc
     {'key': 'store_work_status', 'value': 'Estado de la planilla'},
   ];
 
-  List<ProcessingQueue> processingQueues = [];
   String? dropdownFilterValue;
   String? dropdownStateValue;
 
@@ -142,7 +104,7 @@ class ProcessingQueueBloc
     return Stream.periodic(const Duration(seconds: 30), (int value) async {
       final timer0 = logTimerStart(headerDeveloperLogger, 'Starting...',
           level: LogLevel.info);
-        await _getProcessingQueue();
+      await _getProcessingQueue();
       logTimerStop(headerDeveloperLogger, timer0, 'Initialization completed',
           level: LogLevel.success);
       return true;
@@ -153,82 +115,99 @@ class ProcessingQueueBloc
     return _databaseRepository.watchAllProcessingQueues();
   }
 
-  Stream<List<Map<String, dynamic>>> countProcessingQueueIncompleteToTransactions() {
+  Stream<List<Map<String, dynamic>>>
+      countProcessingQueueIncompleteToTransactions() {
     return _databaseRepository.countProcessingQueueIncompleteToTransactions();
-  }
-
-  void dispose() {
-    _processingQueueController.close();
-    _addProcessingQueueController.close();
   }
 
   Future<void> _getProcessingQueue() async {
     if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
-      logDebugFine(headerDeveloperLogger, 'activating pq');
-      final queues =
-          await _databaseRepository.getAllProcessingQueuesIncomplete();
-      _inProcessingQueue.add(queues);
+      var queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
+      sendProcessingQueue(queues);
     }
   }
 
   void _all(event, emit) async {
-    processingQueues = await _databaseRepository.getAllProcessingQueues();
-    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
+    var processingQueues = await _databaseRepository.getAllProcessingQueues();
+    emit(state.copyWith(
+        status: ProcessingQueueStatus.success,
+        processingQueues: processingQueues));
   }
 
-  void _add(event, emit) {
-    _addProcessingQueueController.add(event.processingQueue);
-    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
+  void _add(ProcessingQueueAdd event, emit) async {
+    await _databaseRepository.insertProcessingQueue(event.processingQueue);
+
+    if (event.processingQueue.code != 'store_transaction_product') {
+      await Future.value([
+        _getProcessingQueue(),
+        validateIfServiceIsCompleted(event.processingQueue),
+      ]);
+    } else {
+      await Future.value([
+        validateIfServiceIsCompleted(event.processingQueue),
+      ]);
+    }
+
+    emit(state.copyWith(status: ProcessingQueueStatus.success));
   }
 
   void _observe(event, emit) {
-    if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
+    if (networkBloc != null &&
+        networkBloc?.state is NetworkSuccess &&
+        state.status == ProcessingQueueStatus.success) {
       _getProcessingQueue();
     }
-    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
+    emit(state.copyWith(status: ProcessingQueueStatus.success));
   }
 
   void _sender(event, emit) async {
-    emit(ProcessingQueueSending());
+    emit(state.copyWith(status: ProcessingQueueStatus.sending));
     await _getProcessingQueue().whenComplete(
-        () => emit(ProcessingQueueSuccess(processingQueues: processingQueues)));
+        () => emit(state.copyWith(status: ProcessingQueueStatus.success)));
   }
 
   void _cancel(event, emit) {
-    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
+    emit(state.copyWith(status: ProcessingQueueStatus.success));
   }
 
-  void _searchFilter(ProcessingQueueSearchFilter event, emit) async {
-    dropdownFilterValue = event.value;
-    if (dropdownFilterValue != null && dropdownFilterValue != 'all') {
-      processingQueues = processingQueues
-          .where((element) => element.task == event.value)
-          .toList(growable: false);
-    } else {
-      processingQueues = await _databaseRepository.getAllProcessingQueues();
-    }
-    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
-  }
-
-  void _searchState(ProcessingQueueSearchState event, emit) async {
-    dropdownStateValue = event.value;
-    if (dropdownStateValue != null && dropdownStateValue != 'all') {
-      processingQueues = processingQueues
-          .where((element) => element.code == event.value)
-          .toList(growable: false);
-    } else {
-      processingQueues = await _databaseRepository.getAllProcessingQueues();
-    }
-    emit(ProcessingQueueSuccess(processingQueues: processingQueues));
-  }
+  // void _searchFilter(ProcessingQueueSearchFilter event, emit) async {
+  //   dropdownFilterValue = event.value;
+  //   if (dropdownFilterValue != null && dropdownFilterValue != 'all') {
+  //     processingQueues = processingQueues
+  //         .where((element) => element.task == event.value)
+  //         .toList(growable: false);
+  //   } else {
+  //     processingQueues = await _databaseRepository.getAllProcessingQueues();
+  //   }
+  //   emit(state.copyWith(
+  //       status: ProcessingQueueStatus.success,
+  //       processingQueues: processingQueues));
+  // }
+  //
+  // void _searchState(ProcessingQueueSearchState event, emit) async {
+  //   dropdownStateValue = event.value;
+  //   if (dropdownStateValue != null && dropdownStateValue != 'all') {
+  //     processingQueues = processingQueues
+  //         .where((element) => element.code == event.value)
+  //         .toList(growable: false);
+  //   } else {
+  //     processingQueues = await _databaseRepository.getAllProcessingQueues();
+  //   }
+  //   emit(state.copyWith(
+  //       status: ProcessingQueueStatus.success,
+  //       processingQueues: processingQueues));
+  // }
 
   void sendProcessingQueue(List<ProcessingQueue> queues) async {
+    print('******************');
+    print(queues.length);
     await Future.forEach(queues, (queue) async {
       queue.updatedAt = now();
 
       switch (queue.code) {
         case 'store_transaction_start':
           try {
+            print('******************start********************');
             var body = jsonDecode(queue.body!);
             body['end'] = now();
             queue.body = jsonEncode(body);
@@ -238,6 +217,7 @@ class ProcessingQueueBloc
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               body['start'] = now();
@@ -266,6 +246,7 @@ class ProcessingQueueBloc
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               body['start'] = now();
@@ -295,6 +276,7 @@ class ProcessingQueueBloc
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               body['start'] = now();
@@ -319,25 +301,17 @@ class ProcessingQueueBloc
             queue.body = jsonEncode(body);
             queue.task = 'processing';
             await _databaseRepository.updateProcessingQueue(queue);
-            // bool transactionExists = await _databaseRepository.verifyTransactionExistence(body['work_id'],
-            //     body['order_number']);
             final response = await _apiRepository.index(
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               body['start'] = now();
               queue.body = jsonEncode(body);
               queue.error = response.error;
             }
-
-            // if (!transactionExists) {
-            //
-            // } else {
-            //   queue.task = 'error';
-            //   queue.error = 'La transacción no existe';
-            // }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
             queue.task = 'error';
@@ -361,6 +335,7 @@ class ProcessingQueueBloc
                       TransactionSummary.fromJson(body)));
               if (response is DataSuccess) {
                 queue.task = 'done';
+                state.processingQueues!.remove(queue);
               } else {
                 queue.task = 'error';
                 queue.error = response.error;
@@ -388,6 +363,7 @@ class ProcessingQueueBloc
                 request: LocationsRequest(queue.body!));
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -401,7 +377,6 @@ class ProcessingQueueBloc
           }
 
           break;
-
         case 'store_news':
           try {
             queue.task = 'processing';
@@ -409,6 +384,7 @@ class ProcessingQueueBloc
                 await _apiRepository.reason(request: ReasonMRequest(queue));
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -420,7 +396,6 @@ class ProcessingQueueBloc
             await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
-
           break;
         case 'store_work_status':
           try {
@@ -431,6 +406,7 @@ class ProcessingQueueBloc
                 request: StatusRequest(body['workcode'], body['status']));
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -451,6 +427,7 @@ class ProcessingQueueBloc
                 request: HistoryOrderSavedRequest(body['work_id']));
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -469,9 +446,9 @@ class ProcessingQueueBloc
             queue.task = 'processing';
             final response = await _apiRepository.historyOrderUpdated(
                 request: HistoryOrderUpdatedRequest(body['workcode'], 1));
-
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -524,6 +501,7 @@ class ProcessingQueueBloc
                 _storageService.setBool(
                     '${historyOrder.workcode}-showAgain', false);
                 queue.task = 'done';
+                state.processingQueues!.remove(queue);
               }
 
               queue.task = 'done';
@@ -538,7 +516,6 @@ class ProcessingQueueBloc
             await FirebaseCrashlytics.instance.recordError(e, stackTrace);
             await _databaseRepository.updateProcessingQueue(queue);
           }
-
           break;
         case 'post_new_routing':
           try {
@@ -549,6 +526,7 @@ class ProcessingQueueBloc
             if (response is DataSuccess) {
               await _databaseRepository.insertWorks(response.data!.works);
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -570,6 +548,7 @@ class ProcessingQueueBloc
                 request: ClientRequest(Client.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -591,6 +570,7 @@ class ProcessingQueueBloc
                 await _apiRepository.logout(request: LogoutRequest());
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -614,6 +594,7 @@ class ProcessingQueueBloc
                     int.parse(body['user_id']), body['fcm_token']));
             if (response is DataSuccess) {
               queue.task = 'done';
+              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -633,7 +614,6 @@ class ProcessingQueueBloc
 
   Future<void> validateIfServiceIsCompleted(ProcessingQueue p) async {
     try {
-
       if (p.code == 'store_transaction' ||
           p.code == 'store_transaction_product') {
         logDebug(headerDeveloperLogger, 'entro a validar');

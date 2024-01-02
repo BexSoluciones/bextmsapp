@@ -37,7 +37,6 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
   void initState() {
     processingQueueBloc = BlocProvider.of<ProcessingQueueBloc>(context);
 
-
     super.initState();
   }
 
@@ -75,12 +74,12 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
         ),
         body: BlocBuilder<ProcessingQueueBloc, ProcessingQueueState>(
           builder: (_, state) {
-            switch (state.runtimeType) {
-              case ProcessingQueueInitial:
+            switch (state.status) {
+              case ProcessingQueueStatus.loading:
                 return const Center(child: CupertinoActivityIndicator());
-              case ProcessingQueueSuccess:
+              case ProcessingQueueStatus.success:
                 return _buildHome();
-              case ProcessingQueueSending:
+              case ProcessingQueueStatus.sending:
                 return _buildSender();
               default:
                 return const SizedBox();

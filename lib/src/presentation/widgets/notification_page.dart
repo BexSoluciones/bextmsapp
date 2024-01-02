@@ -79,7 +79,8 @@ class _BuildNotificationCardState extends State<BuildNotificationCard>
                 createdAt: now(),
                 updatedAt: now(),
               );
-              _processingQueueBloc.inAddPq.add(processingQueue);
+              _processingQueueBloc
+                  .add(ProcessingQueueAdd(processingQueue: processingQueue));
             }
 
             setState(() {

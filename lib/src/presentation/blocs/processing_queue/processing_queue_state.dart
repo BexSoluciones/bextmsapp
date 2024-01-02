@@ -1,20 +1,22 @@
 part of 'processing_queue_bloc.dart';
 
-abstract class ProcessingQueueState extends Equatable {
+enum ProcessingQueueStatus { initial, sending, loading, success, failure }
+
+class ProcessingQueueState extends Equatable {
+  final ProcessingQueueStatus? status;
   final List<ProcessingQueue>? processingQueues;
 
-  const ProcessingQueueState({this.processingQueues});
+  const ProcessingQueueState({this.processingQueues, this.status});
 
   @override
-  List<Object> get props => [processingQueues!];
+  List<Object> get props => [processingQueues!, status!];
+
+  ProcessingQueueState copyWith({
+    ProcessingQueueStatus? status,
+    List<ProcessingQueue>? processingQueues,
+  }) =>
+      ProcessingQueueState(
+        status: status ?? this.status,
+        processingQueues: processingQueues ?? this.processingQueues,
+      );
 }
-
-class ProcessingQueueInitial extends ProcessingQueueState {}
-
-class ProcessingQueueSending extends ProcessingQueueState {}
-
-class ProcessingQueueSuccess extends ProcessingQueueState {
-  const ProcessingQueueSuccess({super.processingQueues});
-}
-
-class ProcessingQueueFailure extends ProcessingQueueState {}

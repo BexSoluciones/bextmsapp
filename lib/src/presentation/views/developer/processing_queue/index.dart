@@ -57,8 +57,6 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
         context.watch<ProcessingQueueBloc>().dropdownFilterValue;
     var dropdownStateValue =
         context.watch<ProcessingQueueBloc>().dropdownStateValue;
-    var processingQueues =
-        context.watch<ProcessingQueueBloc>().processingQueues;
 
     return Scaffold(
         body: NestedScrollView(
@@ -160,10 +158,10 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
         listener: (context, state) {},
         builder: (BuildContext context, ProcessingQueueState state) {
           return ListView.builder(
-            itemCount: processingQueues.length,
+            itemCount: state.processingQueues!.length,
             itemBuilder: (BuildContext context, int index) {
               return ProcessingQueueCard(
-                processingQueue: processingQueueBloc.processingQueues[index],
+                processingQueue: state.processingQueues![index],
               );
             },
           );
