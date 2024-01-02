@@ -226,7 +226,6 @@ class ProcessingQueueBloc
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               body['start'] = now();
@@ -255,7 +254,6 @@ class ProcessingQueueBloc
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               body['start'] = now();
@@ -285,7 +283,6 @@ class ProcessingQueueBloc
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               body['start'] = now();
@@ -314,7 +311,6 @@ class ProcessingQueueBloc
                 request: TransactionRequest(Transaction.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               body['start'] = now();
@@ -344,7 +340,6 @@ class ProcessingQueueBloc
                       TransactionSummary.fromJson(body)));
               if (response is DataSuccess) {
                 queue.task = 'done';
-                state.processingQueues!.remove(queue);
               } else {
                 queue.task = 'error';
                 queue.error = response.error;
@@ -372,7 +367,6 @@ class ProcessingQueueBloc
                 request: LocationsRequest(queue.body!));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -393,7 +387,6 @@ class ProcessingQueueBloc
                 await _apiRepository.reason(request: ReasonMRequest(queue));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -415,7 +408,6 @@ class ProcessingQueueBloc
                 request: StatusRequest(body['workcode'], body['status']));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -436,7 +428,6 @@ class ProcessingQueueBloc
                 request: HistoryOrderSavedRequest(body['work_id']));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -457,7 +448,6 @@ class ProcessingQueueBloc
                 request: HistoryOrderUpdatedRequest(body['workcode'], 1));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -510,7 +500,6 @@ class ProcessingQueueBloc
                 _storageService.setBool(
                     '${historyOrder.workcode}-showAgain', false);
                 queue.task = 'done';
-                state.processingQueues!.remove(queue);
               }
 
               queue.task = 'done';
@@ -535,7 +524,6 @@ class ProcessingQueueBloc
             if (response is DataSuccess) {
               await _databaseRepository.insertWorks(response.data!.works);
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -557,7 +545,6 @@ class ProcessingQueueBloc
                 request: ClientRequest(Client.fromJson(body)));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -579,7 +566,6 @@ class ProcessingQueueBloc
                 await _apiRepository.logout(request: LogoutRequest());
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
@@ -603,7 +589,6 @@ class ProcessingQueueBloc
                     int.parse(body['user_id']), body['fcm_token']));
             if (response is DataSuccess) {
               queue.task = 'done';
-              state.processingQueues!.remove(queue);
             } else {
               queue.task = 'error';
               queue.error = response.error;
