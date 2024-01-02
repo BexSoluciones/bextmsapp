@@ -115,20 +115,17 @@ class ProcessingQueueBloc
     return _databaseRepository.watchAllProcessingQueues();
   }
 
-  Future<int>
-      countProcessingQueueIncompleteToTransactions() {
+  Future<int> countProcessingQueueIncompleteToTransactions() {
     return _databaseRepository.countProcessingQueueIncompleteToTransactions();
   }
 
   Stream<List<Map<String, dynamic>>>
-  getProcessingQueueIncompleteToTransactions() {
+      getProcessingQueueIncompleteToTransactions() {
     return _databaseRepository.getProcessingQueueIncompleteToTransactions();
   }
 
   Future<void> _getProcessingQueue() async {
-    if (networkBloc != null &&
-        networkBloc?.state is NetworkSuccess &&
-        state.status != ProcessingQueueStatus.sending) {
+    if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
       var queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
       sendProcessingQueue(queues);
     }
@@ -169,6 +166,7 @@ class ProcessingQueueBloc
   }
 
   void _sender(event, emit) async {
+    print('sending');
     emit(state.copyWith(status: ProcessingQueueStatus.sending));
     await _getProcessingQueue().whenComplete(
         () => emit(state.copyWith(status: ProcessingQueueStatus.success)));
