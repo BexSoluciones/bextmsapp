@@ -196,7 +196,7 @@ class WorkViewState extends State<WorkView>
                 children: [
                   NotVisitedViewWork(workcode: widget.arguments.work.workcode!),
                   VisitedViewWork(workcode: widget.arguments.work.workcode!),
-                  NotGeoreferencedViewWork(
+                  NotGeoReferencedViewWork(
                       workcode: widget.arguments.work.workcode!)
                 ],
               ),

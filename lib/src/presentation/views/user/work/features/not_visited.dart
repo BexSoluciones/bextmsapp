@@ -101,14 +101,11 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
   Widget buildStaticBody(
       List<Work> works, ScrollController scrollController, bool isStarted) {
     if (works.isEmpty) {
-      return SingleChildScrollView(
-        child: Column(
+      return const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Lottie.asset('assets/animations/36499-page-not-found.json'),
-            const Text('No tienes clientes por visitar.')
+            Text('No tienes clientes por visitar.')
           ],
-        ),
       );
     } else {
       return ListView.builder(
