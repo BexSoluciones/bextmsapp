@@ -1,7 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:ui';
-import 'package:camera/camera.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -9,21 +6,24 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
-import 'package:path/path.dart' as p;
+import 'package:permission_handler/permission_handler.dart';
+// import 'dart:io';
+// import 'dart:ui';
+// import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+// import 'package:path/path.dart' as p;
 
 //plugins
-import 'package:charger_status/charger_status.dart';
-import 'package:permission_handler/permission_handler.dart';
+// import 'package:charger_status/charger_status.dart';
+
 //theme
 import 'src/config/theme/app.dart';
 
 //domain
 import 'src/domain/repositories/api_repository.dart';
 import 'src/domain/repositories/database_repository.dart';
-import '../../src/domain/models/notification.dart';
+import 'src/domain/models/notification.dart';
 
 //cubits
 import 'src/presentation/blocs/theme/theme_bloc.dart';
@@ -61,7 +61,6 @@ import 'src/presentation/blocs/history_order/history_order_bloc.dart';
 import 'src/presentation/blocs/issues/issues_bloc.dart';
 import 'src/presentation/blocs/account/account_bloc.dart';
 import 'src/presentation/blocs/gps/gps_bloc.dart';
-import 'src/presentation/blocs/camera/camera_bloc.dart';
 
 //database
 import 'src/data/datasources/local/app_database.dart';
@@ -71,7 +70,6 @@ import 'src/presentation/providers/photo_provider.dart';
 
 //utils
 import 'src/utils/constants/strings.dart';
-import 'src/utils/resources/camera.dart';
 
 //service
 import 'src/locator.dart';
@@ -110,17 +108,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await notificationDao.insertNotification(pushNotification);
 }
 
-@pragma('vm:entry-point')
-void callbackDispatcher() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  DartPluginRegistrant.ensureInitialized();
-
-  ChargerStatus.instance.listenToEvents().listen((event) {
-    logDebug(headerMainLogger, 'onNewEvent: $event');
-  });
-
-  ChargerStatus.instance.startPowerChangesListener();
-}
+// @pragma('vm:entry-point')
+// void callbackDispatcher() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   DartPluginRegistrant.ensureInitialized();
+//
+//   ChargerStatus.instance.listenToEvents().listen((event) {
+//     logDebug(headerMainLogger, 'onNewEvent: $event');
+//   });
+//
+//   ChargerStatus.instance.startPowerChangesListener();
+// }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -133,7 +131,7 @@ Future<void> main() async {
       DatabaseCubit(locator<ApiRepository>(), locator<DatabaseRepository>());
   await databaseCubit.getDatabase();
 
-  ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
+  // ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
   _loggerService.setLogLevel(LogLevel.debugFinest);
 
@@ -147,32 +145,30 @@ Future<void> main() async {
         headerMainLogger, error, 'Caught an error in the async operation!');
   }
 
-  bool damagedDatabaseDeleted = false;
-
-  await FlutterMapTileCaching.initialise(
-    errorHandler: (error) => damagedDatabaseDeleted = error.wasFatal,
-    debugMode: true,
-  );
-
-  _storageService.setBool('damaged_database_deleted', damagedDatabaseDeleted);
-
-  await FMTC.instance.rootDirectory.migrator.fromV6(urlTemplates: []);
-
-  if (_storageService.getBool('reset') ?? false) {
-    await FMTC.instance.rootDirectory.manage.reset();
-  }
-
-  final File newAppVersionFile = File(
-    p.join(
-      // ignore: invalid_use_of_internal_member, invalid_use_of_protected_member
-      FMTC.instance.rootDirectory.directory.absolute.path,
-      'newAppVersion.${Platform.isWindows ? 'exe' : 'apk'}',
-    ),
-  );
-
-  if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
-
-  // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  // bool damagedDatabaseDeleted = false;
+  //
+  // await FlutterMapTileCaching.initialise(
+  //   errorHandler: (error) => damagedDatabaseDeleted = error.wasFatal,
+  //   debugMode: true,
+  // );
+  //
+  // _storageService.setBool('damaged_database_deleted', damagedDatabaseDeleted);
+  //
+  // await FMTC.instance.rootDirectory.migrator.fromV6(urlTemplates: []);
+  //
+  // if (_storageService.getBool('reset') ?? false) {
+  //   await FMTC.instance.rootDirectory.manage.reset();
+  // }
+  //
+  // final File newAppVersionFile = File(
+  //   p.join(
+  //     // ignore: invalid_use_of_internal_member, invalid_use_of_protected_member
+  //     FMTC.instance.rootDirectory.directory.absolute.path,
+  //     'newAppVersion.${Platform.isWindows ? 'exe' : 'apk'}',
+  //   ),
+  // );
+  //
+  // if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(details);
@@ -206,6 +202,7 @@ class _MyAppState extends State<MyApp> {
   final DatabaseCubit databaseCubit;
 
   _MyAppState(this.databaseCubit);
+
   Future<void> setupInteractedMessage(BuildContext context) async {
     initialize(context);
     RemoteMessage? initialMessage =

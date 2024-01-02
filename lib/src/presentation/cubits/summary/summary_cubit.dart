@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -157,15 +158,14 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     final summaries =
         await _databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
-    var isArrived = await _databaseRepository.validateTransactionArrived(
-        transaction.workId, 'arrived');
-
     var isGeoReferenced =
         await _databaseRepository.validateClient(transaction.workId);
 
     final enterpriseConfig = _storageService.getObject('config') != null
         ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
         : null;
+
+    logDebug(headerSummaryLogger, enterpriseConfig.toString());
 
     if (enterpriseConfig != null &&
         enterpriseConfig.fixedDeliveryDistance == true) {
@@ -188,7 +188,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
             summaries: summaries,
             origin: state.origin,
             time: state.time,
-            isArrived: isArrived,
+            isArrived: true,
             isGeoReference: isGeoReferenced));
       }
     }
@@ -209,7 +209,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         summaries: summaries,
         origin: state.origin,
         time: state.time,
-        isArrived: isArrived,
+        isArrived: true,
         isGeoReference: isGeoReferenced));
   }
 

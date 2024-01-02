@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //utils
@@ -149,7 +150,6 @@ class _MapPageState extends State<MapPage> {
         actions: [
           BlocBuilder<NavigationCubit, NavigationState>(
             builder: (context, navigationState) {
-              print(navigationState.status);
               if (navigationState.status == NavigationStatus.loading) {
                 return const Row(
                   children: [
@@ -271,13 +271,10 @@ class _MapPageState extends State<MapPage> {
                           _streamController.sink.add(zoom);
                         }
                       },
-                      onTap: (position, location) {
-                        //TODO:: notes for transporter to route
+                      onTap: (position, location) async {
                         try {
-                          if (kDebugMode) {
-                            print(location.latitude);
-                            print(location.longitude);
-                          }
+                          var position = LatLng(location.latitude, location.longitude);
+                          await navigationCubit.createNote(position);
                         } catch (e) {
                           if (kDebugMode) {
                             print(e);

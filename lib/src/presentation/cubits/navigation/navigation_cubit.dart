@@ -1,17 +1,19 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:bexdeliveries/src/services/logger.dart';
-import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
+import 'package:location_repository/location_repository.dart';
+import 'package:routing_client_dart/routing_client_dart.dart';
 
 //core
-import 'package:bexdeliveries/core/helpers/index.dart';
-import 'package:routing_client_dart/routing_client_dart.dart';
+import '../../../../core/helpers/index.dart';
+
+//utils
+import '../../../utils/constants/strings.dart';
 
 //cubits
 import '../../blocs/gps/gps_bloc.dart';
@@ -22,9 +24,15 @@ import '../base/base_cubit.dart';
 //domain
 import '../../../domain/models/work.dart';
 import '../../../domain/repositories/database_repository.dart';
-import 'package:location_repository/location_repository.dart';
+
+//services
+import '../../../locator.dart';
+import '../../../services/navigation.dart';
+import '../../../services/logger.dart';
 
 part 'navigation_state.dart';
+
+final NavigationService _navigationService = locator<NavigationService>();
 
 class LayerMoodle {
   LayerMoodle(this.polygons);
@@ -115,8 +123,8 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
             Marker(
                 height: 25,
                 width: 25,
-                point: LatLng(
-                    currentLocation.latitude, currentLocation.longitude),
+                point:
+                    LatLng(currentLocation.latitude, currentLocation.longitude),
                 builder: (ctx) => GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     child:
@@ -196,7 +204,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           }
         }
 
-
         try {
           final manager = OSRMManager()
             ..generatePath(
@@ -212,7 +219,8 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           List<LatLng> polylinesDatabase =
               await _databaseRepository.getPolylines(workcode);
           var polygons = Polyline(
-              color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
+              color:
+                  Colors.primaries[Random().nextInt(Colors.primaries.length)],
               strokeWidth: 2,
               points: road.polyline!.map((e) => getPosition(e)).toList());
 
@@ -220,8 +228,8 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
             polylines = [
               Polyline(
                   points: polylinesDatabase,
-                  color:
-                      Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                  color: Colors
+                      .primaries[Random().nextInt(Colors.primaries.length)],
                   strokeWidth: 2),
             ];
           } else {
@@ -229,12 +237,11 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
             polylines = [
               Polyline(
                   points: polygons.points,
-                  color:
-                      Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                  color: Colors
+                      .primaries[Random().nextInt(Colors.primaries.length)],
                   strokeWidth: 2),
             ];
           }
-
         } on FormatException catch (e, stackTrace) {
           await FirebaseCrashlytics.instance.recordError(e, stackTrace);
         }
@@ -242,8 +249,8 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         if (carouselData.isNotEmpty) {
           kWorkList = List<LatLng>.generate(
               carouselData.length,
-              (index) => getLatLngFromWorksData(
-                  works, carouselData[index]['index']));
+              (index) =>
+                  getLatLngFromWorksData(works, carouselData[index]['index']));
         }
 
         return state.copyWith(
@@ -271,14 +278,23 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     emit(state.copyWith(status: NavigationStatus.success));
   }
 
+  Future<void> createNote(LatLng? position) async {
+    if (position == null) {
+      var currentLocation = gpsBloc.state.lastKnownLocation;
+      position = LatLng(currentLocation!.latitude, currentLocation.longitude);
+    }
+    _navigationService.goTo(AppRoutes.notes, arguments: position);
+  }
+
   Future<void> moveController(int index, double zoom) async {
-    if(isBusy) return;
+    if (isBusy) return;
 
     await run(() async {
       logDebugFine(headerNavigationLogger, data.length.toString());
       if (index >= 0 && index < data.length) {
         if (index > 0 && data[index - 1].color == 15) {
-          if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
+          if (data[index].hasCompleted != null &&
+              data[index].hasCompleted == 0) {
             data[index - 1].color = 5;
           } else {
             data[index - 1].color = 8;
@@ -286,7 +302,8 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         }
 
         if (index < data.length - 1 && data[index + 1].color == 15) {
-          if (data[index].hasCompleted != null && data[index].hasCompleted == 0) {
+          if (data[index].hasCompleted != null &&
+              data[index].hasCompleted == 0) {
             data[index + 1].color = 5;
           } else {
             data[index + 1].color = 5;
@@ -298,11 +315,13 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         final List<Future<void>> updateWorkFutures = [];
 
         if (index - 1 >= 0) {
-          updateWorkFutures.add(_databaseRepository.updateWork(data[index - 1]));
+          updateWorkFutures
+              .add(_databaseRepository.updateWork(data[index - 1]));
         }
 
         if (index + 1 < data.length) {
-          updateWorkFutures.add(_databaseRepository.updateWork(data[index + 1]));
+          updateWorkFutures
+              .add(_databaseRepository.updateWork(data[index + 1]));
         }
 
         updateWorkFutures.add(_databaseRepository.updateWork(data[index]));
@@ -324,7 +343,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
             status: NavigationStatus.failure, error: 'Ocurrio un erroe'));
       }
     });
-
   }
 
   Future<void> showMaps(

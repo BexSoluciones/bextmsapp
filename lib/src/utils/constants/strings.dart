@@ -27,6 +27,9 @@ class AppRoutes {
   static const work = '/work';
   static const confirm = '/confirm-work';
   static const history = '/historic';
+  //NAVIGATION ROUTES
+  static const notes = '/create-note';
+
   static const navigation = '/navigation';
   //SUMMARY ROUTES
   static const summary = '/summary';

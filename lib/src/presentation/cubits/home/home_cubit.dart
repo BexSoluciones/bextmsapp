@@ -156,9 +156,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                 var response =
                 await _apiRepository.accounts(request: AccountRequest());
                 if (response is DataSuccess) {
-                  logDebugFine(
-                      headerHomeLogger, '${response.data!.accounts.length}');
-
                   await _databaseRepository
                       .insertAccounts(response.data!.accounts);
                 }

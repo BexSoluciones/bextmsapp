@@ -121,7 +121,6 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
             child: _buildList(state.isArrived, state.summaries),
           ),
           BlocSelector<SummaryCubit, SummaryState, bool>(
-              bloc: widget.summaryCubit,
               selector: (state) =>
                   state.isArrived == true && state.isGeoReference == false,
               builder: (c, x) {
@@ -139,7 +138,6 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                     : Container();
               }),
           BlocSelector<SummaryCubit, SummaryState, bool>(
-              bloc: widget.summaryCubit,
               selector: (state) => state.isArrived == false,
               builder: (c, x) {
                 return x
