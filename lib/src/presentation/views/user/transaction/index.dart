@@ -10,8 +10,6 @@ import 'package:lottie/lottie.dart';
 import '../../../../presentation/blocs/processing_queue/processing_queue_bloc.dart';
 
 //domain
-import '../../../../domain/models/processing_queue.dart';
-import '../../../../domain/models/work.dart';
 import '../../../../domain/abstracts/format_abstract.dart';
 
 //widgets

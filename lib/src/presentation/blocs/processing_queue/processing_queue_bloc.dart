@@ -210,8 +210,6 @@ class ProcessingQueueBloc
   }
 
   void sendProcessingQueue(List<ProcessingQueue> queues) async {
-    print('******************');
-    print(queues.length);
     await Future.forEach(queues, (queue) async {
       queue.updatedAt = now();
 
