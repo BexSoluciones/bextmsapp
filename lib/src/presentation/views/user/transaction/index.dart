@@ -37,11 +37,23 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
   void initState() {
     processingQueueBloc = BlocProvider.of<ProcessingQueueBloc>(context);
 
+    stream = Stream.periodic(const Duration(seconds: 1), (int count) async {
+      return processingQueueBloc.countProcessingQueueIncompleteToTransactions();
+    });
+
+    subscription = stream.listen((event) async {
+      var int = await event;
+      setState(() {
+        computationCount = int;
+      });
+    });
+
     super.initState();
   }
 
   @override
   void dispose() {
+    subscription.cancel();
     super.dispose();
   }
 
@@ -91,7 +103,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
   Widget _buildHome() {
     return StreamBuilder<List<Map<String, dynamic>>>(
         stream:
-            processingQueueBloc.countProcessingQueueIncompleteToTransactions(),
+            processingQueueBloc.getProcessingQueueIncompleteToTransactions(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
             var queues = snapshot.data;

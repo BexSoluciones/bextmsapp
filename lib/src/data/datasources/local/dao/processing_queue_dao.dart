@@ -46,7 +46,7 @@ class ProcessingQueueDao {
   }
 
   Stream<List<Map<String, dynamic>>>
-      countProcessingQueueIncompleteToTransactions() async* {
+      getProcessingQueueIncompleteToTransactions() async* {
     final db = await _appDatabase.streamDatabase;
     final handleNames = {
       'store_transaction_start': 'Transacciones de inicio de servicio',
@@ -93,6 +93,20 @@ class ProcessingQueueDao {
       }
     }
     yield [...pqc, ...pqs];
+  }
+
+  Future<int> countProcessingQueueIncompleteToTransactions() async {
+    final db = await _appDatabase.streamDatabase;
+    final processingQueueList = await db!.query(tableProcessingQueues,
+        where: 'task != ? AND code != ? AND code != ? AND code != ?',
+        whereArgs: [
+          'done',
+          'store_locations',
+          'store_logout',
+          'get_prediction'
+        ]);
+    final processingQueues = parseProcessingQueues(processingQueueList);
+    return processingQueues.length;
   }
 
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete() async {

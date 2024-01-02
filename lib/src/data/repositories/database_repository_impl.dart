@@ -381,9 +381,15 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
-  Stream<List<Map<String, dynamic>>> countProcessingQueueIncompleteToTransactions() {
+  Future<int> countProcessingQueueIncompleteToTransactions() {
     return _appDatabase.processingQueueDao
         .countProcessingQueueIncompleteToTransactions();
+  }
+
+  @override
+  Stream<List<Map<String, dynamic>>> getProcessingQueueIncompleteToTransactions() {
+    return _appDatabase.processingQueueDao
+        .getProcessingQueueIncompleteToTransactions();
   }
 
   @override
