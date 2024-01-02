@@ -82,7 +82,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
     final user = _storageService.getObject('user') != null
         ? User.fromJson(_storageService.getObject('user')!)
         : null;
-    updateUser(user!);
+    updateUser(user);
   }
 
   Future<HomeState> _getAllWorks() async {
@@ -108,7 +108,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
     return HomeState(status: HomeStatus.success, works: works, user: user);
   }
 
-  void updateUser(User user) {
+  void updateUser(User? user) {
     emit(state.copyWith(user: user));
   }
 

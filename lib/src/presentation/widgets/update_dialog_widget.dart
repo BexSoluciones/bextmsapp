@@ -46,7 +46,7 @@ class UpdateDialog {
                             fontSize: getProportionateScreenHeight(32),
                             fontWeight: FontWeight.bold,
                             color: Colors.black)),
-                    Image.asset('lib/assets/images/upgrade.png',
+                    Image.asset('assets/images/upgrade.png',
                         height: 200, width: 200, alignment: Alignment.center),
                     SizedBox(height: getProportionateScreenHeight(5)),
                     Text('¡Hemos mejorado pensando en ti!',
@@ -57,7 +57,6 @@ class UpdateDialog {
                         alignment: Alignment.centerLeft,
                         child: Text(
                             'Para mejorar la experiencia solemos actualizar la App. Cada actualización tiene mejoras de rendimiento e incluye nuevas funcionalidades',
-                            textScaleFactor: textScaleFactor(context),
                             style: TextStyle(
                                 fontSize: getProportionateScreenHeight(18),
                                 letterSpacing: 1.4))),
@@ -73,7 +72,6 @@ class UpdateDialog {
                     SizedBox(height: getProportionateScreenHeight(40)),
                     DefaultButton(
                         widget: Text('Actualizar a la nueva versión',
-                            textScaleFactor: textScaleFactor(context),
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: getProportionateScreenHeight(20))),
