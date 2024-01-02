@@ -13,6 +13,7 @@ import '../../../../presentation/blocs/processing_queue/processing_queue_bloc.da
 import '../../../../domain/abstracts/format_abstract.dart';
 
 //widgets
+
 import '../../../widgets/default_button_widget.dart';
 
 class TransactionView extends StatefulWidget {
@@ -83,19 +84,40 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
           ),
         ),
         body: BlocBuilder<ProcessingQueueBloc, ProcessingQueueState>(
-          builder: (_, state) {
-            switch (state.status) {
-              case ProcessingQueueStatus.loading:
-                return const Center(child: CupertinoActivityIndicator());
-              case ProcessingQueueStatus.success:
-                return _buildHome();
-              case ProcessingQueueStatus.sending:
-                return _buildSender();
-              default:
-                return const SizedBox();
-            }
-          },
+          builder: (_, state) => _buildBlocConsumer(),
         ));
+  }
+
+  void buildBlocListener(BuildContext context, ProcessingQueueState state) async {
+    if (state.status == ProcessingQueueStatus.failure && state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            state.error!,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildBlocConsumer() {
+    return BlocConsumer<ProcessingQueueBloc, ProcessingQueueState>(
+      listener: buildBlocListener,
+      builder: (context, state) {
+        switch (state.status) {
+          case ProcessingQueueStatus.loading:
+            return const Center(child: CupertinoActivityIndicator());
+          case ProcessingQueueStatus.success:
+            return _buildHome();
+          case ProcessingQueueStatus.sending:
+            return _buildSender();
+          default:
+            return const SizedBox();
+        }
+      },
+    );
   }
 
   Widget _buildHome() {
