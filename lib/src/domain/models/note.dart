@@ -20,10 +20,10 @@ class NoteFields {
 
 class Note {
   int? id;
-  late String latitude;
-  late String longitude;
+  late double latitude;
+  late double longitude;
   late String observation;
-  late List<String> images;
+  List<String>? images;
   int? zoneId;
 
   Note({
@@ -36,8 +36,8 @@ class Note {
 
   Note.fromJson(Map<String, dynamic> json){
     id = json['id'];
-    latitude = json['latitude'];
-    longitude = json ['longitude'];
+    latitude = json['latitude'] is String ? double.parse(json['latitude']) : json['latitude'];
+    longitude = json ['longitude'] is String ? double.parse(json['longitude']) : json['longitude'];
     observation = json['observation'];
     images = json['images'];
     zoneId = json['zone_id'];

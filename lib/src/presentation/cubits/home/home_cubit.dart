@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bexdeliveries/src/presentation/blocs/network/network_bloc.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
 import 'package:location_repository/location_repository.dart';
@@ -11,15 +11,11 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/helpers/index.dart';
 
 //cubit
-import '../../../domain/models/requests/account_request.dart';
-import '../../../domain/models/requests/enterprise_config_request.dart';
-import '../../../domain/models/requests/reason_request.dart';
-import '../../../domain/models/responses/enterprise_config_response.dart';
-import '../../../domain/models/responses/reason_response.dart';
 import '../base/base_cubit.dart';
 
 //blocs
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
+import 'package:bexdeliveries/src/presentation/blocs/network/network_bloc.dart';
 import '../../blocs/gps/gps_bloc.dart';
 
 //utils
@@ -31,17 +27,24 @@ import '../../../utils/extensions/list_extension.dart';
 import '../../../domain/models/work.dart';
 import '../../../domain/models/warehouse.dart';
 import '../../../domain/models/user.dart';
-import '../../../domain/models/summary.dart';
+import '../../../domain/models/summary.dart' as s;
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/processing_queue.dart';
+import '../../../domain/models/note.dart';
 
 import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/repositories/api_repository.dart';
 
 import '../../../domain/abstracts/format_abstract.dart';
-
+//request
 import '../../../domain/models/requests/login_request.dart';
 import '../../../domain/models/requests/work_request.dart';
+import '../../../domain/models/requests/account_request.dart';
+import '../../../domain/models/requests/reason_request.dart';
+import '../../../domain/models/requests/enterprise_config_request.dart';
+//responses
+import '../../../domain/models/responses/enterprise_config_response.dart';
+import '../../../domain/models/responses/reason_response.dart';
 
 //service
 import '../../../locator.dart';
@@ -144,17 +147,40 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             _apiRepository.reasons(request: ReasonRequest()),
           ]);
 
+          if (kDebugMode) {
+            var notes = [
+              Note(
+                  latitude: 8.763710195552399,
+                  longitude: -75.87352402058671,
+                  observation: 'Alamedas CC',
+                  images: null),
+              Note(
+                  latitude: 8.882833302184997,
+                  longitude: -75.79022237096967,
+                  observation: 'Cerete Terminal de Transportes',
+                  images: null),
+              Note(
+                  latitude: 6.326462816996758,
+                  longitude: -75.55815472768755,
+                  observation: 'Centro Comercial Parque Fabricato',
+                  images: null)
+            ];
+
+            await _databaseRepository.insertNotes(notes);
+          }
+
           if (results.isNotEmpty) {
             if (results[0] is DataSuccess) {
               var data = results[0].data as EnterpriseConfigResponse;
-              _storageService.setObject('config', data.enterpriseConfig.toMap());
+              _storageService.setObject(
+                  'config', data.enterpriseConfig.toMap());
               _storageService.setBool(
                   'can_make_history', data.enterpriseConfig.canMakeHistory);
               _storageService.setInt(
                   'limit_days_works', data.enterpriseConfig.limitDaysWorks);
               if (data.enterpriseConfig.specifiedAccountTransfer == true) {
                 var response =
-                await _apiRepository.accounts(request: AccountRequest());
+                    await _apiRepository.accounts(request: AccountRequest());
                 if (response is DataSuccess) {
                   await _databaseRepository
                       .insertAccounts(response.data!.accounts);
@@ -197,30 +223,30 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
 
             if (responseWorks is DataSuccess) {
               var works = <Work>[];
-              var summaries = <Summary>[];
+              var summaries = <s.Summary>[];
               var transactions = <Transaction>[];
 
               await Future.forEach(responseWorks.data!.works, (work) async {
                 works.add(work);
                 if (work.summaries != null) {
                   await Future.forEach(work.summaries as Iterable<Object?>,
-                          (element) {
-                        var summary = element as Summary;
-                        if (summary.idPacking != null && summary.packing != null) {
-                          summary.cant = 1;
-                        } else {
-                          summary.cant = ((double.parse(summary.amount) *
-                              100.0 /
-                              double.parse(summary.unitOfMeasurement))
+                      (element) {
+                    var summary = element as s.Summary;
+                    if (summary.idPacking != null && summary.packing != null) {
+                      summary.cant = 1;
+                    } else {
+                      summary.cant = ((double.parse(summary.amount) *
+                                  100.0 /
+                                  double.parse(summary.unitOfMeasurement))
                               .round() /
-                              100);
-                        }
-                        summary.grandTotalCopy = summary.grandTotal;
-                        if (summary.transaction != null) {
-                          transactions.add(summary.transaction!);
-                        }
-                        summaries.add(summary);
-                      });
+                          100);
+                    }
+                    summary.grandTotalCopy = summary.grandTotal;
+                    if (summary.transaction != null) {
+                      transactions.add(summary.transaction!);
+                    }
+                    summaries.add(summary);
+                  });
 
                   var found = work.summaries!
                       .where((element) => element.transaction != null);
@@ -234,7 +260,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
               });
 
               var worksF =
-              groupBy(responseWorks.data!.works, (Work o) => o.workcode);
+                  groupBy(responseWorks.data!.works, (Work o) => o.workcode);
               var warehouses = <Warehouse>[];
               for (var w in worksF.keys) {
                 var wn = responseWorks.data!.works
@@ -248,7 +274,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
               if (workcodes.isNotEmpty) {
                 var localWorks = await _databaseRepository.getAllWorks();
                 var localWorkcode =
-                groupBy(localWorks, (Work obj) => obj.workcode);
+                    groupBy(localWorks, (Work obj) => obj.workcode);
                 await differenceWorks(
                     localWorkcode.keys.toList(), workcodes.keys.toList());
               }
@@ -300,19 +326,21 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
               }
               emit(await _getAllWorks());
             } else {
-              emit(state.copyWith(status: HomeStatus.failure, error: responseWorks.error, user: user));
+              emit(state.copyWith(
+                  status: HomeStatus.failure,
+                  error: responseWorks.error,
+                  user: user));
             }
           } else if (response is DataFailed) {
-            emit(state.copyWith(status: HomeStatus.failure, error: response.error, user: user));
+            emit(state.copyWith(
+                status: HomeStatus.failure, error: response.error, user: user));
           }
         } else {
           emit(state.copyWith(
               status: HomeStatus.failure,
               error:
-              'Porfavor conectate a internet para realizar esta accion'
-          ));
+                  'Porfavor conectate a internet para realizar esta accion'));
         }
-
       });
     } catch (e, stackTrace) {
       print("Error during sync: $e");
@@ -335,8 +363,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           emit(state.copyWith(
               status: HomeStatus.failure,
               error:
-              'Existe procesamiento incompleto, porfavor espera para realizar esta acción'
-          ));
+                  'Existe procesamiento incompleto, porfavor espera para realizar esta acción'));
         } else {
           var processingQueueWork = ProcessingQueue(
               body: null,
@@ -352,6 +379,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           await _databaseRepository.emptySummaries();
           await _databaseRepository.emptyTransactions();
           await _databaseRepository.emptyReasons();
+          await _databaseRepository.emptyNotes();
           _storageService.remove('user');
           _storageService.remove('token');
           _storageService.remove('can_make_history');
@@ -363,9 +391,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       } else {
         emit(state.copyWith(
             status: HomeStatus.failure,
-            error:
-            'Porfavor conectate a internet para realizar esta accion'
-        ));
+            error: 'Porfavor conectate a internet para realizar esta accion'));
       }
     } catch (e, stackTrace) {
       print("Error during logout: $e");

@@ -287,7 +287,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     required ReasonMRequest request,
   }) {
     return getStateOf<StatusResponse>(
-      request: () => _apiService.reasonsM(request.news),
+      request: () => _apiService.news(request.news),
     );
   }
 

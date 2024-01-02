@@ -342,17 +342,16 @@ class AppDatabase {
     '''
       ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL
     ''',
-    '''
-      CREATE TABLE IF NOT EXISTS $tableNotes (
-        ${NoteFields.id} INTEGER PRIMARY KEY,
-        ${NoteFields.latitude} TEXT DEFAULT NULL,
-        ${NoteFields.longitude} TEXT DEFAULT NULL,
-        ${NoteFields.observation} TEXT DEFAULT NULL,
-        ${NoteFields.images} TEXT DEFAULT NULL,
-        ${NoteFields.zoneId} INTEGER DEFAULT NULL,
-        
-      )
-    ''',
+    // '''
+    //   CREATE TABLE IF NOT EXISTS $tableNotes (
+    //     ${NoteFields.id} INTEGER PRIMARY KEY,
+    //     ${NoteFields.latitude} TEXT DEFAULT NULL,
+    //     ${NoteFields.longitude} TEXT DEFAULT NULL,
+    //     ${NoteFields.observation} TEXT DEFAULT NULL,
+    //     ${NoteFields.images} TEXT DEFAULT NULL,
+    //     ${NoteFields.zoneId} INTEGER DEFAULT NULL
+    //   )
+    // ''',
   ];
 
   Future<Database> _initDatabase(databaseName) async {

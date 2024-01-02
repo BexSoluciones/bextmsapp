@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
-import 'package:bexdeliveries/src/domain/models/requests/locations_request.dart';
 import 'package:dio/dio.dart';
 
 //models
@@ -13,6 +11,7 @@ import '../../../domain/models/reason.dart';
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/transaction_summary.dart';
 import '../../../domain/models/account.dart';
+import '../../../domain/models/processing_queue.dart';
 
 //interceptor
 import 'interceptor_api_service.dart';
@@ -39,6 +38,7 @@ import '../../../domain/models/requests/prediction_request.dart';
 import '../../../domain/models/requests/history_order_saved_request.dart';
 import '../../../domain/models/requests/history_order_updated_request.dart';
 import '../../../domain/models/requests/routing_request.dart';
+import '../../../domain/models/requests/locations_request.dart';
 
 //services
 import '../../../locator.dart';
@@ -241,7 +241,7 @@ class ApiService {
         headers: result.headers);
   }
 
-  Future<Response<StatusResponse>> reasonsM(ProcessingQueue queue)  async {
+  Future<Response<StatusResponse>> news(ProcessingQueue queue)  async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);

@@ -13,6 +13,7 @@ import 'package:routing_client_dart/routing_client_dart.dart';
 import '../../../../core/helpers/index.dart';
 
 //utils
+import '../../../domain/models/note.dart';
 import '../../../utils/constants/strings.dart';
 
 //cubits
@@ -205,9 +206,29 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         }
 
         //TODO:: NOTES
-        final zoneId = works.first.zoneId;
-
-
+        // final zoneId = works.first.zoneId;
+        //
+        // var notes = await _databaseRepository.getAllNotes();
+        //
+        // for (var note in notes) {
+        //   markers.add(
+        //     Marker(
+        //         height: 25,
+        //         width: 25,
+        //         point: LatLng(note.latitude, note.longitude),
+        //         builder: (ctx) => GestureDetector(
+        //           onTap: () async {
+        //             await showNote(note);
+        //           },
+        //             behavior: HitTestBehavior.opaque,
+        //             child:
+        //                 Stack(alignment: Alignment.center, children: <Widget>[
+        //               Image.asset('assets/icons/point.png',
+        //                   color: Colors.black),
+        //               const Icon(Icons.notes, size: 14, color: Colors.white),
+        //             ]))),
+        //   );
+        // }
 
         try {
           final manager = OSRMManager()
@@ -289,6 +310,10 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
       position = LatLng(currentLocation!.latitude, currentLocation.longitude);
     }
     _navigationService.goTo(AppRoutes.notes, arguments: position);
+  }
+
+  Future<void> showNote(Note note) async {
+    _navigationService.goTo(AppRoutes.notes, arguments: note);
   }
 
   Future<void> moveController(int index, double zoom) async {
