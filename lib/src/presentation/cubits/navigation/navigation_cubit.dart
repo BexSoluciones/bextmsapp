@@ -204,6 +204,11 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           }
         }
 
+        //TODO:: NOTES
+        final zoneId = works.first.zoneId;
+
+
+
         try {
           final manager = OSRMManager()
             ..generatePath(

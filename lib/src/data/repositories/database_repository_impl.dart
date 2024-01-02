@@ -1,9 +1,6 @@
-import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
-import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 
-import '../../domain/models/news.dart';
 import '../../domain/repositories/database_repository.dart';
 import '../datasources/local/app_database.dart';
 
@@ -20,6 +17,10 @@ import '../../domain/models/location.dart';
 import '../../domain/models/photo.dart';
 import '../../domain/models/client.dart';
 import '../../domain/models/account.dart';
+import '../../domain/models/news.dart';
+import '../../domain/models/summary_report.dart';
+import '../../domain/models/notification.dart';
+import '../../domain/models/note.dart';
 
 class DatabaseRepositoryImpl implements DatabaseRepository {
   final AppDatabase _appDatabase;
@@ -493,6 +494,42 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyPhotos() async {
     return _appDatabase.photoDao.emptyPhotos();
+  }
+
+  //NOTES
+  @override
+  Future<List<Note>> getAllNotes() async {
+    return _appDatabase.noteDao.getAllNotes();
+  }
+
+  @override
+  Future<Note?> findNote(String zoneId) async {
+    return _appDatabase.noteDao.findNote(zoneId);
+  }
+
+  @override
+  Future<int> insertNote(Note note) async {
+    return _appDatabase.noteDao.insertNote(note);
+  }
+
+  @override
+  Future<int> updateNote(Note note) async {
+    return _appDatabase.noteDao.updateNote(note);
+  }
+
+  @override
+  Future<int> deleteNote(Note note) async {
+    return _appDatabase.noteDao.deleteNote(note);
+  }
+
+  @override
+  Future<void> insertNotes(List<Note> notes) async {
+    return _appDatabase.noteDao.insertNotes(notes);
+  }
+
+  @override
+  Future<void> emptyNotes() async {
+    return _appDatabase.noteDao.emptyNotes();
   }
 
   //CLIENTS

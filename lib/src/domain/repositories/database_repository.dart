@@ -1,9 +1,6 @@
-import 'package:bexdeliveries/src/domain/models/news.dart';
-import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
-import 'package:bexdeliveries/src/domain/models/summary_report.dart';
-
+//models
 import '../models/processing_queue.dart';
 import '../models/transaction_summary.dart';
 import '../models/work.dart';
@@ -16,6 +13,10 @@ import '../models/location.dart';
 import '../models/photo.dart';
 import '../models/client.dart';
 import '../models/account.dart';
+import '../models/news.dart';
+import '../models/summary_report.dart';
+import '../models/notification.dart';
+import '../models/note.dart';
 
 abstract class DatabaseRepository {
   //WORKS
@@ -133,6 +134,15 @@ abstract class DatabaseRepository {
   Future<int> deleteAll(int photoId);
   Future<void> insertPhotos(List<Photo> photos);
   Future<void> emptyPhotos();
+
+  //NOTES
+  Future<List<Note>> getAllNotes();
+  Future<Note?> findNote(String zoneId);
+  Future<int> insertNote(Note note);
+  Future<int> updateNote(Note note);
+  Future<int> deleteNote(Note note);
+  Future<void> insertNotes(List<Note> notes);
+  Future<void> emptyNotes();
 
   //CLIENTS
   Stream<List<Client>> watchAllClients();
