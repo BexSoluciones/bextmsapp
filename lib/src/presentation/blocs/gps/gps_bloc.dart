@@ -79,51 +79,59 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     }
 
     try {
+      EnterpriseConfig? enterpriseConfig;
       var storedConfig = _storageService.getObject('config');
-      var enterpriseConfig = EnterpriseConfig.fromMap(storedConfig!);
-      var distances = enterpriseConfig.distance!;
-      final locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: enterpriseConfig.distance!,
-      );
-      if (!isPermissionGranted && !isLocationEnabled) {
-        errorGpsAlertDialog(
-            onTap: () {
-              Geolocator.openLocationSettings();
-            },
-            context:
-                _navigationService.navigatorKey.currentState!.overlay!.context,
-            error: 'error',
-            iconData: Icons.error,
-            buttonText: 'buttonText');
-      } else {
-        positionStream =
-            Geolocator.getPositionStream(locationSettings: locationSettings)
-                .listen((event) {
-          final position = event;
-          if (enterpriseConfig.backgroundLocation!) {
-            if (lastRecordedLocation != null) {
-              final distance = Geolocator.distanceBetween(
-                lastRecordedLocation!.latitude,
-                lastRecordedLocation!.longitude,
-                position.latitude,
-                position.longitude,
-              );
-              if (distance >= distances) {
+      if (storedConfig != null) {
+        enterpriseConfig = EnterpriseConfig.fromMap(storedConfig);
+      }
+
+      if (enterpriseConfig != null) {
+        var distances = enterpriseConfig.distance!;
+        final locationSettings = LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: enterpriseConfig.distance!,
+        );
+
+        if (!isPermissionGranted && !isLocationEnabled) {
+          errorGpsAlertDialog(
+              onTap: () {
+                Geolocator.openLocationSettings();
+              },
+              context: _navigationService
+                  .navigatorKey.currentState!.overlay!.context,
+              error: 'error',
+              iconData: Icons.error,
+              buttonText: 'buttonText');
+        } else {
+          positionStream =
+              Geolocator.getPositionStream(locationSettings: locationSettings)
+                  .listen((event) {
+            final position = event;
+            if (enterpriseConfig != null &&
+                enterpriseConfig.backgroundLocation!) {
+              if (lastRecordedLocation != null) {
+                final distance = Geolocator.distanceBetween(
+                  lastRecordedLocation!.latitude,
+                  lastRecordedLocation!.longitude,
+                  position.latitude,
+                  position.longitude,
+                );
+                if (distance >= distances) {
+                  lastRecordedLocation =
+                      LatLng(position.latitude, position.longitude);
+                  saveLocation('location', position);
+                }
+              } else {
                 lastRecordedLocation =
                     LatLng(position.latitude, position.longitude);
                 saveLocation('location', position);
               }
-            } else {
-              lastRecordedLocation =
-                  LatLng(position.latitude, position.longitude);
-              saveLocation('location', position);
             }
-          }
 
-          add(OnNewUserLocationEvent(
-              position, LatLng(position.latitude, position.longitude)));
-        });
+            add(OnNewUserLocationEvent(
+                position, LatLng(position.latitude, position.longitude)));
+          });
+        }
       }
     } catch (e, stackTrace) {
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);

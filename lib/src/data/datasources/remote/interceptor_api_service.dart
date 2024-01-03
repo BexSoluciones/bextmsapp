@@ -56,6 +56,7 @@ class Logging extends Interceptor {
     logDebug(headerDeveloperLogger, err.message.toString());
     if (_shouldRetryOnHttpException(err)) {
       try {
+        logDebug(headerDeveloperLogger, 'retry login');
         await helperFunctions.login();
       } catch (e, stackTrace) {
         handler.next(err);
@@ -68,6 +69,7 @@ class Logging extends Interceptor {
 
   bool _shouldRetryOnHttpException(DioException err) {
     return err.type == DioExceptionType.badResponse &&
-        err.message!.contains('401');
+        err.message!.contains('401') &&
+        !err.requestOptions.path.contains('auth');
   }
 }

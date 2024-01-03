@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
 import 'package:location_repository/location_repository.dart';
@@ -30,7 +29,7 @@ import '../../../domain/models/user.dart';
 import '../../../domain/models/summary.dart' as s;
 import '../../../domain/models/transaction.dart';
 import '../../../domain/models/processing_queue.dart';
-import '../../../domain/models/note.dart';
+// import '../../../domain/models/note.dart';
 
 import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/repositories/api_repository.dart';
@@ -146,28 +145,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                 request: EnterpriseConfigRequest()),
             _apiRepository.reasons(request: ReasonRequest()),
           ]);
-
-          if (kDebugMode) {
-            var notes = [
-              Note(
-                  latitude: 8.763710195552399,
-                  longitude: -75.87352402058671,
-                  observation: 'Alamedas CC',
-                  images: null),
-              Note(
-                  latitude: 8.882833302184997,
-                  longitude: -75.79022237096967,
-                  observation: 'Cerete Terminal de Transportes',
-                  images: null),
-              Note(
-                  latitude: 6.326462816996758,
-                  longitude: -75.55815472768755,
-                  observation: 'Centro Comercial Parque Fabricato',
-                  images: null)
-            ];
-
-            await _databaseRepository.insertNotes(notes);
-          }
 
           if (results.isNotEmpty) {
             if (results[0] is DataSuccess) {
@@ -351,6 +328,9 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   }
 
   Future<void> logout() async {
+
+    print(_isLoggingOut);
+
     if (_isLoggingOut) return;
     try {
       _isLoggingOut = true;
@@ -379,23 +359,26 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           await _databaseRepository.emptySummaries();
           await _databaseRepository.emptyTransactions();
           await _databaseRepository.emptyReasons();
-          await _databaseRepository.emptyNotes();
+          // await _databaseRepository.emptyNotes();
           _storageService.remove('user');
           _storageService.remove('token');
           _storageService.remove('can_make_history');
 
           emit(state.copyWith(status: HomeStatus.success));
-
+          _isLoggingOut = false;
           await _navigationService.goTo(AppRoutes.login);
+
         }
       } else {
         emit(state.copyWith(
             status: HomeStatus.failure,
             error: 'Porfavor conectate a internet para realizar esta accion'));
+        _isLoggingOut = false;
       }
     } catch (e, stackTrace) {
       print("Error during logout: $e");
       print(stackTrace);
+      _isLoggingOut = false;
     } finally {
       _isLoggingOut = false;
     }
