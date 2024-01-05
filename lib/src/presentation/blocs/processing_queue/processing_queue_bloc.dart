@@ -73,6 +73,7 @@ class ProcessingQueueBloc
     on<ProcessingQueueAll>(_all);
     on<ProcessingQueueSearchFilter>(_searchFilter);
     on<ProcessingQueueSearchState>(_searchState);
+
   }
 
   final itemsFilter = [
@@ -214,7 +215,6 @@ class ProcessingQueueBloc
       switch (queue.code) {
         case 'store_transaction_start':
           try {
-            print('******************start********************');
             var body = jsonDecode(queue.body!);
             body['end'] = now();
             queue.body = jsonEncode(body);
