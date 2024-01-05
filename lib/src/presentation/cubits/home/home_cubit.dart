@@ -270,7 +270,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                   _processingQueueBloc.add(
                       ProcessingQueueAdd(processingQueue: processingQueueWork));
 
-                  if (worksF.first.zoneId != null) {
+                  if (worksF.first.zoneId != null &&
+                      _storageService.getBool('can_make_history') == true) {
                     var processingQueueHistoric = ProcessingQueue(
                         body: jsonEncode({
                           'zone_id': worksF.first.zoneId!,
@@ -328,7 +329,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   }
 
   Future<void> logout() async {
-
     print(_isLoggingOut);
 
     if (_isLoggingOut) return;
@@ -367,7 +367,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           emit(state.copyWith(status: HomeStatus.success));
           _isLoggingOut = false;
           await _navigationService.goTo(AppRoutes.login);
-
         }
       } else {
         emit(state.copyWith(

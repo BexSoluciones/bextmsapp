@@ -221,10 +221,12 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
             }
           });
 
-          var worksF = groupBy(responseWorks.data!.works, (Work o) => o.workcode);
+          var worksF =
+              groupBy(responseWorks.data!.works, (Work o) => o.workcode);
           var warehouses = <Warehouse>[];
-          for(var w in worksF.keys){
-            var wn = responseWorks.data!.works.where((element) => element.workcode == w);
+          for (var w in worksF.keys) {
+            var wn = responseWorks.data!.works
+                .where((element) => element.workcode == w);
             warehouses.add(wn.first.warehouse!);
           }
           final distinct = warehouses.unique((x) => x.id);
@@ -254,7 +256,8 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
               _processingQueueBloc.add(
                   ProcessingQueueAdd(processingQueue: processingQueueWork));
 
-              if (worksF.first.zoneId != null) {
+              if (worksF.first.zoneId != null &&
+                  _storageService.getBool('can_make_history') == true) {
                 var processingQueueHistoric = ProcessingQueue(
                     body: jsonEncode({
                       'zone_id': worksF.first.zoneId!,
