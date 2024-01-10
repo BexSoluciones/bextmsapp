@@ -329,8 +329,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   }
 
   Future<void> logout() async {
-    print(_isLoggingOut);
-
     if (_isLoggingOut) return;
     try {
       _isLoggingOut = true;

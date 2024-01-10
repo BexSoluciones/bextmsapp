@@ -167,7 +167,6 @@ class ProcessingQueueBloc
   }
 
   void _sender(event, emit) async {
-    print('sending');
     emit(state.copyWith(status: ProcessingQueueStatus.sending));
     await _getProcessingQueue().whenComplete(
         () => emit(state.copyWith(status: ProcessingQueueStatus.success)));

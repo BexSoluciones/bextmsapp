@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -7,8 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:location_repository/location_repository.dart';
+import 'package:logging/logging.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:workmanager/workmanager.dart';
 // import 'dart:io';
 // import 'dart:ui';
 // import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -108,17 +112,34 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await notificationDao.insertNotification(pushNotification);
 }
 
-// @pragma('vm:entry-point')
-// void callbackDispatcher() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   DartPluginRegistrant.ensureInitialized();
-//
-//   ChargerStatus.instance.listenToEvents().listen((event) {
-//     logDebug(headerMainLogger, 'onNewEvent: $event');
-//   });
-//
-//   ChargerStatus.instance.startPowerChangesListener();
-// }
+@pragma('vm:entry-point')
+void callbackDispatcher() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+
+  // ChargerStatus.instance.listenToEvents().listen((event) {
+  //   logDebug(headerMainLogger, 'onNewEvent: $event');
+  // });
+  //
+  // ChargerStatus.instance.startPowerChangesListener();
+
+  Workmanager().executeTask((task, inputData) async {
+    int? totalExecutions;
+    final sharedPreference =
+        await SharedPreferences.getInstance(); //Initialize dependency
+
+    try {
+      //add code execution
+      totalExecutions = sharedPreference.getInt("totalExecutions");
+      sharedPreference.setInt(
+          "totalExecutions", totalExecutions == null ? 1 : totalExecutions + 1);
+    } catch (err) {
+      throw Exception(err);
+    }
+
+    return Future.value(true);
+  });
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -176,6 +197,14 @@ Future<void> main() async {
     runApp(ErrorWidgetClass(details));
   };
 
+  Workmanager().initialize(
+      callbackDispatcher, // The top level function, aka callbackDispatcher
+      isInDebugMode:
+          true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+      );
+
+  Workmanager().registerOneOffTask("task-identifier", "simpleTask");
+
   runApp(MyApp(databaseCubit: databaseCubit));
 }
 
@@ -198,8 +227,9 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState(databaseCubit);
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final DatabaseCubit databaseCubit;
+  bool _isInForeground = true;
 
   _MyAppState(this.databaseCubit);
 
@@ -296,6 +326,28 @@ class _MyAppState extends State<MyApp> {
       await Future.delayed(
           Duration(minutes: _storageService.getInt('time_to_callback') ?? 10));
     }
+  }
+
+  @override
+  void initState() {
+    setupInteractedMessage(context);
+    _fetchRemoteConfig();
+    widget.databaseCubit.getDatabase();
+
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    _isInForeground = state == AppLifecycleState.resumed;
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
@@ -495,13 +547,5 @@ class _MyAppState extends State<MyApp> {
                 })),
               );
             })));
-  }
-
-  @override
-  void initState() {
-    setupInteractedMessage(context);
-    _fetchRemoteConfig();
-    widget.databaseCubit.getDatabase();
-    super.initState();
   }
 }

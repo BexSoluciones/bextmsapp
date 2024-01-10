@@ -168,9 +168,10 @@ class _MapPageState extends State<MapPage> {
                     child: IconButton(
                         icon: const Icon(Icons.directions),
                         onPressed: () {
-                          var navigationCubit = context.read<NavigationCubit>();
-                          var work = navigationCubit.state
-                              .works![navigationCubit.state.pageIndex ?? 0];
+                          print(navigationState.pageIndex);
+
+                          var work = navigationState
+                              .works![navigationState.pageIndex ?? 0];
                           _navigationService.goTo(AppRoutes.summaryNavigation,
                               arguments: SummaryNavigationArgument(work: work));
                         }));
@@ -273,7 +274,8 @@ class _MapPageState extends State<MapPage> {
                       },
                       onTap: (position, location) async {
                         try {
-                          var position = LatLng(location.latitude, location.longitude);
+                          var position =
+                              LatLng(location.latitude, location.longitude);
                           await navigationCubit.createNote(position);
                         } catch (e) {
                           if (kDebugMode) {

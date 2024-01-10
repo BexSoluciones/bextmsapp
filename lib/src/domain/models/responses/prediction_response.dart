@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import '../work.dart';
 
 class PredictionResponse extends Equatable {
-  final int id;
+  final int? id;
   final double likelihood;
   final int workId;
   final int zoneId;
@@ -49,7 +49,7 @@ class PredictionResponse extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         id,
         likelihood,
         workId,

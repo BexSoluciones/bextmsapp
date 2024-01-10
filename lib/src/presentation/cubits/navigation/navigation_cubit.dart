@@ -320,7 +320,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     if (isBusy) return;
 
     await run(() async {
-      logDebugFine(headerNavigationLogger, data.length.toString());
       if (index >= 0 && index < data.length) {
         if (index > 0 && data[index - 1].color == 15) {
           if (data[index].hasCompleted != null &&
@@ -361,7 +360,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           logDebugFine(headerNavigationLogger, state.kWorkList.toString());
 
           state.mapController!.move(state.kWorkList![index], zoom);
-          emit(state.copyWith(works: data));
+          emit(state.copyWith(pageIndex: index, works: data));
         }).catchError((error) {
           logDebugFine(headerNavigationLogger, error.toString());
           emit(state.copyWith(
@@ -370,7 +369,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
       } else {
         // Handle the case when 'index' is out of range.
         emit(state.copyWith(
-            status: NavigationStatus.failure, error: 'Ocurrio un erroe'));
+            status: NavigationStatus.failure, error: 'Ocurrio un error'));
       }
     });
   }

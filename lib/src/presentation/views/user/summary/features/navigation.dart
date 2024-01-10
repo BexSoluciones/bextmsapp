@@ -48,25 +48,19 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
         return const TextField(
             enabled: false,
             decoration: InputDecoration(
-                label: Text('Conducción',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 30)),
+                label: Text('Conducción', textAlign: TextAlign.center),
                 icon: Icon(Icons.directions_car)));
       case 1:
         return const TextField(
             enabled: false,
             decoration: InputDecoration(
-                label: Text('Caminando',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 30)),
+                label: Text('Caminando', textAlign: TextAlign.center),
                 icon: Icon(Icons.directions_walk)));
       case 2:
         return const TextField(
             enabled: false,
             decoration: InputDecoration(
-              label: Text('Tren',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 30)),
+              label: Text('Tren', textAlign: TextAlign.center),
               icon: Icon(
                 Icons.directions_transit,
               ),
@@ -75,11 +69,7 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
         return const TextField(
             enabled: false,
             decoration: InputDecoration(
-                label: Text(
-                  'Bicicleta',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 30),
-                ),
+                label: Text('Bicicleta', textAlign: TextAlign.center),
                 icon: Icon(Icons.directions_bike)));
     }
   }
@@ -105,15 +95,11 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
                       children: [
                         const FormTitle('Destino', Colors.black),
                         const SizedBox(height: 10),
-                        Text(widget.arguments.work.customer!,
-                            style: const TextStyle(fontSize: 20)),
-                        Text('Dirección: ${widget.arguments.work.address}',
-                            style: const TextStyle(fontSize: 20)),
+                        Text(widget.arguments.work.customer!),
+                        Text('Dirección: ${widget.arguments.work.address}'),
                         const SizedBox(height: 10),
-                        Text('Latitud ${widget.arguments.work.latitude}',
-                            style: const TextStyle(fontSize: 20)),
-                        Text('Longitud ${widget.arguments.work.longitude}',
-                            style: const TextStyle(fontSize: 20))
+                        Text('Latitud ${widget.arguments.work.latitude}'),
+                        Text('Longitud ${widget.arguments.work.longitude}')
                       ],
                     )),
                 const SizedBox(height: 60),
@@ -155,13 +141,12 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
                                         child: Icon(
                                             Icons.arrow_circle_down_sharp)),
                                     iconEnabledColor: Colors.white, //Icon color
-                                    style: const TextStyle(fontSize: 20),
                                     underline: Container(), //remove underline
                                     isExpanded:
                                         true, //make true to make width 100%
                                   ))),
                         ),
-                        SizedBox(height: size.height / 2.9),
+                        SizedBox(height: size.height / 3.0),
                         BlocBuilder<SummaryCubit, SummaryState>(
                             builder: (context, state) {
                           if (state.runtimeType == SummaryLoadingMap) {
@@ -170,8 +155,7 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
                           } else {
                             return DefaultButton(
                                 widget: const Text('Mostrar Mapas',
-                                    style: TextStyle(
-                                        fontSize: 20, color: Colors.white)),
+                                    style: TextStyle(color: Colors.white)),
                                 press: () => context
                                     .read<SummaryCubit>()
                                     .showMaps(context, widget.arguments,
@@ -208,9 +192,7 @@ class FormTitle extends StatelessWidget {
           children: [
             Text(
               title,
-              // textScaleFactor: textScaleFactor(context),
               style: TextStyle(
-                fontSize: 25,
                 fontWeight: FontWeight.w600,
                 color: color,
               ),
