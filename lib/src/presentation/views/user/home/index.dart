@@ -35,12 +35,13 @@ class HomeView extends StatefulWidget {
 }
 
 class HomeViewState extends State<HomeView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final GlobalKey one = GlobalKey();
   final GlobalKey two = GlobalKey();
   final GlobalKey three = GlobalKey();
   final GlobalKey four = GlobalKey();
   final GlobalKey five = GlobalKey();
+  bool _isInForeground = true;
 
   late HomeCubit homeCubit;
   late GpsBloc gpsBloc;
@@ -62,7 +63,24 @@ class HomeViewState extends State<HomeView>
       helperFunctions.initLocationService();
       gpsBloc.startFollowingUser();
     }
+    print('***************');
+    print(_isInForeground);
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    _isInForeground = state == AppLifecycleState.resumed;
+    print('***************');
+    print(_isInForeground);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   void startHomeWidget() {

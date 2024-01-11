@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:bexdeliveries/core/helpers/index.dart';
+import 'package:bexdeliveries/src/domain/repositories/api_repository.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -13,6 +17,7 @@ import '../domain/repositories/database_repository.dart';
 //services
 import '../locator.dart';
 import '../services/storage.dart';
+import '../utils/constants/colors.dart';
 
 class WorkmanagerService {
   static WorkmanagerService? _instance;
@@ -29,6 +34,19 @@ class WorkmanagerService {
     _preferences?.initialize(callbackDispatcher, isInDebugMode: true);
   }
 
+  Future<bool> checkConnection() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      } else {
+        return false;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
   executeTask() {
     if (_preferences == null) return;
     _preferences?.executeTask((task, inputData) async {
@@ -36,6 +54,8 @@ class WorkmanagerService {
 
       final storageService = locator<LocalStorageService>();
       final databaseRepository = locator<DatabaseRepository>();
+      final apiRepository = locator<ApiRepository>();
+
 
       final helperFunction = HelperFunctions();
 
@@ -60,6 +80,23 @@ class WorkmanagerService {
         case 'get_processing_queues_with_incomplete_and_handle':
           try {
             //TODO: [ Heider Zapa ] call processing queue
+
+            // final connected = await checkConnection();
+            // var queues = await databaseRepository.getAllProcessingQueuesIncomplete();
+            // if (connected) {
+            //
+            //   sendProcessingQueues(queues);
+            // } else if(queues.isNotEmpty) {
+            //   //TODO::
+            //   showSimpleNotification(
+            //     Text('Estas deconectado de internet y tienes ${queues.length} transacciones pendientes'),
+            //     leading: const Icon(Icons.notification_important_outlined),
+            //     background: kPrimaryColor,
+            //     duration: const Duration(seconds: 2),
+            //   );
+            // }
+
+
             helperFunction.handleException('error incomplete exitoso', StackTrace.fromString('call processing'));
             return Future.value(true);
           } catch (error, stackTrace) {

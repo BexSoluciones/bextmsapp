@@ -394,7 +394,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
         var id = DateTime.now().second.toString();
 
         workmanagerService.registerPeriodicTask(
-            id, 'get_works_completed_and_send',
+            'task_home', 'get_works_completed_and_send',
             const Duration(minutes: 15));
 
         emit(state.copyWith(status: HomeStatus.success));
