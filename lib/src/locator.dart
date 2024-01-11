@@ -41,11 +41,13 @@ Future<void> initializeDependencies() async {
   final remoteConfig = await RemoteConfigService.getInstance();
   locator.registerSingleton<RemoteConfigService>(remoteConfig!);
 
+
+  final workmanager = await WorkmanagerService.getInstance();
+  locator.registerSingleton<WorkmanagerService>(workmanager!);
+
   final logger = LoggerService();
   locator.registerSingleton<LoggerService>(logger);
 
-  final workmanager = WorkmanagerService();
-  locator.registerSingleton<WorkmanagerService>(workmanager);
 
   final db = AppDatabase.instance;
   locator.registerSingleton<AppDatabase>(db);

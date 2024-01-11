@@ -24,6 +24,11 @@ class WorkmanagerService {
     return _instance;
   }
 
+  initialize(Function callbackDispatcher, ) {
+    if (_preferences == null) return;
+    _preferences?.initialize(callbackDispatcher, isInDebugMode: true);
+  }
+
   executeTask() {
     if (_preferences == null) return;
     _preferences?.executeTask((task, inputData) async {
@@ -43,6 +48,33 @@ class WorkmanagerService {
       }
 
       switch (task) {
+        case 'get_processing_queues_with_error_and_handle':
+          try {
+            //TODO: [ Heider Zapa ] call processing queue
+            helperFunction.handleException('error exitoso', StackTrace.fromString('call processing'));
+            return Future.value(true);
+          } catch (error, stackTrace) {
+            helperFunction.handleException(error, stackTrace);
+            return Future.value(false);
+          }
+        case 'get_processing_queues_with_incomplete_and_handle':
+          try {
+            //TODO: [ Heider Zapa ] call processing queue
+            helperFunction.handleException('error incomplete exitoso', StackTrace.fromString('call processing'));
+            return Future.value(true);
+          } catch (error, stackTrace) {
+            helperFunction.handleException(error, stackTrace);
+            return Future.value(false);
+          }
+        case 'get_works_completed_and_send':
+          try {
+            //TODO: [ Heider Zapa ] call processing queue
+            helperFunction.handleException('error works exitoso', StackTrace.fromString('call processing'));
+            return Future.value(true);
+          } catch (error, stackTrace) {
+            helperFunction.handleException(error, stackTrace);
+            return Future.value(false);
+          }
         case 'transaction':
           try {
             final Transaction transactionJson =
@@ -63,5 +95,20 @@ class WorkmanagerService {
 
       return Future.value(true);
     });
+  }
+
+  registerPeriodicTask(String id, String name, Duration? frequency) {
+    if (_preferences == null) return;
+    _preferences?.registerPeriodicTask(
+      id,
+      name,
+      frequency: frequency,
+      existingWorkPolicy: ExistingWorkPolicy.replace,
+      backoffPolicy: BackoffPolicy.linear,
+      initialDelay: const Duration(seconds: 10),
+      constraints: Constraints(
+          networkType: NetworkType.connected
+      )
+    );
   }
 }

@@ -119,6 +119,7 @@ void callbackDispatcher() async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
 
+  await Firebase.initializeApp();
   await initializeDependencies();
 
   // ChargerStatus.instance.listenToEvents().listen((event) {
@@ -129,8 +130,6 @@ void callbackDispatcher() async {
 
   final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
   workmanagerService.executeTask();
-
-
 }
 
 Future<void> main() async {
@@ -143,6 +142,8 @@ Future<void> main() async {
   final databaseCubit =
       DatabaseCubit(locator<ApiRepository>(), locator<DatabaseRepository>());
   await databaseCubit.getDatabase();
+
+  final workmanagerService = locator<WorkmanagerService>();
 
   // ChargerStatus.instance.registerHeadlessDispatcher(callbackDispatcher);
 
@@ -189,11 +190,19 @@ Future<void> main() async {
     runApp(ErrorWidgetClass(details));
   };
 
-  Workmanager().initialize(
-      callbackDispatcher, // The top level function, aka callbackDispatcher
-      isInDebugMode:
-          true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-      );
+  workmanagerService.initialize(callbackDispatcher);
+
+  // workmanagerService.registerPeriodicTask(
+  //     '1',
+  //     'get_processing_queues_with_error_and_handle',
+  //     const Duration(minutes: 15));
+  //
+  // workmanagerService.registerPeriodicTask(
+  //     '2',
+  //     'get_processing_queues_with_incomplete_and_handle',
+  //     const Duration(minutes: 15));
+
+
 
   runApp(MyApp(databaseCubit: databaseCubit));
 }

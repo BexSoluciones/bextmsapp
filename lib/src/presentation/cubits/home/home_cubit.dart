@@ -50,11 +50,13 @@ import '../../../locator.dart';
 import '../../../services/storage.dart';
 import '../../../services/navigation.dart';
 import '../../../services/logger.dart';
+import '../../../services/workmanager.dart';
 
 part 'home_state.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
+final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
 final helperFunctions = HelperFunctions();
 
 class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
@@ -372,12 +374,34 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             error: 'Porfavor conectate a internet para realizar esta accion'));
         _isLoggingOut = false;
       }
-    } catch (e, stackTrace) {
-      print("Error during logout: $e");
-      print(stackTrace);
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
       _isLoggingOut = false;
     } finally {
       _isLoggingOut = false;
     }
   }
+
+  Future<void> schedule() async {
+
+    print(isBusy);
+
+    if (isBusy) return;
+    await run(() async {
+      try {
+        emit(state.copyWith(status: HomeStatus.loading));
+
+        var id = DateTime.now().second.toString();
+
+        workmanagerService.registerPeriodicTask(
+            id, 'get_works_completed_and_send',
+            const Duration(minutes: 15));
+
+        emit(state.copyWith(status: HomeStatus.success));
+      } catch (error, stackTrace) {
+        helperFunctions.handleException(error, stackTrace);
+      }
+    });
+  }
+
 }
