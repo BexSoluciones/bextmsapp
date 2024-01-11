@@ -151,10 +151,6 @@ class HelperFunctions with FormatDate {
             .trim()
             .replaceAll('.', ''));
 
-        logInfo(headerMainLogger, newVersion.toString());
-        logInfo(headerMainLogger, currentVersion.toString());
-        logInfo(headerMainLogger, force.toString());
-
         if (force && newVersion > currentVersion) {
           await UpdateDialog(skipUpdate: forceUpdate, message: message)
               .showVersionDialog(context);

@@ -113,7 +113,7 @@ abstract class DatabaseRepository {
   Stream<List<Map<String, dynamic>>> getProcessingQueueIncompleteToTransactions();
   Future<bool> validateIfProcessingQueueIsIncomplete();
   Future<int> updateProcessingQueue(ProcessingQueue processingQueue);
-  Future<void> insertProcessingQueue(ProcessingQueue processingQueue);
+  Future<int> insertProcessingQueue(ProcessingQueue processingQueue);
   Future<void> emptyProcessingQueues();
 
   //LOCATIONS

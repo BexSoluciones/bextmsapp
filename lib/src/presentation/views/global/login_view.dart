@@ -196,14 +196,12 @@ class LoginViewState extends State<LoginView> {
                                     ? state.enterprise!.name!
                                     : 'demo',
                                 maxLines: 2,
-                                style: const TextStyle(
-                                    fontSize: 40, fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
                               const Text(
                                 'bexsoluciones.com',
                                 maxLines: 2,
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(
                                 height: 30,
