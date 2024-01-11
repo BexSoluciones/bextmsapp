@@ -43,14 +43,6 @@ class WorkmanagerService {
       }
 
       switch (task) {
-        case 'login':
-          try {
-            //TODO: [ Heider Zapa ] call processing queue
-            return Future.value(true);
-          } catch (error, stackTrace) {
-            helperFunction.handleException(error, stackTrace);
-            return Future.value(false);
-          }
         case 'transaction':
           try {
             final Transaction transactionJson =

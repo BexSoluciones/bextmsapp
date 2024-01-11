@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/src/services/workmanager.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -27,6 +28,7 @@ import 'src/config/theme/app.dart';
 import 'src/domain/repositories/api_repository.dart';
 import 'src/domain/repositories/database_repository.dart';
 import 'src/domain/models/notification.dart';
+import 'src/domain/models/transaction.dart' as t;
 import 'src/domain/models/processing_queue.dart';
 
 //cubits
@@ -217,6 +219,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final DatabaseCubit databaseCubit;
+  bool _isInForeground = true;
 
   _MyAppState(this.databaseCubit);
 
@@ -326,6 +329,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    _isInForeground = state == AppLifecycleState.resumed;
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -345,13 +354,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(
             create: (_) => NetworkBloc()..add(NetworkObserve()),
           ),
-          // BlocProvider(
-          //   create: (context) => ProcessingQueueBloc(
-          //       locator<DatabaseRepository>(),
-          //       locator<ApiRepository>(),
-          //       BlocProvider.of<NetworkBloc>(context))
-          //     ..add(ProcessingQueueObserve()),
-          // ),
+          BlocProvider(
+            create: (context) => ProcessingQueueBloc(
+                locator<DatabaseRepository>(),
+                locator<ApiRepository>(),
+                BlocProvider.of<NetworkBloc>(context))
+              ..add(ProcessingQueueObserve()),
+          ),
           BlocProvider(
               create: (context) => LocationBloc(
                   locationRepository: context.read<LocationRepository>(),

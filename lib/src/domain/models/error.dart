@@ -1,4 +1,4 @@
-const String tableErrors = 'errors';
+const String tableErrors = 'error_logs';
 
 class ErrorFields {
   static final List<String> values = [

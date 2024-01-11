@@ -344,22 +344,23 @@ class AppDatabase {
     '''
       ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL
     ''',
-    // '''
-    //   CREATE TABLE IF NOT EXISTS $tableNotes (
-    //     ${NoteFields.id} INTEGER PRIMARY KEY,
-    //     ${NoteFields.latitude} TEXT DEFAULT NULL,
-    //     ${NoteFields.longitude} TEXT DEFAULT NULL,
-    //     ${NoteFields.observation} TEXT DEFAULT NULL,
-    //     ${NoteFields.images} TEXT DEFAULT NULL,
-    //     ${NoteFields.zoneId} INTEGER DEFAULT NULL
-    //   )
-    // ''',
     '''
-    CREATE TABLE $tableErrors (
+      CREATE TABLE IF NOT EXISTS $tableNotes (
+        ${NoteFields.id} INTEGER PRIMARY KEY,
+        ${NoteFields.latitude} TEXT DEFAULT NULL,
+        ${NoteFields.longitude} TEXT DEFAULT NULL,
+        ${NoteFields.observation} TEXT DEFAULT NULL,
+        ${NoteFields.images} TEXT DEFAULT NULL,
+        ${NoteFields.zoneId} INTEGER DEFAULT NULL
+      )
+    ''',
+    '''
+    CREATE TABLE IF NOT EXISTS $tableErrors (
       ${ErrorFields.id} INTEGER PRIMARY KEY,
-      ${ErrorFields.errorMessage} TEXT DEFAULT NULL ,
+      ${ErrorFields.errorMessage} TEXT DEFAULT NULL,
       ${ErrorFields.stackTrace}  TEXT DEFAULT NULL,
       ${ErrorFields.createdAt} TEXT DEFAULT NULL
+     )
     '''
   ];
 

@@ -1,4 +1,5 @@
 
+import 'package:bexdeliveries/src/domain/models/work.dart';
 import 'package:bexdeliveries/src/services/remote_config.dart';
 import 'package:get_it/get_it.dart';
 import 'package:location_repository/location_repository.dart';
@@ -20,6 +21,7 @@ import 'services/navigation.dart';
 import 'services/notifications.dart';
 import 'services/analytics.dart';
 import 'services/logger.dart';
+import 'services/workmanager.dart';
 
 final locator = GetIt.instance;
 
@@ -41,6 +43,9 @@ Future<void> initializeDependencies() async {
 
   final logger = LoggerService();
   locator.registerSingleton<LoggerService>(logger);
+
+  final workmanager = WorkmanagerService();
+  locator.registerSingleton<WorkmanagerService>(workmanager);
 
   final db = AppDatabase.instance;
   locator.registerSingleton<AppDatabase>(db);
