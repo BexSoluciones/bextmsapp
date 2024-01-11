@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'package:bexdeliveries/src/services/logger.dart';
-import 'package:bexdeliveries/src/utils/constants/strings.dart';
+import 'dart:core' hide Error;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -26,6 +25,7 @@ import '../../src/presentation/blocs/processing_queue/processing_queue_bloc.dart
 //domain
 import '../../src/domain/models/processing_queue.dart';
 import '../../src/domain/models/work.dart';
+import '../../src/domain/models/error.dart';
 import '../../src/domain/models/requests/history_order_updated_request.dart';
 import '../../src/domain/models/requests/routing_request.dart';
 import '../../src/domain/abstracts/format_abstract.dart';
@@ -33,8 +33,8 @@ import '../../src/domain/repositories/database_repository.dart';
 import '../../src/domain/repositories/api_repository.dart';
 
 //utils
-
 import '../../src/utils/constants/colors.dart';
+import '../../src/utils/constants/strings.dart';
 import '../../src/utils/resources/data_state.dart';
 
 //widgets
@@ -46,6 +46,7 @@ import '../../src/presentation/widgets/update_dialog_widget.dart';
 import '../../src/locator.dart';
 import '../../src/services/storage.dart';
 import '../../src/services/navigation.dart';
+import '../../src/services/logger.dart';
 
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
@@ -158,8 +159,8 @@ class HelperFunctions with FormatDate {
           await UpdateDialog(skipUpdate: forceUpdate, message: message)
               .showVersionDialog(context);
         }
-      } on PlatformException catch (exception) {
-        print(exception);
+      } on PlatformException catch (exception, stackTrace) {
+        await handleException(exception, stackTrace);
       } catch (exception, stackTrace) {
         await handleException(exception, stackTrace);
       }
@@ -167,12 +168,12 @@ class HelperFunctions with FormatDate {
   }
 
   Future<void> handleException(dynamic error, StackTrace stackTrace) async {
-    // var errorData = Errors(
-    //   errorMessage: error.toString(),
-    //   stackTrace: stackTrace.toString(),
-    //   createdAt: DateTime.now().toString(),
-    // );
-    // await _databaseRepository.insertError(errorData);
+    var errorData = Error(
+      errorMessage: error.toString(),
+      stackTrace: stackTrace.toString(),
+      createdAt: now(),
+    );
+    await _databaseRepository.insertError(errorData);
     await FirebaseCrashlytics.instance.recordError(e, stackTrace);
   }
 
@@ -425,37 +426,6 @@ class HelperFunctions with FormatDate {
     }
   }
 
-  Future<void> showMapDirectionWaze(BuildContext context, Work work,
-      CurrentUserLocationEntity? location) async {
-    final availableMaps = await MapLauncher.installedMaps;
-    AvailableMap? waze;
-
-    location ??= await _locationRepository.getCurrentLocation();
-
-    for (final map in availableMaps) {
-      if (map.mapType == MapType.waze) {
-        waze = map;
-        break;
-      }
-    }
-
-    if (waze != null) {
-      await waze.showDirections(
-        destination: Coords(
-          double.parse(work.latitude!),
-          double.parse(work.longitude!),
-        ),
-        destinationTitle: work.customer,
-        origin: Coords(location.latitude, location.longitude),
-        originTitle: 'Origen',
-        waypoints: null,
-        directionsMode: DirectionsMode.driving,
-      );
-    } else {
-      print('Waze no está instalado en el dispositivo.');
-    }
-  }
-
   Future<void> initLocationService() async {
     final bool serviceEnabled = await checkAndEnableLocationService();
     if (!serviceEnabled) {
@@ -611,7 +581,7 @@ class HelperFunctions with FormatDate {
     var c = 2 * asin(sqrt(a));
     var distanceInMeters = earthRadius * c * 1000;
 
-    return distanceInMeters <= radiusInMeters!;
+    return distanceInMeters <= radiusInMeters;
   }
 
   void showDialogWithDistance(

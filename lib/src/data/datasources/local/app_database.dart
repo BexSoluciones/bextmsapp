@@ -28,6 +28,7 @@ import '../../../domain/models/confirm.dart';
 import '../../../domain/models/zone.dart';
 import '../../../domain/models/transaction_validate.dart';
 import '../../../domain/models/note.dart';
+import '../../../domain/models/error.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //services
@@ -50,6 +51,7 @@ part '../local/dao/account_dao.dart';
 part '../local/dao/news_dao.dart';
 part '../local/dao/notification_dao.dart';
 part '../local/dao/note_dao.dart';
+part '../local/dao/error_dao.dart';
 
 class AppDatabase {
   static BriteDatabase? _streamDatabase;
@@ -352,6 +354,13 @@ class AppDatabase {
     //     ${NoteFields.zoneId} INTEGER DEFAULT NULL
     //   )
     // ''',
+    '''
+    CREATE TABLE $tableErrors (
+      ${ErrorFields.id} INTEGER PRIMARY KEY,
+      ${ErrorFields.errorMessage} TEXT DEFAULT NULL ,
+      ${ErrorFields.stackTrace}  TEXT DEFAULT NULL,
+      ${ErrorFields.createdAt} TEXT DEFAULT NULL
+    '''
   ];
 
   Future<Database> _initDatabase(databaseName) async {
@@ -438,6 +447,8 @@ class AppDatabase {
   NotificationDao get notificationDao => NotificationDao(instance);
 
   NoteDao get noteDao => NoteDao(instance);
+
+  ErrorDao get errorDao => ErrorDao(instance);
 
   void close() {
     _database = null;

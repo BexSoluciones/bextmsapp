@@ -128,7 +128,7 @@ class ProcessingQueueBloc
   Future<void> _getProcessingQueue() async {
     if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
       var queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
-      sendProcessingQueue(queues);
+      sendProcessingQueues(queues);
     }
   }
 
@@ -145,7 +145,7 @@ class ProcessingQueueBloc
 
     if (event.processingQueue.code != 'store_transaction_product') {
       await Future.value([
-        _getProcessingQueue(),
+        sendProcessingQueue(event.processingQueue),
         validateIfServiceIsCompleted(event.processingQueue),
       ]);
     } else {
@@ -207,7 +207,7 @@ class ProcessingQueueBloc
         processingQueues: processingQueues));
   }
 
-  void sendProcessingQueue(List<ProcessingQueue> queues) async {
+  void sendProcessingQueues(List<ProcessingQueue> queues) async {
     await Future.forEach(queues, (queue) async {
       queue.updatedAt = now();
 
@@ -601,6 +601,400 @@ class ProcessingQueueBloc
         default:
       }
     });
+  }
+
+  void sendProcessingQueue(ProcessingQueue queue) async {
+      queue.updatedAt = now();
+
+      switch (queue.code) {
+        case 'store_transaction_start':
+          try {
+            var body = jsonDecode(queue.body!);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+            final response = await _apiRepository.start(
+                request: TransactionRequest(Transaction.fromJson(body)));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            var body = jsonDecode(queue.body!);
+            body['start'] = now();
+            queue.body = jsonEncode(body);
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'store_transaction_arrived':
+          try {
+            var body = jsonDecode(queue.body!);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+            final response = await _apiRepository.arrived(
+                request: TransactionRequest(Transaction.fromJson(body)));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            var body = jsonDecode(queue.body!);
+            body['start'] = now();
+            queue.body = jsonEncode(body);
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+
+          break;
+        case 'store_transaction_summary':
+          try {
+            var body = jsonDecode(queue.body!);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+            final response = await _apiRepository.summary(
+                request: TransactionRequest(Transaction.fromJson(body)));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            var body = jsonDecode(queue.body!);
+            body['start'] = now();
+            queue.body = jsonEncode(body);
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'store_transaction':
+          try {
+            var body = jsonDecode(queue.body!);
+            body['end'] = now();
+            queue.body = jsonEncode(body);
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+            final response = await _apiRepository.index(
+                request: TransactionRequest(Transaction.fromJson(body)));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
+              queue.error = response!.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'store_transaction_product':
+          var body = jsonDecode(queue.body!);
+          try {
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+            final res = await _apiRepository.transaction(
+                request: TransactionSummaryRequest(
+                    TransactionSummary.fromJson(body)));
+            if (res is DataSuccess) {
+              body['transaction_id'] = res.data!.transaction.id;
+              final response = await _apiRepository.product(
+                  request: TransactionSummaryRequest(
+                      TransactionSummary.fromJson(body)));
+              if (response is DataSuccess) {
+                queue.task = 'done';
+              } else {
+                queue.task = 'error';
+                queue.error = response.error;
+              }
+            } else {
+              queue.task = 'error';
+              body['start'] = now();
+              queue.body = jsonEncode(body);
+              queue.error = res.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            body['start'] = now();
+            queue.body = jsonEncode(body);
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'store_locations':
+          try {
+            queue.task = 'processing';
+            final response = await _apiRepository.locations(
+                request: LocationsRequest(queue.body!));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+
+          break;
+        case 'store_news':
+          try {
+            queue.task = 'processing';
+            final response =
+            await _apiRepository.reason(request: ReasonMRequest(queue));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'store_work_status':
+          try {
+            var body = jsonDecode(queue.body!);
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+            final response = await _apiRepository.status(
+                request: StatusRequest(body['workcode'], body['status']));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'store_history_order':
+          try {
+            var body = jsonDecode(queue.body!);
+            queue.task = 'processing';
+            final response = await _apiRepository.historyOrderSaved(
+                request: HistoryOrderSavedRequest(body['work_id']));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'update_history_order':
+          try {
+            var body = jsonDecode(queue.body!);
+            queue.task = 'processing';
+            final response = await _apiRepository.historyOrderUpdated(
+                request: HistoryOrderUpdatedRequest(body['workcode'], 1));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'get_prediction':
+          try {
+            var body = jsonDecode(queue.body!);
+            queue.task = 'processing';
+            final response = await _apiRepository.prediction(
+                request: PredictionRequest(body['zone_id'], body['workcode']));
+            if (response is DataSuccess) {
+              var prediction = response.data;
+
+              var historyOrder = HistoryOrder(
+                  id: prediction?.id,
+                  workId: prediction!.workId,
+                  workcode: body['workcode'],
+                  zoneId: prediction.zoneId,
+                  listOrder: prediction.listOrders,
+                  works: prediction.works,
+                  different: prediction.differences,
+                  likelihood: prediction.likelihood,
+                  used: prediction.used);
+
+              await _databaseRepository.insertHistory(historyOrder);
+
+              if (historyOrder.used!) {
+                _storageService.setBool(
+                    '${historyOrder.workcode}-usedHistoric', true);
+                _storageService.setBool(
+                    '${historyOrder.workcode}-recentlyUpdated', true);
+                _storageService.setBool(
+                    '${historyOrder.workcode}-showAgain', true);
+                _storageService.setBool(
+                    '${historyOrder.workcode}-oneOrMoreFinished', true);
+
+                await helperFunctions.useHistoricFromSync(
+                    workcode: historyOrder.workcode!,
+                    historyId: historyOrder.id!,
+                    queue: queue);
+              } else {
+                _storageService.setBool(
+                    '${historyOrder.workcode}-showAgain', false);
+                queue.task = 'done';
+              }
+
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'post_new_routing':
+          try {
+            var body = jsonDecode(queue.body!);
+            queue.task = 'processing';
+            final response = await _apiRepository.routing(
+                request: RoutingRequest(body['history_id'], body['workcode']));
+            if (response is DataSuccess) {
+              await _databaseRepository.insertWorks(response.data!.works);
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        case 'update_client':
+          try {
+            var body = jsonDecode(queue.body!);
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+            final response = await _apiRepository.georeference(
+                request: ClientRequest(Client.fromJson(body)));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+
+          break;
+        case 'post_logout':
+          try {
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+            var response =
+            await _apiRepository.logout(request: LogoutRequest());
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+
+        case 'post_firebase_token':
+          try {
+            var body = jsonDecode(queue.body!);
+            queue.task = 'processing';
+            await _databaseRepository.updateProcessingQueue(queue);
+            var response = await _apiRepository.sendFCMToken(
+                request: SendTokenRequest(
+                    int.parse(body['user_id']), body['fcm_token']));
+            if (response is DataSuccess) {
+              queue.task = 'done';
+            } else {
+              queue.task = 'error';
+              queue.error = response.error;
+            }
+            await _databaseRepository.updateProcessingQueue(queue);
+          } catch (e, stackTrace) {
+            queue.task = 'error';
+            queue.error = e.toString();
+            await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+            await _databaseRepository.updateProcessingQueue(queue);
+          }
+          break;
+        default:
+      }
   }
 
   Future<void> validateIfServiceIsCompleted(ProcessingQueue p) async {

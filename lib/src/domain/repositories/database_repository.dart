@@ -17,6 +17,7 @@ import '../models/news.dart';
 import '../models/summary_report.dart';
 import '../models/notification.dart';
 import '../models/note.dart';
+import '../models/error.dart';
 
 abstract class DatabaseRepository {
   //WORKS
@@ -144,6 +145,14 @@ abstract class DatabaseRepository {
   Future<int> deleteNote(Note note);
   Future<void> insertNotes(List<Note> notes);
   Future<void> emptyNotes();
+
+  //ERROR
+  Future<List<Error>> getAllErrors();
+  Future<int> insertError(Error error);
+  Future<int> updateError(Error error);
+  Future<int> deleteError(Error error);
+  Future<void> insertErrors(List<Error> errors);
+  Future<void> emptyErrors();
 
   //CLIENTS
   Stream<List<Client>> watchAllClients();

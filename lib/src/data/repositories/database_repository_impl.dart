@@ -21,6 +21,7 @@ import '../../domain/models/news.dart';
 import '../../domain/models/summary_report.dart';
 import '../../domain/models/notification.dart';
 import '../../domain/models/note.dart';
+import '../../domain/models/error.dart';
 
 class DatabaseRepositoryImpl implements DatabaseRepository {
   final AppDatabase _appDatabase;
@@ -536,6 +537,37 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyNotes() async {
     return _appDatabase.noteDao.emptyNotes();
+  }
+
+  //ERROR
+  @override
+  Future<List<Error>> getAllErrors() async {
+    return _appDatabase.errorDao.getAllErrors();
+  }
+
+  @override
+  Future<int> insertError(Error error) async {
+    return _appDatabase.errorDao.insertError(error);
+  }
+
+  @override
+  Future<int> updateError(Error error) async {
+    return _appDatabase.errorDao.updateError(error);
+  }
+
+  @override
+  Future<int> deleteError(Error error) async {
+    return _appDatabase.errorDao.deleteError(error);
+  }
+
+  @override
+  Future<void> insertErrors(List<Error> errors) async {
+    return _appDatabase.errorDao.insertErrors(errors);
+  }
+
+  @override
+  Future<void> emptyErrors() async {
+    return _appDatabase.errorDao.emptyErrors();
   }
 
   //CLIENTS
