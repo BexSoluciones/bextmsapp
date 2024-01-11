@@ -160,6 +160,9 @@ class ProcessingQueueBloc
   }
 
   void _observe(event, emit) {
+
+    logDebug(headerMainLogger, 'activating pq from main');
+
     if (networkBloc != null &&
         networkBloc?.state is NetworkSuccess &&
         state.status == ProcessingQueueStatus.success) {
@@ -229,7 +232,7 @@ class ProcessingQueueBloc
               queue.task = 'error';
               body['start'] = now();
               queue.body = jsonEncode(body);
-              queue.error = response.error;
+              queue.error = response?.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
@@ -257,7 +260,7 @@ class ProcessingQueueBloc
               queue.task = 'error';
               body['start'] = now();
               queue.body = jsonEncode(body);
-              queue.error = response.error;
+              queue.error = response?.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
@@ -286,7 +289,7 @@ class ProcessingQueueBloc
               queue.task = 'error';
               body['start'] = now();
               queue.body = jsonEncode(body);
-              queue.error = response.error;
+              queue.error = response?.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
@@ -333,7 +336,7 @@ class ProcessingQueueBloc
                 request: TransactionSummaryRequest(
                     TransactionSummary.fromJson(body)));
             if (res is DataSuccess) {
-              body['transaction_id'] = res.data!.transaction.id;
+              body['transaction_id'] = res?.data!.transaction.id;
               final response = await _apiRepository.product(
                   request: TransactionSummaryRequest(
                       TransactionSummary.fromJson(body)));
@@ -341,13 +344,13 @@ class ProcessingQueueBloc
                 queue.task = 'done';
               } else {
                 queue.task = 'error';
-                queue.error = response.error;
+                queue.error = response?.error;
               }
             } else {
               queue.task = 'error';
               body['start'] = now();
               queue.body = jsonEncode(body);
-              queue.error = res.error;
+              queue.error = res?.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
@@ -409,7 +412,7 @@ class ProcessingQueueBloc
               queue.task = 'done';
             } else {
               queue.task = 'error';
-              queue.error = response.error;
+              queue.error = response?.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
@@ -625,7 +628,7 @@ class ProcessingQueueBloc
             queue.task = 'error';
             body['start'] = now();
             queue.body = jsonEncode(body);
-            queue.error = response.error;
+            queue.error = response?.error;
           }
           await _databaseRepository.updateProcessingQueue(queue);
         } catch (e, stackTrace) {
@@ -653,7 +656,7 @@ class ProcessingQueueBloc
             queue.task = 'error';
             body['start'] = now();
             queue.body = jsonEncode(body);
-            queue.error = response.error;
+            queue.error = response?.error;
           }
           await _databaseRepository.updateProcessingQueue(queue);
         } catch (e, stackTrace) {
@@ -682,7 +685,7 @@ class ProcessingQueueBloc
             queue.task = 'error';
             body['start'] = now();
             queue.body = jsonEncode(body);
-            queue.error = response.error;
+            queue.error = response?.error;
           }
           await _databaseRepository.updateProcessingQueue(queue);
         } catch (e, stackTrace) {
@@ -710,7 +713,7 @@ class ProcessingQueueBloc
             queue.task = 'error';
             body['start'] = now();
             queue.body = jsonEncode(body);
-            queue.error = response!.error;
+            queue.error = response?.error;
           }
           await _databaseRepository.updateProcessingQueue(queue);
         } catch (e, stackTrace) {
@@ -729,7 +732,7 @@ class ProcessingQueueBloc
               request:
                   TransactionSummaryRequest(TransactionSummary.fromJson(body)));
           if (res is DataSuccess) {
-            body['transaction_id'] = res.data!.transaction.id;
+            body['transaction_id'] = res?.data!.transaction.id;
             final response = await _apiRepository.product(
                 request: TransactionSummaryRequest(
                     TransactionSummary.fromJson(body)));
@@ -737,13 +740,13 @@ class ProcessingQueueBloc
               queue.task = 'done';
             } else {
               queue.task = 'error';
-              queue.error = response.error;
+              queue.error = response?.error;
             }
           } else {
             queue.task = 'error';
             body['start'] = now();
             queue.body = jsonEncode(body);
-            queue.error = res.error;
+            queue.error = res?.error;
           }
           await _databaseRepository.updateProcessingQueue(queue);
         } catch (e, stackTrace) {
@@ -805,7 +808,7 @@ class ProcessingQueueBloc
             queue.task = 'done';
           } else {
             queue.task = 'error';
-            queue.error = response.error;
+            queue.error = response?.error;
           }
           await _databaseRepository.updateProcessingQueue(queue);
         } catch (e, stackTrace) {

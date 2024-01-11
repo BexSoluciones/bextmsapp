@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/src/services/workmanager.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -12,7 +11,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:workmanager/workmanager.dart';
 // import 'dart:io';
 // import 'dart:ui';
 // import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -28,8 +26,6 @@ import 'src/config/theme/app.dart';
 import 'src/domain/repositories/api_repository.dart';
 import 'src/domain/repositories/database_repository.dart';
 import 'src/domain/models/notification.dart';
-import 'src/domain/models/transaction.dart' as t;
-import 'src/domain/models/processing_queue.dart';
 
 //cubits
 import 'src/presentation/blocs/theme/theme_bloc.dart';
@@ -192,17 +188,15 @@ Future<void> main() async {
 
   workmanagerService.initialize(callbackDispatcher);
 
-  // workmanagerService.registerPeriodicTask(
-  //     '1',
-  //     'get_processing_queues_with_error_and_handle',
-  //     const Duration(minutes: 15));
-  //
+  workmanagerService.registerPeriodicTask(
+      '1',
+      'get_processing_queues_and_handle',
+      const Duration(minutes: 15));
+
   // workmanagerService.registerPeriodicTask(
   //     '2',
-  //     'get_processing_queues_with_incomplete_and_handle',
+  //     'get_works_completed_and_send',
   //     const Duration(minutes: 15));
-
-
 
   runApp(MyApp(databaseCubit: databaseCubit));
 }
@@ -228,7 +222,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final DatabaseCubit databaseCubit;
-  bool _isInForeground = true;
 
   _MyAppState(this.databaseCubit);
 
@@ -335,12 +328,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    _isInForeground = state == AppLifecycleState.resumed;
   }
 
   @override
