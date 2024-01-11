@@ -197,7 +197,7 @@ class _MapPageState extends State<MapPage> {
                       metadata.data!.isEmpty)) {
                 return const LoadingIndicator(
                   message:
-                      'Loading Settings...\n\nSeeing this screen for a long time?\nThere may be a misconfiguration of the\nstore. Try disabling caching and deleting\n faulty stores.',
+                      'Cargando configuración...\n\n¿Ves esta pantalla durante mucho tiempo?\nPuede haber una mala configuración del\n la tienda. Intente deshabilitar el almacenamiento en caché y eliminar\n tiendas defectuosas.',
                 );
               }
 

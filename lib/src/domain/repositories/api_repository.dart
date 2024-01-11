@@ -71,7 +71,7 @@ abstract class ApiRepository {
     required AccountRequest request,
   });
 
-  Future<DataState<LoginResponse>> login({
+  Future<DataState<LoginResponse>?> login({
     required LoginRequest request,
   });
 
@@ -105,7 +105,7 @@ abstract class ApiRepository {
     required TransactionRequest request
   });
 
-  Future<DataState<TransactionResponse>> index({
+  Future<DataState<TransactionResponse>?> index({
     required TransactionRequest request
   });
 

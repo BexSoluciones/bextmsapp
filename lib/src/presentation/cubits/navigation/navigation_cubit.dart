@@ -356,9 +356,6 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         updateWorkFutures.add(_databaseRepository.updateWork(data[index]));
 
         await Future.wait(updateWorkFutures).then((value) {
-          logDebugFine(headerNavigationLogger, state.mapController.toString());
-          logDebugFine(headerNavigationLogger, state.kWorkList.toString());
-
           state.mapController!.move(state.kWorkList![index], zoom);
           emit(state.copyWith(pageIndex: index, works: data));
         }).catchError((error) {

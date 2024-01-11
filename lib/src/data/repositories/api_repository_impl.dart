@@ -1,9 +1,12 @@
 //utils
-import 'package:bexdeliveries/src/domain/models/requests/history_order_saved_request.dart';
-import 'package:bexdeliveries/src/domain/models/requests/history_order_updated_request.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:bexdeliveries/src/services/logger.dart';
+import 'package:bexdeliveries/src/utils/constants/strings.dart';
+import 'package:workmanager/workmanager.dart';
+
 import 'package:bexdeliveries/src/domain/models/requests/reason_m_request.dart';
 import 'package:bexdeliveries/src/domain/models/requests/routing_request.dart';
-import 'package:bexdeliveries/src/domain/models/responses/history_order_saved_response.dart';
 import 'package:bexdeliveries/src/domain/models/responses/routing_response.dart';
 
 import '../../domain/models/requests/locations_request.dart';
@@ -70,6 +73,19 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
 
   ApiRepositoryImpl(this._apiService);
 
+  Future<bool> checkConnection() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      } else {
+        return false;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
   @override
   Future<DataState<EnterpriseResponse>> getEnterprise({
     required EnterpriseRequest request,
@@ -107,13 +123,36 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }
 
   @override
-  Future<DataState<LoginResponse>> login({
+  Future<DataState<LoginResponse>?> login({
     required LoginRequest request,
-  }) {
-    return getStateOf<LoginResponse>(
-      request: () => _apiService.login(
-          username: request.username, password: request.password),
-    );
+  }) async {
+    try {
+      bool isConnected = await checkConnection();
+
+      if (isConnected) {
+        return getStateOf<LoginResponse>(
+          request: () => _apiService.login(
+              username: request.username, password: request.password),
+        );
+      } else {
+        final sendingData = jsonEncode(request.toString());
+
+        await Workmanager().registerOneOffTask(
+          '1',
+          'login',
+          backoffPolicy: BackoffPolicy.linear,
+          backoffPolicyDelay: const Duration(seconds: 20),
+          inputData: <String, dynamic>{
+            'string': 'login',
+            'array': sendingData,
+          },
+        );
+
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
@@ -193,12 +232,40 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }
 
   @override
-  Future<DataState<TransactionResponse>> index({
+  Future<DataState<TransactionResponse>?> index({
     required TransactionRequest request,
-  }) {
-    return getStateOf<TransactionResponse>(
-      request: () => _apiService.index(request.transaction),
-    );
+  }) async {
+
+    try {
+      bool isConnected = await checkConnection();
+
+      logDebug(headerDeveloperLogger, isConnected.toString());
+
+      if (isConnected) {
+        return getStateOf<TransactionResponse>(
+          request: () => _apiService.index(request.transaction),
+        );
+      } else {
+        final sendingData = jsonEncode(request.transaction.toString());
+
+        await Workmanager().registerOneOffTask(
+          '1',
+          'transaction',
+          backoffPolicy: BackoffPolicy.linear,
+          backoffPolicyDelay: const Duration(seconds: 20),
+          inputData: <String, dynamic>{
+            'string': 'transaction',
+            'array': sendingData,
+          },
+        );
+
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+
+
   }
 
   @override
@@ -233,7 +300,8 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     required SendTokenRequest request,
   }) {
     return getStateOf<StatusResponse>(
-      request: () => _apiService.sendFCMToken(request.user_id,request.fcm_token),
+      request: () =>
+          _apiService.sendFCMToken(request.user_id, request.fcm_token),
     );
   }
 
@@ -290,6 +358,4 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
       request: () => _apiService.news(request.news),
     );
   }
-
-
 }

@@ -56,6 +56,19 @@ final ApiRepository _apiRepository = locator<ApiRepository>();
 class HelperFunctions with FormatDate {
   loc.Location location = loc.Location();
 
+  Future<bool> checkConnection() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      } else {
+        return false;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
   Future<Map<String, dynamic>?> getDevice() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     const storage = FlutterSecureStorage();
@@ -96,10 +109,10 @@ class HelperFunctions with FormatDate {
     ));
 
     if (response is DataSuccess) {
-      final login = response.data!.login;
+      final login = response!.data!.login;
       _storageService.setString('token', login.token);
     } else {
-      logDebug(headerDeveloperLogger, response.error!);
+      logDebug(headerDeveloperLogger, response!.error!);
     }
   }
 
@@ -111,43 +124,45 @@ class HelperFunctions with FormatDate {
   }
 
   void versionCheck(context) async {
-    var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
-    var currentVersion =
-    double.parse(yaml['version'].trim().replaceAll('.', '').split('+')[0]);
+    final isConnected = await checkConnection();
+    if (isConnected) {
+      var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
+      var currentVersion = double.parse(
+          yaml['version'].trim().replaceAll('.', '').split('+')[0]);
 
-    //Get Latest version info from firebase config
-    final remoteConfig = await setupRemoteConfig();
+      //Get Latest version info from firebase config
+      final remoteConfig = await setupRemoteConfig();
 
-    try {
-      // Using default duration to force fetching from remote server.
-      await remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(seconds: 0),
-        minimumFetchInterval: Duration.zero,
-      ));
-      await remoteConfig.fetchAndActivate();
+      try {
+        // Using default duration to force fetching from remote server.
+        await remoteConfig.setConfigSettings(RemoteConfigSettings(
+          fetchTimeout: const Duration(seconds: 0),
+          minimumFetchInterval: Duration.zero,
+        ));
+        await remoteConfig.fetchAndActivate();
 
-      var force = remoteConfig.getBool('force_activate');
-      var forceUpdate = remoteConfig.getBool('force_update');
-      var message = remoteConfig.getString('message');
+        var force = remoteConfig.getBool('force_activate');
+        var forceUpdate = remoteConfig.getBool('force_update');
+        var message = remoteConfig.getString('message');
 
-      var newVersion = double.parse(remoteConfig
-          .getString('force_update_current_version')
-          .trim()
-          .replaceAll('.', ''));
+        var newVersion = double.parse(remoteConfig
+            .getString('force_update_current_version')
+            .trim()
+            .replaceAll('.', ''));
 
-      logInfo(headerMainLogger, newVersion.toString());
-      logInfo(headerMainLogger, currentVersion.toString());
-      logInfo(headerMainLogger, force.toString());
+        logInfo(headerMainLogger, newVersion.toString());
+        logInfo(headerMainLogger, currentVersion.toString());
+        logInfo(headerMainLogger, force.toString());
 
-      if (force && newVersion > currentVersion) {
-        await UpdateDialog(skipUpdate: forceUpdate, message: message)
-            .showVersionDialog(context);
+        if (force && newVersion > currentVersion) {
+          await UpdateDialog(skipUpdate: forceUpdate, message: message)
+              .showVersionDialog(context);
+        }
+      } on PlatformException catch (exception) {
+        print(exception);
+      } catch (exception, stackTrace) {
+        await handleException(exception, stackTrace);
       }
-
-    } on PlatformException catch (exception) {
-      print(exception);
-    } catch (exception, stackTrace) {
-      await handleException(exception, stackTrace);
     }
   }
 

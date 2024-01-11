@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:location_repository/location_repository.dart';
-import 'package:logging/logging.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
@@ -28,6 +29,8 @@ import 'src/config/theme/app.dart';
 import 'src/domain/repositories/api_repository.dart';
 import 'src/domain/repositories/database_repository.dart';
 import 'src/domain/models/notification.dart';
+import 'src/domain/models/transaction.dart' as t;
+import 'src/domain/models/processing_queue.dart';
 
 //cubits
 import 'src/presentation/blocs/theme/theme_bloc.dart';
@@ -123,18 +126,68 @@ void callbackDispatcher() async {
   //
   // ChargerStatus.instance.startPowerChangesListener();
 
+  // Periodic task registration
+  Workmanager().registerPeriodicTask(
+    "periodic-task-identifier",
+    "simplePeriodicTask",
+  );
+
   Workmanager().executeTask((task, inputData) async {
     int? totalExecutions;
-    final sharedPreference =
-        await SharedPreferences.getInstance(); //Initialize dependency
+    await initializeDependencies();
+
+    final storageService = locator<LocalStorageService>();
 
     try {
-      //add code execution
-      totalExecutions = sharedPreference.getInt("totalExecutions");
-      sharedPreference.setInt(
+      totalExecutions = storageService.getInt("totalExecutions");
+      storageService.setInt(
           "totalExecutions", totalExecutions == null ? 1 : totalExecutions + 1);
     } catch (err) {
       throw Exception(err);
+    }
+
+    final databaseCubit = DatabaseCubit(
+        locator<ApiRepository>(), locator<DatabaseRepository>());
+
+    runApp(MyApp(databaseCubit: databaseCubit));
+
+    switch (task) {
+      case 'login':
+        try {
+          log("this method was called from native!");
+          log("was executed. inputData = $inputData");
+          log(inputData?['array']);
+
+          //TODO: [ Heider Zapa ] call processing queue
+          return Future.value(true);
+        } catch (e) {
+          log("this method was called from native! with false");
+          return Future.value(false);
+        }
+      case 'transaction':
+        try {
+          log("this method was called from native!");
+          log("was executed. inputData = $inputData");
+          log(inputData?['array']);
+
+          final t.Transaction transactionJson = t.Transaction.fromJson(jsonDecode(inputData?['array']));
+
+          log(transactionJson.toString());
+
+          //TODO: [ Heider Zapa ] call processing queue
+
+          return Future.value(true);
+        } catch (e) {
+          log("this method was called from native! with false");
+          return Future.value(false);
+        }
+      case Workmanager.iOSBackgroundTask:
+        print("The iOS background fetch was triggered");
+        Directory? tempDir = await getTemporaryDirectory();
+        String? tempPath = tempDir.path;
+        print(
+            "You can access other plugins in the background, for example Directory.getTemporaryDirectory(): $tempPath");
+        break;
     }
 
     return Future.value(true);

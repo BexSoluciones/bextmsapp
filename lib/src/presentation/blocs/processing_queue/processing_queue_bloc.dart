@@ -312,7 +312,7 @@ class ProcessingQueueBloc
               queue.task = 'error';
               body['start'] = now();
               queue.body = jsonEncode(body);
-              queue.error = response.error;
+              queue.error = response!.error;
             }
             await _databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {

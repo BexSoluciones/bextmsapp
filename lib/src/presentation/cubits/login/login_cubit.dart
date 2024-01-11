@@ -144,7 +144,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
       );
 
       if (response is DataSuccess) {
-        final login = response.data!.login;
+        final login = response!.data!.login;
 
         var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
         var version = yaml['version'];
@@ -292,7 +292,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         }
       } else if (response is DataFailed) {
         emit(LoginFailed(
-            error: response.error,
+            error: response!.error,
             enterprise: _storageService.getObject('enterprise') != null
                 ? Enterprise.fromMap(_storageService.getObject('enterprise')!)
                 : null));

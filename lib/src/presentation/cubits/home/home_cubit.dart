@@ -177,7 +177,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           );
 
           if (response is DataSuccess) {
-            final login = response.data!.login;
+            final login = response!.data!.login;
             var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
             var version = yaml['version'];
             _storageService.setString('token', response.data!.login.token);
@@ -311,7 +311,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             }
           } else if (response is DataFailed) {
             emit(state.copyWith(
-                status: HomeStatus.failure, error: response.error, user: user));
+                status: HomeStatus.failure, error: response!.error, user: user));
           }
         } else {
           emit(state.copyWith(
