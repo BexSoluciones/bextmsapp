@@ -1,34 +1,29 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:bexdeliveries/src/services/logger.dart';
-import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:path_provider/path_provider.dart';
 import 'package:workmanager/workmanager.dart';
 
 //core
 import '../../../core/helpers/index.dart';
 //utils
+
 import '../utils/resources/data_state.dart';
+import '../utils/constants/strings.dart';
 
 //domain
+import '../domain/models/isolate.dart';
 import '../domain/models/transaction.dart';
 import '../domain/models/transaction_summary.dart';
 import '../domain/models/processing_queue.dart';
 import '../domain/models/client.dart';
-import '../domain/models/history_order.dart';
 import '../domain/repositories/database_repository.dart';
 import '../domain/repositories/api_repository.dart';
 import '../domain/abstracts/format_abstract.dart';
 //request
 import '../domain/models/requests/client_request.dart';
-import '../domain/models/requests/history_order_saved_request.dart';
-import '../domain/models/requests/history_order_updated_request.dart';
 import '../domain/models/requests/locations_request.dart';
 import '../domain/models/requests/logout_request.dart';
-import '../domain/models/requests/prediction_request.dart';
 import '../domain/models/requests/reason_m_request.dart';
-import '../domain/models/requests/routing_request.dart';
 import '../domain/models/requests/send_token.dart';
 import '../domain/models/requests/status_request.dart';
 import '../domain/models/requests/transaction_request.dart';
@@ -37,6 +32,7 @@ import '../domain/models/requests/transaction_summary_request.dart';
 //services
 import '../locator.dart';
 import '../services/storage.dart';
+import '../services/logger.dart';
 
 class WorkmanagerService with FormatDate {
   static WorkmanagerService? _instance;
@@ -46,6 +42,12 @@ class WorkmanagerService with FormatDate {
     _instance ??= WorkmanagerService();
     _preferences = Workmanager();
     return _instance;
+  }
+
+  Future<void> heavyTask(IsolateModel model) async {
+    for (var i = 0; i < model.iteration; i++) {
+      await model.functions[i]();
+    }
   }
 
   initialize(
@@ -112,23 +114,31 @@ class WorkmanagerService with FormatDate {
             final isConnected = await checkConnection();
             final queues =
                 await databaseRepository.getAllProcessingQueuesIncomplete();
-
-            logDebug(headerDeveloperLogger, '----${queues.length}');
-            if (isConnected) {
-              sendProcessingQueues(queues, storageService, databaseRepository,
-                  apiRepository, helperFunction);
-              return Future.value(true);
+            if (isConnected && queues.isNotEmpty) {
+              var futures = <Function>[];
+              for (var queue in queues) {
+                futures.add(() => sendProcessingQueue(queue, storageService,
+                    databaseRepository, apiRepository, helperFunction));
+              }
+              var isolateModel = IsolateModel(futures, futures.length);
+              return await heavyTask(isolateModel).then((values) async {
+                return true;
+              }).catchError((error, stackTrace) {
+                helperFunction.handleException(error, stackTrace);
+                return false;
+              });
             } else if (queues.isNotEmpty) {
               display(
                   'Atención!',
                   'No tienes conexción a intenet y tienes ${queues.length} transacciones pendientes.',
                   helperFunction);
-              return Future.value(false);
-            } else {
-              return Future.value(false);
-            }
 
+              return Future.value(true);
+            } else {
+              return Future.value(true);
+            }
           } catch (error, stackTrace) {
+            logDebug(headerDeveloperLogger, 'error----$error');
             helperFunction.handleException(error, stackTrace);
             return Future.value(false);
           }
@@ -248,403 +258,287 @@ class WorkmanagerService with FormatDate {
         constraints: Constraints(networkType: NetworkType.connected));
   }
 
-  void sendProcessingQueues(
-      List<ProcessingQueue> queues,
+  Future<void> sendProcessingQueue(
+      ProcessingQueue queue,
       LocalStorageService storageService,
       DatabaseRepository databaseRepository,
       ApiRepository apiRepository,
-      HelperFunctions helperFunctions) async {
-    await Future.forEach(queues, (queue) async {
-      queue.updatedAt = now();
+      HelperFunctions helperFunction) async {
+    logDebug(headerDeveloperLogger, 'sending');
+    logDebug(headerDeveloperLogger, queue.code);
+    queue.updatedAt = now();
 
-      switch (queue.code) {
-        case 'store_transaction_start':
-          try {
-            var body = jsonDecode(queue.body!);
-            body['end'] = now();
-            queue.body = jsonEncode(body);
-            queue.task = 'processing';
-            await databaseRepository.updateProcessingQueue(queue);
-            final response = await apiRepository.start(
-                request: TransactionRequest(Transaction.fromJson(body)));
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              body['start'] = now();
-              queue.body = jsonEncode(body);
-              queue.error = response?.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
-            queue.task = 'error';
-            var body = jsonDecode(queue.body!);
-            body['start'] = now();
-            queue.body = jsonEncode(body);
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
-          }
-          break;
-        case 'store_transaction_arrived':
-          try {
-            var body = jsonDecode(queue.body!);
-            body['end'] = now();
-            queue.body = jsonEncode(body);
-            queue.task = 'processing';
-            await databaseRepository.updateProcessingQueue(queue);
-            final response = await apiRepository.arrived(
-                request: TransactionRequest(Transaction.fromJson(body)));
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              body['start'] = now();
-              queue.body = jsonEncode(body);
-              queue.error = response?.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
-            queue.task = 'error';
-            var body = jsonDecode(queue.body!);
-            body['start'] = now();
-            queue.body = jsonEncode(body);
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
-          }
-
-          break;
-        case 'store_transaction_summary':
-          try {
-            var body = jsonDecode(queue.body!);
-            body['end'] = now();
-            queue.body = jsonEncode(body);
-            queue.task = 'processing';
-            await databaseRepository.updateProcessingQueue(queue);
-            final response = await apiRepository.summary(
-                request: TransactionRequest(Transaction.fromJson(body)));
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              body['start'] = now();
-              queue.body = jsonEncode(body);
-              queue.error = response?.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
-            queue.task = 'error';
-            var body = jsonDecode(queue.body!);
-            body['start'] = now();
-            queue.body = jsonEncode(body);
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
-          }
-          break;
-        case 'store_transaction':
-          try {
-            var body = jsonDecode(queue.body!);
-            body['end'] = now();
-            queue.body = jsonEncode(body);
-            queue.task = 'processing';
-            await databaseRepository.updateProcessingQueue(queue);
-            final response = await apiRepository.index(
-                request: TransactionRequest(Transaction.fromJson(body)));
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              body['start'] = now();
-              queue.body = jsonEncode(body);
-              queue.error = response!.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
-            queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
-          }
-          break;
-        case 'store_transaction_product':
+    switch (queue.code) {
+      case 'store_transaction_start':
+        try {
           var body = jsonDecode(queue.body!);
-          try {
-            queue.task = 'processing';
-            await databaseRepository.updateProcessingQueue(queue);
-            final res = await apiRepository.transaction(
+          body['end'] = now();
+          queue.body = jsonEncode(body);
+          queue.task = 'processing';
+          await databaseRepository.updateProcessingQueue(queue);
+          final response = await apiRepository.start(
+              request: TransactionRequest(Transaction.fromJson(body)));
+          if (response is DataSuccess) {
+            queue.task = 'done';
+          } else {
+            queue.task = 'error';
+            body['start'] = now();
+            queue.body = jsonEncode(body);
+            queue.error = response?.error;
+          }
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          var body = jsonDecode(queue.body!);
+          body['start'] = now();
+          queue.body = jsonEncode(body);
+          queue.error = e.toString();
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
+        break;
+      case 'store_transaction_arrived':
+        try {
+          var body = jsonDecode(queue.body!);
+          body['end'] = now();
+          queue.body = jsonEncode(body);
+          queue.task = 'processing';
+          await databaseRepository.updateProcessingQueue(queue);
+          final response = await apiRepository.arrived(
+              request: TransactionRequest(Transaction.fromJson(body)));
+          if (response is DataSuccess) {
+            queue.task = 'done';
+          } else {
+            queue.task = 'error';
+            body['start'] = now();
+            queue.body = jsonEncode(body);
+            queue.error = response?.error;
+          }
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          var body = jsonDecode(queue.body!);
+          body['start'] = now();
+          queue.body = jsonEncode(body);
+          queue.error = e.toString();
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
+
+        break;
+      case 'store_transaction_summary':
+        try {
+          var body = jsonDecode(queue.body!);
+          body['end'] = now();
+          queue.body = jsonEncode(body);
+          queue.task = 'processing';
+          await databaseRepository.updateProcessingQueue(queue);
+          final response = await apiRepository.summary(
+              request: TransactionRequest(Transaction.fromJson(body)));
+          if (response is DataSuccess) {
+            queue.task = 'done';
+          } else {
+            queue.task = 'error';
+            body['start'] = now();
+            queue.body = jsonEncode(body);
+            queue.error = response?.error;
+          }
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          var body = jsonDecode(queue.body!);
+          body['start'] = now();
+          queue.body = jsonEncode(body);
+          queue.error = e.toString();
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
+        break;
+      case 'store_transaction':
+        try {
+          var body = jsonDecode(queue.body!);
+          body['end'] = now();
+          queue.body = jsonEncode(body);
+          queue.task = 'processing';
+          await databaseRepository.updateProcessingQueue(queue);
+          final response = await apiRepository.index(
+              request: TransactionRequest(Transaction.fromJson(body)));
+          if (response is DataSuccess) {
+            queue.task = 'done';
+          } else {
+            queue.task = 'error';
+            body['start'] = now();
+            queue.body = jsonEncode(body);
+            queue.error = response!.error;
+          }
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          queue.error = e.toString();
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
+        break;
+      case 'store_transaction_product':
+        var body = jsonDecode(queue.body!);
+        try {
+          queue.task = 'processing';
+          await databaseRepository.updateProcessingQueue(queue);
+          final res = await apiRepository.transaction(
+              request:
+                  TransactionSummaryRequest(TransactionSummary.fromJson(body)));
+          if (res is DataSuccess) {
+            body['transaction_id'] = res?.data!.transaction.id;
+            final response = await apiRepository.product(
                 request: TransactionSummaryRequest(
                     TransactionSummary.fromJson(body)));
-            if (res is DataSuccess) {
-              body['transaction_id'] = res?.data!.transaction.id;
-              final response = await apiRepository.product(
-                  request: TransactionSummaryRequest(
-                      TransactionSummary.fromJson(body)));
-              if (response is DataSuccess) {
-                queue.task = 'done';
-              } else {
-                queue.task = 'error';
-                queue.error = response?.error;
-              }
-            } else {
-              queue.task = 'error';
-              body['start'] = now();
-              queue.body = jsonEncode(body);
-              queue.error = res?.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
-            queue.task = 'error';
-            queue.error = e.toString();
-            body['start'] = now();
-            queue.body = jsonEncode(body);
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
-          }
-          break;
-        case 'store_locations':
-          try {
-            queue.task = 'processing';
-            final response = await apiRepository.locations(
-                request: LocationsRequest(queue.body!));
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              queue.error = response.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
-            queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
-          }
-
-          break;
-        case 'store_news':
-          try {
-            queue.task = 'processing';
-            final response =
-                await apiRepository.reason(request: ReasonMRequest(queue));
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              queue.error = response.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
-            queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
-          }
-          break;
-        case 'store_work_status':
-          try {
-            var body = jsonDecode(queue.body!);
-            queue.task = 'processing';
-            await databaseRepository.updateProcessingQueue(queue);
-            final response = await apiRepository.status(
-                request: StatusRequest(body['workcode'], body['status']));
             if (response is DataSuccess) {
               queue.task = 'done';
             } else {
               queue.task = 'error';
               queue.error = response?.error;
             }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
+          } else {
             queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
+            body['start'] = now();
+            queue.body = jsonEncode(body);
+            queue.error = res?.error;
           }
-          break;
-        case 'store_history_order':
-          try {
-            var body = jsonDecode(queue.body!);
-            queue.task = 'processing';
-            final response = await apiRepository.historyOrderSaved(
-                request: HistoryOrderSavedRequest(body['work_id']));
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              queue.error = response.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          queue.error = e.toString();
+          body['start'] = now();
+          queue.body = jsonEncode(body);
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
+        break;
+      case 'store_locations':
+        try {
+          queue.task = 'processing';
+          final response = await apiRepository.locations(
+              request: LocationsRequest(queue.body!));
+          if (response is DataSuccess) {
+            queue.task = 'done';
+          } else {
             queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
+            queue.error = response.error;
           }
-          break;
-        case 'update_history_order':
-          try {
-            var body = jsonDecode(queue.body!);
-            queue.task = 'processing';
-            final response = await apiRepository.historyOrderUpdated(
-                request: HistoryOrderUpdatedRequest(body['workcode'], 1));
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              queue.error = response.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
-            queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
-          }
-          break;
-        case 'get_prediction':
-          try {
-            var body = jsonDecode(queue.body!);
-            queue.task = 'processing';
-            final response = await apiRepository.prediction(
-                request: PredictionRequest(body['zone_id'], body['workcode']));
-            if (response is DataSuccess) {
-              var prediction = response.data;
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          queue.error = e.toString();
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
 
-              var historyOrder = HistoryOrder(
-                  id: prediction?.id,
-                  workId: prediction!.workId,
-                  workcode: body['workcode'],
-                  zoneId: prediction.zoneId,
-                  listOrder: prediction.listOrders,
-                  works: prediction.works,
-                  different: prediction.differences,
-                  likelihood: prediction.likelihood,
-                  used: prediction.used);
-
-              await databaseRepository.insertHistory(historyOrder);
-
-              if (historyOrder.used!) {
-                storageService.setBool(
-                    '${historyOrder.workcode}-usedHistoric', true);
-                storageService.setBool(
-                    '${historyOrder.workcode}-recentlyUpdated', true);
-                storageService.setBool(
-                    '${historyOrder.workcode}-showAgain', true);
-                storageService.setBool(
-                    '${historyOrder.workcode}-oneOrMoreFinished', true);
-
-                await helperFunctions.useHistoricFromSync(
-                    workcode: historyOrder.workcode!,
-                    historyId: historyOrder.id!,
-                    queue: queue);
-              } else {
-                storageService.setBool(
-                    '${historyOrder.workcode}-showAgain', false);
-                queue.task = 'done';
-              }
-
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              queue.error = response.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
+        break;
+      case 'store_news':
+        try {
+          queue.task = 'processing';
+          final response =
+              await apiRepository.reason(request: ReasonMRequest(queue));
+          if (response is DataSuccess) {
+            queue.task = 'done';
+          } else {
             queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
+            queue.error = response.error;
           }
-          break;
-        case 'post_new_routing':
-          try {
-            var body = jsonDecode(queue.body!);
-            queue.task = 'processing';
-            final response = await apiRepository.routing(
-                request: RoutingRequest(body['history_id'], body['workcode']));
-            if (response is DataSuccess) {
-              await databaseRepository.insertWorks(response.data!.works);
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              queue.error = response.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          queue.error = e.toString();
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
+        break;
+      case 'store_work_status':
+        try {
+          var body = jsonDecode(queue.body!);
+          queue.task = 'processing';
+          await databaseRepository.updateProcessingQueue(queue);
+          final response = await apiRepository.status(
+              request: StatusRequest(body['workcode'], body['status']));
+          if (response is DataSuccess) {
+            queue.task = 'done';
+          } else {
             queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
+            queue.error = response?.error;
           }
-          break;
-        case 'update_client':
-          try {
-            var body = jsonDecode(queue.body!);
-            queue.task = 'processing';
-            await databaseRepository.updateProcessingQueue(queue);
-            final response = await apiRepository.georeference(
-                request: ClientRequest(Client.fromJson(body)));
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              queue.error = response.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          queue.error = e.toString();
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
+        break;
+      case 'update_client':
+        try {
+          var body = jsonDecode(queue.body!);
+          queue.task = 'processing';
+          await databaseRepository.updateProcessingQueue(queue);
+          final response = await apiRepository.georeference(
+              request: ClientRequest(Client.fromJson(body)));
+          if (response is DataSuccess) {
+            queue.task = 'done';
+          } else {
             queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
+            queue.error = response.error;
           }
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          queue.error = e.toString();
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
 
-          break;
-        case 'post_logout':
-          try {
-            queue.task = 'processing';
-            await databaseRepository.updateProcessingQueue(queue);
-            var response = await apiRepository.logout(request: LogoutRequest());
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              queue.error = response.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
+        break;
+      case 'post_logout':
+        try {
+          queue.task = 'processing';
+          await databaseRepository.updateProcessingQueue(queue);
+          var response = await apiRepository.logout(request: LogoutRequest());
+          if (response is DataSuccess) {
+            queue.task = 'done';
+          } else {
             queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
+            queue.error = response.error;
           }
-          break;
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          queue.error = e.toString();
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
+        break;
 
-        case 'post_firebase_token':
-          try {
-            var body = jsonDecode(queue.body!);
-            queue.task = 'processing';
-            await databaseRepository.updateProcessingQueue(queue);
-            var response = await apiRepository.sendFCMToken(
-                request: SendTokenRequest(
-                    int.parse(body['user_id']), body['fcm_token']));
-            if (response is DataSuccess) {
-              queue.task = 'done';
-            } else {
-              queue.task = 'error';
-              queue.error = response.error;
-            }
-            await databaseRepository.updateProcessingQueue(queue);
-          } catch (e, stackTrace) {
+      case 'post_firebase_token':
+        try {
+          var body = jsonDecode(queue.body!);
+          queue.task = 'processing';
+          await databaseRepository.updateProcessingQueue(queue);
+          var response = await apiRepository.sendFCMToken(
+              request: SendTokenRequest(
+                  int.parse(body['user_id']), body['fcm_token']));
+          if (response is DataSuccess) {
+            queue.task = 'done';
+          } else {
             queue.task = 'error';
-            queue.error = e.toString();
-            helperFunctions.handleException(e, stackTrace);
-            await databaseRepository.updateProcessingQueue(queue);
+            queue.error = response.error;
           }
-          break;
-        default:
-      }
-    });
+          await databaseRepository.updateProcessingQueue(queue);
+        } catch (e, stackTrace) {
+          queue.task = 'error';
+          queue.error = e.toString();
+          helperFunction.handleException(e, stackTrace);
+          await databaseRepository.updateProcessingQueue(queue);
+        }
+        break;
+      default:
+    }
   }
 }

@@ -54,12 +54,13 @@ class ProcessingQueueDao {
       'store_transaction_summary': 'Transacciones de facturas vistas',
       'store_transaction': 'Transacciones',
       'store_locations': 'Localizaciones',
-      'pending': 'Transacciones pendientes',
+      'processing': 'Transacciones pendientes',
       'incomplete': 'Transacciones incompletas',
       'error': 'Transacciones con error',
       'done': 'Total'
     };
     final handleColors = {
+      'processing' : Colors.orange,
       'incomplete': Colors.orange,
       'error': Colors.red,
       'done': Colors.green
