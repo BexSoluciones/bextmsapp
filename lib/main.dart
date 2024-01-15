@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/core/helpers/index.dart';
+import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
 import 'package:bexdeliveries/src/services/workmanager.dart';
 import 'package:cron/cron.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -95,8 +96,11 @@ import 'src/presentation/views/global/undefined_view.dart';
 import 'src/presentation/widgets/custom_error_widget.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
+final ProcessingQueue _processingQueue = locator<ProcessingQueue>();
 final NotificationService _notificationService = locator<NotificationService>();
 final RemoteConfigService _remoteConfigService = locator<RemoteConfigService>();
+final DatabaseRepository _databaseRepository  = locator<DatabaseRepository>();
+final ApiRepository _apiRepository = locator<ApiRepository>();
 final LoggerService _loggerService = locator<LoggerService>();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -128,7 +132,10 @@ void callbackDispatcher() async {
   // ChargerStatus.instance.startPowerChangesListener();
 
   final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
-  workmanagerService.executeTask();
+  workmanagerService.executeTask(_processingQueue,
+     _storageService,
+    _databaseRepository,
+    _apiRepository,);
 }
 
 Future<void> main() async {
@@ -201,7 +208,10 @@ Future<void> main() async {
   final helperFunction = HelperFunctions();
   cron.schedule(Schedule.parse('*/15 * * * *'), () async {
     try {
-      workmanagerService.sendProcessing();
+      workmanagerService.sendProcessing(_processingQueue,
+        _storageService,
+        _databaseRepository,
+        _apiRepository);
     } on SocketException catch (error, stackTrace) {
       helperFunction.handleException(error, stackTrace);
     }
