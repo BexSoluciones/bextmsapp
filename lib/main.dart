@@ -192,15 +192,15 @@ Future<void> main() async {
 
   workmanagerService.initialize(callbackDispatcher);
 
-  // workmanagerService.registerPeriodicTask(
-  //     '1',
-  //     'get_processing_queues_with_error_and_handle',
-  //     const Duration(minutes: 15));
-  //
-  // workmanagerService.registerPeriodicTask(
-  //     '2',
-  //     'get_processing_queues_with_incomplete_and_handle',
-  //     const Duration(minutes: 15));
+  workmanagerService.registerPeriodicTask(
+      '1',
+      'get_processing_queues_with_error_and_handle',
+      const Duration(minutes: 15));
+  
+  workmanagerService.registerPeriodicTask(
+      '2',
+      'get_processing_queues_with_incomplete_and_handle',
+      const Duration(minutes: 15));
 
 
 
