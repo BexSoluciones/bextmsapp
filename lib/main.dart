@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
+import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:bexdeliveries/src/services/workmanager.dart';
+import 'package:cron/cron.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -197,6 +200,23 @@ Future<void> main() async {
   //     '2',
   //     'get_works_completed_and_send',
   //     const Duration(minutes: 15));
+
+  var cron =  Cron();
+   cron.schedule( Schedule.parse('*/15 * * * *'), () async {
+    // ignore: avoid_print    
+    
+    NetworkBloc? networkBloc;
+      try {
+
+        if (networkBloc != null && networkBloc.state is NetworkSuccess) {
+
+          print("METODO SEGUNDO PLANO");
+      
+        }
+      } on SocketException catch (_) { 
+
+      }
+  });
 
   runApp(MyApp(databaseCubit: databaseCubit));
 }
