@@ -192,30 +192,19 @@ Future<void> main() async {
   workmanagerService.initialize(callbackDispatcher);
 
   workmanagerService.registerPeriodicTask(
-      '1',
-      'get_processing_queues_and_handle',
-      const Duration(minutes: 15));
+      '1', 'get_processing_queues_and_handle', const Duration(minutes: 15));
 
-  // workmanagerService.registerPeriodicTask(
-  //     '2',
-  //     'get_works_completed_and_send',
-  //     const Duration(minutes: 15));
+  workmanagerService.registerPeriodicTask(
+      '2', 'get_works_completed_and_send', const Duration(minutes: 15));
 
-  var cron =  Cron();
-   cron.schedule( Schedule.parse('*/15 * * * *'), () async {
-    // ignore: avoid_print    
-    
-    NetworkBloc? networkBloc;
-      try {
-
-        if (networkBloc != null && networkBloc.state is NetworkSuccess) {
-
-          print("METODO SEGUNDO PLANO");
-      
-        }
-      } on SocketException catch (_) { 
-
-      }
+  var cron = Cron();
+  final helperFunction = HelperFunctions();
+  cron.schedule(Schedule.parse('*/15 * * * *'), () async {
+    try {
+      workmanagerService.sendProcessing();
+    } on SocketException catch (error, stackTrace) {
+      helperFunction.handleException(error, stackTrace);
+    }
   });
 
   runApp(MyApp(databaseCubit: databaseCubit));

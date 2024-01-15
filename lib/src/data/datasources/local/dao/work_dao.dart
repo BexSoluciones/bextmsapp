@@ -92,6 +92,52 @@ class WorkDao {
     return works;
   }
 
+  Future<List<String>?> completeWorks() async {
+    final db = await _appDatabase.streamDatabase;
+
+    final workList = await db!.rawQuery('''
+        SELECT $tableWorks.${WorkFields.workcode} 
+        FROM $tableWorks
+     ''');
+
+    var works = parseWorks(workList);
+
+    if (works.isNotEmpty) {
+      var workcodes = <String>[];
+
+      for (var work in works) {
+        print(work.workcode);
+        //var resultSummaries = await db.rawQuery('''
+        //  SELECT COUNT(DISTINCT summaries.order_number) as count
+        //  FROM $tableSummaries
+        //  INNER JOIN works ON works.id = summaries.work_id
+        //  WHERE works.workcode = "${work['workcode']}"
+        // ''');
+
+        // var resultTransactions = await db.rawQuery('''
+        //  SELECT COUNT(DISTINCT transactions.order_number) as count
+        //  FROM $tableTransactions
+        //  INNER JOIN works ON transactions.work_id = works.id
+        //  WHERE transactions.status != "start" AND
+        //  transactions.status = "arrived" AND
+        //  transactions.status = "summary" AND
+        //  works.workcode = "${work['workcode']}"
+        //''');
+
+        //var countSummaries = resultSummaries[0]['count'];
+        //var countTransactions = resultTransactions[0]['count'];
+
+        //if (countSummaries == countTransactions) {
+        //   workcodes.add(work['workcode']);
+        //}
+      }
+
+      return workcodes;
+    } else {
+      return null;
+    }
+  }
+
   Future<int> insertWork(Work work) {
     return _appDatabase.insert(tableWorks, work.toJson());
   }

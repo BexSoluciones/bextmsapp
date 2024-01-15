@@ -166,7 +166,8 @@ class ProcessingQueueBloc
     if (networkBloc != null &&
         networkBloc?.state is NetworkSuccess &&
         state.status == ProcessingQueueStatus.success) {
-      _getProcessingQueue();
+      logDebug(headerDeveloperLogger, 'activate get processing from observer');
+      //_getProcessingQueue();
     }
     emit(state.copyWith(status: ProcessingQueueStatus.success));
   }

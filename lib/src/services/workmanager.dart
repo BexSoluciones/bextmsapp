@@ -38,6 +38,11 @@ class WorkmanagerService with FormatDate {
   static WorkmanagerService? _instance;
   static Workmanager? _preferences;
 
+  final helperFunction = HelperFunctions();
+  final storageService = locator<LocalStorageService>();
+  final databaseRepository = locator<DatabaseRepository>();
+  final apiRepository = locator<ApiRepository>();
+
   static Future<WorkmanagerService?> getInstance() async {
     _instance ??= WorkmanagerService();
     _preferences = Workmanager();
@@ -95,11 +100,6 @@ class WorkmanagerService with FormatDate {
     _preferences?.executeTask((task, inputData) async {
       int? totalExecutions;
 
-      final helperFunction = HelperFunctions();
-      final storageService = locator<LocalStorageService>();
-      final databaseRepository = locator<DatabaseRepository>();
-      final apiRepository = locator<ApiRepository>();
-
       try {
         totalExecutions = storageService.getInt("totalExecutions");
         storageService.setInt("totalExecutions",
@@ -111,32 +111,7 @@ class WorkmanagerService with FormatDate {
       switch (task) {
         case 'get_processing_queues_and_handle':
           try {
-            final isConnected = await checkConnection();
-            final queues =
-                await databaseRepository.getAllProcessingQueuesIncomplete();
-            if (isConnected && queues.isNotEmpty) {
-              var futures = <Function>[];
-              for (var queue in queues) {
-                futures.add(() => sendProcessingQueue(queue, storageService,
-                    databaseRepository, apiRepository, helperFunction));
-              }
-              var isolateModel = IsolateModel(futures, futures.length);
-              return await heavyTask(isolateModel).then((values) async {
-                return true;
-              }).catchError((error, stackTrace) {
-                helperFunction.handleException(error, stackTrace);
-                return false;
-              });
-            } else if (queues.isNotEmpty) {
-              display(
-                  'Atención!',
-                  'No tienes conexción a intenet y tienes ${queues.length} transacciones pendientes.',
-                  helperFunction);
-
-              return Future.value(true);
-            } else {
-              return Future.value(true);
-            }
+            return sendProcessing();
           } catch (error, stackTrace) {
             logDebug(headerDeveloperLogger, 'error----$error');
             helperFunction.handleException(error, stackTrace);
@@ -224,7 +199,24 @@ class WorkmanagerService with FormatDate {
           }
         case 'get_works_completed_and_send':
           try {
-            return Future.value(true);
+            var works = await databaseRepository.completeWorks();
+
+            if (works != null && works.isNotEmpty) {
+              for (var workcode in works) {
+                final response = await apiRepository.status(
+                    request: StatusRequest(workcode, 'complete'));
+
+                if (response is DataFailed) {
+                  helperFunction.handleException(
+                      'workcode $workcode no complete',
+                      StackTrace.fromString(response!.error!));
+                }
+              }
+
+              return Future.value(true);
+            } else {
+              return Future.value(true);
+            }
           } catch (error, stackTrace) {
             helperFunction.handleException(error, stackTrace);
             return Future.value(false);
@@ -256,6 +248,34 @@ class WorkmanagerService with FormatDate {
         backoffPolicyDelay: const Duration(seconds: 20),
         inputData: data,
         constraints: Constraints(networkType: NetworkType.connected));
+  }
+
+  Future<bool> sendProcessing() async {
+    final isConnected = await checkConnection();
+    final queues = await databaseRepository.getAllProcessingQueuesIncomplete();
+    if (isConnected && queues.isNotEmpty) {
+      var futures = <Function>[];
+      for (var queue in queues) {
+        futures.add(() => sendProcessingQueue(queue, storageService,
+            databaseRepository, apiRepository, helperFunction));
+      }
+      var isolateModel = IsolateModel(futures, futures.length);
+      return await heavyTask(isolateModel).then((values) async {
+        return true;
+      }).catchError((error, stackTrace) {
+        helperFunction.handleException(error, stackTrace);
+        return false;
+      });
+    } else if (queues.isNotEmpty) {
+      display(
+          'Atención!',
+          'No tienes conexción a intenet y tienes ${queues.length} transacciones pendientes.',
+          helperFunction);
+
+      return Future.value(true);
+    } else {
+      return Future.value(true);
+    }
   }
 
   Future<void> sendProcessingQueue(
