@@ -148,11 +148,11 @@ class ProcessingQueueBloc
     if (event.processingQueue.code != 'store_transaction_product') {
       await Future.value([
         sendProcessingQueue(event.processingQueue),
-        validateIfServiceIsCompleted(event.processingQueue),
+        //validateIfServiceIsCompleted(event.processingQueue),
       ]);
     } else {
       await Future.value([
-        validateIfServiceIsCompleted(event.processingQueue),
+        //validateIfServiceIsCompleted(event.processingQueue),
       ]);
     }
 
@@ -167,6 +167,7 @@ class ProcessingQueueBloc
         networkBloc?.state is NetworkSuccess &&
         state.status == ProcessingQueueStatus.success) {
       logDebug(headerDeveloperLogger, 'activate get processing from observer');
+      //TODO: [Heider Zapa] remove this line comment
       //_getProcessingQueue();
     }
     emit(state.copyWith(status: ProcessingQueueStatus.success));
