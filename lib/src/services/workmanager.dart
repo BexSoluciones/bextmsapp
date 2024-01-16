@@ -1,15 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:bexdeliveries/core/helpers/index.dart';
-import 'package:bexdeliveries/src/domain/repositories/api_repository.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 
+//core
+import '../../../core/helpers/index.dart';
 //utils
-
 import '../utils/resources/data_state.dart';
 import '../utils/constants/strings.dart';
-
 //domain
 import '../domain/models/isolate.dart';
 import '../domain/models/transaction.dart';
