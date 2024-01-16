@@ -2,17 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:bexdeliveries/src/domain/repositories/api_repository.dart';
-import 'package:bexdeliveries/src/presentation/blocs/network/network_bloc.dart';
-import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:overlay_support/overlay_support.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 
-//core
-import '../../../core/helpers/index.dart';
 //utils
 
 import '../utils/resources/data_state.dart';
@@ -43,7 +35,6 @@ import '../services/storage.dart';
 import '../services/logger.dart';
 
 class WorkmanagerService with FormatDate {
-
   static WorkmanagerService? _instance;
   static Workmanager? _preferences;
 
@@ -101,14 +92,12 @@ class WorkmanagerService with FormatDate {
     }
   }
 
-  executeTask(
-      LocalStorageService storageService,
-      DatabaseRepository databaseRepository,
-      ApiRepository apiRepository) {
+  executeTask(LocalStorageService storageService,
+      DatabaseRepository databaseRepository, ApiRepository apiRepository) {
     if (_preferences == null) return;
     _preferences?.executeTask((task, inputData) async {
       int? totalExecutions;
-      
+
       final storageService = locator<LocalStorageService>();
       final databaseRepository = locator<DatabaseRepository>();
       final apiRepository = locator<ApiRepository>();
@@ -127,9 +116,7 @@ class WorkmanagerService with FormatDate {
         case 'get_processing_queues_and_handle':
           try {
             return sendProcessing(
-               storageService,
-              databaseRepository,
-               apiRepository);
+                storageService, databaseRepository, apiRepository);
           } catch (error, stackTrace) {
             logDebug(headerDeveloperLogger, 'error----$error');
             helperFunction.handleException(error, stackTrace);
@@ -217,24 +204,7 @@ class WorkmanagerService with FormatDate {
           }
         case 'get_works_completed_and_send':
           try {
-            var works = await databaseRepository.completeWorks();
-
-            if (works != null && works.isNotEmpty) {
-              for (var workcode in works) {
-                final response = await apiRepository.status(
-                    request: StatusRequest(workcode, 'complete'));
-
-                if (response is DataFailed) {
-                  helperFunction.handleException(
-                      'workcode $workcode no complete',
-                      StackTrace.fromString(response!.error!));
-                }
-              }
-
-              return Future.value(true);
-            } else {
-              return Future.value(true);
-            }
+            return completeWorks(databaseRepository, apiRepository);
           } catch (error, stackTrace) {
             helperFunction.handleException(error, stackTrace);
             return Future.value(false);
@@ -266,6 +236,35 @@ class WorkmanagerService with FormatDate {
         backoffPolicyDelay: const Duration(seconds: 20),
         inputData: data,
         constraints: Constraints(networkType: NetworkType.connected));
+  }
+
+  Future<bool> completeWorks(DatabaseRepository databaseRepository,
+      ApiRepository apiRepository) async {
+    final isConnected = await checkConnection();
+    if (isConnected) {
+      var queues = await databaseRepository.getAllProcessingQueuesIncomplete();
+
+      if (queues.isEmpty) {
+        var works = await databaseRepository.completeWorks();
+        if (works != null && works.isNotEmpty) {
+          for (var workcode in works) {
+            final response = await apiRepository.status(
+                request: StatusRequest(workcode, 'complete'));
+            if (response is DataFailed) {
+              helperFunction.handleException('workcode $workcode no complete',
+                  StackTrace.fromString(response!.error!));
+            }
+          }
+          return true;
+        } else {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    } else {
+      return true;
+    }
   }
 
   Future<bool> sendProcessing(

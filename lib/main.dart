@@ -98,7 +98,7 @@ import 'src/presentation/widgets/custom_error_widget.dart';
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NotificationService _notificationService = locator<NotificationService>();
 final RemoteConfigService _remoteConfigService = locator<RemoteConfigService>();
-final DatabaseRepository _databaseRepository  = locator<DatabaseRepository>();
+final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 final ApiRepository _apiRepository = locator<ApiRepository>();
 final LoggerService _loggerService = locator<LoggerService>();
 
@@ -132,9 +132,10 @@ void callbackDispatcher() async {
 
   final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
   workmanagerService.executeTask(
-     _storageService,
+    _storageService,
     _databaseRepository,
-    _apiRepository,);
+    _apiRepository,
+  );
 }
 
 Future<void> main() async {
@@ -198,19 +199,20 @@ Future<void> main() async {
   workmanagerService.initialize(callbackDispatcher);
 
   workmanagerService.registerPeriodicTask(
-      '1', 'get_processing_queues_and_handle', const Duration(minutes: 15));
+      '1', 'get_processing_queues_and_handle', const Duration(minutes: 30));
 
   workmanagerService.registerPeriodicTask(
-      '2', 'get_works_completed_and_send', const Duration(minutes: 15));
+      '2', 'get_works_completed_and_send', const Duration(minutes: 40));
 
   var cron = Cron();
   final helperFunction = HelperFunctions();
-  cron.schedule(Schedule.parse('*/15 * * * *'), () async {
+  cron.schedule(Schedule.parse('*/5 * * * *'), () async {
     try {
-      workmanagerService.sendProcessing(
-        _storageService,
-        _databaseRepository,
-        _apiRepository);
+      workmanagerService
+          .sendProcessing(_storageService, _databaseRepository, _apiRepository)
+          .then((value) {
+        workmanagerService.completeWorks(_databaseRepository, _apiRepository);
+      });
     } on SocketException catch (error, stackTrace) {
       helperFunction.handleException(error, stackTrace);
     }
