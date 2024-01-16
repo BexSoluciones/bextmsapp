@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/core/helpers/index.dart';
-import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
-import 'package:bexdeliveries/src/services/workmanager.dart';
 import 'package:cron/cron.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -85,6 +83,7 @@ import 'src/services/analytics.dart';
 import 'src/services/notifications.dart';
 import 'src/services/remote_config.dart';
 import 'src/services/logger.dart';
+import 'src/services/workmanager.dart';
 
 //router
 import 'src/config/router/routes.dart';

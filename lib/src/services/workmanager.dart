@@ -246,13 +246,11 @@ class WorkmanagerService with FormatDate {
         var works = await databaseRepository.completeWorks();
         if (works != null && works.isNotEmpty) {
           for (var workcode in works) {
-            logDebug(headerDeveloperLogger, workcode);
-
             final response = await apiRepository.status(
                 request: StatusRequest(workcode, 'complete'));
-
-            logDebug(headerDeveloperLogger, response!.data!.message);
-            if (response is DataFailed) {
+            if (response is DataSuccess) {
+              await databaseRepository.updateStatusWork(workcode, 'complete');
+            } else {
               helperFunction.handleException('workcode $workcode no complete',
                   StackTrace.fromString(response!.error!));
             }
