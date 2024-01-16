@@ -39,9 +39,6 @@ class WorkmanagerService with FormatDate {
   static Workmanager? _preferences;
 
   final helperFunction = HelperFunctions();
-  final storageService = locator<LocalStorageService>();
-  final databaseRepository = locator<DatabaseRepository>();
-  final apiRepository = locator<ApiRepository>();
 
   static Future<WorkmanagerService?> getInstance() async {
     _instance ??= WorkmanagerService();
@@ -95,7 +92,10 @@ class WorkmanagerService with FormatDate {
     }
   }
 
-  executeTask() {
+  executeTask(
+      LocalStorageService storageService,
+      DatabaseRepository databaseRepository,
+      ApiRepository apiRepository) {
     if (_preferences == null) return;
     _preferences?.executeTask((task, inputData) async {
       int? totalExecutions;
@@ -111,7 +111,10 @@ class WorkmanagerService with FormatDate {
       switch (task) {
         case 'get_processing_queues_and_handle':
           try {
-            return sendProcessing();
+            return sendProcessing(
+               storageService,
+              databaseRepository,
+               apiRepository);
           } catch (error, stackTrace) {
             logDebug(headerDeveloperLogger, 'error----$error');
             helperFunction.handleException(error, stackTrace);
@@ -250,7 +253,10 @@ class WorkmanagerService with FormatDate {
         constraints: Constraints(networkType: NetworkType.connected));
   }
 
-  Future<bool> sendProcessing() async {
+  Future<bool> sendProcessing(
+      LocalStorageService storageService,
+      DatabaseRepository databaseRepository,
+      ApiRepository apiRepository) async {
     final isConnected = await checkConnection();
     final queues = await databaseRepository.getAllProcessingQueuesIncomplete();
     if (isConnected && queues.isNotEmpty) {

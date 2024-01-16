@@ -65,14 +65,19 @@ class ProcessingQueueDao {
       'error': Colors.red,
       'done': Colors.green
     };
+
     final processingQueueListCode = await db!.rawQuery('''
         SELECT count(*) as cant, code FROM $tableProcessingQueues GROUP BY code ORDER BY code DESC; 
       ''');
     final processingQueueListStatus = await db.rawQuery('''
         SELECT count(*) as cant, task FROM $tableProcessingQueues GROUP BY task ORDER BY task DESC; 
       ''');
+    final totalTransactions = await db.rawQuery('''
+    SELECT count(*) as cant FROM $tableProcessingQueues;
+  ''');
     var pqc = [];
     var pqs = [];
+    var pqa = [];
 
     for (var p in processingQueueListCode) {
       if (handleNames[p['code']] != null) {
@@ -82,6 +87,13 @@ class ProcessingQueueDao {
           'cant': p['cant']
         });
       }
+    }
+    for (var p in totalTransactions) {
+        pqa.add({
+          'name': 'Otras',
+          'cant': p['cant'],
+          'color': Colors.deepPurple,
+        });
     }
     for (var p in processingQueueListStatus) {
       if (handleNames[p['task']] != null) {
@@ -93,7 +105,7 @@ class ProcessingQueueDao {
         });
       }
     }
-    yield [...pqc, ...pqs];
+    yield [...pqc, ...pqs,...pqa];
   }
 
   Future<int> countProcessingQueueIncompleteToTransactions() async {
@@ -108,6 +120,12 @@ class ProcessingQueueDao {
         ]);
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues.length;
+  }
+
+  Future<int> countAllTransactions() async {
+    final db = await _appDatabase.streamDatabase;
+    final result = await db!.query(tableProcessingQueues);
+    return result.length;
   }
 
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete() async {
