@@ -1,5 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:bexdeliveries/core/helpers/index.dart';
+import 'package:bexdeliveries/src/domain/repositories/api_repository.dart';
+import 'package:bexdeliveries/src/presentation/blocs/network/network_bloc.dart';
+import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:overlay_support/overlay_support.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -35,6 +43,7 @@ import '../services/storage.dart';
 import '../services/logger.dart';
 
 class WorkmanagerService with FormatDate {
+
   static WorkmanagerService? _instance;
   static Workmanager? _preferences;
 
@@ -99,6 +108,12 @@ class WorkmanagerService with FormatDate {
     if (_preferences == null) return;
     _preferences?.executeTask((task, inputData) async {
       int? totalExecutions;
+      
+      final storageService = locator<LocalStorageService>();
+      final databaseRepository = locator<DatabaseRepository>();
+      final apiRepository = locator<ApiRepository>();
+
+      final helperFunction = HelperFunctions();
 
       try {
         totalExecutions = storageService.getInt("totalExecutions");
