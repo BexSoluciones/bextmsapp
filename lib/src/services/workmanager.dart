@@ -92,7 +92,7 @@ class WorkmanagerService with FormatDate {
     }
   }
 
-  executeTask(ProcessingQueue queue,
+  executeTask(
       LocalStorageService storageService,
       DatabaseRepository databaseRepository,
       ApiRepository apiRepository) {
@@ -111,7 +111,7 @@ class WorkmanagerService with FormatDate {
       switch (task) {
         case 'get_processing_queues_and_handle':
           try {
-            return sendProcessing(queue,
+            return sendProcessing(
                storageService,
               databaseRepository,
                apiRepository);
@@ -253,7 +253,7 @@ class WorkmanagerService with FormatDate {
         constraints: Constraints(networkType: NetworkType.connected));
   }
 
-  Future<bool> sendProcessing(ProcessingQueue queue,
+  Future<bool> sendProcessing(
       LocalStorageService storageService,
       DatabaseRepository databaseRepository,
       ApiRepository apiRepository) async {

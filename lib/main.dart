@@ -96,7 +96,6 @@ import 'src/presentation/views/global/undefined_view.dart';
 import 'src/presentation/widgets/custom_error_widget.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
-final ProcessingQueue _processingQueue = locator<ProcessingQueue>();
 final NotificationService _notificationService = locator<NotificationService>();
 final RemoteConfigService _remoteConfigService = locator<RemoteConfigService>();
 final DatabaseRepository _databaseRepository  = locator<DatabaseRepository>();
@@ -132,7 +131,7 @@ void callbackDispatcher() async {
   // ChargerStatus.instance.startPowerChangesListener();
 
   final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
-  workmanagerService.executeTask(_processingQueue,
+  workmanagerService.executeTask(
      _storageService,
     _databaseRepository,
     _apiRepository,);
@@ -208,7 +207,7 @@ Future<void> main() async {
   final helperFunction = HelperFunctions();
   cron.schedule(Schedule.parse('*/15 * * * *'), () async {
     try {
-      workmanagerService.sendProcessing(_processingQueue,
+      workmanagerService.sendProcessing(
         _storageService,
         _databaseRepository,
         _apiRepository);
