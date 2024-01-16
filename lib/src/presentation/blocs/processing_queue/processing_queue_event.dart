@@ -4,7 +4,7 @@ abstract class ProcessingQueueEvent {}
 
 class ProcessingQueueAdd extends ProcessingQueueEvent {
   final ProcessingQueue processingQueue;
-  ProcessingQueueAdd({ required this.processingQueue });
+  ProcessingQueueAdd({ required this.processingQueue});
 }
 
 class ProcessingQueueObserve extends ProcessingQueueEvent {}

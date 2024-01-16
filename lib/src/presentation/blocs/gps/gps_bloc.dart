@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -119,12 +118,12 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
                 if (distance >= distances) {
                   lastRecordedLocation =
                       LatLng(position.latitude, position.longitude);
-                  saveLocation('location', position);
+                  saveLocation('location', position, 0);
                 }
               } else {
                 lastRecordedLocation =
                     LatLng(position.latitude, position.longitude);
-                saveLocation('location', position);
+                saveLocation('location', position, 1);
               }
             }
 
@@ -261,7 +260,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     }
   }
 
-  Future<void> saveLocation(String type, Position position) async {
+  Future<void> saveLocation(String type, Position position, int send) async {
     try {
       var lastLocation = await _databaseRepository.getLastLocation();
 
@@ -292,7 +291,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
             calculateDateBetweenTwoLatLng(location.time, lastLocation.time);
 
         var speed = ((distance / seconds) * 18) / 5;
-
         if (diff == true) {
           if (speed < 10) {
             _storageService.setBool('is_walking', true);
@@ -309,8 +307,18 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       }
 
       var count = await _databaseRepository.countLocationsManager();
+      if (count && send == 0) {
+        var processingQueue = ProcessingQueue(
+            body: await _databaseRepository.getLocationsToSend(),
+            task: 'incomplete',
+            code: 'store_locations',
+            createdAt: now(),
+            updatedAt: now());
 
-      if (count) {
+        await _databaseRepository.insertProcessingQueue(processingQueue);
+        await _databaseRepository.updateLocationsManager();
+      } else {
+        await _databaseRepository.insertLocation(location);
         var processingQueue = ProcessingQueue(
             body: await _databaseRepository.getLocationsToSend(),
             task: 'incomplete',

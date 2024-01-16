@@ -75,7 +75,11 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
         if (imageCount >= 3) {
           emit(CameraCaptureFailure(error: 'Solo se permiten 3 fotos'));
         } else {
+          await _controller.setFocusMode(FocusMode.locked);
+          await _controller.setExposureMode(ExposureMode.locked);
           var picture = await _controller.takePicture();
+          await _controller.setFocusMode(FocusMode.locked);
+          await _controller.setExposureMode(ExposureMode.locked);
           var photo = Photo(name: picture.name, path: picture.path);
           await compressAndSaveImage(photo.path);
           await databaseRepository.insertPhoto(photo);

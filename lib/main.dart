@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'package:bexdeliveries/core/helpers/index.dart';
+import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
 import 'package:bexdeliveries/src/services/workmanager.dart';
+import 'package:cron/cron.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -12,7 +15,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:workmanager/workmanager.dart';
 // import 'dart:io';
 // import 'dart:ui';
 // import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -28,8 +30,6 @@ import 'src/config/theme/app.dart';
 import 'src/domain/repositories/api_repository.dart';
 import 'src/domain/repositories/database_repository.dart';
 import 'src/domain/models/notification.dart';
-import 'src/domain/models/transaction.dart' as t;
-import 'src/domain/models/processing_queue.dart';
 
 //cubits
 import 'src/presentation/blocs/theme/theme_bloc.dart';
@@ -98,6 +98,8 @@ import 'src/presentation/widgets/custom_error_widget.dart';
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NotificationService _notificationService = locator<NotificationService>();
 final RemoteConfigService _remoteConfigService = locator<RemoteConfigService>();
+final DatabaseRepository _databaseRepository  = locator<DatabaseRepository>();
+final ApiRepository _apiRepository = locator<ApiRepository>();
 final LoggerService _loggerService = locator<LoggerService>();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -129,7 +131,10 @@ void callbackDispatcher() async {
   // ChargerStatus.instance.startPowerChangesListener();
 
   final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
-  workmanagerService.executeTask();
+  workmanagerService.executeTask(
+     _storageService,
+    _databaseRepository,
+    _apiRepository,);
 }
 
 Future<void> main() async {
@@ -193,16 +198,23 @@ Future<void> main() async {
   workmanagerService.initialize(callbackDispatcher);
 
   workmanagerService.registerPeriodicTask(
-      '1',
-      'get_processing_queues_with_error_and_handle',
-      const Duration(minutes: 15));
-  
+      '1', 'get_processing_queues_and_handle', const Duration(minutes: 15));
+
   workmanagerService.registerPeriodicTask(
-      '2',
-      'get_processing_queues_with_incomplete_and_handle',
-      const Duration(minutes: 15));
+      '2', 'get_works_completed_and_send', const Duration(minutes: 15));
 
-
+  var cron = Cron();
+  final helperFunction = HelperFunctions();
+  cron.schedule(Schedule.parse('*/15 * * * *'), () async {
+    try {
+      workmanagerService.sendProcessing(
+        _storageService,
+        _databaseRepository,
+        _apiRepository);
+    } on SocketException catch (error, stackTrace) {
+      helperFunction.handleException(error, stackTrace);
+    }
+  });
 
   runApp(MyApp(databaseCubit: databaseCubit));
 }
@@ -228,7 +240,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final DatabaseCubit databaseCubit;
-  bool _isInForeground = true;
 
   _MyAppState(this.databaseCubit);
 
@@ -335,12 +346,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    _isInForeground = state == AppLifecycleState.resumed;
   }
 
   @override
