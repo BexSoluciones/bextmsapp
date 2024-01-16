@@ -145,6 +145,9 @@ class ProcessingQueueBloc
     event.processingQueue.id = id;
     logInfo(headerDeveloperLogger, event.processingQueue.toJson().toString());
 
+
+
+
     if (event.processingQueue.code != 'store_transaction_product') {
       await Future.value([
         sendProcessingQueue(event.processingQueue),

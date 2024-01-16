@@ -274,7 +274,6 @@ class ApiService {
         headers: result.headers);
   }
 
-
   Future<Response<AccountResponse>> accounts() async {
     const extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};

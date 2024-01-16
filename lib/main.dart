@@ -206,11 +206,13 @@ Future<void> main() async {
 
   var cron = Cron();
   final helperFunction = HelperFunctions();
-  cron.schedule(Schedule.parse('*/5 * * * *'), () async {
+  cron.schedule(Schedule.parse('*/15 * * * *'), () async {
     try {
       workmanagerService
           .sendProcessing(_storageService, _databaseRepository, _apiRepository)
           .then((value) {
+
+            logDebug(headerDeveloperLogger, value.toString());
         workmanagerService.completeWorks(_databaseRepository, _apiRepository);
       });
     } on SocketException catch (error, stackTrace) {

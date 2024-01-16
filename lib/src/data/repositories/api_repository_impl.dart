@@ -198,7 +198,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }
 
   @override
-  Future<DataState<StatusResponse>> status({
+  Future<DataState<StatusResponse>?> status({
     required StatusRequest request,
   }) {
     return getStateOf<StatusResponse>(
