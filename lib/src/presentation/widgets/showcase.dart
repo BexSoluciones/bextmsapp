@@ -69,7 +69,7 @@ class _BuildShowcaseIconButtonState extends State<BuildShowcaseIconButton> {
 }
 
 // Crear el Showcase para llamar al teléfono del cliente
-Widget buildPhoneShowcase(Work work, GlobalKey one) {
+Widget buildPhoneShowcase(Work work, GlobalKey one, BuildContext context) {
   return BuildShowcaseIconButton(
     keys: one,
     description: 'Llama al teléfono del cliente!',
@@ -78,7 +78,16 @@ Widget buildPhoneShowcase(Work work, GlobalKey one) {
       if (work.cellphone != null && work.cellphone != '0') {
         launchUrl(Uri.parse('tel://${work.cellphone}'));
       } else {
-        summaryCubit.error(work.id!, 'No tiene número de celular');
+        //summaryCubit.error(work.id!, 'No tiene número de celular');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+              'No tiene número de celular',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
       }
     },
   );
@@ -105,7 +114,7 @@ Widget buildMapShowcase(BuildContext context, Work work, GlobalKey three) {
 }
 
 // Crear el Showcase para enviar un mensaje de WhatsApp al cliente
-Widget buildWhatsAppShowcase(Work work, GlobalKey two) {
+Widget buildWhatsAppShowcase(Work work, GlobalKey two,BuildContext context) {
   return BuildShowcaseIconButton(
     keys: two,
     description: 'Deja un mensaje de WhatsApp!',
@@ -117,12 +126,20 @@ Widget buildWhatsAppShowcase(Work work, GlobalKey two) {
           'Hola!, ¿Cómo estás?',
         );
       } else {
-        summaryCubit.error(work.id!, 'No tiene número de celular');
+        //summaryCubit.error(work.id!, 'No tiene número de celular');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+              'No tiene número de celular',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
       }
     },
   );
 }
-
 // Crear el Showcase para la opción "Publicar"
 Widget buildPublishShowcase(GlobalKey four, int summaryId) {
   return BuildShowcaseIconButton(
