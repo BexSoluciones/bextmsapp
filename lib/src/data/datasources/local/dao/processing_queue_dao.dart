@@ -141,12 +141,14 @@ class ProcessingQueueDao {
   Future<bool> validateIfProcessingQueueIsIncomplete() async {
     final db = await _appDatabase.streamDatabase;
     final processingQueueList = await db!.query(tableProcessingQueues,
-        where: 'task = ? AND code != ? AND code != ? AND code != ?',
+        where: 'task = ? OR task = ? OR task = ? AND code != ? AND code != ? AND code != ?',
         whereArgs: [
           'incomplete',
+          'error',
+          'processing'
           'store_locations',
           'store_logout',
-          'get_prediction'
+          'get_prediction',
         ]);
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues.isNotEmpty;

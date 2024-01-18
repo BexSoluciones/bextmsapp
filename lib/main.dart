@@ -210,8 +210,7 @@ Future<void> main() async {
       workmanagerService
           .sendProcessing(_storageService, _databaseRepository, _apiRepository)
           .then((value) {
-
-            logDebug(headerDeveloperLogger, value.toString());
+        logDebug(headerDeveloperLogger, value.toString());
         workmanagerService.completeWorks(_databaseRepository, _apiRepository);
       });
     } on SocketException catch (error, stackTrace) {
@@ -442,14 +441,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(
             create: (context) => RejectCubit(
                 locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+                BlocProvider.of<ProcessingQueueBloc>(context),
+                BlocProvider.of<GpsBloc>(context)
+            ),
           ),
           BlocProvider(
             create: (context) => RespawnCubit(
                 locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+                BlocProvider.of<ProcessingQueueBloc>(context),
+                BlocProvider.of<GpsBloc>(context)
+            ),
           ),
           BlocProvider(
             create: (context) => CollectionCubit(

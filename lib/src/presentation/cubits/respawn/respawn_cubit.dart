@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:location_repository/location_repository.dart';
 
 //blocs
+import '../../blocs/gps/gps_bloc.dart';
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
 
 //utils
@@ -32,12 +33,10 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 class RespawnCubit extends Cubit<RespawnState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
-  final LocationRepository _locationRepository;
+  final GpsBloc gpsBloc;
 
-  CurrentUserLocationEntity? currentLocation;
-
-  RespawnCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc)
+  RespawnCubit(this._databaseRepository,
+      this._processingQueueBloc, this.gpsBloc)
       : super(const RespawnLoading());
 
   Future<void> getReasons() async {
@@ -106,10 +105,10 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
       end: null,
     );
 
-    currentLocation = await _locationRepository.getCurrentLocation();
+    var currentLocation = gpsBloc.state.lastKnownLocation;
 
     transaction.latitude = currentLocation!.latitude.toString();
-    transaction.longitude = currentLocation!.longitude.toString();
+    transaction.longitude = currentLocation.longitude.toString();
 
     await _databaseRepository.insertTransaction(transaction);
 

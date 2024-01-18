@@ -186,9 +186,6 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   }
 
   Future<void> validate(InventoryArgument arguments) async {
-
-    print(isBusy);
-
     if (isBusy) return;
 
     await run(() async {

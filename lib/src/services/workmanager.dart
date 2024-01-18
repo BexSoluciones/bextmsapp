@@ -240,9 +240,8 @@ class WorkmanagerService with FormatDate {
       ApiRepository apiRepository) async {
     final isConnected = await checkConnection();
     if (isConnected) {
-      var queues = await databaseRepository.getAllProcessingQueuesIncomplete();
-
-      if (queues.isEmpty) {
+      var queues = await databaseRepository.validateIfProcessingQueueIsIncomplete();
+      if (queues) {
         var works = await databaseRepository.completeWorks();
         if (works != null && works.isNotEmpty) {
           for (var workcode in works) {
