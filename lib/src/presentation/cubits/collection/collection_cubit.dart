@@ -210,7 +210,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         if (arguments.summary.typeOfCharge == 'CREDITO' && total == 0) {
           _storageService.setBool('firmRequired', false);
           _storageService.setBool('photoRequired', false);
-          confirmTransaction(arguments);
+          return confirmTransaction(arguments);
         }
 
         if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
@@ -231,16 +231,18 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           _storageService.setBool('photoRequired', false);
 
           if (total != 0 && total <= state.totalSummary!.toDouble()) {
-            confirmTransaction(arguments);
+            return confirmTransaction(arguments);
           } else {
-            emit(CollectionWaiting(totalSummary: state.totalSummary, enterpriseConfig: state.enterpriseConfig));
+            emit(CollectionWaiting(
+                totalSummary: state.totalSummary,
+                enterpriseConfig: state.enterpriseConfig));
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
           if (total <= state.totalSummary!.toDouble()) {
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
-            confirmTransaction(arguments);
+            return confirmTransaction(arguments);
           } else {
             emit(CollectionFailed(
                 totalSummary: state.totalSummary,
@@ -252,7 +254,9 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           if (total >= state.totalSummary!.toDouble()) {
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
-            emit(CollectionWaiting(totalSummary: state.totalSummary, enterpriseConfig: state.enterpriseConfig));
+            emit(CollectionWaiting(
+                totalSummary: state.totalSummary,
+                enterpriseConfig: state.enterpriseConfig));
           } else {
             emit(CollectionFailed(
                 totalSummary: state.totalSummary,
@@ -393,7 +397,9 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         }
       }
 
-      if (payments.isEmpty && (status == 'delivery' || status == 'partial')) {
+      if (arguments.summary.typeOfCharge != 'CREDITO' &&
+          payments.isEmpty &&
+          (status == 'delivery' || status == 'partial')) {
         emit(CollectionFailed(
             totalSummary: state.totalSummary,
             enterpriseConfig: state.enterpriseConfig,

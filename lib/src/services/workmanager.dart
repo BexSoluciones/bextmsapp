@@ -54,7 +54,7 @@ class WorkmanagerService with FormatDate {
     Function callbackDispatcher,
   ) {
     if (_preferences == null) return;
-    _preferences?.initialize(callbackDispatcher, isInDebugMode: true);
+    _preferences?.initialize(callbackDispatcher, isInDebugMode: false);
   }
 
   Future<bool> checkConnection() async {
