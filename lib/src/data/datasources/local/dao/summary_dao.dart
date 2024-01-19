@@ -27,8 +27,8 @@ class SummaryDao {
   Future<List<Summary>> getAllSummariesByOrderNumber(int workId) async {
     final db = await _appDatabase.streamDatabase;
     var summaryList = await db!.rawQuery(''' 
-            SELECT $tableSummaries.*, SUM(DISTINCT $tableSummaries.${SummaryFields.grandTotalCopy}) as ${SummaryFields.grandTotalCopy},
-            COUNT(DISTINCT $tableSummaries.${SummaryFields.coditem}) AS count,
+            SELECT $tableSummaries.*, SUM($tableSummaries.${SummaryFields.grandTotalCopy}) as ${SummaryFields.grandTotalCopy},
+            COUNT($tableSummaries.${SummaryFields.coditem}) AS count,
             CASE id_packing IS NOT NULL WHEN 1 THEN 1 ELSE 0 END validate,
             CASE transactions.id IS NOT NULL WHEN 1 THEN 1 ELSE 0 END has_transaction
             FROM $tableSummaries 
@@ -233,7 +233,8 @@ class SummaryDao {
     final summaryList = await db!.rawQuery('''
         SELECT $tableSummaries.*
         FROM $tableSummaries
-        WHERE $tableSummaries.${SummaryFields.workId} = $workId AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
+        WHERE $tableSummaries.${SummaryFields.workId} = $workId 
+        AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
      ''');
 
     var sum = 0.0;
@@ -243,7 +244,7 @@ class SummaryDao {
       sum += summary.grandTotal;
     }
 
-    return sum;
+    return double.parse(sum.toStringAsFixed(2));
   }
 
   Future<int> getTotalPackageSummaries(String orderNumber) async {

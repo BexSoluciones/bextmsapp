@@ -141,29 +141,28 @@ class ProcessingQueueBloc
 
   void _add(ProcessingQueueAdd event, emit) async {
     logDebug(headerDeveloperLogger, 'add event dispatch');
-    var id = await _databaseRepository.insertProcessingQueue(event.processingQueue);
+    var id =
+        await _databaseRepository.insertProcessingQueue(event.processingQueue);
     event.processingQueue.id = id;
     logInfo(headerDeveloperLogger, event.processingQueue.toJson().toString());
 
-
-
-
-    if (event.processingQueue.code != 'store_transaction_product') {
-      await Future.value([
-        sendProcessingQueue(event.processingQueue),
-        //validateIfServiceIsCompleted(event.processingQueue),
-      ]);
-    } else {
-      await Future.value([
-        //validateIfServiceIsCompleted(event.processingQueue),
-      ]);
+    if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
+      if (event.processingQueue.code != 'store_transaction_product') {
+        await Future.value([
+          sendProcessingQueue(event.processingQueue),
+          validateIfServiceIsCompleted(event.processingQueue),
+        ]);
+      } else {
+        await Future.value([
+          validateIfServiceIsCompleted(event.processingQueue),
+        ]);
+      }
     }
 
     emit(state.copyWith(status: ProcessingQueueStatus.success));
   }
 
   void _observe(event, emit) {
-
     logDebug(headerMainLogger, 'activating pq from main');
 
     if (networkBloc != null &&
@@ -1011,13 +1010,10 @@ class ProcessingQueueBloc
     try {
       if (p.code == 'store_transaction' ||
           p.code == 'store_transaction_product') {
-        logDebug(headerDeveloperLogger, 'entro a validar');
         var body = jsonDecode(p.body!);
         String? workcode = body['workcode'];
         if (workcode != null) {
-          logDebug(headerDeveloperLogger, 'entro con $workcode');
           var isLast = await _databaseRepository.checkLastTransaction(workcode);
-          logDebug(headerDeveloperLogger, 'is last $isLast');
           if (isLast) {
             var processingQueue = ProcessingQueue(
               body: jsonEncode({'workcode': workcode, 'status': 'complete'}),

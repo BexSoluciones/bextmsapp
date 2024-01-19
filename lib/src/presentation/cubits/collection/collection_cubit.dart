@@ -215,10 +215,10 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
         if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
-          if (total == state.totalSummary!.toDouble()) {
+          if (total == state.totalSummary) {
             _storageService.setBool('firmRequired', false);
             _storageService.setBool('photoRequired', false);
-            confirmTransaction(arguments);
+            return confirmTransaction(arguments);
           } else {
             emit(CollectionFailed(
                 totalSummary: state.totalSummary,
