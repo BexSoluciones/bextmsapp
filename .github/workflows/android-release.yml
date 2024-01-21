@@ -77,7 +77,6 @@ jobs:
         with:
           name: appbundle
           path: build/app/outputs/bundle/release/app-release.aab
-  jobs:
     release:
       name: Release app to internal track
       needs: [ build ]
