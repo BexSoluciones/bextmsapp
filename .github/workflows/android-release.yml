@@ -12,7 +12,7 @@ jobs:
     name: Version Number
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
       - name: Retrieve Tags and Branch History
         run: |
           git config remote.origin.url @github.com/${{github.repository}}>https://x-access-token:${{secrets.TOKEN_GITHUB}}@github.com/${{github.repository}}
