@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v1
       - name: Retrieve Tags and Branch History
         run: |
-          git config remote.origin.url @github.com/${{github.repository">https://x-access-token:${{secrets.TOKEN_GITHUB}}@github.com/${{github.repository}}
+          git config remote.origin.url @github.com/${{github.repository}}">https://x-access-token:${{secrets.TOKEN_GITHUB}}@github.com/${{github.repository}}
           git fetch --prune --depth=10000
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0.9.7
@@ -31,35 +31,3 @@ jobs:
         with:
           name: gitversion
           path: version.txt
-#  build:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      # 9
-#      - uses: actions/setup-java@v3
-#        with:
-#          distribution: 'zulu'
-#          java-version: "12.x"
-#          cache : 'gradle'
-#      # 10
-#      - uses: subosito/flutter-action@v2
-#        with:
-#          # 11
-#          flutter-version: "3.16.3"
-#          channel: 'stable'
-#          cache: true
-#      # 12
-#      - name: Get dependencies
-#        run: flutter pub get
-#
-#      # Runs a set of commands using the runners shell
-#      - name: Start release build
-#        run: flutter build appbundle
-#
-#      #Create a release to github
-#      - name: Create Release
-#        uses: ncipollo/release-action@v1
-#        with:
-#          artifacts: "build/app/outputs/flutter-apk/app-release.apk,build/app/outputs/bundle/release/app-release.aab,build/ios_build.tar.gz"
-#          tag: v1.0.${{ github.run_number }}
-#          token: ${{ secrets.TOKEN_GITHUB }}
