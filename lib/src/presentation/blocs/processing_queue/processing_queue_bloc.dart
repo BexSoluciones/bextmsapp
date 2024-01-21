@@ -144,8 +144,6 @@ class ProcessingQueueBloc
     var id =
         await _databaseRepository.insertProcessingQueue(event.processingQueue);
     event.processingQueue.id = id;
-    logInfo(headerDeveloperLogger, event.processingQueue.toJson().toString());
-
     if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
       if (event.processingQueue.code != 'store_transaction_product') {
         await Future.value([
@@ -163,13 +161,9 @@ class ProcessingQueueBloc
   }
 
   void _observe(event, emit) {
-    logDebug(headerMainLogger, 'activating pq from main');
-
     if (networkBloc != null &&
         networkBloc?.state is NetworkSuccess &&
         state.status == ProcessingQueueStatus.success) {
-      logDebug(headerDeveloperLogger, 'activate get processing from observer');
-      //TODO: [Heider Zapa] remove this line comment
       //_getProcessingQueue();
     }
     emit(state.copyWith(status: ProcessingQueueStatus.success));
