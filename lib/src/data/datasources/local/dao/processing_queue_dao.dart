@@ -17,11 +17,95 @@ class ProcessingQueueDao {
     return processingQueues;
   }
 
-  Stream<List<ProcessingQueue>> getAllProcessingQueues() async* {
+  Future<List<ProcessingQueue>> getAllProcessingQueues(
+      String? code, String? task) async {
+    final db = await _appDatabase.streamDatabase;
+    var processingQueueList = <Map<String, dynamic>>[];
+    if (code != null) {
+      processingQueueList = await db!
+          .query(tableProcessingQueues, where: 'code = ?', whereArgs: [code]);
+    } else if (task != null) {
+      processingQueueList = await db!
+          .query(tableProcessingQueues, where: 'task = ?', whereArgs: [task]);
+    } else if (code != null && task != null) {
+      processingQueueList = await db!.query(tableProcessingQueues,
+          where: 'task = ? and code = ?', whereArgs: [task, code]);
+    } else {
+      processingQueueList = await db!.query(tableProcessingQueues);
+    }
+
+    final processingQueues = parseProcessingQueues(processingQueueList);
+    return processingQueues;
+  }
+
+  Stream<List<ProcessingQueue>> watchAllProcessingQueues() async* {
     final db = await _appDatabase.streamDatabase;
     final processingQueueList = await db!.query(tableProcessingQueues);
     final processingQueues = parseProcessingQueues(processingQueueList);
     yield processingQueues;
+  }
+
+  Stream<List<Map<String, dynamic>>>
+      getProcessingQueueIncompleteToTransactions() async* {
+    final db = await _appDatabase.streamDatabase;
+    final handleNames = {
+      'store_transaction_start': 'Transacciones de inicio de servicio',
+      'store_transaction_arrived': 'Transacciones de llegada de cliente',
+      'store_transaction_summary': 'Transacciones de facturas vistas',
+      'store_transaction': 'Transacciones',
+      'store_locations': 'Localizaciones',
+      'processing': 'Transacciones pendientes',
+      'incomplete': 'Transacciones incompletas',
+      'error': 'Transacciones con error',
+      'done': 'Total'
+    };
+    final handleColors = {
+      'processing' : Colors.orange,
+      'incomplete': Colors.orange,
+      'error': Colors.red,
+      'done': Colors.green
+    };
+
+    final processingQueueListCode = await db!.rawQuery('''
+        SELECT count(*) as cant, code FROM $tableProcessingQueues GROUP BY code ORDER BY code DESC; 
+      ''');
+    final processingQueueListStatus = await db.rawQuery('''
+        SELECT count(*) as cant, task FROM $tableProcessingQueues GROUP BY task ORDER BY task DESC; 
+      ''');
+    final totalTransactions = await db.rawQuery('''
+    SELECT count(*) as cant FROM $tableProcessingQueues;
+  ''');
+    var pqc = [];
+    var pqs = [];
+    var pqa = [];
+
+    for (var p in processingQueueListCode) {
+      if (handleNames[p['code']] != null) {
+        pqc.add({
+          'name': handleNames[p['code']],
+          'code': p['code'],
+          'cant': p['cant']
+        });
+      }
+    }
+    for (var p in totalTransactions) {
+        pqa.add({
+          'name': 'Otras',
+          'cant': p['cant'],
+          'color': Colors.deepPurple,
+        });
+    }
+    for (var p in processingQueueListStatus) {
+      if (handleNames[p['task']] != null) {
+        pqs.add({
+          'name': handleNames[p['task']],
+          'task': p['task'],
+          'cant': p['cant'],
+          'color': handleColors[p['task']]
+        });
+      }
+    }
+    yield [...pqc, ...pqs,...pqa];
   }
 
   Future<int> countProcessingQueueIncompleteToTransactions() async {
@@ -38,8 +122,15 @@ class ProcessingQueueDao {
     return processingQueues.length;
   }
 
+  Future<int> countAllTransactions() async {
+    final db = await _appDatabase.streamDatabase;
+    final result = await db!.query(tableProcessingQueues);
+    return result.length;
+  }
+
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete() async {
     final db = await _appDatabase.streamDatabase;
+
     final processingQueueList = await db!.query(tableProcessingQueues,
         where: 'task = ? or task = ? or task = ?',
         whereArgs: ['incomplete', 'error', 'processing']);
@@ -50,12 +141,14 @@ class ProcessingQueueDao {
   Future<bool> validateIfProcessingQueueIsIncomplete() async {
     final db = await _appDatabase.streamDatabase;
     final processingQueueList = await db!.query(tableProcessingQueues,
-        where: 'task = ? AND code != ? AND code != ? AND code != ?',
+        where: 'task = ? OR task = ? OR task = ? AND code != ? AND code != ? AND code != ?',
         whereArgs: [
           'incomplete',
+          'error',
+          'processing'
           'store_locations',
           'store_logout',
-          'get_prediction'
+          'get_prediction',
         ]);
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues.isNotEmpty;
@@ -72,7 +165,6 @@ class ProcessingQueueDao {
 
   Future<void> emptyProcessingQueue() async {
     final db = await _appDatabase.streamDatabase;
-    await db!.delete(tableProcessingQueues, where: 'code = "store_locations"');
     await db!.delete(tableProcessingQueues, where: 'code = "store_locations"');
     return Future.value();
   }

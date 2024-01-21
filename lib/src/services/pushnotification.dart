@@ -10,8 +10,8 @@ class PushNotificationService {
       try {
         print(message.notification);
         print(message.notification!.title);
-      } catch (e) {
-        print(e);
+      } catch (e, stackTrace) {
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
     });
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
@@ -20,7 +20,6 @@ class PushNotificationService {
         print(message.notification);
       } catch (e, stackTrace) {
         await FirebaseCrashlytics.instance.recordError(e, stackTrace);
-        print(e);
       }
     });
   }

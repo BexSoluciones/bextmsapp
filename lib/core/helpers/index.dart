@@ -1,35 +1,74 @@
+import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'dart:math';
+import 'dart:core' hide Error;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 import 'package:location/location.dart' as loc;
+import 'package:yaml/yaml.dart';
+
+//blocs
+import '../../src/domain/models/requests/login_request.dart';
+import '../../src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 
 //domain
+import '../../src/domain/models/processing_queue.dart';
 import '../../src/domain/models/work.dart';
+import '../../src/domain/models/error.dart';
+import '../../src/domain/models/requests/history_order_updated_request.dart';
+import '../../src/domain/models/requests/routing_request.dart';
+import '../../src/domain/abstracts/format_abstract.dart';
+import '../../src/domain/repositories/database_repository.dart';
+import '../../src/domain/repositories/api_repository.dart';
+
+//utils
+import '../../src/utils/constants/colors.dart';
+import '../../src/utils/constants/strings.dart';
+import '../../src/utils/resources/data_state.dart';
 
 //widgets
-import '../../src/domain/repositories/database_repository.dart';
 import '../../src/presentation/widgets/show_map_direction_widget.dart';
+import '../../src/presentation/widgets/custom_dialog.dart';
+import '../../src/presentation/widgets/update_dialog_widget.dart';
 
 //locator
 import '../../src/locator.dart';
 import '../../src/services/storage.dart';
 import '../../src/services/navigation.dart';
+import '../../src/services/logger.dart';
 
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
 final LocationRepository _locationRepository = locator<LocationRepository>();
+final ApiRepository _apiRepository = locator<ApiRepository>();
 
-class HelperFunctions {
+class HelperFunctions with FormatDate {
   loc.Location location = loc.Location();
+
+  Future<bool> checkConnection() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      } else {
+        return false;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
 
   Future<Map<String, dynamic>?> getDevice() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -58,6 +97,80 @@ class HelperFunctions {
       }
     }
     return null;
+  }
+
+  Future<void> login() async {
+    var username = _storageService.getString('username');
+    var password = _storageService.getString('password');
+
+    var response = await _apiRepository.login(
+        request: LoginRequest(
+      username!,
+      password!,
+    ));
+
+    if (response is DataSuccess) {
+      final login = response!.data!.login;
+      _storageService.setString('token', login.token);
+    } else {
+      logDebug(headerDeveloperLogger, response!.error!);
+    }
+  }
+
+  Future<FirebaseRemoteConfig> setupRemoteConfig() async {
+    final remoteConfig = FirebaseRemoteConfig.instance;
+
+    RemoteConfigValue(null, ValueSource.valueStatic);
+    return remoteConfig;
+  }
+
+  void versionCheck(context) async {
+    final isConnected = await checkConnection();
+    if (isConnected) {
+      var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
+      var currentVersion = double.parse(
+          yaml['version'].trim().replaceAll('.', '').split('+')[0]);
+
+      //Get Latest version info from firebase config
+      final remoteConfig = await setupRemoteConfig();
+
+      try {
+        // Using default duration to force fetching from remote server.
+        await remoteConfig.setConfigSettings(RemoteConfigSettings(
+          fetchTimeout: const Duration(seconds: 0),
+          minimumFetchInterval: Duration.zero,
+        ));
+        await remoteConfig.fetchAndActivate();
+
+        var force = remoteConfig.getBool('force_activate');
+        var forceUpdate = remoteConfig.getBool('force_update');
+        var message = remoteConfig.getString('message');
+
+        var newVersion = double.parse(remoteConfig
+            .getString('force_update_current_version')
+            .trim()
+            .replaceAll('.', ''));
+
+        if (force && newVersion > currentVersion) {
+          await UpdateDialog(skipUpdate: forceUpdate, message: message)
+              .showVersionDialog(context);
+        }
+      } on PlatformException catch (exception, stackTrace) {
+        await handleException(exception, stackTrace);
+      } catch (exception, stackTrace) {
+        await handleException(exception, stackTrace);
+      }
+    }
+  }
+
+  Future<void> handleException(dynamic error, StackTrace stackTrace) async {
+    var errorData = Error(
+      errorMessage: error.toString(),
+      stackTrace: stackTrace.toString(),
+      createdAt: now(),
+    );
+    await _databaseRepository.insertError(errorData);
+    await FirebaseCrashlytics.instance.recordError(e, stackTrace);
   }
 
   Future<String> get _localPath async {
@@ -279,7 +392,7 @@ class HelperFunctions {
           double.parse(work.longitude!),
         ),
         destinationTitle: work.customer,
-        origin: Coords(location!.latitude, location.longitude),
+        origin: Coords(location.latitude, location.longitude),
         originTitle: 'Origen',
         waypoints: null,
         directionsMode: DirectionsMode.driving,
@@ -363,53 +476,133 @@ class HelperFunctions {
       {required String workcode,
       required int historyId,
       required var queue}) async {
-    //   List<Work>? w = [];
-    //   w = await _apiRepository.routing(historyId, workcode, queue);
-    //
-    //   if (w != null) {
-    //     await database.insertWorks(w);
-    //     _storageService.setBool('$workcode-routing', false);
-    //   } else {
-    //     queue.task = 'error';
-    //     queue.error = 'routing not found.';
-    //   }
-    //
-    //   var updateHoBody = jsonDecode(queue.body);
-    //
-    //   bool? historyOrder;
-    //   historyOrder = await repository.updateHistoryOrder(
-    //       updateHoBody['workcode'], updateHoBody['count'], queue);
-    //   if (historyOrder != null) {
-    //     queue.task = 'done';
-    //   } else {
-    //     queue.task = 'error';
-    //     queue.error = 'historyOrder Null';
-    //   }
+    final responseR = await _apiRepository.routing(
+        request: RoutingRequest(historyId, workcode));
+
+    if (responseR is DataSuccess) {
+      if (responseR.data!.works.isNotEmpty) {
+        await _databaseRepository.insertWorks(responseR.data!.works);
+        _storageService.setBool('$workcode-routing', false);
+      } else {
+        queue.task = 'error';
+        queue.error = 'routing not found.';
+      }
+    }
+
+    var updateHoBody = jsonDecode(queue.body);
+    final responseH = await _apiRepository.historyOrderUpdated(
+        request: HistoryOrderUpdatedRequest(workcode, updateHoBody['count']));
+    if (responseH is DataSuccess) {
+      queue.task = 'done';
+    } else {
+      queue.task = 'error';
+      queue.error = 'historyOrder Null';
+    }
   }
 
   Future<void> useHistoric(
     String workcode,
     int historyId,
   ) async {
-    // final queueBloc = BlocProvider.of<QueueBloc>(
-    //     _navigationService.navigatorKey.currentState!.overlay!.context);
-    // var processingQueue = ProcessingQueue(
-    //     body: jsonEncode({'workcode': workcode, 'history_id': historyId}),
-    //     task: 'incomplete',
-    //     code: 'store_post_routing',
-    //     created_at: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-    //     location: null);
-    //
-    // queueBloc.add(AddTaskEvent(processingQueue));
-    // var processingQueue2 = ProcessingQueue(
-    //     body: jsonEncode({'workcode': workcode, 'count': 1}),
-    //     task: 'incomplete',
-    //     code: 'store_history_used',
-    //     created_at: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-    //     location: null);
-    //
-    // queueBloc.add(AddTaskEvent(procesingQueue2));
-    // _storageService.setBool('$workcode-routing', true);
-    // _storageService.setBool('$workcode-historic', true);
+    final queueBloc = BlocProvider.of<ProcessingQueueBloc>(
+        _navigationService.navigatorKey.currentState!.overlay!.context);
+    var processingQueue = ProcessingQueue(
+      body: jsonEncode({'workcode': workcode, 'history_id': historyId}),
+      task: 'incomplete',
+      code: 'store_post_routing',
+      createdAt: now(),
+      updatedAt: now(),
+    );
+
+    queueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue));
+
+    var processingQueue2 = ProcessingQueue(
+      body: jsonEncode({'workcode': workcode, 'count': 1}),
+      task: 'incomplete',
+      code: 'store_history_used',
+      createdAt: now(),
+      updatedAt: now(),
+    );
+
+    queueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue2));
+    _storageService.setBool('$workcode-routing', true);
+    _storageService.setBool('$workcode-historic', true);
+  }
+
+  double _toRadians(double degrees) {
+    return degrees * (pi / 180);
+  }
+
+  double calculateDistanceInMetersGeo(
+      LatLng currentLocation, double lat, double long) {
+    const earthRadius = 6371.0;
+    var lat1 = currentLocation.latitude;
+    var lon1 = currentLocation.longitude;
+    var lat2 = lat;
+    var lon2 = long;
+    var dLat = _toRadians(lat2 - lat1);
+    var dLon = _toRadians(lon2 - lon1);
+
+    var a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_toRadians(lat1)) *
+            cos(_toRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+
+    var c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    var distanceInKilometers = earthRadius * c;
+    var distanceInMeters = distanceInKilometers * 1000;
+
+    return distanceInMeters;
+  }
+
+  bool isWithinRadiusGeo(
+      LatLng currentLocation, double lat, double long, int ratio) {
+    const earthRadius = 6371.0;
+    final radiusInMeters = ratio; // Radio en metros
+    var lat1 = currentLocation.latitude;
+    var lon1 = currentLocation.longitude;
+    var lat2 = lat;
+    var lon2 = long;
+    var dLat = _toRadians(lat2 - lat1);
+    var dLon = _toRadians(lon2 - lon1);
+
+    var a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_toRadians(lat1)) *
+            cos(_toRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+
+    var c = 2 * asin(sqrt(a));
+    var distanceInMeters = earthRadius * c * 1000;
+
+    return distanceInMeters <= radiusInMeters;
+  }
+
+  void showDialogWithDistance(
+      BuildContext context, double distanceInMeters, int ratio) async {
+    String distanceRemaining;
+    distanceInMeters = distanceInMeters - ratio.toDouble();
+    if (distanceInMeters < 1000) {
+      distanceRemaining = '${distanceInMeters.round()} metros';
+    } else {
+      var distanceInKilometers = distanceInMeters / 1000;
+      distanceRemaining = '${distanceInKilometers.toStringAsFixed(2)} km';
+    }
+
+    await showDialog(
+      context: context,
+      builder: (context) => CustomDialog(
+        title: 'No has llegado a la zona',
+        message: 'Te hacen falta: $distanceRemaining',
+        elevatedButton1: kPrimaryColor,
+        elevatedButton2: Colors.green,
+        cancelarButtonText: '',
+        completarButtonText: 'Aceptar',
+        icon: Icons.map,
+        colorIcon: kPrimaryColor,
+      ),
+    );
   }
 }

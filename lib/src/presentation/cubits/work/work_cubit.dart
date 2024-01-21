@@ -29,8 +29,7 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
 
   CurrentUserLocationEntity? currentLocation;
 
-  WorkCubit(this._databaseRepository)
-      : super(const WorkLoading(), []);
+  WorkCubit(this._databaseRepository) : super(const WorkLoading(), []);
 
   int page = 0;
 
@@ -48,6 +47,11 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
       var confirm = _storageService.getBool('$workcode-confirm');
 
       data = works;
+
+      for (var d in data) {
+        d.summaries = await _databaseRepository.getAllSummariesByWorkcode(
+            d.id!, d.customer!);
+      }
 
       final visited = data
           .where((element) =>

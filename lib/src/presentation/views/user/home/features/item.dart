@@ -278,13 +278,12 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                 true;
 
         if (state.historyOrder != null && showAgain == false) {
-          _navigationService.goTo(
-            AppRoutes.history,
-            arguments: HistoryOrder.fromJson(state.historyOrder!.toJson()),
-          );
+          _navigationService.goTo(AppRoutes.history,
+              arguments: HistoryArgument(
+                  work: work,
+                  likelihood: state.historyOrder!.likelihood!,
+                  differents: state.historyOrder!.different));
         } else {
-
-          print(widget.work.id);
           _navigationService.goTo(AppRoutes.work,
               arguments: WorkArgument(work: widget.work));
         }

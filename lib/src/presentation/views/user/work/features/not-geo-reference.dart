@@ -12,18 +12,18 @@ import '../../../../cubits/work/work_cubit.dart';
 //widget
 import 'sub-item.dart';
 
-class NotGeoreferencedViewWork extends StatefulWidget {
-  const NotGeoreferencedViewWork({Key? key, required this.workcode})
+class NotGeoReferencedViewWork extends StatefulWidget {
+  const NotGeoReferencedViewWork({Key? key, required this.workcode})
       : super(key: key);
 
   final String workcode;
 
   @override
-  NotGeoreferencedViewWorkState createState() =>
-      NotGeoreferencedViewWorkState();
+  NotGeoReferencedViewWorkState createState() =>
+      NotGeoReferencedViewWorkState();
 }
 
-class NotGeoreferencedViewWorkState extends State<NotGeoreferencedViewWork> {
+class NotGeoReferencedViewWorkState extends State<NotGeoReferencedViewWork> {
   bool isLoading = false;
 
   @override

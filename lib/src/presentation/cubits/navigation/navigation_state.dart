@@ -1,82 +1,93 @@
 part of 'navigation_cubit.dart';
 
-abstract class NavigationState extends Equatable {
-  final List<Work> works;
-  final String? error;
+enum NavigationStatus { initial, loading, success, failure }
+
+extension NavigationStateX on NavigationStatus {
+  bool get isInitial => this == NavigationStatus.initial;
+  bool get isLoading => this == NavigationStatus.loading;
+  bool get isSuccess => this == NavigationStatus.success;
+  bool get isError => this == NavigationStatus.failure;
+}
+
+class NavigationState extends Equatable {
+  final NavigationStatus? status;
+  //CONTROLLERS
   final MapController? mapController;
-  final CarouselController? buttonCarouselController;
-  final double rotation;
+  final CarouselController? carouselController;
+  //LISTS
+  final List<Work>? works;
   final List<PolylineLayer>? layer;
   final List<Marker>? markers;
-  final List<LatLng>? kWorksList;
+  final List<LatLng>? kWorkList;
   final List<Map>? carouselData;
   final List<LayerMoodle>? model;
-  List<Polyline>? Polylines = [];
-  final int pageIndex;
+  final List<Polyline>? polylines;
+  //VARIABLES
+  final double? rotation;
+  final int? pageIndex;
+  final String? error;
 
-  final bool isLoadingFullScreenNavigation;
-  final bool isLoadingPosition;
-
-  NavigationState(
-      {this.works = const [],
-      this.isLoadingFullScreenNavigation = false,
-      this.isLoadingPosition = false,
+  const NavigationState(
+      {this.status,
+      this.works,
       this.mapController,
-      this.rotation = 0,
-      this.buttonCarouselController,
+      this.rotation,
+      this.carouselController,
       this.layer,
       this.markers,
-      this.kWorksList,
+      this.kWorkList,
       this.carouselData,
       this.model,
-        this.Polylines,
-      this.pageIndex = 0,
+      this.polylines,
+      this.pageIndex,
       this.error});
 
   @override
   List<Object?> get props => [
+        status,
         works,
-        isLoadingFullScreenNavigation,
-        isLoadingPosition,
         mapController,
-        buttonCarouselController,
+        carouselController,
         rotation,
         layer,
         markers,
-        kWorksList,
+        kWorkList,
         carouselData,
         model,
-        Polylines,
+        polylines,
         pageIndex,
         error
       ];
-}
 
-class NavigationLoading extends NavigationState {
-  NavigationLoading();
-}
-
-class NavigationLoadingMap extends NavigationState {
-   NavigationLoadingMap();
-}
-
-class NavigationSuccess extends NavigationState {
-   NavigationSuccess(
-      {super.works,
-      super.isLoadingFullScreenNavigation,
-      super.isLoadingPosition,
-      super.mapController,
-      super.buttonCarouselController,
-      super.layer,
-      super.markers,
-      super.rotation,
-      super.kWorksList,
-      super.carouselData,
-        super.Polylines,
-      super.pageIndex,
-      super.model});
-}
-
-class NavigationFailed extends NavigationState {
-   NavigationFailed({super.error});
+  NavigationState copyWith({
+    NavigationStatus? status,
+    MapController? mapController,
+    CarouselController? carouselController,
+    List<Work>? works,
+    List<PolylineLayer>? layer,
+    List<LatLng>? kWorkList,
+    List<Marker>? markers,
+    List<Polyline>? polylines,
+    List<Map>? carouselData,
+    List<LayerMoodle>? model,
+    double? rotation,
+    int? pageIndex,
+    String? error,
+  }) {
+    return NavigationState(
+      status: status ?? this.status,
+      mapController: mapController ?? this.mapController,
+      carouselController: carouselController ?? this.carouselController,
+      works: works ?? this.works,
+      layer: layer ?? this.layer,
+      kWorkList: kWorkList ?? this.kWorkList,
+      markers: markers ?? this.markers,
+      polylines: polylines ?? this.polylines,
+      carouselData: carouselData ?? this.carouselData,
+      model: model ?? this.model,
+      rotation: rotation ?? this.rotation,
+      pageIndex: pageIndex ?? this.pageIndex,
+      error: error ?? this.error,
+    );
+  }
 }

@@ -24,15 +24,12 @@ import '../../../services/navigation.dart';
 
 part 'partial_state.dart';
 
-final NavigationService _navigationService  = locator<NavigationService>();
+final NavigationService _navigationService = locator<NavigationService>();
 
 class PartialCubit extends BaseCubit<PartialState, List<ReasonProduct>?> {
   final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
 
-  PartialCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc)
+  PartialCubit(this._databaseRepository)
       : super(const PartialLoading(), null);
 
   Future<void> init(InventoryArgument arguments) async {
@@ -41,7 +38,7 @@ class PartialCubit extends BaseCubit<PartialState, List<ReasonProduct>?> {
     await run(() async {
       final summaries =
           await _databaseRepository.getAllSummariesByOrderNumberMoved(
-              arguments.work.id!, arguments.orderNumber);
+              arguments.work.id!, arguments.summary.orderNumber);
 
       final reasons = await _databaseRepository.getAllReasons();
 
@@ -53,17 +50,24 @@ class PartialCubit extends BaseCubit<PartialState, List<ReasonProduct>?> {
               nameItem: e.nameItem))
           .toList();
 
-      emit(PartialSuccess(summaries: summaries, products: list, reasons: reasons));
+      emit(PartialSuccess(
+          summaries: summaries, products: list, reasons: reasons));
     });
   }
 
   Future<void> goToCollection(InventoryArgument arguments) async {
     if (isBusy) return;
     await run(() async {
-      final found = state.products!.where((element) => element.controller.text.isEmpty).toList();
+      final found = state.products!
+          .where((element) => element.controller.text.isEmpty)
+          .toList();
 
-      if(found.isNotEmpty){
-        emit(PartialFailed(summaries: state.summaries, reasons: state.reasons, error: 'Debes completar todos los motivos de devolución'));
+      if (found.isNotEmpty) {
+        emit(PartialFailed(
+            summaries: state.summaries,
+            products: state.products,
+            reasons: state.reasons,
+            error: 'Debes completar todos los motivos de devolución'));
       } else {
         arguments.summaries = state.summaries;
         arguments.r = state.products;

@@ -1,9 +1,6 @@
-import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
-import 'package:bexdeliveries/src/domain/models/summary_report.dart';
 
-import '../../domain/models/news.dart';
 import '../../domain/repositories/database_repository.dart';
 import '../datasources/local/app_database.dart';
 
@@ -20,6 +17,11 @@ import '../../domain/models/location.dart';
 import '../../domain/models/photo.dart';
 import '../../domain/models/client.dart';
 import '../../domain/models/account.dart';
+import '../../domain/models/news.dart';
+import '../../domain/models/summary_report.dart';
+import '../../domain/models/notification.dart';
+import '../../domain/models/note.dart';
+import '../../domain/models/error.dart';
 
 class DatabaseRepositoryImpl implements DatabaseRepository {
   final AppDatabase _appDatabase;
@@ -46,6 +48,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   Future<List<Work>> findAllWorksPaginatedByWorkcode(
       String workcode, int page) async {
     return _appDatabase.workDao.findAllWorksPaginatedByWorkcode(workcode, page);
+  }
+
+  @override
+  Future<List<String>?> completeWorks() async {
+    return _appDatabase.workDao.completeWorks();
   }
 
   @override
@@ -128,10 +135,22 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<List<Summary>> getAllSummariesByWorkcode(int workId, String customer) async {
+    return _appDatabase.summaryDao.getAllSummariesByWorkcode(workId, customer);
+  }
+
+  @override
   Future<List<Summary>> getAllInventoryByOrderNumber(
       int workId, String orderNumber) async {
     return _appDatabase.summaryDao
         .getAllInventoryByOrderNumber(workId, orderNumber);
+  }
+
+  @override
+  Future<List<Summary>> getAllInventoryByPackage(
+      int workId, String orderNumber) async {
+    return _appDatabase.summaryDao
+        .getAllInventoryByPackage(workId, orderNumber);
   }
 
   @override
@@ -142,10 +161,27 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<List<Summary>> watchAllItemsPackage(
+      String orderNumber, String packing, String idPacking) {
+    return _appDatabase.summaryDao
+        .watchAllItemsPackage(orderNumber, packing, idPacking);
+  }
+
+  @override
   Future<List<Summary>> getAllSummariesByOrderNumberMoved(
       int workId, String orderNumber) async {
     return _appDatabase.summaryDao
         .getAllSummariesByOrderNumberMoved(workId, orderNumber);
+  }
+
+  @override
+  Future<int> getTotalPackageSummaries(String orderNumber) async {
+    return _appDatabase.summaryDao.getTotalPackageSummaries(orderNumber);
+  }
+
+  @override
+  Future<int> getTotalPackageSummariesLoose(String orderNumber) async {
+    return _appDatabase.summaryDao.getTotalPackageSummariesLoose(orderNumber);
   }
 
   @override
@@ -220,6 +256,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<bool> checkLastProduct(int transactionId) {
+    return _appDatabase.transactionDao.checkLastProduct(transactionId);
+  }
+
+  @override
   Future<String?> getDiffTime(int workId) async {
     return _appDatabase.transactionDao.getDiffTime(workId);
   }
@@ -259,6 +300,12 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<int> countLeftClients(String workcode) {
     return _appDatabase.transactionDao.countLeftClients(workcode);
+  }
+
+  @override
+  Future<bool> verifyTransactionExistence(int workId, String orderNumber) {
+    return _appDatabase.transactionDao
+        .verifyTransactionExistence(workId, orderNumber);
   }
 
   //REASONS
@@ -325,8 +372,13 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   //PROCESSING QUEUE
   @override
-  Stream<List<ProcessingQueue>> getAllProcessingQueues() {
-    return _appDatabase.processingQueueDao.getAllProcessingQueues();
+  Future<List<ProcessingQueue>> getAllProcessingQueues(String? code, String? task) {
+    return _appDatabase.processingQueueDao.getAllProcessingQueues(code, task);
+  }
+
+  @override
+  Stream<List<ProcessingQueue>> watchAllProcessingQueues() {
+    return _appDatabase.processingQueueDao.watchAllProcessingQueues();
   }
 
   @override
@@ -338,6 +390,18 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   Future<int> countProcessingQueueIncompleteToTransactions() {
     return _appDatabase.processingQueueDao
         .countProcessingQueueIncompleteToTransactions();
+  }
+
+  @override
+  Stream<List<Map<String, dynamic>>> getProcessingQueueIncompleteToTransactions() {
+    return _appDatabase.processingQueueDao
+        .getProcessingQueueIncompleteToTransactions();
+  }
+
+  @override
+  Future<bool> validateIfProcessingQueueIsIncomplete() {
+    return _appDatabase.processingQueueDao
+        .validateIfProcessingQueueIsIncomplete();
   }
 
   @override
@@ -362,7 +426,6 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   Stream<List<Location>> watchAllLocations() {
     return _appDatabase.locationDao.watchAllLocations();
   }
-
 
   @override
   Future<List<Location>> getAllLocations() async {
@@ -443,6 +506,73 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<void> emptyPhotos() async {
     return _appDatabase.photoDao.emptyPhotos();
+  }
+
+  //NOTES
+  @override
+  Future<List<Note>> getAllNotes() async {
+    return _appDatabase.noteDao.getAllNotes();
+  }
+
+  @override
+  Future<Note?> findNote(String zoneId) async {
+    return _appDatabase.noteDao.findNote(zoneId);
+  }
+
+  @override
+  Future<int> insertNote(Note note) async {
+    return _appDatabase.noteDao.insertNote(note);
+  }
+
+  @override
+  Future<int> updateNote(Note note) async {
+    return _appDatabase.noteDao.updateNote(note);
+  }
+
+  @override
+  Future<int> deleteNote(Note note) async {
+    return _appDatabase.noteDao.deleteNote(note);
+  }
+
+  @override
+  Future<void> insertNotes(List<Note> notes) async {
+    return _appDatabase.noteDao.insertNotes(notes);
+  }
+
+  @override
+  Future<void> emptyNotes() async {
+    return _appDatabase.noteDao.emptyNotes();
+  }
+
+  //ERROR
+  @override
+  Future<List<Error>> getAllErrors() async {
+    return _appDatabase.errorDao.getAllErrors();
+  }
+
+  @override
+  Future<int> insertError(Error error) async {
+    return _appDatabase.errorDao.insertError(error);
+  }
+
+  @override
+  Future<int> updateError(Error error) async {
+    return _appDatabase.errorDao.updateError(error);
+  }
+
+  @override
+  Future<int> deleteError(Error error) async {
+    return _appDatabase.errorDao.deleteError(error);
+  }
+
+  @override
+  Future<void> insertErrors(List<Error> errors) async {
+    return _appDatabase.errorDao.insertErrors(errors);
+  }
+
+  @override
+  Future<void> emptyErrors() async {
+    return _appDatabase.errorDao.emptyErrors();
   }
 
   //CLIENTS

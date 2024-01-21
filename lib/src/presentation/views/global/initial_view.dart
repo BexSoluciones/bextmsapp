@@ -1,9 +1,10 @@
-import 'package:bexdeliveries/src/presentation/cubits/login/login_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
-import 'package:flutter/services.dart';
+
+//core
+import '../../../../core/helpers/index.dart';
 
 //utils
 import '../../../utils/constants/nums.dart';
@@ -11,6 +12,7 @@ import '../../../utils/constants/gaps.dart';
 
 //cubits
 import '../../cubits/initial/initial_cubit.dart';
+import '../../cubits/login/login_cubit.dart';
 
 //bloc
 import '../../blocs/network/network_bloc.dart';
@@ -31,12 +33,16 @@ class InitialViewState extends State<InitialView> {
   late LoginCubit loginCubit;
   bool isLoading = false;
   bool showSuffix = true;
+  final helperFunctions = HelperFunctions();
   final FocusNode _focus = FocusNode();
   final TextEditingController companyNameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      helperFunctions.versionCheck(context);
+    });
     _focus.addListener(_onFocusChange);
   }
 

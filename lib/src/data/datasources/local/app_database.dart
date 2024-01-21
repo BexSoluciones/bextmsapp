@@ -1,17 +1,13 @@
 import 'dart:convert';
-import 'package:bexdeliveries/src/domain/models/transaction_validate.dart';
+import 'package:bexdeliveries/src/services/logger.dart';
+import 'package:bexdeliveries/src/utils/constants/strings.dart';
+import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 import 'package:sqlbrite/sqlbrite.dart';
 import 'package:synchronized/synchronized.dart';
-
-//utils
-import '../../../domain/abstracts/format_abstract.dart';
-import '../../../domain/models/confirm.dart';
-import '../../../domain/models/zone.dart';
-import '../../../utils/constants/strings.dart';
 
 //models
 import '../../../domain/models/work.dart';
@@ -30,6 +26,12 @@ import '../../../domain/models/news.dart';
 import '../../../domain/models/notification.dart';
 import '../../../domain/models/summary_report.dart';
 import '../../../domain/models/transaction.dart';
+import '../../../domain/models/confirm.dart';
+import '../../../domain/models/zone.dart';
+import '../../../domain/models/transaction_validate.dart';
+import '../../../domain/models/note.dart';
+import '../../../domain/models/error.dart';
+import '../../../domain/abstracts/format_abstract.dart';
 
 //services
 import '../../../locator.dart';
@@ -50,6 +52,8 @@ part '../local/dao/client_dao.dart';
 part '../local/dao/account_dao.dart';
 part '../local/dao/news_dao.dart';
 part '../local/dao/notification_dao.dart';
+part '../local/dao/note_dao.dart';
+part '../local/dao/error_dao.dart';
 
 class AppDatabase {
   static BriteDatabase? _streamDatabase;
@@ -320,7 +324,7 @@ class AppDatabase {
 
   final migrations = [
     '''
-      CREATE INDEX workcode_index ON $tableWorks(${WorkFields.workcode})
+      CREATE INDEX IF NOT EXISTS workcode_index ON $tableWorks(${WorkFields.workcode})
     ''',
     '''
       CREATE TABLE IF NOT EXISTS $tablePhotos (
@@ -341,6 +345,24 @@ class AppDatabase {
     ''',
     '''
       ALTER TABLE $tableProcessingQueues ADD COLUMN ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tableNotes (
+        ${NoteFields.id} INTEGER PRIMARY KEY,
+        ${NoteFields.latitude} TEXT DEFAULT NULL,
+        ${NoteFields.longitude} TEXT DEFAULT NULL,
+        ${NoteFields.observation} TEXT DEFAULT NULL,
+        ${NoteFields.images} TEXT DEFAULT NULL,
+        ${NoteFields.zoneId} INTEGER DEFAULT NULL
+      )
+    ''',
+    '''
+    CREATE TABLE IF NOT EXISTS $tableErrors (
+      ${ErrorFields.id} INTEGER PRIMARY KEY,
+      ${ErrorFields.errorMessage} TEXT DEFAULT NULL,
+      ${ErrorFields.stackTrace}  TEXT DEFAULT NULL,
+      ${ErrorFields.createdAt} TEXT DEFAULT NULL
+     )
     '''
   ];
 
@@ -426,6 +448,10 @@ class AppDatabase {
   NewsDao get newsDao => NewsDao(instance);
 
   NotificationDao get notificationDao => NotificationDao(instance);
+
+  NoteDao get noteDao => NoteDao(instance);
+
+  ErrorDao get errorDao => ErrorDao(instance);
 
   void close() {
     _database = null;

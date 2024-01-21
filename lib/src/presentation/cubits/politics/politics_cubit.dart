@@ -22,17 +22,10 @@ class PoliticsCubit extends BaseCubit<PoliticsState, String?> {
     if (isBusy) return;
 
     await run(() async {
-
       try {
-        print('aqui esta el error');
-        print(state.route);
-
         _storageService.setBool('first_time', true);
         var token  = _storageService.getString('token');
         String route;
-
-        print('**************');
-        print(token);
 
         if (token != null) {
           route = AppRoutes.home;

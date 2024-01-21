@@ -6,18 +6,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:showcaseview/showcaseview.dart';
+
+//utils
+import '../../../../../../utils/constants/strings.dart';
 
 //blocs
 import '../../../../../blocs/location/location_bloc.dart';
 import '../../../../../blocs/network/network_bloc.dart';
-import '../../../../../blocs/processing_queue/processing_queue_bloc.dart';
 
 //cubit
 import '../../../../../cubits/navigation/navigation_cubit.dart';
 import '../../../../../cubits/general/general_cubit.dart';
 
 //domain
+import '../../../../../../domain/models/arguments.dart';
 import '../../../../../../domain/models/enterprise_config.dart';
 
 //widgets
@@ -105,10 +109,10 @@ class _MapPageState extends State<MapPage> {
         appBar: buildAppBar,
         body: BlocBuilder<NavigationCubit, NavigationState>(
           builder: (context, navigationState) {
-            if (navigationState.runtimeType == NavigationLoading) {
+            if (navigationState.status == NavigationStatus.loading) {
               return const Center(child: CupertinoActivityIndicator());
-            } else if (navigationState.runtimeType == NavigationSuccess ||
-                navigationState.runtimeType == NavigationFailed) {
+            } else if (navigationState.status == NavigationStatus.success ||
+                navigationState.status == NavigationStatus.failure) {
               return _buildBody(size, navigationState);
             } else {
               return const SizedBox();
@@ -129,42 +133,54 @@ class _MapPageState extends State<MapPage> {
             icon: const Icon(Icons.arrow_back_ios_new),
             onPressed: () {
               _navigationService.goBack();
-              context.read<NavigationCubit>().clean();
             }),
-      title: BlocBuilder<NavigationCubit, NavigationState>(
-        builder: (context, navigationState) {
-          if (navigationState is NavigationLoading) {
-            // Show loading indicator
-            return const Row(
-              children: [
-                CupertinoActivityIndicator(),
-
-              ],
-            );
-          } else if (navigationState is NavigationSuccess) {
-            // Show client count
-            return Text('Clientes a visitar: ${navigationState.works.length}');
-          } else {
-            // Handle other states or return an empty widget
-            return const SizedBox();
-          }
-        },
-      ),
+        title: BlocSelector<NavigationCubit, NavigationState, bool>(
+          selector: (state) => state.status == NavigationStatus.success,
+          builder: (context, condition) {
+            var works = context.read<NavigationCubit>().state.works;
+            return condition
+                ? Text('Clientes a visitar: ${works!.length}')
+                : const Row(
+                    children: [
+                      CupertinoActivityIndicator(),
+                    ],
+                  );
+          },
+        ),
         actions: [
-          Showcase(
-              key: widget.one,
-              disableMovingAnimation: true,
-              title: 'Navegación completa!',
-              description:
-                  'Ingresa a la navegación completa y deja que te guiemos!',
-              child: IconButton(
-                  icon: const Icon(Icons.directions),
-                  onPressed: () {
-                    var navigationCubit = context.read<NavigationCubit>();
-                    var work = navigationCubit
-                        .state.works[navigationCubit.state.pageIndex];
-                    context.read<NavigationCubit>().showMaps(context, work);
-                  })),
+          BlocBuilder<NavigationCubit, NavigationState>(
+            builder: (context, navigationState) {
+              if (navigationState.status == NavigationStatus.loading) {
+                return const Row(
+                  children: [
+                    CupertinoActivityIndicator(),
+                  ],
+                );
+              } else if (navigationState.status == NavigationStatus.success ||
+                  navigationState.status == NavigationStatus.failure) {
+                // Show client count
+                return Showcase(
+                    key: widget.one,
+                    disableMovingAnimation: true,
+                    title: 'Navegación completa!',
+                    description:
+                        'Ingresa a la navegación completa y deja que te guiemos!',
+                    child: IconButton(
+                        icon: const Icon(Icons.directions),
+                        onPressed: () {
+                          print(navigationState.pageIndex);
+
+                          var work = navigationState
+                              .works![navigationState.pageIndex ?? 0];
+                          _navigationService.goTo(AppRoutes.summaryNavigation,
+                              arguments: SummaryNavigationArgument(work: work));
+                        }));
+              } else {
+                // Handle other states or return an empty widget
+                return const SizedBox();
+              }
+            },
+          ),
         ],
       );
 
@@ -181,14 +197,14 @@ class _MapPageState extends State<MapPage> {
                       metadata.data!.isEmpty)) {
                 return const LoadingIndicator(
                   message:
-                      'Loading Settings...\n\nSeeing this screen for a long time?\nThere may be a misconfiguration of the\nstore. Try disabling caching and deleting\n faulty stores.',
+                      'Cargando configuración...\n\n¿Ves esta pantalla durante mucho tiempo?\nPuede haber una mala configuración del\n la tienda. Intente deshabilitar el almacenamiento en caché y eliminar\n tiendas defectuosas.',
                 );
               }
 
               final String urlTemplate = generalState.currentStore != null &&
                       metadata.data != null
                   ? metadata.data!['sourceURL']!
-                  : 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}@2x?access_token={accessToken}';
+                  : 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png';
 
               return BlocBuilder<NavigationCubit, NavigationState>(
                   builder: (context, state) => SingleChildScrollView(
@@ -230,11 +246,11 @@ class _MapPageState extends State<MapPage> {
             }));
   }
 
-  Widget _buildBodyNetworkSuccess(Size size, state, bool offline,
-      String urlTemplate, generalState, metadata) {
+  Widget _buildBodyNetworkSuccess(Size size, NavigationState state,
+      bool offline, String urlTemplate, generalState, metadata) {
     return Stack(
       children: [
-        state.works.isNotEmpty
+        state.works != null && state.works!.isNotEmpty
             ? SizedBox(
                 width: double.infinity,
                 height: MediaQuery.of(context).size.height * 1.0,
@@ -242,7 +258,9 @@ class _MapPageState extends State<MapPage> {
                   mapController: state.mapController,
                   options: MapOptions(
                       keepAlive: true,
-                      center: state.markers[1].point,
+                      center: state.markers != null
+                          ? state.markers![1].point
+                          : null,
                       maxZoom: 18,
                       zoom: 9.2,
                       interactiveFlags:
@@ -254,13 +272,11 @@ class _MapPageState extends State<MapPage> {
                           _streamController.sink.add(zoom);
                         }
                       },
-                      onTap: (position, location) {
-                        //TODO:: notes for transporter to route
+                      onTap: (position, location) async {
                         try {
-                          if (kDebugMode) {
-                            print(location.latitude);
-                            print(location.longitude);
-                          }
+                          var position =
+                              LatLng(location.latitude, location.longitude);
+                          await navigationCubit.createNote(position);
                         } catch (e) {
                           if (kDebugMode) {
                             print(e);
@@ -280,34 +296,34 @@ class _MapPageState extends State<MapPage> {
                             ? widget.enterpriseConfig!.mapbox!
                             : 'sk.eyJ1IjoiYmV4aXRhY29sMiIsImEiOiJjbDVnc3ltaGYwMm16M21wZ21rMXg1OWd6In0.Dwtkt3r6itc0gCXDQ4CVxg',
                       },
-                      tileProvider: generalState.currentStore != null
-                          ? FMTC.instance(state.currentStore!).getTileProvider(
-                                FMTCTileProviderSettings(
-                                  behavior: CacheBehavior.values
-                                      .byName(metadata.data!['behaviour']!),
-                                  cachedValidDuration: int.parse(
-                                            metadata.data!['validDuration']!,
-                                          ) ==
-                                          0
-                                      ? Duration.zero
-                                      : Duration(
-                                          days: int.parse(
-                                            metadata.data!['validDuration']!,
-                                          ),
-                                        ),
-                                  maxStoreLength: int.parse(
-                                    metadata.data!['maxLength']!,
-                                  ),
-                                ),
-                              )
-                          : NetworkNoRetryTileProvider(),
+                      // tileProvider: generalState.currentStore != null
+                      //     ? FMTC.instance(state.currentStore!).getTileProvider(
+                      //           FMTCTileProviderSettings(
+                      //             behavior: CacheBehavior.values
+                      //                 .byName(metadata.data!['behaviour']!),
+                      //             cachedValidDuration: int.parse(
+                      //                       metadata.data!['validDuration']!,
+                      //                     ) ==
+                      //                     0
+                      //                 ? Duration.zero
+                      //                 : Duration(
+                      //                     days: int.parse(
+                      //                       metadata.data!['validDuration']!,
+                      //                     ),
+                      //                   ),
+                      //             maxStoreLength: int.parse(
+                      //               metadata.data!['maxLength']!,
+                      //             ),
+                      //           ),
+                      //         )
+                      //     : NetworkNoRetryTileProvider(),
                     ),
                     //...state.layer,
                     PolylineLayer(
-                      polylines: state.Polylines,
+                      polylines: state.polylines ?? [],
                     ),
                     MarkerLayer(
-                      markers: state.markers,
+                      markers: state.markers ?? [],
                     ),
                   ],
                 ))
@@ -315,18 +331,19 @@ class _MapPageState extends State<MapPage> {
                 path: 'assets/animations/58404-geo-location-icon.json',
                 message: 'No hay clientes con geolocalización.'),
         state.carouselData != null &&
-                state.carouselData.isNotEmpty &&
-                state.works.isNotEmpty
+                state.carouselData!.isNotEmpty &&
+                state.works != null &&
+                state.works!.isNotEmpty
             ? CarouselSlider(
                 items: List<Widget>.generate(
-                    state.carouselData.length,
+                    state.carouselData!.length,
                     (index) => CarouselCard(
-                        work:  state.works[index] ?? 999,
-                        index: state.carouselData[index]['index'],
-                        distance:state.carouselData[index]['distance'],
-                        duration:  state.carouselData[index]['duration'],
+                        work: state.works![index],
+                        index: state.carouselData![index]['index'],
+                        distance: state.carouselData![index]['distance'],
+                        duration: state.carouselData![index]['duration'],
                         context: context)),
-                carouselController: state.buttonCarouselController,
+                carouselController: state.carouselController,
                 options: CarouselOptions(
                   height: 100,
                   viewportFraction: 0.6,

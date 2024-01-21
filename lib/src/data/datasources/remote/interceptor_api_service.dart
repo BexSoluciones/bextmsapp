@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:bexdeliveries/src/presentation/cubits/home/home_cubit.dart';
+import 'package:bexdeliveries/src/services/logger.dart';
+import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -47,14 +50,15 @@ class Logging extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+    logDebug(headerDeveloperLogger, 'init error');
+    logDebug(headerDeveloperLogger, err.type.toString());
+    logDebug(headerDeveloperLogger, err.error.toString());
+    logDebug(headerDeveloperLogger, err.message.toString());
     if (_shouldRetryOnHttpException(err)) {
       try {
-        handler.resolve(await DioHttpRequestRetrier(dio: dio)
-            .requestRetry(err.requestOptions)
-            .catchError((e) {
-          handler.next(err);
-        }));
-      } catch (e,stackTrace) {
+        logDebug(headerDeveloperLogger, 'retry login');
+        await helperFunctions.login();
+      } catch (e, stackTrace) {
         handler.next(err);
         await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
@@ -64,45 +68,8 @@ class Logging extends Interceptor {
   }
 
   bool _shouldRetryOnHttpException(DioException err) {
-    return err.type == DioExceptionType.unknown &&
-        ((err.error is HttpException &&
-            err.message!.contains(
-                'Connection closed before full header was received')));
-  }
-}
-
-/// Retrier
-class DioHttpRequestRetrier {
-  DioHttpRequestRetrier({
-    required this.dio,
-  });
-
-  final Dio dio;
-
-  Future<Response> requestRetry(RequestOptions requestOptions) async {
-    return dio.request(
-      requestOptions.path,
-      cancelToken: requestOptions.cancelToken,
-      data: requestOptions.data,
-      onReceiveProgress: requestOptions.onReceiveProgress,
-      onSendProgress: requestOptions.onSendProgress,
-      queryParameters: requestOptions.queryParameters,
-      options: Options(
-        contentType: requestOptions.contentType,
-        headers: requestOptions.headers,
-        sendTimeout: requestOptions.sendTimeout,
-        receiveTimeout: requestOptions.receiveTimeout,
-        extra: requestOptions.extra,
-        followRedirects: requestOptions.followRedirects,
-        listFormat: requestOptions.listFormat,
-        maxRedirects: requestOptions.maxRedirects,
-        method: requestOptions.method,
-        receiveDataWhenStatusError: requestOptions.receiveDataWhenStatusError,
-        requestEncoder: requestOptions.requestEncoder,
-        responseDecoder: requestOptions.responseDecoder,
-        responseType: requestOptions.responseType,
-        validateStatus: requestOptions.validateStatus,
-      ),
-    );
+    return err.type == DioExceptionType.badResponse &&
+        err.message!.contains('401') &&
+        !err.requestOptions.path.contains('auth');
   }
 }

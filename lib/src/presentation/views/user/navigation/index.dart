@@ -1,13 +1,16 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:lottie/lottie.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //cubit
+import '../../../blocs/network/network_bloc.dart';
 import '../../../cubits/download/download_cubit.dart';
 
 //domain
@@ -152,7 +155,9 @@ class _NavigationScreenState extends State<NavigationView> {
   }
 
   void onMapEvent(MapEvent mapEvent) {
-    if (mapEvent is! MapEventMove && mapEvent is! MapEventRotate) {
+    if (mapEvent is! MapEventMove &&
+        mapEvent is! MapEventRotate &&
+        kDebugMode) {
       debugPrint(mapEvent.toString());
     }
   }
@@ -162,80 +167,115 @@ class _NavigationScreenState extends State<NavigationView> {
     final Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      //TODO:: [Heider Zapa uncomment y verify logic work]
-      // bottomNavigationBar: size.width > 950
-      //     ? null
-      //     : NavigationBar(
-      //         backgroundColor:
-      //             Theme.of(context).navigationBarTheme.backgroundColor,
-      //         onDestinationSelected: _onDestinationSelected,
-      //         selectedIndex: currentPageIndex,
-      //         destinations: _destinations,
-      //         labelBehavior: MediaQuery.of(context).size.width > 450
-      //             ? null
-      //             : NavigationDestinationLabelBehavior.alwaysHide,
-      //         height: 70,
-      //       ),
-      resizeToAvoidBottomInset: false,
-      body: Row(
-        children: [
-          if (MediaQuery.of(context).size.width > 950)
-            NavigationRail(
-              onDestinationSelected: _onDestinationSelected,
-              selectedIndex: currentPageIndex,
-              groupAlignment: 0,
-              extended: extended,
-              destinations: _destinations
-                  .map(
-                    (d) => NavigationRailDestination(
-                      icon: d.icon,
-                      label: Text(d.label),
-                      padding: const EdgeInsets.all(10),
-                    ),
-                  )
-                  .toList(),
-              leading: Row(
+        //TODO:: [Heider Zapa uncomment y verify logic work]
+        // bottomNavigationBar: size.width > 950
+        //     ? null
+        //     : NavigationBar(
+        //         backgroundColor:
+        //             Theme.of(context).navigationBarTheme.backgroundColor,
+        //         onDestinationSelected: _onDestinationSelected,
+        //         selectedIndex: currentPageIndex,
+        //         destinations: _destinations,
+        //         labelBehavior: MediaQuery.of(context).size.width > 450
+        //             ? null
+        //             : NavigationDestinationLabelBehavior.alwaysHide,
+        //         height: 70,
+        //       ),
+        resizeToAvoidBottomInset: false,
+        body: BlocBuilder<NetworkBloc, NetworkState>(
+            builder: (context, networkState) {
+          if (networkState is NetworkFailure) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  AnimatedContainer(
-                    width: extended ? 205 : 0,
-                    duration: kThemeAnimationDuration,
-                    curve: Curves.easeInOut,
-                  ),
-                  IconButton(
-                    icon: AnimatedSwitcher(
-                      duration: kThemeAnimationDuration,
-                      switchInCurve: Curves.easeInOut,
-                      switchOutCurve: Curves.easeInOut,
-                      child: Icon(
-                        extended ? Icons.menu_open : Icons.menu,
-                        key: UniqueKey(),
-                      ),
-                    ),
-                    onPressed: () => setState(() => extended = !extended),
-                    tooltip: !extended ? 'Extend Menu' : 'Collapse Menu',
-                  ),
+                  Lottie.asset('assets/animations/1611-online-offline.json',
+                      height: 180, width: 180),
+                  const Text('No tienes conexión o tu conexión es lenta.'),
+                  const Text(
+                      'Actualmente los mapas no funcionan sin internet 😔.',
+                      textAlign: TextAlign.center)
                 ],
               ),
-            ),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: MediaQuery.of(context).size.width > 950
-                    ? const Radius.circular(16)
-                    : Radius.zero,
-                bottomLeft: MediaQuery.of(context).size.width > 950
-                    ? const Radius.circular(16)
-                    : Radius.zero,
+            );
+          } else if (networkState is NetworkSuccess) {
+            return _buildBody();
+          } else {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Algo ocurrió mientras cargaba la información'),
+                  IconButton(
+                    icon: Icon(Icons.refresh),
+                    onPressed: null,
+                  )
+                ],
               ),
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: _pages,
-              ),
+            );
+          }
+        }));
+  }
+
+  Widget _buildBody() {
+    return Row(
+      children: [
+        if (MediaQuery.of(context).size.width > 950)
+          NavigationRail(
+            onDestinationSelected: _onDestinationSelected,
+            selectedIndex: currentPageIndex,
+            groupAlignment: 0,
+            extended: extended,
+            destinations: _destinations
+                .map(
+                  (d) => NavigationRailDestination(
+                    icon: d.icon,
+                    label: Text(d.label),
+                    padding: const EdgeInsets.all(10),
+                  ),
+                )
+                .toList(),
+            leading: Row(
+              children: [
+                AnimatedContainer(
+                  width: extended ? 205 : 0,
+                  duration: kThemeAnimationDuration,
+                  curve: Curves.easeInOut,
+                ),
+                IconButton(
+                  icon: AnimatedSwitcher(
+                    duration: kThemeAnimationDuration,
+                    switchInCurve: Curves.easeInOut,
+                    switchOutCurve: Curves.easeInOut,
+                    child: Icon(
+                      extended ? Icons.menu_open : Icons.menu,
+                      key: UniqueKey(),
+                    ),
+                  ),
+                  onPressed: () => setState(() => extended = !extended),
+                  tooltip: !extended ? 'Extend Menu' : 'Collapse Menu',
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: MediaQuery.of(context).size.width > 950
+                  ? const Radius.circular(16)
+                  : Radius.zero,
+              bottomLeft: MediaQuery.of(context).size.width > 950
+                  ? const Radius.circular(16)
+                  : Radius.zero,
+            ),
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: _pages,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

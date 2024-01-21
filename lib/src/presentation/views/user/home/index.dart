@@ -34,35 +34,57 @@ class HomeView extends StatefulWidget {
 }
 
 class HomeViewState extends State<HomeView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final GlobalKey one = GlobalKey();
   final GlobalKey two = GlobalKey();
   final GlobalKey three = GlobalKey();
   final GlobalKey four = GlobalKey();
   final GlobalKey five = GlobalKey();
+  bool _isInForeground = true;
 
   late HomeCubit homeCubit;
   late GpsBloc gpsBloc;
 
   @override
   void initState() {
+    EnterpriseConfig? enterpriseConfig;
     var storedConfig = _storageService.getObject('config');
-    var enterpriseConfig = EnterpriseConfig.fromMap(storedConfig!);
+    if(storedConfig != null) {
+      enterpriseConfig = EnterpriseConfig.fromMap(storedConfig);
+    }
     startHomeWidget();
     homeCubit = BlocProvider.of<HomeCubit>(context);
     gpsBloc = BlocProvider.of<GpsBloc>(context);
     homeCubit.getAllWorks();
     homeCubit.getUser();
     gpsBloc.startFollowingUser();
-    if (enterpriseConfig.background_location!) {
+    if (enterpriseConfig != null && enterpriseConfig.backgroundLocation!) {
       helperFunctions.initLocationService();
       gpsBloc.startFollowingUser();
     }
+    print('***************');
+    print(_isInForeground);
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    _isInForeground = state == AppLifecycleState.resumed;
+    print('***************');
+    print(_isInForeground);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   void startHomeWidget() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      helperFunctions.versionCheck(context);
       await _isFirstLaunch().then((result) {
         if (result == null || result == false) {
           ShowCaseWidget.of(context)
@@ -98,7 +120,7 @@ class HomeViewState extends State<HomeView>
               ),
               SyncBar(two: two),
               SearchBar(three: three),
-              LogoutBar(four: four)
+              LogoutBar(four: four),
             ],
             title:  Text(
               'Servicios',

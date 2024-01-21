@@ -10,7 +10,6 @@ import '../../../../../domain/models/work.dart';
 import '../../../../cubits/home/home_cubit.dart';
 
 //widgets
-import '../../../../widgets/skeleton_loader_widget.dart';
 import 'item.dart';
 
 class HomeListView extends StatefulWidget {
@@ -35,16 +34,36 @@ class _HomeListViewState extends State<HomeListView> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, HomeState>(
-      builder: (_, state) {
-        switch (state.runtimeType) {
-          case HomeLoading:
-            return const SkeletonLoading(cant: 10);
-          case HomeSuccess:
-            return _buildHome(
-              state.works,
-            );
-          default:
-            return const SizedBox();
+      builder: (_, state) => _buildBlocConsumer(),
+    );
+  }
+
+  void buildBlocListener(BuildContext context, HomeState state) async {
+    if (state.status == HomeStatus.failure && state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            state.error!,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildBlocConsumer() {
+    return BlocConsumer<HomeCubit, HomeState>(
+      // buildWhen: (previous, current) => previous != current,
+      listener: buildBlocListener,
+      builder: (context, state) {
+        if (state.status == HomeStatus.loading) {
+          return const Center(child: CupertinoActivityIndicator());
+        } else if (state.status == HomeStatus.success ||
+            state.status == HomeStatus.failure) {
+          return _buildHome(state.works);
+        } else {
+          return const SizedBox();
         }
       },
     );

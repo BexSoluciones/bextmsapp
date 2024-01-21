@@ -21,7 +21,6 @@ class SplashScreenBloc extends Bloc<SplashScreenEvent, SplashScreenState> {
     await Future.delayed(const Duration(seconds: 2));
     await isFirstTime().then((firstTime) async {
       if (firstTime == null || firstTime == false) {
-        print('********aqui******');
         emit(const Loaded(route: AppRoutes.politics));
       } else {
         var token = _storageService.getString('token');

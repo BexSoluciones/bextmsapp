@@ -71,7 +71,7 @@ abstract class ApiRepository {
     required AccountRequest request,
   });
 
-  Future<DataState<LoginResponse>> login({
+  Future<DataState<LoginResponse>?> login({
     required LoginRequest request,
   });
 
@@ -89,31 +89,31 @@ abstract class ApiRepository {
   });
 
   //ASYNCHRONOUS
-  Future<DataState<StatusResponse>> status({
+  Future<DataState<StatusResponse>?> status({
     required StatusRequest request
   });
 
-  Future<DataState<TransactionResponse>> start({
+  Future<DataState<TransactionResponse>?> start({
     required TransactionRequest request
   });
 
-  Future<DataState<TransactionResponse>> arrived({
+  Future<DataState<TransactionResponse>?> arrived({
     required TransactionRequest request
   });
 
-  Future<DataState<TransactionResponse>> summary({
+  Future<DataState<TransactionResponse>?> summary({
     required TransactionRequest request
   });
 
-  Future<DataState<TransactionResponse>> index({
+  Future<DataState<TransactionResponse>?> index({
     required TransactionRequest request
   });
 
-  Future<DataState<TransactionResponse>> transaction({
+  Future<DataState<TransactionResponse>?> transaction({
     required TransactionSummaryRequest request
   });
 
-  Future<DataState<TransactionSummaryResponse>> product({
+  Future<DataState<TransactionSummaryResponse>?> product({
     required TransactionSummaryRequest request
   });
 

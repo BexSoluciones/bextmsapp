@@ -1,9 +1,12 @@
 //utils
-import 'package:bexdeliveries/src/domain/models/requests/history_order_saved_request.dart';
-import 'package:bexdeliveries/src/domain/models/requests/history_order_updated_request.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:bexdeliveries/src/services/logger.dart';
+import 'package:bexdeliveries/src/utils/constants/strings.dart';
+import 'package:workmanager/workmanager.dart';
+
 import 'package:bexdeliveries/src/domain/models/requests/reason_m_request.dart';
 import 'package:bexdeliveries/src/domain/models/requests/routing_request.dart';
-import 'package:bexdeliveries/src/domain/models/responses/history_order_saved_response.dart';
 import 'package:bexdeliveries/src/domain/models/responses/routing_response.dart';
 
 import '../../domain/models/requests/locations_request.dart';
@@ -60,15 +63,30 @@ import 'base/base_api_repository.dart';
 
 //services
 import '../../locator.dart';
+import '../../services/workmanager.dart';
 import '../../../core/cache/cache_manager.dart';
 import '../../../core/cache/strategy/async_or_cache_strategy.dart';
 
 final CacheManager _cacheManager = locator<CacheManager>();
+final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
 
 class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   final ApiService _apiService;
 
   ApiRepositoryImpl(this._apiService);
+
+  Future<bool> checkConnection() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      } else {
+        return false;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
 
   @override
   Future<DataState<EnterpriseResponse>> getEnterprise({
@@ -107,13 +125,36 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }
 
   @override
-  Future<DataState<LoginResponse>> login({
+  Future<DataState<LoginResponse>?> login({
     required LoginRequest request,
-  }) {
-    return getStateOf<LoginResponse>(
-      request: () => _apiService.login(
-          username: request.username, password: request.password),
-    );
+  }) async {
+    try {
+      bool isConnected = await checkConnection();
+
+      if (isConnected) {
+        return getStateOf<LoginResponse>(
+          request: () => _apiService.login(
+              username: request.username, password: request.password),
+        );
+      } else {
+        final sendingData = jsonEncode(request.toString());
+
+        await Workmanager().registerOneOffTask(
+          '1',
+          'login',
+          backoffPolicy: BackoffPolicy.linear,
+          backoffPolicyDelay: const Duration(seconds: 20),
+          inputData: <String, dynamic>{
+            'string': 'login',
+            'array': sendingData,
+          },
+        );
+
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
@@ -157,7 +198,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }
 
   @override
-  Future<DataState<StatusResponse>> status({
+  Future<DataState<StatusResponse>?> status({
     required StatusRequest request,
   }) {
     return getStateOf<StatusResponse>(
@@ -166,57 +207,155 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }
 
   @override
-  Future<DataState<TransactionResponse>> start({
+  Future<DataState<TransactionResponse>?> start({
     required TransactionRequest request,
-  }) {
-    return getStateOf<TransactionResponse>(
-      request: () => _apiService.start(request.transaction),
-    );
+  }) async {
+    bool isConnected = await checkConnection();
+    if (isConnected) {
+      return getStateOf<TransactionResponse>(
+        request: () => _apiService.start(request.transaction),
+      );
+    } else {
+      final sendingData = jsonEncode(request.transaction.toString());
+      workmanagerService.registerOneOffTask(
+        '1',
+        'transaction_start',
+        {
+          'string': 'transaction',
+          'array': sendingData,
+        },
+      );
+      return null;
+    }
   }
 
   @override
-  Future<DataState<TransactionResponse>> arrived({
+  Future<DataState<TransactionResponse>?> arrived({
     required TransactionRequest request,
-  }) {
-    return getStateOf<TransactionResponse>(
-      request: () => _apiService.arrived(request.transaction),
-    );
+  }) async {
+    bool isConnected = await checkConnection();
+    if (isConnected) {
+      return getStateOf<TransactionResponse>(
+        request: () => _apiService.arrived(request.transaction),
+      );
+    } else {
+      final sendingData = jsonEncode(request.transaction.toString());
+      workmanagerService.registerOneOffTask(
+        '1',
+        'transaction_start',
+        {
+          'string': 'transaction',
+          'array': sendingData,
+        },
+      );
+      return null;
+    }
   }
 
   @override
-  Future<DataState<TransactionResponse>> summary({
+  Future<DataState<TransactionResponse>?> summary({
     required TransactionRequest request,
-  }) {
-    return getStateOf<TransactionResponse>(
-      request: () => _apiService.summary(request.transaction),
-    );
+  }) async {
+    bool isConnected = await checkConnection();
+    if (isConnected) {
+      return getStateOf<TransactionResponse>(
+        request: () => _apiService.summary(request.transaction),
+      );
+    } else {
+      final sendingData = jsonEncode(request.transaction.toString());
+      workmanagerService.registerOneOffTask(
+        '1',
+        'transaction_start',
+        {
+          'string': 'transaction',
+          'array': sendingData,
+        },
+      );
+      return null;
+    }
+
   }
 
   @override
-  Future<DataState<TransactionResponse>> index({
+  Future<DataState<TransactionResponse>?> index({
     required TransactionRequest request,
-  }) {
-    return getStateOf<TransactionResponse>(
-      request: () => _apiService.index(request.transaction),
-    );
+  }) async {
+    try {
+      bool isConnected = await checkConnection();
+      if (isConnected) {
+        return getStateOf<TransactionResponse>(
+          request: () => _apiService.index(request.transaction),
+        );
+      } else {
+        final sendingData = jsonEncode(request.transaction.toString());
+        workmanagerService.registerOneOffTask(
+          '1',
+          'transaction',
+          {
+            'string': 'transaction',
+            'array': sendingData,
+          },
+        );
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
-  Future<DataState<TransactionResponse>> transaction({
+  Future<DataState<TransactionResponse>?> transaction({
     required TransactionSummaryRequest request,
-  }) {
-    return getStateOf<TransactionResponse>(
-      request: () => _apiService.transaction(request.transactionSummary),
-    );
+  }) async {
+    try {
+      bool isConnected = await checkConnection();
+      if (isConnected) {
+        return getStateOf<TransactionResponse>(
+          request: () => _apiService.transaction(request.transactionSummary),
+        );
+      } else {
+        final sendingData = jsonEncode(request.transactionSummary.toString());
+        workmanagerService.registerOneOffTask(
+          '1',
+          'transaction',
+          {
+            'string': 'transaction',
+            'array': sendingData,
+          },
+        );
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+
   }
 
   @override
-  Future<DataState<TransactionSummaryResponse>> product({
+  Future<DataState<TransactionSummaryResponse>?> product({
     required TransactionSummaryRequest request,
-  }) {
-    return getStateOf<TransactionSummaryResponse>(
-      request: () => _apiService.product(request.transactionSummary),
-    );
+  }) async {
+    try {
+      bool isConnected = await checkConnection();
+      if (isConnected) {
+        return getStateOf<TransactionSummaryResponse>(
+          request: () => _apiService.product(request.transactionSummary),
+        );
+      } else {
+        final sendingData = jsonEncode(request.transactionSummary.toString());
+        workmanagerService.registerOneOffTask(
+          '1',
+          'transaction',
+          {
+            'string': 'transaction',
+            'array': sendingData,
+          },
+        );
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
@@ -233,7 +372,8 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     required SendTokenRequest request,
   }) {
     return getStateOf<StatusResponse>(
-      request: () => _apiService.sendFCMToken(request.user_id,request.fcm_token),
+      request: () =>
+          _apiService.sendFCMToken(request.user_id, request.fcm_token),
     );
   }
 
@@ -287,9 +427,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     required ReasonMRequest request,
   }) {
     return getStateOf<StatusResponse>(
-      request: () => _apiService.reasonsM(request.news),
+      request: () => _apiService.news(request.news),
     );
   }
-
-
 }

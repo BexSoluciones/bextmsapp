@@ -42,7 +42,7 @@ class CollectionLoading extends CollectionState {
 }
 
 class CollectionWaiting extends CollectionState {
-  const CollectionWaiting();
+  const CollectionWaiting({super.totalSummary, super.enterpriseConfig});
 }
 
 class CollectionSuccess extends CollectionState {

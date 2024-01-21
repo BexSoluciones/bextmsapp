@@ -74,11 +74,10 @@ class VisitedViewWorkState extends State<VisitedViewWork> {
 
   Widget buildStaticBody(works) {
     if (works.isEmpty) {
-      return Column(
+      return const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset('assets/animations/36499-page-not-found.json'),
-          const Text('No hay clientes visitados.')
+           Text('No hay clientes visitados.')
         ],
       );
     } else {

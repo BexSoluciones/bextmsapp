@@ -14,7 +14,8 @@ class ReasonsGlobal extends StatefulWidget {
       required this.r,
       this.typeAheadController});
 
-  final dynamic context, type, r, setState;
+  final dynamic context, type, setState;
+  final List<ReasonProduct>? r;
   final List<Reason> reasons;
   final TextEditingController? typeAheadController;
 
@@ -39,17 +40,17 @@ class _ReasonsGlobalState extends State<ReasonsGlobal> {
     return ListView.separated(
       padding: const EdgeInsets.all(20),
       separatorBuilder: (BuildContext context, int index) => const Divider(),
-      itemCount: widget.r.length ?? 0,
+      itemCount: widget.r?.length ?? 0,
       itemBuilder: (BuildContext context, int index) {
         return ListTile(
-          title: Text(widget.r[index].nameItem),
-          subtitle: (widget.r[index].controller.text == '')
+          title: Text(widget.r![index].nameItem),
+          subtitle: (widget.r![index].controller.text == '')
               ? Text(
                   'Sin motivo asignado',
                   style: TextStyle(color: Colors.red.shade700),
                 )
-              : Text(widget.r[index].controller.text),
-          trailing: (widget.r[index].controller.text == '')
+              : Text(widget.r![index].controller.text),
+          trailing: (widget.r![index].controller.text == '')
               ? const Icon(Icons.add)
               : const Icon(Icons.edit),
           onTap: () async {
@@ -62,7 +63,7 @@ class _ReasonsGlobalState extends State<ReasonsGlobal> {
                       canPop: false,
                       child: RefusedOrder(
                           reasons: widget.reasons,
-                          controllerMotiveItem: widget.r[index].controller,
+                          controllerMotiveItem: widget.r![index].controller,
                           callback: reload),
                     ));
           },

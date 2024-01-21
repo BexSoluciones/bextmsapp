@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,10 +25,10 @@ import '../../../../widgets/default_button_widget.dart';
 final NavigationService _navigationService = locator<NavigationService>();
 
 class SummaryGeoReferenceView extends StatefulWidget {
-  const SummaryGeoReferenceView({Key? key, required this.work})
+  const SummaryGeoReferenceView({Key? key, required this.argument})
       : super(key: key);
 
-  final Work work;
+  final SummaryArgument argument;
 
   @override
   State<SummaryGeoReferenceView> createState() =>
@@ -35,7 +36,6 @@ class SummaryGeoReferenceView extends StatefulWidget {
 }
 
 class SummaryGeoReferenceViewState extends State<SummaryGeoReferenceView> {
-
   late GeoReferenceCubit geoReferenceCubit;
 
   @override
@@ -53,7 +53,10 @@ class SummaryGeoReferenceViewState extends State<SummaryGeoReferenceView> {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new),
-            onPressed: () => _navigationService.goBack(),
+            onPressed: () {
+              _navigationService.goBack();
+              setState(() {});
+            },
           ),
         ),
         body: BlocBuilder<GeoReferenceCubit, GeoReferenceState>(
@@ -62,7 +65,7 @@ class SummaryGeoReferenceViewState extends State<SummaryGeoReferenceView> {
             case GeoReferenceLoading:
               return const Center(child: CupertinoActivityIndicator());
             case GeoReferenceSuccess:
-              return _buildGeoReference(context, state, widget.work, size);
+              return _buildGeoReference(context, state, size, widget.argument);
             default:
               return const SizedBox();
           }
@@ -70,7 +73,7 @@ class SummaryGeoReferenceViewState extends State<SummaryGeoReferenceView> {
   }
 }
 
-Widget _buildGeoReference(context, state, Work work, Size size) {
+Widget _buildGeoReference(context, state, size, SummaryArgument argument) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.all(kDefaultPadding),
@@ -92,23 +95,22 @@ Widget _buildGeoReference(context, state, Work work, Size size) {
             const Spacer(),
             DefaultButton(
                 widget: Text(
-                    work.latitude != null &&
-                            work.longitude != null
+                    argument.work.latitude != null && argument.work.longitude != null
                         ? 'Actualizar'
                         : 'Guardar',
                     style: const TextStyle(fontSize: 20, color: Colors.white)),
                 press: () async {
                   var client = Client(
-                      id: work.id,
-                      nit: work.numberCustomer,
-                      operativeCenter: work.codePlace,
-                      action: work.latitude != null &&
-                              work.longitude != null
+                      id: argument.work.id,
+                      nit: argument.work.numberCustomer,
+                      operativeCenter: argument.work.codePlace,
+                      action: argument.work.latitude != null && argument.work.longitude != null
                           ? 'update'
                           : 'save',
                       userId: null);
 
-                  BlocProvider.of<GeoReferenceCubit>(context).sendTransactionClient(client);
+                  BlocProvider.of<GeoReferenceCubit>(context)
+                      .sendTransactionClient(argument, client);
                 }),
             const SizedBox(height: 30),
             DefaultButton(

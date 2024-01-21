@@ -48,13 +48,13 @@ class WarehouseDao {
     if (warehouses.isNotEmpty) {
       await Future.forEach(warehouses, (warehouse) async {
         var d = await db.query(tableWarehouses,
-            where: 'name = ?', whereArgs: [warehouse.name]);
+            where: 'id = ?', whereArgs: [warehouse.id]);
         var w = parseWarehouses(d);
         if (w.isEmpty) {
           batch.insert(tableWarehouses, warehouse.toJson());
         } else {
           batch.update(tableWarehouses, warehouse.toJson(),
-              where: 'name = ?', whereArgs: [warehouse.name]);
+              where: 'id = ?', whereArgs: [warehouse.id]);
         }
       });
     }

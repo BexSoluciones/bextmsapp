@@ -56,7 +56,8 @@ class _PartialViewState extends State<PartialView> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new,color:Theme.of(context).colorScheme.secondaryContainer),
+          icon: Icon(Icons.arrow_back_ios_new,
+              color: Theme.of(context).colorScheme.secondaryContainer),
           onPressed: () => _navigationService.goBack(),
         ),
       ),
@@ -85,9 +86,9 @@ class _PartialViewState extends State<PartialView> {
     );
   }
 
-  SizedBox buildBody(Size size, state) {
+  SizedBox buildBody(Size size, PartialState state) {
     return SizedBox(
-      height: size.height / 1.5,
+      height: size.height / 1.6,
       width: size.width,
       child: Padding(
         padding: const EdgeInsets.all(kDefaultPadding),
@@ -110,21 +111,30 @@ class _PartialViewState extends State<PartialView> {
               ),
             ),
             Expanded(
-                child: ReasonsGlobal(
-                context: context, r: state.products, setState: setState,
-                type: 'partial',
-                reasons: state.reasons,
-              //context, type, r, setState
-            )),
+                flex: 4,
+                child: BlocListener<PartialCubit, PartialState>(
+                    listener: (context, state) {},
+                    child: ReasonsGlobal(
+                      context: context,
+                      r: state.products,
+                      setState: setState,
+                      type: 'partial',
+                      reasons: state.reasons!,
+                    ))),
             const Spacer(),
             if (state.error != null)
-              Text(state.error,
+              Text(state.error!,
                   maxLines: 2,
                   style: const TextStyle(color: Colors.red, fontSize: 16)),
             DefaultButton(
-                widget: const Text('Confirmar', style: TextStyle(fontSize: 20,color: Colors.white,)),
+                widget: const Text('Confirmar',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    )),
                 press: () {
-                  BlocProvider.of<PartialCubit>(context).goToCollection(widget.arguments);
+                  BlocProvider.of<PartialCubit>(context)
+                      .goToCollection(widget.arguments);
                 })
           ],
         ),

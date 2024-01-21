@@ -17,18 +17,18 @@ class SummaryDao {
   List<SummaryReport> parseSummariesReport(
       List<Map<String, dynamic>> summaryList) {
     final summaries = <SummaryReport>[];
-    summaryList.forEach((summaryMap) {
+    for (var summaryMap in summaryList) {
       final summary = SummaryReport.fromJson(summaryMap);
       summaries.add(summary);
-    });
+    }
     return summaries;
   }
 
   Future<List<Summary>> getAllSummariesByOrderNumber(int workId) async {
     final db = await _appDatabase.streamDatabase;
     var summaryList = await db!.rawQuery(''' 
-            SELECT $tableSummaries.*, SUM(DISTINCT $tableSummaries.${SummaryFields.grandTotalCopy}) as ${SummaryFields.grandTotalCopy},
-            COUNT(DISTINCT $tableSummaries.${SummaryFields.coditem}) AS count,
+            SELECT $tableSummaries.*, SUM($tableSummaries.${SummaryFields.grandTotalCopy}) as ${SummaryFields.grandTotalCopy},
+            COUNT($tableSummaries.${SummaryFields.coditem}) AS count,
             CASE id_packing IS NOT NULL WHEN 1 THEN 1 ELSE 0 END validate,
             CASE transactions.id IS NOT NULL WHEN 1 THEN 1 ELSE 0 END has_transaction
             FROM $tableSummaries 
@@ -44,18 +44,58 @@ class SummaryDao {
     return parseSummaries(summaryList);
   }
 
-  Future<List<Summary>> getAllInventoryByOrderNumber(int workId, String orderNumber) async {
+  Future<List<Summary>> getAllSummariesByWorkcode(
+      int workId, String customer) async {
     final db = await _appDatabase.streamDatabase;
-    var summaryList = await db!.rawQuery('''
-            SELECT $tableSummaries.*
-            FROM $tableSummaries
-            WHERE $tableSummaries.${SummaryFields.workId} = $workId 
-            AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
-            ''');
+    final summaryList = await db!.query(tableSummaries,
+        where: 'work_id = $workId', groupBy: SummaryFields.orderNumber);
     return parseSummaries(summaryList);
   }
 
-  Future<List<Summary>> getAllSummariesByOrderNumberMoved(int workId, String orderNumber) async {
+  Future<List<Summary>> getAllInventoryByOrderNumber(
+      int workId, String orderNumber) async {
+    final db = await _appDatabase.streamDatabase;
+    var summaryList = await db!.rawQuery('''
+      SELECT $tableSummaries.*
+      FROM $tableSummaries
+      WHERE $tableSummaries.${SummaryFields.workId} = $workId 
+      AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
+    ''');
+    return parseSummaries(summaryList);
+  }
+
+  Future<List<Summary>> getAllInventoryByPackage(
+      int workId, String orderNumber) async {
+    final db = await _appDatabase.streamDatabase;
+
+    var summaryList = await db!.rawQuery('''
+      SELECT $tableSummaries.*,
+      SUM($tableSummaries.${SummaryFields.grandTotal}) as ${SummaryFields.grandTotal},
+      COUNT($tableSummaries.${SummaryFields.coditem}) AS count
+      FROM $tableSummaries
+      WHERE $tableSummaries.${SummaryFields.workId} = $workId 
+      AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
+      GROUP BY $tableSummaries.${SummaryFields.idPacking}, $tableSummaries.${SummaryFields.packing}
+    ''');
+    return parseSummaries(summaryList);
+  }
+
+  Future<List<Summary>> watchAllItemsPackage(
+      String orderNumber, String packing, String idPacking) async {
+    final db = await _appDatabase.streamDatabase;
+
+    var summaryList = await db!.rawQuery('''
+      SELECT * FROM $tableSummaries 
+      WHERE order_number="$orderNumber" 
+      AND packing="$packing" 
+      AND id_packing="$idPacking"
+    ''');
+
+    return parseSummaries(summaryList);
+  }
+
+  Future<List<Summary>> getAllSummariesByOrderNumberMoved(
+      int workId, String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
     var summaryList = await db!.rawQuery('''
             SELECT $tableSummaries.*
@@ -67,7 +107,8 @@ class SummaryDao {
     return parseSummaries(summaryList);
   }
 
-  Future<List<Summary>> getAllPackageByOrderNumber(int workId, String orderNumber) async {
+  Future<List<Summary>> getAllPackageByOrderNumber(
+      int workId, String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
     var summaryList = await db!.rawQuery('''
             SELECT $tableSummaries.*,
@@ -85,69 +126,71 @@ class SummaryDao {
       String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
     final summaryList = await db!.rawQuery('''
-    SELECT  $tableSummaries.* ,
-    CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
-    THEN 'REDESPACHO'
-    ELSE transactions.reason
-    END AS reason
-    FROM summaries
-    INNER JOIN transactions ON (transactions.order_number = summaries.order_number AND transactions.work_id = summaries.work_id AND transactions.`status` = 'respawn')
-    WHERE summaries.order_number = $orderNumber
-    GROUP BY summaries.name_item
-   ORDER BY summaries.id ASC;
-  ''');
+      SELECT  $tableSummaries.* ,
+      CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
+      THEN 'REDESPACHO'
+      ELSE transactions.reason
+      END AS reason
+      FROM summaries
+      INNER JOIN transactions ON (transactions.order_number = summaries.order_number AND transactions.work_id = summaries.work_id AND transactions.`status` = 'respawn')
+      WHERE summaries.order_number = $orderNumber
+      GROUP BY summaries.name_item
+     ORDER BY summaries.id ASC;
+    ''');
 
     final parsedSummaries = parseSummariesReport(summaryList);
     return parsedSummaries;
   }
 
-  Future<List<SummaryReport>> getSummaryReportsWithReturnOrRedelivery(String orderNumber) async {
+  Future<List<SummaryReport>> getSummaryReportsWithReturnOrRedelivery(
+      String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
     final summaryList = await db!.rawQuery('''
-    SELECT  $tableSummaries.* ,
-    CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
-    THEN 'RECHAZADO'
-    ELSE transactions.reason
-    END AS reason
-    FROM summaries
-    INNER JOIN transactions ON (transactions.order_number = summaries.order_number AND transactions.work_id = summaries.work_id AND transactions.`status` = 'reject')
-    WHERE summaries.order_number = $orderNumber
-    GROUP BY summaries.name_item
-   ORDER BY summaries.id ASC;
-  ''');
+      SELECT  $tableSummaries.* ,
+      CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
+      THEN 'RECHAZADO'
+      ELSE transactions.reason
+      END AS reason
+      FROM summaries
+      INNER JOIN transactions ON (transactions.order_number = summaries.order_number AND transactions.work_id = summaries.work_id AND transactions.`status` = 'reject')
+      WHERE summaries.order_number = $orderNumber
+      GROUP BY summaries.name_item
+      ORDER BY summaries.id ASC;
+    ''');
 
     final parsedSummaries = parseSummariesReport(summaryList);
     return parsedSummaries;
   }
 
-  Future<List<SummaryReport>> getSummaryReportsWithDelivery(String orderNumber) async {
+  Future<List<SummaryReport>> getSummaryReportsWithDelivery(
+      String orderNumber) async {
     final db = await _appDatabase.streamDatabase;
     final summaryList = await db!.rawQuery('''
-    SELECT $tableSummaries.*, COALESCE(MAX($tableTransactions.${TransactionFields.reason}), 'ENTREGADO') AS reason
-    FROM $tableSummaries
-    LEFT JOIN $tableTransactions ON $tableTransactions.${TransactionFields.workId} = $tableSummaries.${SummaryReportFields.workId} AND $tableTransactions.${TransactionFields.orderNumber} = $tableSummaries.${SummaryReportFields.orderNumber} AND $tableTransactions.${TransactionFields.summaryId} = $tableSummaries.${SummaryFields.id}
-    WHERE $tableSummaries.${SummaryReportFields.orderNumber} = ? 
-    GROUP BY $tableSummaries.${SummaryFields.id}
-    ORDER BY ${SummaryFields.id} ASC
-  ''', [orderNumber]);
+      SELECT $tableSummaries.*, COALESCE(MAX($tableTransactions.${TransactionFields.reason}), 'ENTREGADO') AS reason
+      FROM $tableSummaries
+      LEFT JOIN $tableTransactions ON $tableTransactions.${TransactionFields.workId} = $tableSummaries.${SummaryReportFields.workId} AND $tableTransactions.${TransactionFields.orderNumber} = $tableSummaries.${SummaryReportFields.orderNumber} AND $tableTransactions.${TransactionFields.summaryId} = $tableSummaries.${SummaryFields.id}
+      WHERE $tableSummaries.${SummaryReportFields.orderNumber} = ? 
+      GROUP BY $tableSummaries.${SummaryFields.id}
+      ORDER BY ${SummaryFields.id} ASC
+    ''', [orderNumber]);
 
     final parsedSummaries = parseSummariesReport(summaryList);
     return parsedSummaries;
   }
 
-
-  Future<double> countTotalRespawnWorksByWorkcode(String workcode,String reason) async {
+  Future<double> countTotalRespawnWorksByWorkcode(
+      String workcode, String reason) async {
     final db = await _appDatabase.streamDatabase;
 
     var summaryList = await db!.rawQuery('''
-    SELECT $tableSummaries.*, SUM($tableSummaries.${SummaryFields.grandTotal}) as ${SummaryFields.grandTotal}, COUNT($tableSummaries.${SummaryFields.coditem}) AS count 
-    FROM $tableSummaries 
-    INNER JOIN $tableWorks ON $tableWorks.${WorkFields.id} = $tableSummaries.${SummaryFields.workId}
-    INNER JOIN ${t.tableTransactions} ON ${t.tableTransactions}.${t.TransactionFields.workId} = $tableWorks.${WorkFields.id}
-    WHERE ${t.tableTransactions}.${t.TransactionFields.status} = '$reason'
-    AND $tableWorks.${WorkFields.workcode} = "$workcode"
-    GROUP BY $tableSummaries.${SummaryFields.orderNumber}
-  ''');
+      SELECT $tableSummaries.*, SUM($tableSummaries.${SummaryFields.grandTotal}) as ${SummaryFields.grandTotal}, COUNT($tableSummaries.${SummaryFields.coditem}) AS count 
+      FROM $tableSummaries 
+      INNER JOIN $tableWorks ON $tableWorks.${WorkFields.id} = $tableSummaries.${SummaryFields.workId}
+      INNER JOIN ${t.tableTransactions} ON ${t.tableTransactions}.${t.TransactionFields.workId} = $tableWorks.${WorkFields.id}
+      WHERE ${t.tableTransactions}.${t.TransactionFields.status} = '$reason'
+      AND $tableWorks.${WorkFields.workcode} = "$workcode"
+      GROUP BY $tableSummaries.${SummaryFields.orderNumber}
+    ''');
 
     var summaries = parseSummaries(summaryList);
     var sum = 0.0;
@@ -170,7 +213,11 @@ class SummaryDao {
     for (var element in summaryList) {
       var summary = Summary.fromJson(element);
 
-      summary.cant = ((double.parse(summary.amount) * 100.0 / double.parse(summary.unitOfMeasurement)).round() / 100);
+      summary.cant = ((double.parse(summary.amount) *
+                  100.0 /
+                  double.parse(summary.unitOfMeasurement))
+              .round() /
+          100);
       summary.grandTotal = summary.grandTotalCopy!;
       summary.minus = 0;
 
@@ -186,8 +233,9 @@ class SummaryDao {
     final summaryList = await db!.rawQuery('''
         SELECT $tableSummaries.*
         FROM $tableSummaries
-        WHERE $tableSummaries.${SummaryFields.workId} = $workId AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
-      ''');
+        WHERE $tableSummaries.${SummaryFields.workId} = $workId 
+        AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
+     ''');
 
     var sum = 0.0;
 
@@ -196,7 +244,38 @@ class SummaryDao {
       sum += summary.grandTotal;
     }
 
-    return sum;
+    return double.parse(sum.toStringAsFixed(2));
+  }
+
+  Future<int> getTotalPackageSummaries(String orderNumber) async {
+    final db = await _appDatabase.streamDatabase;
+
+    final summaryList = await db!.rawQuery('''
+      SELECT COUNT(DISTINCT id_packing) AS total_columns
+      FROM summaries
+      WHERE order_number = ? 
+    ''', [orderNumber]);
+
+    final totalPackage = summaryList.isNotEmpty
+        ? int.parse(summaryList[0]['total_columns'].toString())
+        : 0;
+
+    return totalPackage;
+  }
+
+  Future<int> getTotalPackageSummariesLoose(String orderNumber) async {
+    final db = await _appDatabase.streamDatabase;
+
+    final summaryList = await db!.rawQuery('''
+      SELECT COUNT(order_number) AS loose
+      FROM summaries
+      WHERE order_number = ? AND (id_packing IS NULL OR id_packing = '') AND (packing IS NULL OR packing = '');
+    ''', [orderNumber]);
+
+    final totalLoose = summaryList.isNotEmpty
+        ? int.parse(summaryList[0]['loose'].toString())
+        : 0;
+    return totalLoose;
   }
 
   Future<int> insertSummary(Summary summary) {

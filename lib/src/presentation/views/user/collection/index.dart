@@ -46,11 +46,13 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   @override
   void initState() {
     super.initState();
-
     context.read<AccountBloc>().add(LoadAccountListEvent());
     collectionCubit = BlocProvider.of<CollectionCubit>(context);
+
+    collectionCubit.initState();
+
     collectionCubit.getCollection(
-        widget.arguments.work.id!, widget.arguments.orderNumber);
+        widget.arguments.work.id!, widget.arguments.summary.orderNumber);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       collectionCubit.cashController.addListener(() {
         collectionCubit.listenForCash();
@@ -63,12 +65,6 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
         }
       });
     });
-  }
-
-  @override
-  void dispose() {
-    // collectionCubit.dispose();
-    super.dispose();
   }
 
   @override
@@ -100,7 +96,6 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   }
 
   void buildBlocListener(BuildContext context, CollectionState state) async {
-    print(state);
     if (state is CollectionSuccess) {
       if (state.validate != null && state.validate == true) {
         collectionCubit.goToWork(state.work);
@@ -122,22 +117,19 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
           context: context,
           builder: (_) {
             return MyDialog(
+              id: widget.arguments.work.id!,
+              orderNumber: widget.arguments.summary.orderNumber,
               total: collectionCubit.total,
               totalSummary: state.totalSummary!.toDouble(),
-              confirmTransaction: () => collectionCubit.confirmTransaction(
-                widget.arguments,
-              ),
+              arguments: widget.arguments,
               context: context,
             );
           });
-    } else if (state is CollectionModalClosed) {
-      print(collectionCubit.total);
     }
   }
 
   Widget _buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionCubit, CollectionState>(
-      // buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
         if (state is CollectionLoading ||
@@ -162,14 +154,14 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
         width: size.width,
         child: Column(children: [
           HeaderCollection(
-              type: widget.arguments.typeOfCharge,
+              type: widget.arguments.summary.typeOfCharge!,
               total: state.totalSummary ?? 0.0),
           SizedBox(height: size.height * 0.02),
           FormCollection(
               formKey: _formKey,
               collectionCubit: collectionCubit,
               state: state,
-              orderNumber: widget.arguments.orderNumber),
+              orderNumber: widget.arguments.summary.orderNumber),
           Padding(
               padding: const EdgeInsets.only(
                   left: kDefaultPadding, right: kDefaultPadding),
@@ -177,7 +169,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
                   widget: const Icon(Icons.edit, color: Colors.white),
                   press: () => context
                       .read<CollectionCubit>()
-                      .goToFirm(widget.arguments.orderNumber))),
+                      .goToFirm(widget.arguments.summary.orderNumber))),
           SizedBox(height: size.height * 0.05),
           BlocSelector<CollectionCubit, CollectionState, bool>(
               selector: (state) => state is CollectionLoading,
@@ -229,15 +221,19 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 class MyDialog extends StatefulWidget {
   const MyDialog(
       {Key? key,
+      required this.id,
+      required this.orderNumber,
       required this.totalSummary,
       required this.total,
-      required this.confirmTransaction,
+      required this.arguments,
       required this.context})
       : super(key: key);
 
+  final int id;
+  final String orderNumber;
   final double totalSummary;
   final double total;
-  final Function confirmTransaction;
+  final InventoryArgument arguments;
   final BuildContext context;
 
   @override
@@ -248,6 +244,13 @@ class _MyDialogState extends State<MyDialog> with FormatNumber {
   var seconds = 5;
   var showText = false;
   Timer? timer;
+
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void initState() {
@@ -288,13 +291,23 @@ class _MyDialogState extends State<MyDialog> with FormatNumber {
           child: const Text('Cancelar'),
           onPressed: () {
             Navigator.of(context).pop();
+            context
+                .read<CollectionCubit>()
+                .getCollection(widget.id, widget.orderNumber);
           },
         ),
         TextButton(
           child: showText ? const Text('Si') : Text(seconds.toString()),
-          onPressed: () {
-            widget.confirmTransaction(context);
+          onPressed: ()  {
             Navigator.of(context).pop();
+            context
+                .read<CollectionCubit>()
+                .confirmTransaction(widget.arguments)
+                .then((value) {
+            });
+            context
+                .read<CollectionCubit>()
+                .getCollection(widget.id, widget.orderNumber);
           },
         ),
       ],

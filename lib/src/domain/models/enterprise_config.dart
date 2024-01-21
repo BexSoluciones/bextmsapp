@@ -16,8 +16,8 @@ class EnterpriseConfig extends Equatable {
   final String? mapbox;
   final String? codeQr;
   final int? limitDaysWorks, ratio, distance;
-  final bool? blockPartial;
-  final bool? background_location;
+  final bool? blockPartial, blockReject;
+  final bool? backgroundLocation;
 
   const EnterpriseConfig({
     this.id,
@@ -30,6 +30,7 @@ class EnterpriseConfig extends Equatable {
     this.fixedDeliveryDistance,
     this.hadReasonRespawn,
     this.specifiedAccountTransfer,
+    this.blockReject,
     this.mapbox,
     this.codeQr,
     this.blockPartial,
@@ -37,7 +38,7 @@ class EnterpriseConfig extends Equatable {
     this.limitDaysWorks,
     this.ratio,
     this.multipleAccounts,
-    this.background_location,
+    this.backgroundLocation,
     this.distance,
   });
 
@@ -123,6 +124,13 @@ class EnterpriseConfig extends Equatable {
                   : false
               : map['block_partial']
           : null,
+      blockReject: map['block_reject'] != null
+          ? map['block_reject'] is int
+              ? map['block_reject'] == 1
+                  ? true
+                  : false
+              : map['block_reject']
+          : null,
       skipUpdate: map['skip_update'] != null
           ? map['skip_update'] is int
               ? map['skip_update'] == 1
@@ -134,7 +142,7 @@ class EnterpriseConfig extends Equatable {
           ? map['limit_days_works'] as int
           : null,
       ratio: map['ratio'] != null ? map['ratio'] as int : null,
-      background_location: map['block_partial'] != null
+      backgroundLocation: map['background_location'] != null
           ? map['background_location'] is int
               ? map['background_location'] == 1
                   ? true
@@ -156,6 +164,7 @@ class EnterpriseConfig extends Equatable {
       'mapbox': mapbox,
       'code_qr': codeQr,
       'block_partial': blockPartial,
+      'block_reject': blockReject,
       'skip_update': skipUpdate,
       'limit_days_works': limitDaysWorks,
       'can_make_history': canMakeHistory,
@@ -164,7 +173,7 @@ class EnterpriseConfig extends Equatable {
       'ratio': ratio,
       'distance': distance,
       'specified_account_transfer': specifiedAccountTransfer,
-      'background_location': background_location,
+      'background_location': backgroundLocation,
       'multiple_accounts': multipleAccounts
     };
   }
@@ -187,11 +196,12 @@ class EnterpriseConfig extends Equatable {
         mapbox,
         codeQr,
         blockPartial,
+        blockReject,
         skipUpdate,
         limitDaysWorks,
         ratio,
         distance,
-        background_location,
+        backgroundLocation,
         multipleAccounts
       ];
 }

@@ -25,7 +25,7 @@ class ProcessingQueueFields {
 class ProcessingQueue {
   ProcessingQueue({
     this.id,
-    required this.body,
+    this.body,
     required this.task,
     required this.code,
     this.relationId,
@@ -64,7 +64,7 @@ class ProcessingQueue {
   }
 
   late int? id;
-  late String body;
+  String? body;
   late String task;
   late String code;
   String? relationId;

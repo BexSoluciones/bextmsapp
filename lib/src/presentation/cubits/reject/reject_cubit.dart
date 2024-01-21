@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:location_repository/location_repository.dart';
 
 //blocs
+import '../../blocs/gps/gps_bloc.dart';
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
 
 //utils
@@ -29,12 +30,11 @@ final NavigationService _navigationService = locator<NavigationService>();
 class RejectCubit extends Cubit<RejectState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
-  final LocationRepository _locationRepository;
+  final GpsBloc gpsBloc;
 
   CurrentUserLocationEntity? currentLocation;
 
-  RejectCubit(
-      this._databaseRepository, this._locationRepository, this._processingQueueBloc)
+  RejectCubit(this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
       : super(const RejectLoading());
 
   Future<void> getReasons() async {
@@ -46,7 +46,8 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
     return RejectSuccess(reasons: reasons);
   }
 
-  Future<void> confirmTransaction(InventoryArgument arguments, String? nameReason, String? observation) async {
+  Future<void> confirmTransaction(InventoryArgument arguments,
+      String? nameReason, String? observation) async {
     emit(const RejectLoading());
     final reasons = await _databaseRepository.getAllReasons();
 
@@ -63,10 +64,10 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
       } else {
         var transaction = Transaction(
             workId: arguments.work.id!,
-            summaryId: arguments.summaryId,
+            summaryId: arguments.summary.id,
             workcode: arguments.work.workcode,
-            orderNumber: arguments.orderNumber,
-            operativeCenter: arguments.operativeCenter,
+            orderNumber: arguments.summary.orderNumber,
+            operativeCenter: arguments.summary.operativeCenter,
             delivery: arguments.total.toString(),
             status: 'reject',
             codmotvis: reason.codmotvis,
@@ -77,10 +78,10 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
             latitude: null,
             longitude: null);
 
-        currentLocation = await _locationRepository.getCurrentLocation();
+        var currentLocation = gpsBloc.state.lastKnownLocation;
 
         transaction.latitude = currentLocation!.latitude.toString();
-        transaction.longitude = currentLocation!.longitude.toString();
+        transaction.longitude = currentLocation.longitude.toString();
 
         await _databaseRepository.insertTransaction(transaction);
 
@@ -91,7 +92,8 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
             createdAt: now(),
             updatedAt: now());
 
-        _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueue));
+        _processingQueueBloc
+            .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
         var validate =
             await _databaseRepository.validateTransaction(arguments.work.id!);

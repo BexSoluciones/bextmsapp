@@ -48,7 +48,10 @@ class InventoryViewState extends State<InventoryView> {
   @override
   void initState() {
     inventoryCubit = BlocProvider.of<InventoryCubit>(context);
-    inventoryCubit.getAllInventoryByOrderNumber(widget.arguments.work.id!, widget.arguments.orderNumber);
+    inventoryCubit.getAllInventoryByOrderNumber(
+        widget.arguments.summary.validate!,
+        widget.arguments.work.id!,
+        widget.arguments.summary.orderNumber);
 
     startWidgetSummary();
     super.initState();
@@ -82,7 +85,8 @@ class InventoryViewState extends State<InventoryView> {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        child: BlocBuilder<InventoryCubit, InventoryState>(builder: (context, state) {
+        child: BlocBuilder<InventoryCubit, InventoryState>(
+            builder: (context, state) {
           return Scaffold(
               resizeToAvoidBottomInset: true,
               body: CustomScrollView(

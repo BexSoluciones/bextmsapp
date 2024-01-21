@@ -16,7 +16,7 @@ class LocationState extends Equatable {
     CurrentUserLocationEntity? currentUserLocation,
     String? errorMessage,
   })  : currentUserLocation =
-      currentUserLocation ?? CurrentUserLocationEntity.empty,
+            currentUserLocation ?? CurrentUserLocationEntity.empty,
         initLocation = initLocation ?? LatLng(40.4167, -3.70325),
         errorMessage = errorMessage ?? '';
 
@@ -27,11 +27,11 @@ class LocationState extends Equatable {
 
   @override
   List<Object?> get props => [
-    status,
-    currentUserLocation,
-    initLocation,
-    errorMessage,
-  ];
+        status,
+        currentUserLocation,
+        initLocation,
+        errorMessage,
+      ];
 
   LocationState copyWith({
     LocationStateStatus? status,

@@ -46,7 +46,6 @@ class PoliticsViewState extends State<PoliticsView> {
       body: BlocConsumer<PoliticsCubit, PoliticsState>(
         listener: (context, state) {
           if (state is PoliticsSuccess) {
-            print(state.route);
             _navigationService.goTo(state.route!);
           }
         },

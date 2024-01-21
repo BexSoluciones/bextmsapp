@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -16,12 +18,24 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
   factory NetworkBloc() => _instance;
 
   void _observe(event, emit) {
-    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
-      if (result == ConnectivityResult.none) {
-        NetworkBloc().add(NetworkNotify());
-      } else {
-        NetworkBloc().add(NetworkNotify(isConnected: true));
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) async {
+      try {
+        final response = await InternetAddress.lookup('example.com');
+
+        print(response);
+
+        if (result == ConnectivityResult.none) {
+          NetworkBloc().add(NetworkNotify(isConnected: false));
+        } else if(response.isNotEmpty && response[0].rawAddress.isNotEmpty) {
+          NetworkBloc().add(NetworkNotify(isConnected: true));
+        } else {
+          NetworkBloc().add(NetworkNotify(isConnected: false));
+        }
+      } on SocketException catch (e) {
+        print(e.toString());
+        NetworkBloc().add(NetworkNotify(isConnected: false));
       }
+
     });
   }
 

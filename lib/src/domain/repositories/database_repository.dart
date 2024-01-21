@@ -1,9 +1,6 @@
-import 'package:bexdeliveries/src/domain/models/news.dart';
-import 'package:bexdeliveries/src/domain/models/notification.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
-import 'package:bexdeliveries/src/domain/models/summary_report.dart';
-
+//models
 import '../models/processing_queue.dart';
 import '../models/transaction_summary.dart';
 import '../models/work.dart';
@@ -16,12 +13,18 @@ import '../models/location.dart';
 import '../models/photo.dart';
 import '../models/client.dart';
 import '../models/account.dart';
+import '../models/news.dart';
+import '../models/summary_report.dart';
+import '../models/notification.dart';
+import '../models/note.dart';
+import '../models/error.dart';
 
 abstract class DatabaseRepository {
   //WORKS
   Future<List<Work>> getAllWorks();
   Future<List<Work>> findAllWorksByWorkcode(String workcode);
   Future<List<Work>> findAllWorksPaginatedByWorkcode(String workcode, int page);
+  Future<List<String>?> completeWorks();
   Future<int> countAllWorksByWorkcode(String workcode);
   Future<int> insertWork(Work work);
   Future<int> updateWork(Work work);
@@ -49,8 +52,11 @@ abstract class DatabaseRepository {
 
   //SUMMARIES
   Future<List<Summary>> getAllSummariesByOrderNumber(int workId);
+  Future<List<Summary>> getAllSummariesByWorkcode(int workId, String customer);
   Future<List<Summary>> getAllInventoryByOrderNumber(int workId, String orderNumber);
+  Future<List<Summary>> getAllInventoryByPackage(int workId, String orderNumber);
   Future<List<Summary>> getAllPackageByOrderNumber(int workId, String orderNumber);
+  Future<List<Summary>> watchAllItemsPackage(String orderNumber, String packing, String idPacking);
   Future<List<Summary>> getAllSummariesByOrderNumberMoved(int workId, String orderNumber);
   Future<List<SummaryReport>> getSummaryReportsWithReasonOrRedelivery(String orderNumber);
   Future<List<SummaryReport>> getSummaryReportsWithReturnOrRedelivery(String orderNumber);
@@ -58,6 +64,8 @@ abstract class DatabaseRepository {
   Future<double> countTotalRespawnWorksByWorkcode(String workcode,String reason);
   Future<bool> resetCantSummaries(int workId, String orderNumber);
   Future<double> getTotalSummaries(int workId, String orderNumber);
+  Future<int> getTotalPackageSummaries(String orderNumber);
+  Future<int> getTotalPackageSummariesLoose(String orderNumber);
   Future<int> insertSummary(Summary summary);
   Future<int> updateSummary(Summary summary);
   Future<void> insertSummaries(List<Summary> summaries);
@@ -74,11 +82,13 @@ abstract class DatabaseRepository {
   Future<bool> validateTransactionArrived(int workId, String status);
   Future<bool> validateTransactionSummary(String workcode, String orderNumber, String status);
   Future<bool> checkLastTransaction(String workcode);
+  Future<bool> checkLastProduct(int transactionId);
   Future<int> updateTransaction(Transaction transaction);
   Future<void> insertTransactions(List<Transaction> transactions);
   Future<void> emptyTransactions();
   Future<void> deleteTransactionsByWorkcode(String workcode);
   Future<int> countLeftClients(String workcode);
+  Future<bool> verifyTransactionExistence(int workId,String orderNumber);
 
 
   //REASONS
@@ -97,11 +107,14 @@ abstract class DatabaseRepository {
   Future<void> emptyAccounts();
 
   //PROCESSING QUEUE
-  Stream<List<ProcessingQueue>> getAllProcessingQueues();
+  Future<List<ProcessingQueue>> getAllProcessingQueues(String? code, String? task);
+  Stream<List<ProcessingQueue>> watchAllProcessingQueues();
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete();
   Future<int> countProcessingQueueIncompleteToTransactions();
+  Stream<List<Map<String, dynamic>>> getProcessingQueueIncompleteToTransactions();
+  Future<bool> validateIfProcessingQueueIsIncomplete();
   Future<int> updateProcessingQueue(ProcessingQueue processingQueue);
-  Future<void> insertProcessingQueue(ProcessingQueue processingQueue);
+  Future<int> insertProcessingQueue(ProcessingQueue processingQueue);
   Future<void> emptyProcessingQueues();
 
   //LOCATIONS
@@ -124,6 +137,23 @@ abstract class DatabaseRepository {
   Future<int> deleteAll(int photoId);
   Future<void> insertPhotos(List<Photo> photos);
   Future<void> emptyPhotos();
+
+  //NOTES
+  Future<List<Note>> getAllNotes();
+  Future<Note?> findNote(String zoneId);
+  Future<int> insertNote(Note note);
+  Future<int> updateNote(Note note);
+  Future<int> deleteNote(Note note);
+  Future<void> insertNotes(List<Note> notes);
+  Future<void> emptyNotes();
+
+  //ERROR
+  Future<List<Error>> getAllErrors();
+  Future<int> insertError(Error error);
+  Future<int> updateError(Error error);
+  Future<int> deleteError(Error error);
+  Future<void> insertErrors(List<Error> errors);
+  Future<void> emptyErrors();
 
   //CLIENTS
   Stream<List<Client>> watchAllClients();

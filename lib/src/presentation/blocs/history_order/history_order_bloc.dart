@@ -28,8 +28,8 @@ part 'history_order_state.dart';
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
 
-class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with FormatDate {
-
+class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState>
+    with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
 
@@ -40,7 +40,6 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
   }
 
   HistoryOrder? historyOrder;
-
 
   Future<void> _requestHistory(
     HistoryOrderInitialRequest event,
@@ -66,7 +65,11 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState> with F
       showAgain = _storageService.getBool('${event.work.workcode}-showAgain');
 
       (historyOrder != null && showAgain == false)
-          ? await _navigationService.goTo(AppRoutes.history, arguments: historyOrder)
+          ? await _navigationService.goTo(AppRoutes.history,
+              arguments: HistoryArgument(
+                  work: event.work,
+                  likelihood: historyOrder!.likelihood!,
+                  differents: historyOrder!.different))
           : await _navigationService.goTo(AppRoutes.work,
               arguments: WorkArgument(work: event.work));
     } else {

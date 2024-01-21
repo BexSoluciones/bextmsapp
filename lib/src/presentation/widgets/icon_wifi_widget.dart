@@ -9,8 +9,8 @@ class IconConnection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NetworkBloc, NetworkState>(
+      buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
-        print(state);
         if (state is NetworkFailure) {
           return Icon(Icons.wifi_off,
               color: Theme.of(context).colorScheme.primary);

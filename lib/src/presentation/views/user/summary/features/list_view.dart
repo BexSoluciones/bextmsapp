@@ -31,6 +31,7 @@ final NavigationService _navigationService = locator<NavigationService>();
 class ListViewSummary extends StatefulWidget {
   const ListViewSummary(
       {Key? key,
+      required this.summaryCubit,
       required this.arguments,
       required this.one,
       required this.two,
@@ -39,6 +40,7 @@ class ListViewSummary extends StatefulWidget {
       required this.five})
       : super(key: key);
 
+  final SummaryCubit summaryCubit;
   final SummaryArgument arguments;
   final GlobalKey one, two, three, four, five;
 
@@ -58,19 +60,40 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
-      switch (state.runtimeType) {
-        case SummaryLoading:
+    return BlocBuilder<SummaryCubit, SummaryState>(
+        builder: (_, state) => _buildBlocConsumer(size));
+  }
+
+  void buildBlocListener(BuildContext context, SummaryState state) async {
+    if (state is SummaryFailed && state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            state.error!,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildBlocConsumer(Size size) {
+    return BlocConsumer<SummaryCubit, SummaryState>(
+      listener: buildBlocListener,
+      builder: (context, state) {
+        if (state is SummaryLoading) {
           return const Align(
             alignment: Alignment.center,
             child: CupertinoActivityIndicator(),
           );
-        case SummarySuccess:
+        } else if (state is SummarySuccess || state is SummaryFailed) {
           return _buildSummary(state, size);
-        default:
+        } else {
           return const SizedBox();
-      }
-    });
+        }
+      },
+    );
   }
 
   Widget _buildSummary(SummaryState state, Size size) {
@@ -86,8 +109,8 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                buildPhoneShowcase(widget.arguments.work, widget.one),
-                buildWhatsAppShowcase(widget.arguments.work, widget.two),
+                buildPhoneShowcase(widget.arguments.work, widget.one,context),
+                buildWhatsAppShowcase(widget.arguments.work, widget.two,context),
                 buildMapShowcase(context, widget.arguments.work, widget.three),
                 buildPublishShowcase(widget.four, state.summaries.first.id),
               ],
@@ -97,38 +120,49 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
             flex: 3,
             child: _buildList(state.isArrived, state.summaries),
           ),
-          state.isGeoreference == false && state.isArrived == true
-              ? Padding(
-                  padding: const EdgeInsets.all(kDefaultPadding),
-                  child: DefaultButton(
-                      widget: const Text('¿Quieres georeferenciarlo?',
-                          style: TextStyle(color: Colors.white, fontSize: 18)),
-                      press: () => _navigationService.goTo(
-                          AppRoutes.summaryGeoReference,
-                          arguments: widget.arguments.work)),
-                )
-              : Container(),
-          state.isArrived == false
-              ? Padding(
-                  padding: const EdgeInsets.all(kDefaultPadding),
-                  child: DefaultButton(
-                      widget: const Text('¿Llegaste donde el cliente?',
-                          style: TextStyle(color: Colors.white, fontSize: 18)),
-                      press: () async {
-                        var transaction = Transaction(
-                            workId: widget.arguments.work.id!,
-                            workcode: widget.arguments.work.workcode!,
-                            status: 'arrived',
-                            start: now(),
-                            end: now(),
-                            latitude: null,
-                            longitude: null,
-                            firm: null);
-                        context.read<SummaryCubit>().sendTransactionArrived(
-                            widget.arguments.work, transaction);
-                      }),
-                )
-              : Container()
+          BlocSelector<SummaryCubit, SummaryState, bool>(
+              selector: (state) =>
+                  state.isArrived == true && state.isGeoReference == false,
+              builder: (c, x) {
+                return x
+                    ? Padding(
+                        padding: const EdgeInsets.all(kDefaultPadding),
+                        child: DefaultButton(
+                            widget: const Text('¿Quieres georeferenciarlo?',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18)),
+                            press: () => _navigationService.goTo(
+                                AppRoutes.summaryGeoReference,
+                                arguments: widget.arguments)),
+                      )
+                    : Container();
+              }),
+          BlocSelector<SummaryCubit, SummaryState, bool>(
+              selector: (state) => state.isArrived == false,
+              builder: (c, x) {
+                return x
+                    ? Padding(
+                        padding: const EdgeInsets.all(kDefaultPadding),
+                        child: DefaultButton(
+                            widget: const Text('¿Llegaste donde el cliente?',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18)),
+                            press: () async {
+                              var transaction = Transaction(
+                                  workId: widget.arguments.work.id!,
+                                  workcode: widget.arguments.work.workcode!,
+                                  status: 'arrived',
+                                  start: now(),
+                                  end: now(),
+                                  latitude: null,
+                                  longitude: null,
+                                  firm: null);
+                              widget.summaryCubit.sendTransactionArrived(
+                                  context, widget.arguments.work, transaction);
+                            }),
+                      )
+                    : Container();
+              }),
         ],
       ),
     );
@@ -175,7 +209,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                         latitude: null,
                         longitude: null,
                       );
-                      context.read<SummaryCubit>().sendTransactionSummary(
+                      widget.summaryCubit.sendTransactionSummary(
                           widget.arguments.work, summary, transaction);
                     });
               }
@@ -205,7 +239,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                 latitude: null,
                 longitude: null,
               );
-              context.read<SummaryCubit>().sendTransactionSummary(
+              widget.summaryCubit.sendTransactionSummary(
                   widget.arguments.work, summary, transaction);
             }));
   }

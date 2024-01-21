@@ -10,7 +10,7 @@ const String headerSummaryLogger = 'summary';
 const String headerNavigationLogger = 'navigation';
 const String headerDrawerLogger = 'drawer';
 const String headerIssueLogger = 'issue';
-const String headerCollectionLogger = 'issue';
+const String headerCollectionLogger = 'collection';
 const String headerDeveloperLogger = 'developer';
 
 //routes
@@ -27,6 +27,9 @@ class AppRoutes {
   static const work = '/work';
   static const confirm = '/confirm-work';
   static const history = '/historic';
+  //NAVIGATION ROUTES
+  static const notes = '/create-note';
+
   static const navigation = '/navigation';
   //SUMMARY ROUTES
   static const summary = '/summary';

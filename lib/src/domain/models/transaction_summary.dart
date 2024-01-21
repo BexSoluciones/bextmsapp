@@ -31,15 +31,16 @@ class TransactionSummaryFields {
 class TransactionSummary {
   TransactionSummary(
       {this.id,
-        this.transactionId,
-        required this.summaryId,
-        this.orderNumber,
-        this.workId,
-        required this.numItems,
-        required this.productName,
-        this.codmotvis,
-        this.reason, this.createdAt,
-        this.updatedAt});
+      this.transactionId,
+      required this.summaryId,
+      this.orderNumber,
+      this.workId,
+      required this.numItems,
+      required this.productName,
+      this.codmotvis,
+      this.reason,
+      this.createdAt,
+      this.updatedAt});
 
   TransactionSummary copy({
     int? id,
@@ -76,7 +77,9 @@ class TransactionSummary {
     summaryId = json['summary_id'];
     orderNumber = json['order_number'];
     workId = json['work_id'];
-    numItems = json['num_items'] is int ? json['num_items'].toString() : json['num_items'];
+    numItems = json['num_items'] is int || json['num_items'] is double
+        ? json['num_items'].toString()
+        : json['num_items'];
     productName = json['product_name'];
     codmotvis = json['codmotvis'];
     reason = json['reason'];

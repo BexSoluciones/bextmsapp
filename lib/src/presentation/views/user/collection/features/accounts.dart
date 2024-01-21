@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -33,12 +34,11 @@ class AccountsCollection extends StatefulWidget {
 
 class _AccountsCollectionState extends State<AccountsCollection>
     with FormatNumber {
-
   final _formKey = GlobalKey<FormState>();
 
   @override
   void setState(VoidCallback fn) {
-    if(mounted){
+    if (mounted) {
       super.setState(fn);
     }
   }
@@ -90,14 +90,15 @@ class _AccountsCollectionState extends State<AccountsCollection>
                   IconButton(
                       icon: const Icon(Icons.camera_alt,
                           size: 32, color: kPrimaryColor),
-                      onPressed: () =>
-                          widget.collectionCubit.goToCamera(widget.orderNumber)),
+                      onPressed: () => widget.collectionCubit
+                          .goToCamera(widget.orderNumber)),
                   widget.state.enterpriseConfig != null &&
                           widget.state.enterpriseConfig!.codeQr != null
                       ? IconButton(
                           icon: const Icon(Icons.qr_code_2,
                               size: 32, color: kPrimaryColor),
-                          onPressed: () => widget.collectionCubit.goToCodeQR())
+                          onPressed: () => widget.collectionCubit.goToCodeQR(
+                              widget.state.enterpriseConfig!.codeQr))
                       : Container()
                 ],
               ),
@@ -118,11 +119,11 @@ class _AccountsCollectionState extends State<AccountsCollection>
                   ),
                   suffixIcon: IconButton(
                     onPressed: () {
-                      if (double.tryParse(
-                              widget.collectionCubit.multiTransferController.text) !=
+                      if (double.tryParse(widget
+                              .collectionCubit.multiTransferController.text) !=
                           null) {
-                        widget.collectionCubit.total -= double.parse(
-                            widget.collectionCubit.multiTransferController.text);
+                        widget.collectionCubit.total -= double.parse(widget
+                            .collectionCubit.multiTransferController.text);
                       }
                       widget.collectionCubit.multiTransferController.clear();
                     },
@@ -130,7 +131,10 @@ class _AccountsCollectionState extends State<AccountsCollection>
                   ),
                 ),
                 validator: (value) {
-                  if (value!.contains(',')) {
+                  if (value!.startsWith('.') || value.endsWith('.')) {
+                    return 'valor no válido';
+                  }
+                  if (value.contains(',')) {
                     return '';
                   }
                   return null;
@@ -147,7 +151,8 @@ class _AccountsCollectionState extends State<AccountsCollection>
                     children: [
                       IconButton(
                         icon: const Icon(Icons.qr_code_2),
-                        onPressed: () => widget.collectionCubit.goToCodeQR(),
+                        onPressed: () => widget.collectionCubit.goToCodeQR(
+                            widget.collectionCubit.selectedAccount?.code_qr),
                       ),
                     ],
                   )
@@ -161,7 +166,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                     return DropdownButtonFormField<Account>(
                       itemHeight: null,
                       isExpanded: true,
-                      value: accountBlocState.accounts.first,
+                      value: widget.collectionCubit.selectedAccount ?? accountBlocState.accounts.first,
                       onChanged: (Account? newValue) {
                         widget.collectionCubit.selectedAccount = newValue;
                         setState(() {});
@@ -169,7 +174,8 @@ class _AccountsCollectionState extends State<AccountsCollection>
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.symmetric(horizontal: 10),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey, width: 2.0),
+                          borderSide:
+                              BorderSide(color: Colors.grey, width: 2.0),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderSide:
@@ -246,7 +252,9 @@ class _AccountsCollectionState extends State<AccountsCollection>
                           formattedDate; //set output date to TextField value.
                     });
                   } else {
-                    print('Fecha no seleccionada');
+                    if (kDebugMode) {
+                      print('Fecha no seleccionada');
+                    }
                   }
                 },
               ),
@@ -255,9 +263,13 @@ class _AccountsCollectionState extends State<AccountsCollection>
                   widget: BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) => state is CollectionEditingPayment,
                     builder: (c, x) {
-                      return x ? const Text('Editar',
-                          style: TextStyle(color: Colors.white, fontSize: 20)) : const Text('Agregar',
-                          style: TextStyle(color: Colors.white, fontSize: 20));
+                      return x
+                          ? const Text('Editar',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20))
+                          : const Text('Agregar',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20));
                     },
                   ),
                   press: () {
@@ -267,19 +279,18 @@ class _AccountsCollectionState extends State<AccountsCollection>
                           index: widget.collectionCubit.indexToEdit);
                       setState(() {});
                     }
-
                   }),
               const SizedBox(height: 10),
               Expanded(
                   child: TransactionList(
                 selectedAccounts: widget.collectionCubit.selectedAccounts,
                 onDataEdit: (index) {
-                  widget.collectionCubit.editPaymentWithAccount(index);
+                  widget.collectionCubit
+                      .editPaymentWithAccount(index);
                   setState(() {});
                 },
                 onTotalChange: (amount) {
                   widget.collectionCubit.total += amount;
-                  setState(() {});
                 },
                 onDataRemove: (removedData) {
                   widget.collectionCubit.selectedAccounts.remove(removedData);

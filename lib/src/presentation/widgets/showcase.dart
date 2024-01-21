@@ -1,3 +1,5 @@
+import 'package:bexdeliveries/src/domain/models/arguments.dart';
+import 'package:bexdeliveries/src/presentation/cubits/summary/summary_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -21,7 +23,7 @@ import '../../locator.dart';
 import '../../services/navigation.dart';
 
 final helperFunctions = HelperFunctions();
-final NavigationService navigationService = locator<NavigationService>();
+final NavigationService _navigationService = locator<NavigationService>();
 
 class BuildShowcaseIconButton extends StatefulWidget {
   const BuildShowcaseIconButton(
@@ -42,12 +44,14 @@ class BuildShowcaseIconButton extends StatefulWidget {
 }
 
 late IssuesBloc issuesBloc;
+late SummaryCubit summaryCubit;
 
 class _BuildShowcaseIconButtonState extends State<BuildShowcaseIconButton> {
   @override
   void initState() {
     super.initState();
     issuesBloc = BlocProvider.of<IssuesBloc>(context);
+    summaryCubit = BlocProvider.of<SummaryCubit>(context);
   }
 
   @override
@@ -65,7 +69,7 @@ class _BuildShowcaseIconButtonState extends State<BuildShowcaseIconButton> {
 }
 
 // Crear el Showcase para llamar al teléfono del cliente
-Widget buildPhoneShowcase(Work work, GlobalKey one) {
+Widget buildPhoneShowcase(Work work, GlobalKey one, BuildContext context) {
   return BuildShowcaseIconButton(
     keys: one,
     description: 'Llama al teléfono del cliente!',
@@ -73,6 +77,17 @@ Widget buildPhoneShowcase(Work work, GlobalKey one) {
     onPressed: () {
       if (work.cellphone != null && work.cellphone != '0') {
         launchUrl(Uri.parse('tel://${work.cellphone}'));
+      } else {
+        //summaryCubit.error(work.id!, 'No tiene número de celular');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+              'No tiene número de celular',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
       }
     },
   );
@@ -87,21 +102,11 @@ Widget buildMapShowcase(BuildContext context, Work work, GlobalKey three) {
     child: IconButton(
       onPressed: () async {
         if (work.latitude != '0' && work.longitude != '0') {
-          await helperFunctions.showMapDirection(
-            context,
-            work,
-            null,
-          );
+          _navigationService.goTo(AppRoutes.summaryNavigation, arguments: SummaryNavigationArgument(work: work));
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'No tiene geolocalización 🚨',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          );
+          summaryCubit.error(work.id!, 'No tiene geolocalización 🚨');
         }
+
       },
       icon:  Icon(Icons.directions, size: 35,color: Theme.of(context).colorScheme.shadow),
     ),
@@ -109,7 +114,7 @@ Widget buildMapShowcase(BuildContext context, Work work, GlobalKey three) {
 }
 
 // Crear el Showcase para enviar un mensaje de WhatsApp al cliente
-Widget buildWhatsAppShowcase(Work work, GlobalKey two) {
+Widget buildWhatsAppShowcase(Work work, GlobalKey two,BuildContext context) {
   return BuildShowcaseIconButton(
     keys: two,
     description: 'Deja un mensaje de WhatsApp!',
@@ -120,11 +125,21 @@ Widget buildWhatsAppShowcase(Work work, GlobalKey two) {
           '+57${work.cellphone}',
           'Hola!, ¿Cómo estás?',
         );
+      } else {
+        //summaryCubit.error(work.id!, 'No tiene número de celular');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+              'No tiene número de celular',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
       }
     },
   );
 }
-
 // Crear el Showcase para la opción "Publicar"
 Widget buildPublishShowcase(GlobalKey four, int summaryId) {
   return BuildShowcaseIconButton(
@@ -134,7 +149,7 @@ Widget buildPublishShowcase(GlobalKey four, int summaryId) {
     onPressed: () {
       issuesBloc.add(GetIssuesList(
           currentStatus: 'summary', workId: null, summaryId: summaryId));
-      navigationService.goTo(AppRoutes.issue);
+      _navigationService.goTo(AppRoutes.issue);
     },
   );
 }

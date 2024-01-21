@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bexdeliveries/src/utils/constants/gaps.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,11 +10,10 @@ import 'package:lottie/lottie.dart';
 import '../../../../presentation/blocs/processing_queue/processing_queue_bloc.dart';
 
 //domain
-import '../../../../domain/models/processing_queue.dart';
-import '../../../../domain/models/work.dart';
 import '../../../../domain/abstracts/format_abstract.dart';
 
 //widgets
+
 import '../../../widgets/default_button_widget.dart';
 
 class TransactionView extends StatefulWidget {
@@ -31,8 +31,6 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
   late Stream stream;
   late StreamSubscription subscription;
   int computationCount = 0;
-
-  var works = <Work>[];
 
   @override
   void initState() {
@@ -86,24 +84,48 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
           ),
         ),
         body: BlocBuilder<ProcessingQueueBloc, ProcessingQueueState>(
-          builder: (_, state) {
-            switch (state.runtimeType) {
-              case ProcessingQueueInitial:
-                return const Center(child: CupertinoActivityIndicator());
-              case ProcessingQueueSuccess:
-                return _buildHome();
-              case ProcessingQueueSending:
-                return _buildSender();
-              default:
-                return const SizedBox();
-            }
-          },
+          builder: (_, state) => _buildBlocConsumer(),
         ));
   }
 
+  void buildBlocListener(
+      BuildContext context, ProcessingQueueState state) async {
+    print(state);
+    if (state.status == ProcessingQueueStatus.failure && state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            state.error!,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildBlocConsumer() {
+    return BlocConsumer<ProcessingQueueBloc, ProcessingQueueState>(
+      listener: buildBlocListener,
+      builder: (context, state) {
+        switch (state.status) {
+          case ProcessingQueueStatus.loading:
+            return const Center(child: CupertinoActivityIndicator());
+          case ProcessingQueueStatus.success:
+            return _buildHome();
+          case ProcessingQueueStatus.sending:
+            return _buildSender();
+          default:
+            return const SizedBox();
+        }
+      },
+    );
+  }
+
   Widget _buildHome() {
-    return StreamBuilder<List<ProcessingQueue>>(
-        stream: processingQueueBloc.todos,
+    return StreamBuilder<List<Map<String, dynamic>>>(
+        stream:
+            processingQueueBloc.getProcessingQueueIncompleteToTransactions(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
             var queues = snapshot.data;
@@ -115,54 +137,27 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                       right: 16.0,
                       bottom: 20.0,
                     ),
-                    child: ListView(
-                      shrinkWrap: true,
+                    child: Column(
                       children: [
-                        item(
-                            'Transacciones de inicio de planilla',
-                            queues
-                                .where((queue) =>
-                                    queue.code == "store_transaction_start")
-                                .length,
-                            null),
-                        const SizedBox(height: 16),
-                        item(
-                            'Transacciones de llegada de cliente',
-                            queues
-                                .where((queue) =>
-                                    queue.code == "store_transaction_arrived")
-                                .length,
-                            null),
-                        const SizedBox(height: 16),
-                        item(
-                            'Transacciones de facturas vistas',
-                            queues
-                                .where((queue) =>
-                                    queue.code == "store_transaction_summary")
-                                .length,
-                            null),
-                        const SizedBox(height: 16),
-                        item(
-                            'Transacciones pendientes',
-                            queues
-                                .where((queue) => queue.task == "pending" || queue.task == "incomplete")
-                                .length,
-                            Colors.orange),
-                        const SizedBox(height: 16),
-                        item(
-                            'Transacciones con error',
-                            queues
-                                .where((queue) => queue.task == "error")
-                                .length,
-                            Colors.red),
-                        const SizedBox(height: 20),
-                        item('Total', queues.length, null),
-                        const SizedBox(height: 20),
+                        Expanded(
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: queues.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return item(
+                                  queues[index]['name'],
+                                  queues[index]['cant'],
+                                  queues[index]['color']);
+                            },
+                            separatorBuilder:
+                                (BuildContext context, int index) => gapH16,
+                          ),
+                        ),
                         queues
                                 .where((queue) =>
-                                    queue.task == "pending" ||
-                                    queue.task == "error" ||
-                                    queue.task == "incomplete")
+                                    queue['task'] == "pending" ||
+                                    queue['task'] == "error" ||
+                                    queue['task'] == "incomplete")
                                 .isNotEmpty
                             ? DefaultButton(
                                 widget: const Text('Enviar transacciones',

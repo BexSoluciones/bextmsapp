@@ -48,9 +48,11 @@ class DioExceptions implements Exception {
       case 404:
         switch (error['error']){
           case null:
-            return 'Oops something went wrong';
+            return 'Huy! Algo salió mal';
           case '':
-            return 'Oops something went wrong';
+            return 'Huy! Algo salió mal';
+          case 'export database disable':
+             return 'No tienes permisos para enviar la base de datos por favor contactate con el administrador';
           case 'max_udids_used':
             return 'Limite de dispositivos alcanzados 🙁🙁 ($model)';
           case 'Udid disabled':
@@ -64,7 +66,7 @@ class DioExceptions implements Exception {
           case 'Inactive user':
             return 'El usuario no se encuentra activo 🙁🙁 ($model)';
           default:
-            return 'Oops something went wrong';
+            return 'Huy! Algo salió mal';
         }
       case 500:
         return 'Internal server error';

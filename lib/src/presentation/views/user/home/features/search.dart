@@ -19,16 +19,30 @@ class SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (_, state) {
-        switch (state.runtimeType) {
-          case HomeLoading:
+        switch (state.status) {
+          case HomeStatus.loading:
             return const Center(child: CupertinoActivityIndicator());
-          case HomeSuccess:
+          case HomeStatus.success:
             return Showcase(
                 key: three,
                 disableMovingAnimation: true,
                 title: 'Busqueda!',
                 description:
                     'Encuentra al cliente que necesitas tanto por nombre, por nit, por dirección o por facturas',
+                child: IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      showSearch(
+                          context: context,
+                          delegate: SearchHomeDelegate(state.works));
+                    }));
+          case HomeStatus.failure:
+            return Showcase(
+                key: three,
+                disableMovingAnimation: true,
+                title: 'Busqueda!',
+                description:
+                'Encuentra al cliente que necesitas tanto por nombre, por nit, por dirección o por facturas',
                 child: IconButton(
                     icon: const Icon(Icons.search),
                     onPressed: () {

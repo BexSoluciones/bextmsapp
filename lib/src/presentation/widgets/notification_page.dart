@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:bexdeliveries/src/domain/abstracts/format_abstract.dart';
 import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:bexdeliveries/src/domain/models/notification.dart' as notificationModel;
+import 'package:bexdeliveries/src/domain/models/notification.dart'
+    as notificationModel;
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:readmore/readmore.dart';
@@ -14,7 +16,7 @@ import '../../locator.dart';
 import '../../utils/constants/colors.dart';
 
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
-final ProcessingQueueBloc _procesingQueueBloc = locator<ProcessingQueueBloc>();
+final ProcessingQueueBloc _processingQueueBloc = locator<ProcessingQueueBloc>();
 
 class BuildNotificationCard extends StatefulWidget {
   const BuildNotificationCard({
@@ -29,9 +31,7 @@ class BuildNotificationCard extends StatefulWidget {
 }
 
 class _BuildNotificationCardState extends State<BuildNotificationCard>
-    with AutomaticKeepAliveClientMixin {
-
-
+    with AutomaticKeepAliveClientMixin, FormatDate {
   late DateTime? dateParse;
   late bool updateStatus;
 
@@ -60,6 +60,7 @@ class _BuildNotificationCardState extends State<BuildNotificationCard>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
@@ -68,16 +69,18 @@ class _BuildNotificationCardState extends State<BuildNotificationCard>
             await _databaseRepository.updateNotification(
                 widget.notification.id!, DateTime.now().toString());
             if (widget.notification.id_from_server != null) {
-              var procesingQueue =  ProcessingQueue(
+              var processingQueue = ProcessingQueue(
                 body: jsonEncode({
                   'notification_id': widget.notification.id_from_server,
                   'date': '${DateTime.now()}'
                 }),
                 task: 'incomplete',
-                code: 'SIKOAJH24D', createdAt: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()), updatedAt:  DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-
+                code: 'store_notification',
+                createdAt: now(),
+                updatedAt: now(),
               );
-              _procesingQueueBloc.inAddPq.add(procesingQueue);
+              _processingQueueBloc
+                  .add(ProcessingQueueAdd(processingQueue: processingQueue));
             }
 
             setState(() {
@@ -101,18 +104,17 @@ class _BuildNotificationCardState extends State<BuildNotificationCard>
             borderRadius: BorderRadius.circular(10),
             elevation: 2,
             color: Colors.white,
-            child:
-            Padding(
+            child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
                       child: Image.asset(
-                        'assets/images/bex-deliveries-icon.png',
-                        height: 30,
-                        width: 30,
-                      )),
+                    'assets/images/bex-deliveries-icon.png',
+                    height: 30,
+                    width: 30,
+                  )),
                   const SizedBox(width: 15),
                   Expanded(
                     child: Column(
@@ -139,10 +141,10 @@ class _BuildNotificationCardState extends State<BuildNotificationCard>
                         const SizedBox(height: 12),
                         (dateParse != null)
                             ? Text(formatDateTime(dateParse!),
-                            style: const TextStyle(
-                                color: Color(0xFF737373),
-                                fontSize: 12,
-                                fontWeight: FontWeight.normal))
+                                style: const TextStyle(
+                                    color: Color(0xFF737373),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.normal))
                             : const Text(''),
                         const SizedBox(height: 15),
                       ],
@@ -151,7 +153,6 @@ class _BuildNotificationCardState extends State<BuildNotificationCard>
                 ],
               ),
             ),
-            /*  ), */
           ),
         ),
       ),
@@ -159,6 +160,5 @@ class _BuildNotificationCardState extends State<BuildNotificationCard>
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }

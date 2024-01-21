@@ -43,7 +43,6 @@ class _FormCollectionState extends State<FormCollection>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -58,12 +57,32 @@ class _FormCollectionState extends State<FormCollection>
             key: widget.formKey,
             child: Column(
               children: [
-                const Row(
+                Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(children: [
-                        Text('EFECTIVO', style: TextStyle(fontSize: 14)),
-                        Icon(Icons.money, color: Colors.green),
+                        const Text('EFECTIVO', style: TextStyle(fontSize: 14)),
+                        const Icon(Icons.money, color: Colors.green),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 2,
+                        ),
+                        BlocSelector<CollectionCubit, CollectionState, bool>(
+                            selector: (state) =>
+                                (state is CollectionInitial ||
+                                    state is CollectionLoading ||
+                                    state is CollectionFailed) &&
+                                state.enterpriseConfig != null &&
+                                state.enterpriseConfig!.multipleAccounts ==
+                                    true,
+                            builder: (c, x) {
+                              return x
+                                  ? IconButton(
+                                      icon: const Icon(Icons.camera_alt,
+                                          size: 32, color: kPrimaryColor),
+                                      onPressed: () => widget.collectionCubit
+                                          .goToCamera(widget.orderNumber))
+                                  : Container();
+                            }),
                       ]),
                     ]),
                 TextFormField(
@@ -107,13 +126,15 @@ class _FormCollectionState extends State<FormCollection>
                     ),
                   ),
                   validator: (value) {
-                    if (value!.contains(',')) {
-                      return '';
+                    if (value!.startsWith('.') || value.endsWith('.')) {
+                      return 'valor no válido';
+                    }
+                    if (value.contains(',')) {
+                      return 'no debe contener comas';
                     }
                     return null;
                   },
                 ),
-                //TODO:: [Heider Zapa] fix multiple accounts
                 const SizedBox(height: 10),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     bloc: widget.collectionCubit,
@@ -138,15 +159,29 @@ class _FormCollectionState extends State<FormCollection>
                                         size: 32, color: kPrimaryColor),
                                     onPressed: () => widget.collectionCubit
                                         .goToCamera(widget.orderNumber)),
-                                widget.state.enterpriseConfig != null &&
-                                        widget.state.enterpriseConfig!.codeQr !=
-                                            null
-                                    ? IconButton(
-                                        icon: const Icon(Icons.qr_code_2,
-                                            size: 32, color: kPrimaryColor),
-                                        onPressed: () =>
-                                            widget.collectionCubit.goToCodeQR())
-                                    : Container()
+                                BlocSelector<CollectionCubit, CollectionState,
+                                        bool>(
+                                    bloc: widget.collectionCubit,
+                                    selector: (state) =>
+                                        (state is CollectionInitial ||
+                                            state is CollectionLoading ||
+                                            state is CollectionFailed) &&
+                                        state.enterpriseConfig != null &&
+                                        state.enterpriseConfig!.codeQr != null,
+                                    builder: (c, x) {
+                                      return x
+                                          ? IconButton(
+                                              icon: const Icon(Icons.qr_code_2,
+                                                  size: 32,
+                                                  color: kPrimaryColor),
+                                              onPressed: () => widget
+                                                  .collectionCubit
+                                                  .goToCodeQR(widget
+                                                      .state
+                                                      .enterpriseConfig!
+                                                      .codeQr))
+                                          : Container();
+                                    }),
                               ],
                             )
                           : const Row(
@@ -204,7 +239,11 @@ class _FormCollectionState extends State<FormCollection>
                                 ),
                               ),
                               validator: (value) {
-                                if (value!.contains(',')) {
+                                if (value!.startsWith('.') ||
+                                    value.endsWith('.')) {
+                                  return 'valor no válido';
+                                }
+                                if (value.contains(',')) {
                                   return 'el valor no puede contener comas';
                                 }
                                 return null;
@@ -217,6 +256,9 @@ class _FormCollectionState extends State<FormCollection>
                               press: () {
                                 widget.collectionCubit.dateController.text =
                                     date(null);
+                                widget.collectionCubit.selectedAccount = null;
+                                widget.collectionCubit.indexToEdit = null;
+                                widget.collectionCubit.isEditing = false;
                                 Future<void> future = showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,
@@ -254,8 +296,17 @@ class _FormCollectionState extends State<FormCollection>
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.qr_code_2),
-                                      onPressed: () => widget.collectionCubit
-                                          .goToCamera(widget.orderNumber),
+                                      onPressed: () {
+                                        if (widget.collectionCubit
+                                                .selectedAccount !=
+                                            null) {
+                                          widget.collectionCubit.goToCodeQR(
+                                              widget.collectionCubit
+                                                  .selectedAccount!.code_qr);
+                                        } else {
+                                          widget.collectionCubit.error();
+                                        }
+                                      },
                                     ),
                                   ],
                                 )

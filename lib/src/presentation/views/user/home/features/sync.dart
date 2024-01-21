@@ -15,10 +15,10 @@ class SyncBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (_, state) {
-        switch (state.runtimeType) {
-          case HomeLoading:
+        switch (state.status) {
+          case HomeStatus.loading:
             return const Center(child: CupertinoActivityIndicator());
-          case HomeSuccess:
+          case HomeStatus.success:
             return Showcase(
                 key: two,
                 disableMovingAnimation: true,
@@ -27,8 +27,17 @@ class SyncBar extends StatelessWidget {
                     'Sincroniza todas las planillas para que estes al día',
                 child: IconButton(
                     icon: const Icon(Icons.sync),
-                    onPressed: () => context.read<HomeCubit>().sync()
-                    ));
+                    onPressed: () => context.read<HomeCubit>().sync()));
+          case HomeStatus.failure:
+            return Showcase(
+                key: two,
+                disableMovingAnimation: true,
+                title: 'Sincronización!',
+                description:
+                    'Sincroniza todas las planillas para que estes al día',
+                child: IconButton(
+                    icon: const Icon(Icons.sync),
+                    onPressed: () => context.read<HomeCubit>().sync()));
           default:
             return const SizedBox();
         }

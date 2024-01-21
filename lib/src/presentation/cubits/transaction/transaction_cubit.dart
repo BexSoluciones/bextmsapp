@@ -28,10 +28,9 @@ part 'transaction_state.dart';
 final helperFunctions = HelperFunctions();
 
 class TransactionCubit extends BaseCubit<TransactionState, String?> with FormatDate {
-  final ApiRepository _apiRepository;
   final DatabaseRepository _databaseRepository;
 
-  TransactionCubit(this._databaseRepository, this._apiRepository)
+  TransactionCubit(this._databaseRepository)
       : super(const TransactionLoading(), null);
 
   Future<void> getAllTransactions() async {

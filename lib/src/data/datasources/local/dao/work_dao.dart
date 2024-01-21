@@ -19,7 +19,7 @@ class WorkDao {
 
     final workList = await db!.rawQuery('''
         SELECT works.id, works.workcode, works.latitude, works.longitude,
-        works.active, works.status,
+        works.active, works.status, works.zone_id,
         COUNT(DISTINCT number_customer || code_place) as count,
         COUNT(DISTINCT summaries.order_number || works.number_customer || works.code_place) as left,
         COUNT(DISTINCT transactions.order_number || works.number_customer || works.code_place) as right
@@ -90,6 +90,54 @@ class WorkDao {
     //LIMIT $limit
     final works = parseWorks(workList);
     return works;
+  }
+
+  Future<List<String>?> completeWorks() async {
+    final db = await _appDatabase.streamDatabase;
+
+    final workList = await db!.rawQuery('''
+        SELECT $tableWorks.${WorkFields.workcode} 
+        FROM $tableWorks
+        GROUP by $tableWorks.${WorkFields.workcode}
+     ''');
+
+    var works = parseWorks(workList);
+
+    logDebug(headerDeveloperLogger, works.length.toString());
+
+    if (works.isNotEmpty) {
+      var workcodes = <String>[];
+
+      for (var work in works) {
+        var resultSummaries = await db.rawQuery('''
+         SELECT COUNT(DISTINCT summaries.order_number) as count
+         FROM $tableSummaries
+         INNER JOIN works ON works.id = summaries.work_id
+         WHERE works.workcode = "${work.workcode}"
+        ''');
+
+        var resultTransactions = await db.rawQuery('''
+         SELECT COUNT(DISTINCT transactions.order_number) as count
+         FROM $tableTransactions
+         INNER JOIN works ON transactions.work_id = works.id
+         WHERE transactions.status != "start" AND
+         transactions.status != "arrived" AND
+         transactions.status != "summary" AND
+         works.workcode = "${work.workcode}"
+        ''');
+
+        var countSummaries = resultSummaries[0]['count'];
+        var countTransactions = resultTransactions[0]['count'];
+
+        if (countSummaries == countTransactions) {
+          workcodes.add(work.workcode!);
+        }
+      }
+
+      return workcodes;
+    } else {
+      return null;
+    }
   }
 
   Future<int> insertWork(Work work) {

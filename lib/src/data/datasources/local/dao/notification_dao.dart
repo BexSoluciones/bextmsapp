@@ -23,7 +23,6 @@ class NotificationDao {
     try {
       return db!.insert(table, row);
     } catch (error, stackTrace) {
-      print('Error in insertFunction ${error.toString()}');
       //await helperFunctions.handleException(error, stackTrace);
       return 0;
     }
