@@ -13,10 +13,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
-// import 'dart:io';
-// import 'dart:ui';
-// import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-// import 'package:path/path.dart' as p;
+import 'package:provider/provider.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:path/path.dart' as p;
 
 //plugins
 // import 'package:charger_status/charger_status.dart';
@@ -71,6 +70,8 @@ import 'src/data/datasources/local/app_database.dart';
 
 //providers
 import 'src/presentation/providers/photo_provider.dart';
+import 'src/presentation/providers/general_provider.dart';
+import 'src/presentation/providers/download_provider.dart';
 
 //utils
 import 'src/utils/constants/strings.dart';
@@ -164,30 +165,20 @@ Future<void> main() async {
         headerMainLogger, error, 'Caught an error in the async operation!');
   }
 
-  // bool damagedDatabaseDeleted = false;
-  //
-  // await FlutterMapTileCaching.initialise(
-  //   errorHandler: (error) => damagedDatabaseDeleted = error.wasFatal,
-  //   debugMode: true,
-  // );
-  //
-  // _storageService.setBool('damaged_database_deleted', damagedDatabaseDeleted);
-  //
-  // await FMTC.instance.rootDirectory.migrator.fromV6(urlTemplates: []);
-  //
-  // if (_storageService.getBool('reset') ?? false) {
-  //   await FMTC.instance.rootDirectory.manage.reset();
-  // }
-  //
-  // final File newAppVersionFile = File(
-  //   p.join(
-  //     // ignore: invalid_use_of_internal_member, invalid_use_of_protected_member
-  //     FMTC.instance.rootDirectory.directory.absolute.path,
-  //     'newAppVersion.${Platform.isWindows ? 'exe' : 'apk'}',
-  //   ),
-  // );
-  //
-  // if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
+  bool damagedDatabaseDeleted = false;
+
+  await FlutterMapTileCaching.initialise(
+    errorHandler: (error) => damagedDatabaseDeleted = error.wasFatal,
+    debugMode: true,
+  );
+
+  _storageService.setBool('damaged_database_deleted', damagedDatabaseDeleted);
+
+  await FMTC.instance.rootDirectory.migrator.fromV6(urlTemplates: []);
+
+  if (_storageService.getBool('reset') ?? false) {
+    await FMTC.instance.rootDirectory.manage.reset();
+  }
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(details);
@@ -358,7 +349,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<GeneralProvider>(
+          create: (context) => GeneralProvider(),
+        ),
+        ChangeNotifierProvider<DownloadProvider>(
+          create: (context) => DownloadProvider(),
+        ),
+      ],
+      child: MultiBlocProvider(
         providers: [
           RepositoryProvider(create: (context) => LocationRepository()),
           BlocProvider(
@@ -548,6 +548,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   );
                 })),
               );
-            })));
+            }))));
   }
 }

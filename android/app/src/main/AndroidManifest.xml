@@ -26,6 +26,7 @@
         android:label="bexdeliveries"
         android:allowBackup="false"
         android:hardwareAccelerated="false"
+        android:enableOnBackInvokedCallback="true"
         android:largeHeap="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"

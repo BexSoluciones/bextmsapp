@@ -187,7 +187,6 @@ class ProcessingQueueDao {
     var formattedToday = DateTime(today.year, today.month, today.day);
     var formattedDatesToValidate = DateTime(
         datesToValidate.year, datesToValidate.month, datesToValidate.day);
-    var formattedTodayStr = formattedToday.toIso8601String().split('T')[0];
     var formattedDatesToValidateStr =
         formattedDatesToValidate.toIso8601String().split('T')[0];
 
