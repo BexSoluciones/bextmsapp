@@ -303,6 +303,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<double> countTotalCollectionWorksByWorkcode(String workcode) {
+    return _appDatabase.transactionDao.countTotalCollectionWorksByWorkcode(workcode);
+  }
+
+  @override
   Future<bool> verifyTransactionExistence(int workId, String orderNumber) {
     return _appDatabase.transactionDao
         .verifyTransactionExistence(workId, orderNumber);

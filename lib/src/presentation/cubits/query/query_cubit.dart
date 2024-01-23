@@ -1,4 +1,4 @@
-
+import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
@@ -21,7 +21,6 @@ part 'query_state.dart';
 final NavigationService _navigationService = locator<NavigationService>();
 
 class QueryCubit extends BaseCubit<QueryState, List<Work>?> {
-
   final DatabaseRepository _databaseRepository;
 
   QueryCubit(this._databaseRepository) : super(const QueryLoading(), []);
@@ -30,32 +29,52 @@ class QueryCubit extends BaseCubit<QueryState, List<Work>?> {
     if (isBusy) return;
 
     await run(() async {
-      try{
+      try {
         final works = await _databaseRepository.getAllWorks();
-        final respawnList = await _databaseRepository.getClientsResJetDel(workcode,'respawn');
-        final countTotalReturnRespawn=  await _databaseRepository.countTotalRespawnWorksByWorkcode(workcode,'respawn');
+        final respawnList =
+            await _databaseRepository.getClientsResJetDel(workcode, 'respawn');
+        final countTotalReturnRespawn = await _databaseRepository
+            .countTotalRespawnWorksByWorkcode(workcode, 'respawn');
 
-        final rejectList = await _databaseRepository.getClientsResJetDel(workcode,'reject');
-        final countTotalReturnReject  = await _databaseRepository.countTotalRespawnWorksByWorkcode(workcode,'reject');
+        final rejectList =
+            await _databaseRepository.getClientsResJetDel(workcode, 'reject');
+        final countTotalReturnReject = await _databaseRepository
+            .countTotalRespawnWorksByWorkcode(workcode, 'reject');
 
-        final deliveryList = await _databaseRepository.getClientsResJetDel(workcode,'delivery');
-        final countTotalReturnDelivery  = await _databaseRepository.countTotalRespawnWorksByWorkcode(workcode,'delivery');
+        final deliveryList =
+            await _databaseRepository.getClientsResJetDel(workcode, 'delivery');
 
-        final countTotalCollectionWork = await  _databaseRepository.countTotalCollectionWorks();
+        final partialList =
+            await _databaseRepository.getClientsResJetDel(workcode, 'partial');
+
+        final countTotalReturnDelivery = await _databaseRepository
+            .countTotalCollectionWorksByWorkcode(workcode);
+
+        print(countTotalReturnDelivery);
+
+        var fixedCollectionList = [...deliveryList, ...partialList];
+
+        final countTotalCollectionWork =
+            await _databaseRepository.countTotalCollectionWorks();
         data = [];
 
         await Future.forEach(works, (work) async {
           data?.add(work);
-        }).then((value) => emit(QuerySuccess(works: data,respawns: respawnList,totalRespawn:countTotalReturnRespawn,rejects: rejectList ,totalRejects: countTotalReturnReject,delivery: deliveryList,totalDelivery: countTotalReturnDelivery,countTotalCollectionWorks: countTotalCollectionWork)));
-
-
-      } catch (e,stackTrace) {
+        }).then((value) => emit(QuerySuccess(
+            works: data,
+            respawns: respawnList,
+            totalRespawn: countTotalReturnRespawn,
+            rejects: rejectList,
+            totalRejects: countTotalReturnReject,
+            delivery: fixedCollectionList,
+            totalDelivery: countTotalReturnDelivery,
+            countTotalCollectionWorks: countTotalCollectionWork)));
+      } catch (e, stackTrace) {
         emit(QueryFailed(error: e.toString()));
         await FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
     });
   }
-
 
   Future<void> goTo(url, args) async {
     await _navigationService.goTo(url, arguments: args);
