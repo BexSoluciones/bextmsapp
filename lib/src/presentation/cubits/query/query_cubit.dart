@@ -50,8 +50,6 @@ class QueryCubit extends BaseCubit<QueryState, List<Work>?> {
         final countTotalReturnDelivery = await _databaseRepository
             .countTotalCollectionWorksByWorkcode(workcode);
 
-        print(countTotalReturnDelivery);
-
         var fixedCollectionList = [...deliveryList, ...partialList];
 
         final countTotalCollectionWork =

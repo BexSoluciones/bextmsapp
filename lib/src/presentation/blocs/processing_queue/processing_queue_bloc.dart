@@ -164,7 +164,7 @@ class ProcessingQueueBloc
     if (networkBloc != null &&
         networkBloc?.state is NetworkSuccess &&
         state.status == ProcessingQueueStatus.success) {
-      //_getProcessingQueue();
+      _getProcessingQueue();
     }
     emit(state.copyWith(status: ProcessingQueueStatus.success));
   }
