@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-//cubit
-import '../../../../../../cubits/general/general_cubit.dart';
+import 'package:provider/provider.dart';
+//providers
+import '../../../../../../providers/general_provider.dart';
 
 class Header extends StatelessWidget {
   const Header({
@@ -19,8 +18,8 @@ class Header extends StatelessWidget {
                 const Text(
                   'Stores',
                 ),
-                BlocBuilder<GeneralCubit, GeneralState>(
-                  builder: (context, state) =>
+                Consumer<GeneralProvider>(
+                  builder: (context, state, _) =>
                       state.currentStore == null
                           ? const Text('Caching Disabled')
                           : Text(
@@ -33,15 +32,15 @@ class Header extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 15),
-          BlocBuilder<GeneralCubit, GeneralState>(
-            builder: (context, state) => IconButton(
+          Consumer<GeneralProvider>(
+            builder: (context, state, _) => IconButton(
               icon: const Icon(Icons.cancel),
               tooltip: 'Disable Caching',
               onPressed: state.currentStore == null
                   ? null
                   : () {
                       state.currentStore = null;
-                      BlocProvider.of<GeneralCubit>(context).resetMap();
+                      Provider.of<GeneralProvider>(context).resetMap();
                     },
             ),
           ),

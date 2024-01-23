@@ -15,7 +15,6 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:path/path.dart' as p;
 
 //plugins
 // import 'package:charger_status/charger_status.dart';
@@ -47,8 +46,6 @@ import 'src/presentation/cubits/respawn/respawn_cubit.dart';
 import 'src/presentation/cubits/collection/collection_cubit.dart';
 import 'src/presentation/cubits/database/database_cubit.dart';
 import 'src/presentation/cubits/navigation/navigation_cubit.dart';
-import 'src/presentation/cubits/general/general_cubit.dart';
-import 'src/presentation/cubits/download/download_cubit.dart';
 import 'src/presentation/cubits/query/query_cubit.dart';
 import 'src/presentation/cubits/transaction/transaction_cubit.dart';
 import 'src/presentation/cubits/notification/count/count_cubit.dart';
@@ -165,10 +162,10 @@ Future<void> main() async {
         headerMainLogger, error, 'Caught an error in the async operation!');
   }
 
-  bool damagedDatabaseDeleted = false;
+  String? damagedDatabaseDeleted;
 
   await FlutterMapTileCaching.initialise(
-    errorHandler: (error) => damagedDatabaseDeleted = error.wasFatal,
+    errorHandler: (error) => damagedDatabaseDeleted = error.message,
     debugMode: true,
   );
 
@@ -471,12 +468,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(
               create: (context) =>
                   TransactionCubit(locator<DatabaseRepository>())),
-          BlocProvider(
-            create: (context) => GeneralCubit(),
-          ),
-          BlocProvider(
-            create: (context) => DownloadCubit(),
-          ),
           BlocProvider(
             create: (context) => QueryCubit(locator<DatabaseRepository>()),
           ),

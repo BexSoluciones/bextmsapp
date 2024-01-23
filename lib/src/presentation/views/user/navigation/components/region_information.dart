@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
-//cubit
-import '../../../../cubits/download/download_cubit.dart';
+//providers
+import '../../../../providers/download_provider.dart';
+
 //features
 import '../features/download_region.dart';
 
@@ -70,32 +71,34 @@ class RegionInformation extends StatelessWidget {
                   ],
                   const SizedBox(height: 10),
                   const Text('MIN/MAX ZOOM LEVELS'),
-                  BlocBuilder<DownloadCubit, DownloadState>(
-                    builder: (context, state) => state.regionTiles == null
-                        ? Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: SizedBox(
-                              height: 36,
-                              width: 36,
-                              child: Center(
+                  Consumer<DownloadProvider>(
+                    builder: (context, provider, _) =>
+                        provider.regionTiles == null
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 4),
                                 child: SizedBox(
-                                  height: 28,
-                                  width: 28,
-                                  child: CircularProgressIndicator(
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
+                                  height: 36,
+                                  width: 36,
+                                  child: Center(
+                                    child: SizedBox(
+                                      height: 28,
+                                      width: 28,
+                                      child: CircularProgressIndicator(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
+                                      ),
+                                    ),
                                   ),
                                 ),
+                              )
+                            : Text(
+                                '${provider.minZoom} - ${provider.maxZoom}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24,
+                                ),
                               ),
-                            ),
-                          )
-                        : Text(
-                            '${state.minZoom} - ${state.maxZoom}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                            ),
-                          ),
                   ),
                 ],
               ),
@@ -103,32 +106,35 @@ class RegionInformation extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   const Text('TOTAL TILES'),
-                  BlocBuilder<DownloadCubit, DownloadState>(
-                    builder: (context, state) => state.regionTiles == null
-                        ? Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: SizedBox(
-                              height: 36,
-                              width: 36,
-                              child: Center(
+                  Consumer<DownloadProvider>(
+                    builder: (context, provider, _) =>
+                        provider.regionTiles == null
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 4),
                                 child: SizedBox(
-                                  height: 28,
-                                  width: 28,
-                                  child: CircularProgressIndicator(
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
+                                  height: 36,
+                                  width: 36,
+                                  child: Center(
+                                    child: SizedBox(
+                                      height: 28,
+                                      width: 28,
+                                      child: CircularProgressIndicator(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
+                                      ),
+                                    ),
                                   ),
                                 ),
+                              )
+                            : Text(
+                                NumberFormat('###,###')
+                                    .format(provider.regionTiles),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24,
+                                ),
                               ),
-                            ),
-                          )
-                        : Text(
-                            NumberFormat('###,###').format(state.regionTiles),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                            ),
-                          ),
                   ),
                 ],
               ),

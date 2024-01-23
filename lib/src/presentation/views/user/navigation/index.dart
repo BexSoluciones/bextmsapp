@@ -1,22 +1,25 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //cubit
 import '../../../blocs/network/network_bloc.dart';
-import '../../../cubits/download/download_cubit.dart';
+
+//providers
+
 
 //domain
 import '../../../../domain/models/enterprise_config.dart';
 
 //pages
+import '../../../providers/download_provider.dart';
 import 'pages/map/map_view.dart';
 import 'pages/stores/stores.dart';
 import 'pages/downloader/downloader.dart';
@@ -54,13 +57,9 @@ class _NavigationScreenState extends State<NavigationView> {
                 ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
                 : null),
         const StoresPage(),
-        BlocBuilder<DownloadCubit, DownloadState>(
-          builder: (context, state) => state.downloadProgress == null
-              ? DownloaderPage(
-                  enterpriseConfig: _storageService.getObject('config') != null
-                      ? EnterpriseConfig.fromMap(
-                          _storageService.getObject('config')!)
-                      : null)
+        Consumer<DownloadProvider>(
+          builder: (context, provider, _) => provider.downloadProgress == null
+              ? const DownloaderPage()
               : const DownloadingPage(),
         ),
         RecoveryPage(moveToDownloadPage: () => _onDestinationSelected(2)),
@@ -168,19 +167,19 @@ class _NavigationScreenState extends State<NavigationView> {
 
     return Scaffold(
         //TODO:: [Heider Zapa uncomment y verify logic work]
-        // bottomNavigationBar: size.width > 950
-        //     ? null
-        //     : NavigationBar(
-        //         backgroundColor:
-        //             Theme.of(context).navigationBarTheme.backgroundColor,
-        //         onDestinationSelected: _onDestinationSelected,
-        //         selectedIndex: currentPageIndex,
-        //         destinations: _destinations,
-        //         labelBehavior: MediaQuery.of(context).size.width > 450
-        //             ? null
-        //             : NavigationDestinationLabelBehavior.alwaysHide,
-        //         height: 70,
-        //       ),
+        bottomNavigationBar: size.width > 950
+            ? null
+            : NavigationBar(
+                backgroundColor:
+                    Theme.of(context).navigationBarTheme.backgroundColor,
+                onDestinationSelected: _onDestinationSelected,
+                selectedIndex: currentPageIndex,
+                destinations: _destinations,
+                labelBehavior: MediaQuery.of(context).size.width > 450
+                    ? null
+                    : NavigationDestinationLabelBehavior.alwaysHide,
+                height: 70,
+              ),
         resizeToAvoidBottomInset: false,
         body: BlocBuilder<NetworkBloc, NetworkState>(
             builder: (context, networkState) {

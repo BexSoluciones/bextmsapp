@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:fmtc_plus_sharing/fmtc_plus_sharing.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
-//cubit
-import '../../../../../../cubits/general/general_cubit.dart';
+//providers
+import '../../../../../../providers/general_provider.dart';
 
 //utils
 import '../../../../../../../utils/extensions/size_formatter_extension.dart';
@@ -110,8 +110,8 @@ class _StoreTileState extends State<StoreTile> {
       );
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<GeneralCubit, GeneralState>(
-        builder: (context, state) {
+  Widget build(BuildContext context) => Consumer<GeneralProvider>(
+        builder: (context, state, _) {
           final bool isCurrentStore = state.currentStore == widget.storeName;
 
           return ExpansionTile(
@@ -146,13 +146,15 @@ class _StoreTileState extends State<StoreTile> {
                               children: [
                                 FutureBuilder<Image?>(
                                   future: _image,
-                                  builder: (context, snapshot) => snapshot.data == null
-                                      ? const SizedBox(
-                                    height: 125,
-                                    width: 125,
-                                    child: Icon(Icons.help_outline, size: 36),
-                                  )
-                                      : snapshot.data!,
+                                  builder: (context, snapshot) =>
+                                      snapshot.data == null
+                                          ? const SizedBox(
+                                              height: 125,
+                                              width: 125,
+                                              child: Icon(Icons.help_outline,
+                                                  size: 36),
+                                            )
+                                          : snapshot.data!,
                                 ),
                                 if (MediaQuery.of(context).size.width > 675)
                                   ...stats
@@ -260,7 +262,8 @@ class _StoreTileState extends State<StoreTile> {
                                       ? null
                                       : () {
                                           state.currentStore = widget.storeName;
-                                          BlocProvider.of<GeneralCubit>(context).resetMap();
+                                          Provider.of<GeneralProvider>(context)
+                                              .resetMap();
                                         },
                                 ),
                               ],

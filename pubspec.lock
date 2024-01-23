@@ -721,26 +721,26 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_local_notifications
-      sha256: "293995f94e120c8afce768981bd1fa9c5d6de67c547568e3b42ae2defdcbb4a0"
+      sha256: "5f79a1be5e9fef9ddd7f494532d31851399099f9defc21ebcb1ae4539e8a37f1"
       url: "https://pub.dev"
     source: hosted
-    version: "13.0.0"
+    version: "14.1.5"
   flutter_local_notifications_linux:
     dependency: transitive
     description:
       name: flutter_local_notifications_linux
-      sha256: ccb08b93703aeedb58856e5637450bf3ffec899adb66dc325630b68994734b89
+      sha256: "33f741ef47b5f63cc7f78fe75eeeac7e19f171ff3c3df054d84c1e38bedb6a03"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0+1"
+    version: "4.0.0+1"
   flutter_local_notifications_platform_interface:
     dependency: transitive
     description:
       name: flutter_local_notifications_platform_interface
-      sha256: "5ec1feac5f7f7d9266759488bc5f76416152baba9aa1b26fe572246caa00d1ab"
+      sha256: "7cf643d6d5022f3baed0be777b0662cce5919c0a7b86e700299f22dc4ae660ef"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0"
+    version: "7.0.0+1"
   flutter_localizations:
     dependency: transitive
     description: flutter
@@ -750,18 +750,18 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_map
-      sha256: "59dfd14267b691bea55760786b47d3172d47cdcc0d79ff930746a5ad123491b8"
+      sha256: "52c65a977daae42f9aae6748418dd1535eaf27186e9bac9bf431843082bc75a3"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "4.0.0"
   flutter_map_tile_caching:
     dependency: "direct main"
     description:
       name: flutter_map_tile_caching
-      sha256: "3f5fe42bd16a4e0f205863e8d4313c66a9a6f26575a3afa9b3b616399d875b15"
+      sha256: "48ab77adc7adf70ec682db737b68dd5ac804e78a2e834b951e0d9735a6923971"
       url: "https://pub.dev"
     source: hosted
-    version: "7.2.0"
+    version: "8.0.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -880,18 +880,18 @@ packages:
     dependency: "direct main"
     description:
       name: fmtc_plus_background_downloading
-      sha256: "55e45f4377592441183f33061218672d196824e1ad9d0c0da2603df9ff754350"
+      sha256: "7ad51bb61fc754161a858d655a291e3f9223937b1f2922f7d846af8d75df79b4"
       url: "https://pub.dev"
     source: hosted
-    version: "7.0.0"
+    version: "8.0.0"
   fmtc_plus_sharing:
     dependency: "direct main"
     description:
       name: fmtc_plus_sharing
-      sha256: "17602cde42cd185397d6eecbefaa2cd8d8a9a9ecb5b32bdbbadf28ba9fd9956f"
+      sha256: "171d58f94e9fdd620697561daedc62aedab3129be0ff82b3f2ac6491511ec23f"
       url: "https://pub.dev"
     source: hosted
-    version: "7.0.0"
+    version: "8.0.0"
   font_awesome_flutter:
     dependency: "direct main"
     description:
@@ -981,13 +981,13 @@ packages:
     source: hosted
     version: "2.3.1"
   hive:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: hive
-      sha256: "00806ba9fd0e725804c7c524e79a0f979bf562e71ada0d69ba7299d0d34d1a37"
+      sha256: "8dcf6db979d7933da8217edcec84e9df1bdb4e4edc7fc77dbd5aa74356d6d941"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0-dev"
+    version: "2.2.3"
   hive_generator:
     dependency: "direct dev"
     description:
@@ -998,13 +998,21 @@ packages:
     source: git
     version: "2.0.1"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       sha256: "5895291c13fa8a3bd82e76d5627f69e0d85ca6a30dcac95c4ea19a5d555879c2"
       url: "https://pub.dev"
     source: hosted
     version: "0.13.6"
+  http2:
+    dependency: transitive
+    description:
+      name: http2
+      sha256: "9ced024a160b77aba8fb8674e38f70875e321d319e6f303ec18e87bd5a4b0c1d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
   http_multi_server:
     dependency: transitive
     description:
@@ -1021,6 +1029,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  http_plus:
+    dependency: transitive
+    description:
+      name: http_plus
+      sha256: "6e2af403727ea5bd0a6a45edbe8e1ebc9d5d49b38a93893e1c00e2a307035773"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
   image:
     dependency: "direct main"
     description:
@@ -1134,21 +1150,21 @@ packages:
     source: hosted
     version: "1.0.4"
   isar:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: isar
-      sha256: "814695aa17cd1e725f7b751264cc45f0780b9070be6138c556d8b02c19117e48"
+      sha256: "99165dadb2cf2329d3140198363a7e7bff9bbd441871898a87e26914d25cf1ea"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.6-dev.0"
+    version: "3.1.0+1"
   isar_flutter_libs:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: isar_flutter_libs
-      sha256: "05d287b128b470bb1adfac515e098702b5957bf6b06a7d84b3bf82708b5b49ea"
+      sha256: bc6768cc4b9c61aabff77152e7f33b4b17d2fc93134f7af1c3dd51500fe8d5e8
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.6-dev.0"
+    version: "3.1.0+1"
   js:
     dependency: transitive
     description:
@@ -1348,14 +1364,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  osm_nominatim:
-    dependency: "direct main"
-    description:
-      name: osm_nominatim
-      sha256: "0e3b2a5bc0e40ae09d64475287de1f46564abe4e218cd2c506ef0bc0bcf85212"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
   overlay_support:
     dependency: "direct main"
     description:
@@ -1524,14 +1532,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.1"
-  positioned_tap_detector_2:
-    dependency: transitive
-    description:
-      name: positioned_tap_detector_2
-      sha256: "52e06863ad3e1f82b058fd05054fc8c9caeeb3b47d5cea7a24bd9320746059c1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.4"
   process:
     dependency: transitive
     description:

@@ -1,9 +1,8 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
-//cubit
-import '../../../../../cubits/download/download_cubit.dart';
+//providers
+import '../../../../../providers/download_provider.dart';
 
 //domain
 import '../../../../../../domain/models/enterprise_config.dart';
@@ -50,21 +49,21 @@ class _DownloaderPageState extends State<DownloaderPage> {
             ),
           ],
         ),
-        floatingActionButton: BlocBuilder<DownloadCubit, DownloadState>(
-          builder: (context, state) => FloatingActionButton.extended(
-            onPressed: state.region == null || state.regionTiles == null
+        floatingActionButton: Consumer<DownloadProvider>(
+          builder: (context, provider, _) => FloatingActionButton.extended(
+            onPressed: provider.region == null || provider.regionTiles == null
                 ? () {}
                 : () => Navigator.of(context).push(
                       MaterialPageRoute<String>(
                         builder: (BuildContext context) =>
-                            DownloadRegionPopup(region: state.region!, enterpriseConfig: widget.enterpriseConfig),
+                            DownloadRegionPopup(region: provider.region!),
                         fullscreenDialog: true,
                       ),
                     ),
             icon: const Icon(Icons.arrow_forward),
             label: Padding(
               padding: const EdgeInsets.only(left: 10),
-              child: state.regionTiles == null
+              child: provider.regionTiles == null
                   ? SizedBox(
                       height: 36,
                       width: 36,
@@ -78,7 +77,7 @@ class _DownloaderPageState extends State<DownloaderPage> {
                         ),
                       ),
                     )
-                  : Text('~${state.regionTiles} tiles'),
+                  : Text('${provider.regionTiles} tiles'),
             ),
           ),
         ),
