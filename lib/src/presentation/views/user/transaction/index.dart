@@ -90,7 +90,6 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
 
   void buildBlocListener(
       BuildContext context, ProcessingQueueState state) async {
-    print(state);
     if (state.status == ProcessingQueueStatus.failure && state.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

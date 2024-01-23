@@ -60,21 +60,28 @@ class ProcessingQueueDao {
       'done': 'Total'
     };
     final handleColors = {
-      'processing' : Colors.orange,
+      'processing': Colors.orange,
       'incomplete': Colors.orange,
       'error': Colors.red,
       'done': Colors.green
     };
 
     final processingQueueListCode = await db!.rawQuery('''
-        SELECT count(*) as cant, code FROM $tableProcessingQueues GROUP BY code ORDER BY code DESC; 
-      ''');
+     SELECT count(*) as cant, code FROM $tableProcessingQueues GROUP BY code ORDER BY code DESC; 
+    ''');
+
     final processingQueueListStatus = await db.rawQuery('''
-        SELECT count(*) as cant, task FROM $tableProcessingQueues GROUP BY task ORDER BY task DESC; 
-      ''');
+     SELECT count(*) as cant, task FROM $tableProcessingQueues GROUP BY task ORDER BY task DESC; 
+    ''');
+
     final totalTransactions = await db.rawQuery('''
-    SELECT count(*) as cant FROM $tableProcessingQueues;
-  ''');
+     SELECT count(*) as cant FROM $tableProcessingQueues 
+     WHERE code != 'store_transaction_start' and code != 'store_transaction_arrived' 
+     and code != 'store_transaction_summary' and code != 'store_transaction'
+     and code != 'store_locations' and task != 'incomplete' and task != 'error'
+     and task != 'processing';
+    ''');
+
     var pqc = [];
     var pqs = [];
     var pqa = [];
@@ -89,11 +96,11 @@ class ProcessingQueueDao {
       }
     }
     for (var p in totalTransactions) {
-        pqa.add({
-          'name': 'Otras',
-          'cant': p['cant'],
-          'color': Colors.deepPurple,
-        });
+      pqa.add({
+        'name': 'Otras',
+        'cant': p['cant'],
+        'color': Colors.deepPurple,
+      });
     }
     for (var p in processingQueueListStatus) {
       if (handleNames[p['task']] != null) {
@@ -105,7 +112,7 @@ class ProcessingQueueDao {
         });
       }
     }
-    yield [...pqc, ...pqs,...pqa];
+    yield [...pqc, ...pqs, ...pqa];
   }
 
   Future<int> countProcessingQueueIncompleteToTransactions() async {
@@ -141,12 +148,13 @@ class ProcessingQueueDao {
   Future<bool> validateIfProcessingQueueIsIncomplete() async {
     final db = await _appDatabase.streamDatabase;
     final processingQueueList = await db!.query(tableProcessingQueues,
-        where: 'task = ? OR task = ? OR task = ? AND code != ? AND code != ? AND code != ?',
+        where:
+            'task = ? OR task = ? OR task = ? AND code != ? AND code != ? AND code != ?',
         whereArgs: [
           'incomplete',
           'error',
           'processing'
-          'store_locations',
+              'store_locations',
           'store_logout',
           'get_prediction',
         ]);

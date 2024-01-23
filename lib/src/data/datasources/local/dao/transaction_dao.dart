@@ -18,10 +18,10 @@ class TransactionDao {
   List<TransactionValidate> parseValidateTransactions(
       List<Map<String, dynamic>> transactionList) {
     final transactions = <TransactionValidate>[];
-    transactionList.forEach((transactionMap) {
+    for (var transactionMap in transactionList) {
       final transaction = TransactionValidate.fromJson(transactionMap);
       transactions.add(transaction);
-    });
+    }
     return transactions;
   }
 
@@ -29,14 +29,21 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     var deliveryList = await db!.query(t.tableTransactions,
+        columns: ['work_id', 'status'],
         where: 'status = ? and workcode = ?',
         whereArgs: ['delivery', workcode]);
     var partialList = await db.query(t.tableTransactions,
-        where: 'status = ? and workcode = ?', whereArgs: ['partial', workcode]);
+        columns: ['work_id', 'status'],
+        where: 'status = ? and workcode = ?',
+        whereArgs: ['partial', workcode]);
     var respawnList = await db.query(t.tableTransactions,
-        where: 'status = ? and workcode = ?', whereArgs: ['respawn', workcode]);
+        columns: ['work_id', 'status'],
+        where: 'status = ? and workcode = ?',
+        whereArgs: ['respawn', workcode]);
     var rejectList = await db.query(t.tableTransactions,
-        where: 'status = ? and workcode = ?', whereArgs: ['reject', workcode]);
+        columns: ['work_id', 'status'],
+        where: 'status = ? and workcode = ?',
+        whereArgs: ['reject', workcode]);
 
     var deliveries = parseTransactions(deliveryList);
     var partials = parseTransactions(partialList);
@@ -163,7 +170,9 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     var transactionList = await db!.query(t.tableTransactions,
-        where: 'status = ? OR status = ?', whereArgs: ['delivery', 'partial']);
+        columns: ['work_id', 'status', 'payments'],
+        where: 'status = ? OR status = ?',
+        whereArgs: ['delivery', 'partial']);
 
     var transactions = parseTransactions(transactionList);
 
@@ -198,6 +207,7 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     var transactionList = await db!.query(t.tableTransactions,
+        columns: ['work_id', 'status', 'payments'],
         where:
             'status != ? AND status != ? AND status != ? AND status != ? AND status != ? AND workcode = ?',
         whereArgs: [
@@ -458,7 +468,6 @@ class TransactionDao {
     var formattedToday = DateTime(today.year, today.month, today.day);
     var formattedDatesToValidate = DateTime(
         datesToValidate.year, datesToValidate.month, datesToValidate.day);
-    var formattedTodayStr = formattedToday.toIso8601String().split('T')[0];
     var formattedDatesToValidateStr =
         formattedDatesToValidate.toIso8601String().split('T')[0];
 
