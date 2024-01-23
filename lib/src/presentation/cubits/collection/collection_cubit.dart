@@ -426,107 +426,107 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
               totalSummary: state.totalSummary,
               enterpriseConfig: state.enterpriseConfig,
               error: 'La foto es es obligatoria.'));
-        }
-
-        var imagesServer = <String>[];
-        if (images.isNotEmpty) {
-          for (var element in images) {
-            List<int> imageBytes = element.readAsBytesSync();
-            var base64Image = base64Encode(imageBytes);
-            imagesServer.add(base64Image);
-          }
-        }
-
-        var totalSummary = await _databaseRepository.getTotalSummaries(
-            arguments.work.id!, arguments.summary.orderNumber);
-
-        var transaction = Transaction(
-            workId: arguments.work.id!,
-            summaryId: arguments.summary.id,
-            workcode: arguments.work.workcode,
-            orderNumber: arguments.summary.orderNumber,
-            operativeCenter: arguments.summary.operativeCenter,
-            status: status,
-            payments: payments,
-            firm: firm,
-            images: imagesServer.isNotEmpty ? imagesServer : null,
-            delivery: totalSummary.toString(),
-            start: now(),
-            end: null,
-            latitude: currentLocation!.latitude.toString(),
-            longitude: currentLocation.longitude.toString());
-
-        var id = await _databaseRepository.insertTransaction(transaction);
-
-        var processingQueue = ProcessingQueue(
-            body: jsonEncode(transaction.toJson()),
-            task: 'incomplete',
-            code: 'store_transaction',
-            relationId: id.toString(),
-            relation: 'transactions',
-            createdAt: now(),
-            updatedAt: now());
-
-        _processingQueueBloc
-            .add(ProcessingQueueAdd(processingQueue: processingQueue));
-
-        if (status == 'partial') {
-          await Future.forEach(arguments.summaries!, (summary) async {
-            if (summary.minus != 0) {
-              var reason = arguments.r!
-                  .where((element) => element.summaryId == summary.id)
-                  .toList();
-
-              var re = await _databaseRepository
-                  .findReason(reason[0].controller.text);
-
-              var transactionSummary = TransactionSummary(
-                  productName: summary.nameItem,
-                  numItems:
-                      (summary.minus * double.parse(summary.unitOfMeasurement))
-                          .toString(),
-                  summaryId: summary.id,
-                  orderNumber: summary.orderNumber,
-                  workId: arguments.work.id!,
-                  codmotvis: re!.codmotvis,
-                  reason: reason[0].controller.text,
-                  createdAt: now(),
-                  updatedAt: now());
-
-              var id = await _databaseRepository
-                  .insertTransactionSummary(transactionSummary);
-
-              var processingQueue = ProcessingQueue(
-                body: jsonEncode(transactionSummary.toJson()),
-                task: 'incomplete',
-                code: 'store_transaction_product',
-                relationId: id.toString(),
-                relation: 'transactions',
-                createdAt: now(),
-                updatedAt: now(),
-              );
-
-              _processingQueueBloc
-                  .add(ProcessingQueueAdd(processingQueue: processingQueue));
+        } else {
+          var imagesServer = <String>[];
+          if (images.isNotEmpty) {
+            for (var element in images) {
+              List<int> imageBytes = element.readAsBytesSync();
+              var base64Image = base64Encode(imageBytes);
+              imagesServer.add(base64Image);
             }
-          });
+          }
+
+          var totalSummary = await _databaseRepository.getTotalSummaries(
+              arguments.work.id!, arguments.summary.orderNumber);
+
+          var transaction = Transaction(
+              workId: arguments.work.id!,
+              summaryId: arguments.summary.id,
+              workcode: arguments.work.workcode,
+              orderNumber: arguments.summary.orderNumber,
+              operativeCenter: arguments.summary.operativeCenter,
+              status: status,
+              payments: payments,
+              firm: firm,
+              images: imagesServer.isNotEmpty ? imagesServer : null,
+              delivery: totalSummary.toString(),
+              start: now(),
+              end: null,
+              latitude: currentLocation!.latitude.toString(),
+              longitude: currentLocation.longitude.toString());
+
+          var id = await _databaseRepository.insertTransaction(transaction);
+
+          var processingQueue = ProcessingQueue(
+              body: jsonEncode(transaction.toJson()),
+              task: 'incomplete',
+              code: 'store_transaction',
+              relationId: id.toString(),
+              relation: 'transactions',
+              createdAt: now(),
+              updatedAt: now());
+
+          _processingQueueBloc
+              .add(ProcessingQueueAdd(processingQueue: processingQueue));
+
+          if (status == 'partial') {
+            await Future.forEach(arguments.summaries!, (summary) async {
+              if (summary.minus != 0) {
+                var reason = arguments.r!
+                    .where((element) => element.summaryId == summary.id)
+                    .toList();
+
+                var re = await _databaseRepository
+                    .findReason(reason[0].controller.text);
+
+                var transactionSummary = TransactionSummary(
+                    productName: summary.nameItem,
+                    numItems: (summary.minus *
+                            double.parse(summary.unitOfMeasurement))
+                        .toString(),
+                    summaryId: summary.id,
+                    orderNumber: summary.orderNumber,
+                    workId: arguments.work.id!,
+                    codmotvis: re!.codmotvis,
+                    reason: reason[0].controller.text,
+                    createdAt: now(),
+                    updatedAt: now());
+
+                var id = await _databaseRepository
+                    .insertTransactionSummary(transactionSummary);
+
+                var processingQueue = ProcessingQueue(
+                  body: jsonEncode(transactionSummary.toJson()),
+                  task: 'incomplete',
+                  code: 'store_transaction_product',
+                  relationId: id.toString(),
+                  relation: 'transactions',
+                  createdAt: now(),
+                  updatedAt: now(),
+                );
+
+                _processingQueueBloc
+                    .add(ProcessingQueueAdd(processingQueue: processingQueue));
+              }
+            });
+          }
+
+          await helperFunctions.deleteImages(arguments.summary.orderNumber);
+          await helperFunctions
+              .deleteFirm('firm-${arguments.summary.orderNumber}');
+
+          var v =
+              await _databaseRepository.validateTransaction(arguments.work.id!);
+
+          cashController.clear();
+          transferController.clear();
+          selectedAccounts.clear();
+
+          emit(CollectionSuccess(
+            work: arguments.work,
+            validate: v,
+          ));
         }
-
-        await helperFunctions.deleteImages(arguments.summary.orderNumber);
-        await helperFunctions
-            .deleteFirm('firm-${arguments.summary.orderNumber}');
-
-        var v =
-            await _databaseRepository.validateTransaction(arguments.work.id!);
-
-        cashController.clear();
-        transferController.clear();
-        selectedAccounts.clear();
-
-        emit(CollectionSuccess(
-          work: arguments.work,
-          validate: v,
-        ));
       }
     } catch (e) {
       emit(CollectionFailed(

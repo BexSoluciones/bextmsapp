@@ -54,6 +54,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       listener: (_, state) {
         if (state is CameraCaptureSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            duration: Duration(seconds: 1),
             backgroundColor: Colors.green,
             content: Text("foto tomada exitosamente"),
           ));
@@ -62,6 +63,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
           BlocProvider.of<PhotosBloc>(context).add(PhotosLoaded());
         } else if (state is CameraCaptureFailure) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            duration: const Duration(seconds: 1),
             key: MyPhotosKeys.errorSnackBar,
             content: Text(state.error),
           ));

@@ -193,7 +193,7 @@ Future<void> main() async {
 
   var cron = Cron();
   final helperFunction = HelperFunctions();
-  cron.schedule(Schedule.parse('*/15 * * * *'), () async {
+  cron.schedule(Schedule.parse('*/10 * * * *'), () async {
     try {
       workmanagerService
           .sendProcessing(_storageService, _databaseRepository, _apiRepository)
@@ -346,16 +346,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<GeneralProvider>(
-          create: (context) => GeneralProvider(),
-        ),
-        ChangeNotifierProvider<DownloadProvider>(
-          create: (context) => DownloadProvider(),
-        ),
-      ],
-      child: MultiBlocProvider(
+    return MultiBlocProvider(
         providers: [
           RepositoryProvider(create: (context) => LocationRepository()),
           BlocProvider(
@@ -439,15 +430,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             create: (context) => RejectCubit(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)
-            ),
+                BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => RespawnCubit(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)
-            ),
+                BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => CollectionCubit(
@@ -510,35 +499,47 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   lightScheme = lightColorScheme;
                   darkScheme = darkColorScheme;
 
-                  return MaterialApp(
-                    debugShowCheckedModeBanner: false,
-                    title: appTitle,
-                    theme: ThemeData(
-                      useMaterial3: true,
-                      colorScheme: state.isDarkTheme ? lightScheme : darkScheme,
-                      // extensions: [lightCustomColors],
-                    ),
-                    darkTheme: ThemeData(
-                      useMaterial3: true,
-                      colorScheme: state.isDarkTheme ? lightScheme : darkScheme,
-                      // extensions: [darkCustomColors],
-                    ),
-                    themeMode: ThemeMode.system,
-                    navigatorKey: locator<NavigationService>().navigatorKey,
-                    navigatorObservers: [
-                      locator<FirebaseAnalyticsService>()
-                          .appAnalyticsObserver(),
-                    ],
-                    onUnknownRoute: (RouteSettings settings) =>
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => UndefinedView(
-                                  name: settings.name,
-                                )),
-                    initialRoute: '/splash',
-                    onGenerateRoute: Routes.onGenerateRoutes,
-                  );
+                  return MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider<GeneralProvider>(
+                          create: (context) => GeneralProvider(),
+                        ),
+                        ChangeNotifierProvider<DownloadProvider>(
+                          create: (context) => DownloadProvider(),
+                        ),
+                      ],
+                      child: MaterialApp(
+                        debugShowCheckedModeBanner: false,
+                        title: appTitle,
+                        theme: ThemeData(
+                          useMaterial3: true,
+                          colorScheme:
+                              state.isDarkTheme ? lightScheme : darkScheme,
+                          // extensions: [lightCustomColors],
+                        ),
+                        darkTheme: ThemeData(
+                          useMaterial3: true,
+                          colorScheme:
+                              state.isDarkTheme ? lightScheme : darkScheme,
+                          // extensions: [darkCustomColors],
+                        ),
+                        themeMode: ThemeMode.system,
+                        navigatorKey: locator<NavigationService>().navigatorKey,
+                        navigatorObservers: [
+                          locator<FirebaseAnalyticsService>()
+                              .appAnalyticsObserver(),
+                        ],
+                        onUnknownRoute: (RouteSettings settings) =>
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    UndefinedView(
+                                      name: settings.name,
+                                    )),
+                        initialRoute: '/splash',
+                        onGenerateRoute: Routes.onGenerateRoutes,
+                      ));
                 })),
               );
-            }))));
+            })));
   }
 }

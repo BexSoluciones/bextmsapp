@@ -190,8 +190,7 @@ class _MapPageState extends State<MapPage> {
             builder: (context, metadata) {
               if (!metadata.hasData ||
                   metadata.data == null ||
-                  (provider.currentStore != null &&
-                      metadata.data!.isEmpty)) {
+                  (provider.currentStore != null && metadata.data!.isEmpty)) {
                 return const LoadingIndicator(
                   message:
                       'Cargando configuración...\n\n¿Ves esta pantalla durante mucho tiempo?\nPuede haber una mala configuración del\n la tienda. Intente deshabilitar el almacenamiento en caché y eliminar\n tiendas defectuosas.',
@@ -213,29 +212,14 @@ class _MapPageState extends State<MapPage> {
                                   builder: (context, networkState) {
                                 switch (networkState.runtimeType) {
                                   case NetworkInitial:
-                                    return _buildBodyNetworkSuccess(
-                                        size,
-                                        state,
-                                        true,
-                                        urlTemplate,
-                                        provider,
-                                        metadata);
+                                    return _buildBodyNetworkSuccess(size, state,
+                                        true, urlTemplate, provider, metadata);
                                   case NetworkFailure:
-                                    return _buildBodyNetworkSuccess(
-                                        size,
-                                        state,
-                                        true,
-                                        urlTemplate,
-                                        provider,
-                                        metadata);
+                                    return _buildBodyNetworkSuccess(size, state,
+                                        true, urlTemplate, provider, metadata);
                                   case NetworkSuccess:
-                                    return _buildBodyNetworkSuccess(
-                                        size,
-                                        state,
-                                        false,
-                                        urlTemplate,
-                                        provider,
-                                        metadata);
+                                    return _buildBodyNetworkSuccess(size, state,
+                                        false, urlTemplate, provider, metadata);
                                   default:
                                     return const SizedBox();
                                 }
@@ -290,7 +274,9 @@ class _MapPageState extends State<MapPage> {
                             : 'sk.eyJ1IjoiYmV4aXRhY29sMiIsImEiOiJjbDVnc3ltaGYwMm16M21wZ21rMXg1OWd6In0.Dwtkt3r6itc0gCXDQ4CVxg',
                       },
                       tileProvider: provider.currentStore != null
-                          ? FMTC.instance(provider.currentStore!).getTileProvider(
+                          ? FMTC
+                              .instance(provider.currentStore!)
+                              .getTileProvider(
                                 FMTCTileProviderSettings(
                                   behavior: CacheBehavior.values
                                       .byName(metadata.data!['behaviour']!),

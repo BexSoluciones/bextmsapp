@@ -63,7 +63,7 @@ class _NavigationScreenState extends State<NavigationView> {
               : const DownloadingPage(),
         ),
         RecoveryPage(moveToDownloadPage: () => _onDestinationSelected(2)),
-        const SettingsAndAboutPage(),
+        // const SettingsAndAboutPage(),
         // if (Platform.isWindows || Platform.isAndroid) const UpdatePage(),
       ];
 
@@ -100,10 +100,10 @@ class _NavigationScreenState extends State<NavigationView> {
           ),
           label: 'Recuperar',
         ),
-        const NavigationDestination(
-          icon: Icon(Icons.settings),
-          label: 'Configuraciones',
-        ),
+        // const NavigationDestination(
+        //   icon: Icon(Icons.settings),
+        //   label: 'Configuraciones',
+        // ),
       ];
 
   @override

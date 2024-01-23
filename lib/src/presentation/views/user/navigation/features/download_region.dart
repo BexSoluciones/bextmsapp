@@ -40,6 +40,13 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
   late final RectangleRegion? rectangleRegion;
 
   @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     if (widget.region is CircleRegion) {
       circleRegion = widget.region as CircleRegion;
@@ -54,12 +61,12 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
 
   @override
   void didChangeDependencies() {
-    final String? currentStore =
-        Provider.of<GeneralProvider>(context, listen: false).currentStore;
-    if (currentStore != null) {
-      Provider.of<DownloadProvider>(context, listen: false)
-          .setSelectedStore(FMTC.instance(currentStore), notify: false);
-    }
+    // final String? currentStore =
+    //     Provider.of<GeneralProvider>(context, listen: false).currentStore;
+    // if (currentStore != null) {
+    //   Provider.of<DownloadProvider>(context, listen: false)
+    //       .setSelectedStore(FMTC.instance(currentStore), notify: false);
+    // }
 
     super.didChangeDependencies();
   }
