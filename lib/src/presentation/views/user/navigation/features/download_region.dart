@@ -95,7 +95,7 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
                 const SectionSeparator(),
                 const UsageWarning(),
                 const SectionSeparator(),
-                const Text('START DOWNLOAD IN'),
+                const Text('COMENZAR A DESCARGAR EN'),
                 Consumer2<DownloadProvider, GeneralProvider>(
                   builder: (context, downloadProvider, generalProvider, _) =>
                       Row(
@@ -151,7 +151,7 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
 
                                   if (mounted) Navigator.of(context).pop();
                                 },
-                          child: const Text('Foreground'),
+                          child: const Text('Primer plano'),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -196,7 +196,7 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
 
                                   if (mounted) Navigator.of(context).pop();
                                 },
-                          child: const Text('Background'),
+                          child: const Text('Segundo plano'),
                         ),
                       ),
                     ],

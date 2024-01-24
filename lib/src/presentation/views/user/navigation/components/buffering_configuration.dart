@@ -24,7 +24,7 @@ class BufferingConfiguration extends StatelessWidget {
                     segments: const [
                       ButtonSegment(
                         value: DownloadBufferMode.disabled,
-                        label: Text('Disabled'),
+                        label: Text('Desactivado'),
                         icon: Icon(Icons.cancel),
                       ),
                       ButtonSegment(
