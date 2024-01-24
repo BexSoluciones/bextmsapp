@@ -165,8 +165,6 @@ class _MapPageState extends State<MapPage> {
                     child: IconButton(
                         icon: const Icon(Icons.directions),
                         onPressed: () {
-                          print(navigationState.pageIndex);
-
                           var work = navigationState
                               .works![navigationState.pageIndex ?? 0];
                           _navigationService.goTo(AppRoutes.summaryNavigation,

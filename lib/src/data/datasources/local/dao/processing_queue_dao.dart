@@ -38,6 +38,22 @@ class ProcessingQueueDao {
     return processingQueues;
   }
 
+  Future<List<ProcessingQueue>> getAllProcessingQueuesPaginated(
+    int? page,
+    int? limit,
+  ) async {
+    final db = await _appDatabase.streamDatabase;
+    var processingQueueList = await db!.rawQuery('''
+      SELECT * FROM $tableProcessingQueues
+      ORDER BY $tableProcessingQueues.${ProcessingQueueFields.createdAt} DESC
+      LIMIT $limit
+      OFFSET $page
+    ''');
+
+    final processingQueues = parseProcessingQueues(processingQueueList);
+    return processingQueues;
+  }
+
   Stream<List<ProcessingQueue>> watchAllProcessingQueues() async* {
     final db = await _appDatabase.streamDatabase;
     final processingQueueList = await db!.query(tableProcessingQueues);

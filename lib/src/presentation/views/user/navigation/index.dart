@@ -55,13 +55,13 @@ class _NavigationScreenState extends State<NavigationView> {
             enterpriseConfig: _storageService.getObject('config') != null
                 ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
                 : null),
-        const StoresPage(),
-        Consumer<DownloadProvider>(
-          builder: (context, provider, _) => provider.downloadProgress == null
-              ? const DownloaderPage()
-              : const DownloadingPage(),
-        ),
-        RecoveryPage(moveToDownloadPage: () => _onDestinationSelected(2)),
+        // const StoresPage(),
+        // Consumer<DownloadProvider>(
+        //   builder: (context, provider, _) => provider.downloadProgress == null
+        //       ? const DownloaderPage()
+        //       : const DownloadingPage(),
+        // ),
+        // RecoveryPage(moveToDownloadPage: () => _onDestinationSelected(2)),
         // const SettingsAndAboutPage(),
         // if (Platform.isWindows || Platform.isAndroid) const UpdatePage(),
       ];
@@ -166,19 +166,19 @@ class _NavigationScreenState extends State<NavigationView> {
 
     return Scaffold(
         //TODO:: [Heider Zapa uncomment y verify logic work]
-        bottomNavigationBar: size.width > 950
-            ? null
-            : NavigationBar(
-                backgroundColor:
-                    Theme.of(context).navigationBarTheme.backgroundColor,
-                onDestinationSelected: _onDestinationSelected,
-                selectedIndex: currentPageIndex,
-                destinations: _destinations,
-                labelBehavior: MediaQuery.of(context).size.width > 450
-                    ? null
-                    : NavigationDestinationLabelBehavior.alwaysHide,
-                height: 70,
-              ),
+        // bottomNavigationBar: size.width > 950
+        //     ? null
+        //     : NavigationBar(
+        //         backgroundColor:
+        //             Theme.of(context).navigationBarTheme.backgroundColor,
+        //         onDestinationSelected: _onDestinationSelected,
+        //         selectedIndex: currentPageIndex,
+        //         destinations: _destinations,
+        //         labelBehavior: MediaQuery.of(context).size.width > 450
+        //             ? null
+        //             : NavigationDestinationLabelBehavior.alwaysHide,
+        //         height: 70,
+        //       ),
         resizeToAvoidBottomInset: false,
         body: BlocBuilder<NetworkBloc, NetworkState>(
             builder: (context, networkState) {

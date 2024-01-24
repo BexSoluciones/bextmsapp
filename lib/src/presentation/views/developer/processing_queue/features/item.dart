@@ -16,8 +16,7 @@ class ProcessingQueueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      elevation: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8.0),
       ),

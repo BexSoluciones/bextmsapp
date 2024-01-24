@@ -382,6 +382,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<List<ProcessingQueue>> getAllProcessingQueuesPaginated(int? page, int? limit) {
+    return _appDatabase.processingQueueDao.getAllProcessingQueuesPaginated(page, limit);
+  }
+
+  @override
   Stream<List<ProcessingQueue>> watchAllProcessingQueues() {
     return _appDatabase.processingQueueDao.watchAllProcessingQueues();
   }
