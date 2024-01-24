@@ -4,14 +4,11 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:fmtc_plus_background_downloading/fmtc_plus_background_downloading.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 //domain
 import '../../../../../domain/models/enterprise_config.dart';
-
 //providers
-import '../shared/state/download_provider.dart';
-import '../shared/state/general_provider.dart';
-
+import '../../../../providers/download_provider.dart';
+import '../../../../providers/general_provider.dart';
 //components
 import '../components/bd_battery_optimizations_info.dart';
 import '../components/buffering_configuration.dart';
@@ -122,10 +119,6 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
                                             TileLayer(
                                               urlTemplate:
                                                   metadata['sourceURL'],
-                                              additionalOptions: {
-                                                'accessToken': widget
-                                                    .enterpriseConfig!.mapbox!
-                                              },
                                             ),
                                             preventRedownload: downloadProvider
                                                 .preventRedownload,
@@ -178,10 +171,6 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
                                       downloadProvider.maxZoom,
                                       TileLayer(
                                         urlTemplate: metadata['sourceURL'],
-                                        additionalOptions: {
-                                          'accessToken':
-                                              widget.enterpriseConfig!.mapbox!
-                                        },
                                       ),
                                       preventRedownload:
                                           downloadProvider.preventRedownload,

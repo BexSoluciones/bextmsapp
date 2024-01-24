@@ -25,7 +25,6 @@ import 'pages/stores/stores.dart';
 import 'pages/downloader/downloader.dart';
 import 'pages/downloading/downloading.dart';
 import 'pages/recovery/recovery.dart';
-import 'pages/settingsAndAbout/settings_and_about.dart';
 
 //services
 import '../../../../locator.dart';

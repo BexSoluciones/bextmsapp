@@ -32,16 +32,16 @@ class BufferingConfiguration extends StatelessWidget {
                         label: Text('Tiles'),
                         icon: Icon(Icons.flip_to_front_outlined),
                       ),
-                      ButtonSegment(
-                        value: DownloadBufferMode.bytes,
-                        label: Text('Size (kB)'),
-                        icon: Icon(Icons.storage_rounded),
-                      ),
+                      // ButtonSegment(
+                      //   value: DownloadBufferMode.bytes,
+                      //   label: Text('Size (kB)'),
+                      //   icon: Icon(Icons.storage_rounded),
+                      // ),
                     ],
                     selected: {provider.bufferMode},
                     onSelectionChanged: (s) => provider.bufferMode = s.single,
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 5),
                   provider.bufferMode == DownloadBufferMode.disabled
                       ? const SizedBox.shrink()
                       : Text(

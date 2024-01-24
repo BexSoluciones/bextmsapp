@@ -64,6 +64,7 @@ class AppRoutes {
   //DEVELOPER ROUTES
   static const database = '/database';
   static const processingQueue = '/processing-queue';
+  static const processingQueueDetail = '/processing-queue-detail';
   static const transactions = '/transactions';
   static const locations = '/locations';
   static const issue = '/issues';

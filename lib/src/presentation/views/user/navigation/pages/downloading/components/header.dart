@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 
-import '../../../shared/state/download_provider.dart';
+import '../../../../../../providers/download_provider.dart';
 
 class Header extends StatefulWidget {
   const Header({

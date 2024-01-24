@@ -3,8 +3,8 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 
 //providers
-
 import '../../../../../providers/download_provider.dart';
+
 import 'components/header.dart';
 import 'components/horizontal_layout.dart';
 import 'components/vertical_layout.dart';
