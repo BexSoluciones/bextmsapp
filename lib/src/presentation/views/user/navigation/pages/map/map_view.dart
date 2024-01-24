@@ -188,20 +188,35 @@ class _MapPageState extends State<MapPage> {
                     width: size.width,
                     child: BlocBuilder<NetworkBloc, NetworkState>(
                         builder: (context, networkState) {
-                          switch (networkState.runtimeType) {
-                            case NetworkInitial:
-                              return _buildBodyNetworkSuccess(size, state,
-                                  true, urlTemplate, provider, metadata);
-                            case NetworkFailure:
-                              return _buildBodyNetworkSuccess(size, state,
-                                  true, urlTemplate, provider, metadata);
-                            case NetworkSuccess:
-                              return _buildBodyNetworkSuccess(size, state,
-                                  false, urlTemplate, provider, metadata);
-                            default:
-                              return const SizedBox();
-                          }
-                        })))));
+                      switch (networkState.runtimeType) {
+                        case NetworkInitial:
+                          return _buildBodyNetworkSuccess(
+                              size,
+                              state,
+                              true,
+                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                              null,
+                              null);
+                        case NetworkFailure:
+                          return _buildBodyNetworkSuccess(
+                              size,
+                              state,
+                              true,
+                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                              null,
+                              null);
+                        case NetworkSuccess:
+                          return _buildBodyNetworkSuccess(
+                              size,
+                              state,
+                              false,
+                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                              null,
+                              null);
+                        default:
+                          return const SizedBox();
+                      }
+                    })))));
     // return Consumer<GeneralProvider>(
     //     builder: (context, provider, _) => FutureBuilder<Map<String, String>?>(
     //         future: provider.currentStore == null
@@ -227,7 +242,7 @@ class _MapPageState extends State<MapPage> {
   }
 
   Widget _buildBodyNetworkSuccess(Size size, NavigationState state,
-      bool offline, String urlTemplate, GeneralProvider provider, metadata) {
+      bool offline, String urlTemplate, GeneralProvider? provider, metadata) {
     return Stack(
       children: [
         state.works != null && state.works!.isNotEmpty
