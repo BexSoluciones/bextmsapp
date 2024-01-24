@@ -180,7 +180,7 @@ Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(details);
     FlutterError.dumpErrorToConsole(details);
-    runApp(ErrorWidgetClass(details));
+    runApp(ErrorWidgetClass(details, databaseCubit));
   };
 
   workmanagerService.initialize(callbackDispatcher);
@@ -211,10 +211,13 @@ Future<void> main() async {
 
 class ErrorWidgetClass extends StatelessWidget {
   final FlutterErrorDetails errorDetails;
-  const ErrorWidgetClass(this.errorDetails, {super.key});
+  final DatabaseCubit databaseCubit;
+  const ErrorWidgetClass(this.errorDetails, this.databaseCubit, {super.key});
+
   @override
   Widget build(BuildContext context) {
     return CustomErrorWidget(
+      databaseCubit: databaseCubit,
       errorMessage: errorDetails.exceptionAsString(),
     );
   }

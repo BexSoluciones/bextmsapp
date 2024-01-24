@@ -180,49 +180,50 @@ class _MapPageState extends State<MapPage> {
       );
 
   Widget _buildBody(Size size, state) {
-    return Consumer<GeneralProvider>(
-        builder: (context, provider, _) => FutureBuilder<Map<String, String>?>(
-            future: provider.currentStore == null
-                ? Future.sync(() => {})
-                : FMTC.instance(provider.currentStore!).metadata.readAsync,
-            builder: (context, metadata) {
-              if (!metadata.hasData ||
-                  metadata.data == null ||
-                  (provider.currentStore != null && metadata.data!.isEmpty)) {
-                return const LoadingIndicator(
-                  message:
-                      'Cargando configuración...\n\n¿Ves esta pantalla durante mucho tiempo?\nPuede haber una mala configuración del\n la tienda. Intente deshabilitar el almacenamiento en caché y eliminar\n tiendas defectuosas.',
-                );
-              }
-
-              final String urlTemplate = provider.currentStore != null &&
-                      metadata.data != null
-                  ? metadata.data!['sourceURL']!
-                  : 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png';
-
-              return BlocBuilder<NavigationCubit, NavigationState>(
-                  builder: (context, state) => SingleChildScrollView(
-                      child: SafeArea(
-                          child: SizedBox(
-                              height: size.height,
-                              width: size.width,
-                              child: BlocBuilder<NetworkBloc, NetworkState>(
-                                  builder: (context, networkState) {
-                                switch (networkState.runtimeType) {
-                                  case NetworkInitial:
-                                    return _buildBodyNetworkSuccess(size, state,
-                                        true, urlTemplate, provider, metadata);
-                                  case NetworkFailure:
-                                    return _buildBodyNetworkSuccess(size, state,
-                                        true, urlTemplate, provider, metadata);
-                                  case NetworkSuccess:
-                                    return _buildBodyNetworkSuccess(size, state,
-                                        false, urlTemplate, provider, metadata);
-                                  default:
-                                    return const SizedBox();
-                                }
-                              })))));
-            }));
+    return BlocBuilder<NavigationCubit, NavigationState>(
+        builder: (context, state) => SingleChildScrollView(
+            child: SafeArea(
+                child: SizedBox(
+                    height: size.height,
+                    width: size.width,
+                    child: BlocBuilder<NetworkBloc, NetworkState>(
+                        builder: (context, networkState) {
+                          switch (networkState.runtimeType) {
+                            case NetworkInitial:
+                              return _buildBodyNetworkSuccess(size, state,
+                                  true, urlTemplate, provider, metadata);
+                            case NetworkFailure:
+                              return _buildBodyNetworkSuccess(size, state,
+                                  true, urlTemplate, provider, metadata);
+                            case NetworkSuccess:
+                              return _buildBodyNetworkSuccess(size, state,
+                                  false, urlTemplate, provider, metadata);
+                            default:
+                              return const SizedBox();
+                          }
+                        })))));
+    // return Consumer<GeneralProvider>(
+    //     builder: (context, provider, _) => FutureBuilder<Map<String, String>?>(
+    //         future: provider.currentStore == null
+    //             ? Future.sync(() => {})
+    //             : FMTC.instance(provider.currentStore!).metadata.readAsync,
+    //         builder: (context, metadata) {
+    //           if (!metadata.hasData ||
+    //               metadata.data == null ||
+    //               (provider.currentStore != null && metadata.data!.isEmpty)) {
+    //             return const LoadingIndicator(
+    //               message:
+    //                   'Cargando configuración...\n\n¿Ves esta pantalla durante mucho tiempo?\nPuede haber una mala configuración del\n la tienda. Intente deshabilitar el almacenamiento en caché y eliminar\n tiendas defectuosas.',
+    //             );
+    //           }
+    //
+    //           final String urlTemplate = provider.currentStore != null &&
+    //                   metadata.data != null
+    //               ? metadata.data!['sourceURL']!
+    //               : 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png';
+    //
+    //           return
+    //         }));
   }
 
   Widget _buildBodyNetworkSuccess(Size size, NavigationState state,
@@ -262,38 +263,33 @@ class _MapPageState extends State<MapPage> {
                           }
                         }
                       }),
-                  nonRotatedChildren: buildStdAttribution(urlTemplate),
+                  // nonRotatedChildren: buildStdAttribution(urlTemplate),
                   children: [
                     TileLayer(
                       urlTemplate: urlTemplate,
-                      additionalOptions: {
-                        'accessToken': widget.enterpriseConfig != null
-                            ? widget.enterpriseConfig!.mapbox!
-                            : 'sk.eyJ1IjoiYmV4aXRhY29sMiIsImEiOiJjbDVnc3ltaGYwMm16M21wZ21rMXg1OWd6In0.Dwtkt3r6itc0gCXDQ4CVxg',
-                      },
-                      tileProvider: provider.currentStore != null
-                          ? FMTC
-                              .instance(provider.currentStore!)
-                              .getTileProvider(
-                                FMTCTileProviderSettings(
-                                  behavior: CacheBehavior.values
-                                      .byName(metadata.data!['behaviour']!),
-                                  cachedValidDuration: int.parse(
-                                            metadata.data!['validDuration']!,
-                                          ) ==
-                                          0
-                                      ? Duration.zero
-                                      : Duration(
-                                          days: int.parse(
-                                            metadata.data!['validDuration']!,
-                                          ),
-                                        ),
-                                  maxStoreLength: int.parse(
-                                    metadata.data!['maxLength']!,
-                                  ),
-                                ),
-                              )
-                          : NetworkNoRetryTileProvider(),
+                      // tileProvider: provider.currentStore != null
+                      //     ? FMTC
+                      //         .instance(provider.currentStore!)
+                      //         .getTileProvider(
+                      //           FMTCTileProviderSettings(
+                      //             behavior: CacheBehavior.values
+                      //                 .byName(metadata.data!['behaviour']!),
+                      //             cachedValidDuration: int.parse(
+                      //                       metadata.data!['validDuration']!,
+                      //                     ) ==
+                      //                     0
+                      //                 ? Duration.zero
+                      //                 : Duration(
+                      //                     days: int.parse(
+                      //                       metadata.data!['validDuration']!,
+                      //                     ),
+                      //                   ),
+                      //             maxStoreLength: int.parse(
+                      //               metadata.data!['maxLength']!,
+                      //             ),
+                      //           ),
+                      //         )
+                      //     : NetworkNoRetryTileProvider(),
                     ),
                     //...state.layer,
                     PolylineLayer(
