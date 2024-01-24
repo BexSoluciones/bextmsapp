@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+//utils
+import '../../../../../../utils/constants/strings.dart';
 //providers
 import '../../../../../providers/download_provider.dart';
-
 //domain
 import '../../../../../../domain/models/enterprise_config.dart';
-
-//features
-import '../../features/download_region.dart';
-
 //components
 import 'components/header.dart';
 import 'components/map_view.dart';
+//services
+import '../../../../../../locator.dart';
+import '../../../../../../services/navigation.dart';
+final NavigationService _navigationService = locator<NavigationService>();
 
 class DownloaderPage extends StatefulWidget {
   const DownloaderPage({super.key, this.enterpriseConfig});
@@ -53,13 +53,7 @@ class _DownloaderPageState extends State<DownloaderPage> {
           builder: (context, provider, _) => FloatingActionButton.extended(
             onPressed: provider.region == null || provider.regionTiles == null
                 ? () {}
-                : () => Navigator.of(context).push(
-                      MaterialPageRoute<String>(
-                        builder: (BuildContext context) =>
-                            DownloadRegionPopup(region: provider.region!),
-                        fullscreenDialog: true,
-                      ),
-                    ),
+                : () => _navigationService.goTo(AppRoutes.downloader, arguments: provider.region),
             icon: const Icon(Icons.arrow_forward),
             label: Padding(
               padding: const EdgeInsets.only(left: 10),

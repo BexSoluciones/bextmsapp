@@ -35,17 +35,7 @@ class PreviewScreen extends StatelessWidget {
                   TextButton(
                     onPressed: () async {
                       await imageFile.delete();
-
                       fileList.remove(imageFile);
-                      //TODO [Heider Zapa] fix
-
-                      // await Navigator.of(context).pushReplacement(
-                      //   MaterialPageRoute(
-                      //     builder: (context) => CapturesScreen(
-                      //       imageFileList: fileList,
-                      //     ),
-                      //   ),
-                      // );
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.red,

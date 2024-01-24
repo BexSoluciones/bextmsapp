@@ -31,6 +31,10 @@ class AppRoutes {
   static const notes = '/create-note';
 
   static const navigation = '/navigation';
+  static const editStore = '/edit-store-popup';
+  static const importStore = '/import-store-popup';
+  static const recovery = '/recovery-popup';
+  static const downloader = '/downloader-popup';
   //SUMMARY ROUTES
   static const summary = '/summary';
   static const summaryNavigation = '/summary-navigation';

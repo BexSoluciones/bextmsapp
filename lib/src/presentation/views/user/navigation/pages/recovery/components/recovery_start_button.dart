@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
+//utils
+import '../../../../../../../utils/constants/strings.dart';
 //provider
 import '../../../../../../providers/download_provider.dart';
-//features
-import '../../../features/download_region.dart';
+//services
+import '../../../../../../../locator.dart';
+import '../../../../../../../services/navigation.dart';
+
+final NavigationService _navigationService = locator<NavigationService>();
 
 class RecoveryStartButton extends StatelessWidget {
   const RecoveryStartButton({
@@ -51,15 +56,8 @@ class RecoveryStartButton extends StatelessWidget {
                                 )
                                 ..regionTiles = tiles.data;
 
-                          await Navigator.of(context).push(
-                            MaterialPageRoute<String>(
-                              builder: (BuildContext context) =>
-                                  DownloadRegionPopup(
-                                region: downloadProvider.region!,
-                              ),
-                              fullscreenDialog: true,
-                            ),
-                          );
+                          await _navigationService.goTo(AppRoutes.downloader,
+                              arguments: downloadProvider.region);
 
                           moveToDownloadPage();
                         },
