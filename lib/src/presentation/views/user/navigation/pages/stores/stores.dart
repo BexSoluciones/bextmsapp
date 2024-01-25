@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-
-
-import '../../features/import_store.dart';
-import '../../features/store_editor.dart';
-
+//utils
+import '../../../../../../utils/constants/strings.dart';
+//components
 import 'components/empty_indicator.dart';
 import 'components/header.dart';
 import 'components/store_tile.dart';
-
 //widget
 import '../../../../../widgets/loading_indicator_widget.dart';
+//services
+import '../../../../../../locator.dart';
+import '../../../../../../services/navigation.dart';
+
+final NavigationService _navigationService = locator<NavigationService>();
 
 class StoresPage extends StatefulWidget {
   const StoresPage({super.key});
@@ -79,25 +81,12 @@ class _StoresPageState extends State<StoresPage> {
           activeIcon: Icons.close,
           children: [
             SpeedDialChild(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<String>(
-                  builder: (BuildContext context) => const StoreEditorPopup(
-                    existingStoreName: null,
-                    isStoreInUse: false,
-                  ),
-                  fullscreenDialog: true,
-                ),
-              ),
+              onTap: () => _navigationService.goTo(AppRoutes.editStore),
               child: const Icon(Icons.add),
               label: 'Create New Store',
             ),
             SpeedDialChild(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<String>(
-                  builder: (BuildContext context) => const ImportStorePopup(),
-                  fullscreenDialog: true,
-                ),
-              ),
+              onTap: () => _navigationService.goTo(AppRoutes.importStore),
               child: const Icon(Icons.file_open),
               label: 'Import Stores',
             ),

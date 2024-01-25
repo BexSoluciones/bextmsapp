@@ -47,6 +47,13 @@ class Routes {
           return MaterialPageRoute(builder: builder);
         }
 
+        if (settings.name!.contains('popup')) {
+          return MaterialPageRoute<String>(
+            builder: builder,
+            fullscreenDialog: true,
+          );
+        }
+
         return MaterialPageRoute(
             builder: (context) => ShowCaseWidget(
                   autoPlayDelay: const Duration(seconds: 3),

@@ -124,6 +124,10 @@ class ProcessingQueueBloc
     return _databaseRepository.getProcessingQueueIncompleteToTransactions();
   }
 
+  Future<List<ProcessingQueue>> getData(int? page, int? limit) {
+    return _databaseRepository.getAllProcessingQueuesPaginated(page, limit);
+  }
+
   Future<void> _getProcessingQueue() async {
     if (networkBloc != null && networkBloc?.state is NetworkSuccess) {
       var queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
@@ -164,7 +168,7 @@ class ProcessingQueueBloc
     if (networkBloc != null &&
         networkBloc?.state is NetworkSuccess &&
         state.status == ProcessingQueueStatus.success) {
-      //_getProcessingQueue();
+      _getProcessingQueue();
     }
     emit(state.copyWith(status: ProcessingQueueStatus.success));
   }

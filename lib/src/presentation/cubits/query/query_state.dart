@@ -14,9 +14,7 @@ abstract class QueryState extends Equatable {
   final double? totalDelivery;
 
   final double? countTotalCollectionWorks;
-
-
-
+  
   final String? error;
 
   const QueryState({

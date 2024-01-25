@@ -4,14 +4,11 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:fmtc_plus_background_downloading/fmtc_plus_background_downloading.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 //domain
 import '../../../../../domain/models/enterprise_config.dart';
-
 //providers
-import '../shared/state/download_provider.dart';
-import '../shared/state/general_provider.dart';
-
+import '../../../../providers/download_provider.dart';
+import '../../../../providers/general_provider.dart';
 //components
 import '../components/bd_battery_optimizations_info.dart';
 import '../components/buffering_configuration.dart';
@@ -40,6 +37,13 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
   late final RectangleRegion? rectangleRegion;
 
   @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     if (widget.region is CircleRegion) {
       circleRegion = widget.region as CircleRegion;
@@ -54,12 +58,12 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
 
   @override
   void didChangeDependencies() {
-    final String? currentStore =
-        Provider.of<GeneralProvider>(context, listen: false).currentStore;
-    if (currentStore != null) {
-      Provider.of<DownloadProvider>(context, listen: false)
-          .setSelectedStore(FMTC.instance(currentStore), notify: false);
-    }
+    // final String? currentStore =
+    //     Provider.of<GeneralProvider>(context, listen: false).currentStore;
+    // if (currentStore != null) {
+    //   Provider.of<DownloadProvider>(context, listen: false)
+    //       .setSelectedStore(FMTC.instance(currentStore), notify: false);
+    // }
 
     super.didChangeDependencies();
   }
@@ -91,7 +95,7 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
                 const SectionSeparator(),
                 const UsageWarning(),
                 const SectionSeparator(),
-                const Text('START DOWNLOAD IN'),
+                const Text('COMENZAR A DESCARGAR EN'),
                 Consumer2<DownloadProvider, GeneralProvider>(
                   builder: (context, downloadProvider, generalProvider, _) =>
                       Row(
@@ -115,10 +119,6 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
                                             TileLayer(
                                               urlTemplate:
                                                   metadata['sourceURL'],
-                                              additionalOptions: {
-                                                'accessToken': widget
-                                                    .enterpriseConfig!.mapbox!
-                                              },
                                             ),
                                             preventRedownload: downloadProvider
                                                 .preventRedownload,
@@ -151,7 +151,7 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
 
                                   if (mounted) Navigator.of(context).pop();
                                 },
-                          child: const Text('Foreground'),
+                          child: const Text('Primer plano'),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -171,10 +171,6 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
                                       downloadProvider.maxZoom,
                                       TileLayer(
                                         urlTemplate: metadata['sourceURL'],
-                                        additionalOptions: {
-                                          'accessToken':
-                                              widget.enterpriseConfig!.mapbox!
-                                        },
                                       ),
                                       preventRedownload:
                                           downloadProvider.preventRedownload,
@@ -200,7 +196,7 @@ class _DownloadRegionPopupState extends State<DownloadRegionPopup> {
 
                                   if (mounted) Navigator.of(context).pop();
                                 },
-                          child: const Text('Background'),
+                          child: const Text('Segundo plano'),
                         ),
                       ),
                     ],

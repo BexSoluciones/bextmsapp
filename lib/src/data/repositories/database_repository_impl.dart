@@ -303,6 +303,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   @override
+  Future<double> countTotalCollectionWorksByWorkcode(String workcode) {
+    return _appDatabase.transactionDao.countTotalCollectionWorksByWorkcode(workcode);
+  }
+
+  @override
   Future<bool> verifyTransactionExistence(int workId, String orderNumber) {
     return _appDatabase.transactionDao
         .verifyTransactionExistence(workId, orderNumber);
@@ -374,6 +379,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<List<ProcessingQueue>> getAllProcessingQueues(String? code, String? task) {
     return _appDatabase.processingQueueDao.getAllProcessingQueues(code, task);
+  }
+
+  @override
+  Future<List<ProcessingQueue>> getAllProcessingQueuesPaginated(int? page, int? limit) {
+    return _appDatabase.processingQueueDao.getAllProcessingQueuesPaginated(page, limit);
   }
 
   @override

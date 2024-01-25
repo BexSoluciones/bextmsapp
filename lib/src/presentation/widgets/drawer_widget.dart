@@ -85,7 +85,7 @@ Drawer drawer(BuildContext context, User? user) {
         createDrawerItem(
             context: context,
             icon: Icons.transfer_within_a_station,
-            text: 'Transacciones.',
+            text: 'Cierre de ruta.',
             onTap: () => _navigationService.goTo(AppRoutes.transaction)),
         createDrawerItem(
             context: context,

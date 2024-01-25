@@ -15,7 +15,7 @@ import '../../../../../utils/constants/colors.dart';
 //widgets
 import 'delivery_description.dart';
 
-import 'item_respawn.dart';
+import 'item_collection.dart';
 
 class CollectionQueryView extends StatefulWidget {
   const CollectionQueryView({Key? key, required this.workcode})
@@ -68,7 +68,7 @@ class _CollectionQueryViewState extends State<CollectionQueryView>
         ));
   }
 
-  Widget _buildHome(List<WorkAdditional>? data, double totalReject) {
+  Widget _buildHome(List<WorkAdditional>? data, double totalDelivery) {
     return Column(
       children: [
         Expanded(
@@ -97,7 +97,7 @@ class _CollectionQueryViewState extends State<CollectionQueryView>
                         ),
                       );
                     },
-                    child: ItemRespawn(data: data[index], reason: 'Entregas'));
+                    child: ItemCollection(data: data[index]));
               },
             )),
         const Spacer(),
@@ -107,7 +107,7 @@ class _CollectionQueryViewState extends State<CollectionQueryView>
               borderRadius: BorderRadius.circular(20), color: kPrimaryColor),
           height: 60,
           child: Center(
-            child: Text('Total: ${formatter.format(totalReject)}',
+            child: Text('Total: ${formatter.format(totalDelivery)}',
                 style: const TextStyle(color: Colors.white, fontSize: 18)),
           ),
         )

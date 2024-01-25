@@ -217,6 +217,7 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
       } else {
         main
             ? snackbar = SnackBar(
+                duration: const Duration(seconds: 1),
                 elevation: 0,
                 behavior: SnackBarBehavior.floating,
                 backgroundColor: Colors.transparent,

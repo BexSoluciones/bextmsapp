@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 
-import '../../../shared/state/download_provider.dart';
+import '../../../../../../providers/download_provider.dart';
 
 class Header extends StatefulWidget {
   const Header({
@@ -25,10 +25,10 @@ class _HeaderState extends State<Header> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Downloading',
+                    'Descargando',
                   ),
                   Text(
-                    'Downloading To: ${provider.selectedStore?.storeName ?? '<in test mode>'}',
+                    'Descargando a: ${provider.selectedStore?.storeName ?? '<en modo de prueba>'}',
                     overflow: TextOverflow.fade,
                     softWrap: false,
                   ),
@@ -38,7 +38,7 @@ class _HeaderState extends State<Header> {
             const SizedBox(width: 15),
             IconButton(
               icon: const Icon(Icons.cancel),
-              tooltip: 'Cancel Download',
+              tooltip: 'Cancelar descarga',
               onPressed: cancelled
                   ? null
                   : () async {

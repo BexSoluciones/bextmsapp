@@ -7,31 +7,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
-
 //utils
 import '../../../../../../utils/constants/strings.dart';
-
 //blocs
 import '../../../../../blocs/location/location_bloc.dart';
 import '../../../../../blocs/network/network_bloc.dart';
-
 //cubit
 import '../../../../../cubits/navigation/navigation_cubit.dart';
-import '../../../../../cubits/general/general_cubit.dart';
-
+//providers
+import '../../../../../providers/general_provider.dart';
 //domain
 import '../../../../../../domain/models/arguments.dart';
 import '../../../../../../domain/models/enterprise_config.dart';
-
 //widgets
 import '../../../../../widgets/loading_indicator_widget.dart';
 import '../../../../../widgets/lottie_widget.dart';
 import '../../features/carousel_card.dart';
-
 //services
 import '../../../../../../locator.dart';
 import '../../../../../../services/navigation.dart';
+import 'build_attribution.dart';
 
 final NavigationService _navigationService = locator<NavigationService>();
 
@@ -168,8 +165,6 @@ class _MapPageState extends State<MapPage> {
                     child: IconButton(
                         icon: const Icon(Icons.directions),
                         onPressed: () {
-                          print(navigationState.pageIndex);
-
                           var work = navigationState
                               .works![navigationState.pageIndex ?? 0];
                           _navigationService.goTo(AppRoutes.summaryNavigation,
@@ -185,69 +180,69 @@ class _MapPageState extends State<MapPage> {
       );
 
   Widget _buildBody(Size size, state) {
-    return BlocBuilder<GeneralCubit, GeneralState>(
-        builder: (context, generalState) => FutureBuilder<Map<String, String>?>(
-            future: generalState.currentStore == null
-                ? Future.sync(() => {})
-                : FMTC.instance(generalState.currentStore!).metadata.readAsync,
-            builder: (context, metadata) {
-              if (!metadata.hasData ||
-                  metadata.data == null ||
-                  (generalState.currentStore != null &&
-                      metadata.data!.isEmpty)) {
-                return const LoadingIndicator(
-                  message:
-                      'Cargando configuración...\n\n¿Ves esta pantalla durante mucho tiempo?\nPuede haber una mala configuración del\n la tienda. Intente deshabilitar el almacenamiento en caché y eliminar\n tiendas defectuosas.',
-                );
-              }
-
-              final String urlTemplate = generalState.currentStore != null &&
-                      metadata.data != null
-                  ? metadata.data!['sourceURL']!
-                  : 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png';
-
-              return BlocBuilder<NavigationCubit, NavigationState>(
-                  builder: (context, state) => SingleChildScrollView(
-                      child: SafeArea(
-                          child: SizedBox(
-                              height: size.height,
-                              width: size.width,
-                              child: BlocBuilder<NetworkBloc, NetworkState>(
-                                  builder: (context, networkState) {
-                                switch (networkState.runtimeType) {
-                                  case NetworkInitial:
-                                    return _buildBodyNetworkSuccess(
-                                        size,
-                                        state,
-                                        true,
-                                        urlTemplate,
-                                        generalState,
-                                        metadata);
-                                  case NetworkFailure:
-                                    return _buildBodyNetworkSuccess(
-                                        size,
-                                        state,
-                                        true,
-                                        urlTemplate,
-                                        generalState,
-                                        metadata);
-                                  case NetworkSuccess:
-                                    return _buildBodyNetworkSuccess(
-                                        size,
-                                        state,
-                                        false,
-                                        urlTemplate,
-                                        generalState,
-                                        metadata);
-                                  default:
-                                    return const SizedBox();
-                                }
-                              })))));
-            }));
+    return BlocBuilder<NavigationCubit, NavigationState>(
+        builder: (context, state) => SingleChildScrollView(
+            child: SafeArea(
+                child: SizedBox(
+                    height: size.height,
+                    width: size.width,
+                    child: BlocBuilder<NetworkBloc, NetworkState>(
+                        builder: (context, networkState) {
+                      switch (networkState.runtimeType) {
+                        case NetworkInitial:
+                          return _buildBodyNetworkSuccess(
+                              size,
+                              state,
+                              true,
+                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                              null,
+                              null);
+                        case NetworkFailure:
+                          return _buildBodyNetworkSuccess(
+                              size,
+                              state,
+                              true,
+                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                              null,
+                              null);
+                        case NetworkSuccess:
+                          return _buildBodyNetworkSuccess(
+                              size,
+                              state,
+                              false,
+                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                              null,
+                              null);
+                        default:
+                          return const SizedBox();
+                      }
+                    })))));
+    // return Consumer<GeneralProvider>(
+    //     builder: (context, provider, _) => FutureBuilder<Map<String, String>?>(
+    //         future: provider.currentStore == null
+    //             ? Future.sync(() => {})
+    //             : FMTC.instance(provider.currentStore!).metadata.readAsync,
+    //         builder: (context, metadata) {
+    //           if (!metadata.hasData ||
+    //               metadata.data == null ||
+    //               (provider.currentStore != null && metadata.data!.isEmpty)) {
+    //             return const LoadingIndicator(
+    //               message:
+    //                   'Cargando configuración...\n\n¿Ves esta pantalla durante mucho tiempo?\nPuede haber una mala configuración del\n la tienda. Intente deshabilitar el almacenamiento en caché y eliminar\n tiendas defectuosas.',
+    //             );
+    //           }
+    //
+    //           final String urlTemplate = provider.currentStore != null &&
+    //                   metadata.data != null
+    //               ? metadata.data!['sourceURL']!
+    //               : 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png';
+    //
+    //           return
+    //         }));
   }
 
   Widget _buildBodyNetworkSuccess(Size size, NavigationState state,
-      bool offline, String urlTemplate, generalState, metadata) {
+      bool offline, String urlTemplate, GeneralProvider? provider, metadata) {
     return Stack(
       children: [
         state.works != null && state.works!.isNotEmpty
@@ -283,21 +278,14 @@ class _MapPageState extends State<MapPage> {
                           }
                         }
                       }),
-                  nonRotatedChildren: [
-                    AttributionWidget.defaultWidget(
-                      source: Uri.parse(urlTemplate).host,
-                    ),
-                  ],
+                  // nonRotatedChildren: buildStdAttribution(urlTemplate),
                   children: [
                     TileLayer(
                       urlTemplate: urlTemplate,
-                      additionalOptions: {
-                        'accessToken': widget.enterpriseConfig != null
-                            ? widget.enterpriseConfig!.mapbox!
-                            : 'sk.eyJ1IjoiYmV4aXRhY29sMiIsImEiOiJjbDVnc3ltaGYwMm16M21wZ21rMXg1OWd6In0.Dwtkt3r6itc0gCXDQ4CVxg',
-                      },
-                      // tileProvider: generalState.currentStore != null
-                      //     ? FMTC.instance(state.currentStore!).getTileProvider(
+                      // tileProvider: provider.currentStore != null
+                      //     ? FMTC
+                      //         .instance(provider.currentStore!)
+                      //         .getTileProvider(
                       //           FMTCTileProviderSettings(
                       //             behavior: CacheBehavior.values
                       //                 .byName(metadata.data!['behaviour']!),

@@ -37,7 +37,8 @@ abstract class DatabaseRepository {
   Future<WorkTypes?> getWorkTypesFromWorkcode(String workcode);
 
   //DELIVERY
-  Future<List<WorkAdditional>> getClientsResJetDel(String workcode,String reason);
+  Future<List<WorkAdditional>> getClientsResJetDel(
+      String workcode, String reason);
 
   //NEWS
   Future<void> insertNews(News news);
@@ -53,15 +54,23 @@ abstract class DatabaseRepository {
   //SUMMARIES
   Future<List<Summary>> getAllSummariesByOrderNumber(int workId);
   Future<List<Summary>> getAllSummariesByWorkcode(int workId, String customer);
-  Future<List<Summary>> getAllInventoryByOrderNumber(int workId, String orderNumber);
-  Future<List<Summary>> getAllInventoryByPackage(int workId, String orderNumber);
-  Future<List<Summary>> getAllPackageByOrderNumber(int workId, String orderNumber);
-  Future<List<Summary>> watchAllItemsPackage(String orderNumber, String packing, String idPacking);
-  Future<List<Summary>> getAllSummariesByOrderNumberMoved(int workId, String orderNumber);
-  Future<List<SummaryReport>> getSummaryReportsWithReasonOrRedelivery(String orderNumber);
-  Future<List<SummaryReport>> getSummaryReportsWithReturnOrRedelivery(String orderNumber);
+  Future<List<Summary>> getAllInventoryByOrderNumber(
+      int workId, String orderNumber);
+  Future<List<Summary>> getAllInventoryByPackage(
+      int workId, String orderNumber);
+  Future<List<Summary>> getAllPackageByOrderNumber(
+      int workId, String orderNumber);
+  Future<List<Summary>> watchAllItemsPackage(
+      String orderNumber, String packing, String idPacking);
+  Future<List<Summary>> getAllSummariesByOrderNumberMoved(
+      int workId, String orderNumber);
+  Future<List<SummaryReport>> getSummaryReportsWithReasonOrRedelivery(
+      String orderNumber);
+  Future<List<SummaryReport>> getSummaryReportsWithReturnOrRedelivery(
+      String orderNumber);
   Future<List<SummaryReport>> getSummaryReportsWithDelivery(String orderNumber);
-  Future<double> countTotalRespawnWorksByWorkcode(String workcode,String reason);
+  Future<double> countTotalRespawnWorksByWorkcode(
+      String workcode, String reason);
   Future<bool> resetCantSummaries(int workId, String orderNumber);
   Future<double> getTotalSummaries(int workId, String orderNumber);
   Future<int> getTotalPackageSummaries(String orderNumber);
@@ -80,7 +89,8 @@ abstract class DatabaseRepository {
   Future<int> insertTransactionSummary(TransactionSummary transactionSummary);
   Future<bool> validateTransaction(int workId);
   Future<bool> validateTransactionArrived(int workId, String status);
-  Future<bool> validateTransactionSummary(String workcode, String orderNumber, String status);
+  Future<bool> validateTransactionSummary(
+      String workcode, String orderNumber, String status);
   Future<bool> checkLastTransaction(String workcode);
   Future<bool> checkLastProduct(int transactionId);
   Future<int> updateTransaction(Transaction transaction);
@@ -88,8 +98,8 @@ abstract class DatabaseRepository {
   Future<void> emptyTransactions();
   Future<void> deleteTransactionsByWorkcode(String workcode);
   Future<int> countLeftClients(String workcode);
-  Future<bool> verifyTransactionExistence(int workId,String orderNumber);
-
+  Future<double> countTotalCollectionWorksByWorkcode(String workcode);
+  Future<bool> verifyTransactionExistence(int workId, String orderNumber);
 
   //REASONS
   Future<List<Reason>> getAllReasons();
@@ -107,11 +117,15 @@ abstract class DatabaseRepository {
   Future<void> emptyAccounts();
 
   //PROCESSING QUEUE
-  Future<List<ProcessingQueue>> getAllProcessingQueues(String? code, String? task);
+  Future<List<ProcessingQueue>> getAllProcessingQueues(
+      String? code, String? task);
+  Future<List<ProcessingQueue>> getAllProcessingQueuesPaginated(
+      int? page, int? limit);
   Stream<List<ProcessingQueue>> watchAllProcessingQueues();
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete();
   Future<int> countProcessingQueueIncompleteToTransactions();
-  Stream<List<Map<String, dynamic>>> getProcessingQueueIncompleteToTransactions();
+  Stream<List<Map<String, dynamic>>>
+      getProcessingQueueIncompleteToTransactions();
   Future<bool> validateIfProcessingQueueIsIncomplete();
   Future<int> updateProcessingQueue(ProcessingQueue processingQueue);
   Future<int> insertProcessingQueue(ProcessingQueue processingQueue);
@@ -178,7 +192,7 @@ abstract class DatabaseRepository {
   Future<int?> countAllUnreadNotifications();
 
   //POLYLINES
-  Future<int> insertPolylines(String workcode,List<LatLng> data);
+  Future<int> insertPolylines(String workcode, List<LatLng> data);
   Future<List<LatLng>> getPolylines(String workcode);
 
   //DELETE-BY-DAYS
@@ -186,5 +200,4 @@ abstract class DatabaseRepository {
   Future<void> deleteLocationsByDays();
   Future<void> deleteNotificationsByDays();
   Future<void> deleteTransactionByDays();
-
 }

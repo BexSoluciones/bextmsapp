@@ -1,19 +1,18 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-//cubit
-import '../../../../../cubits/download/download_cubit.dart';
-
+import 'package:provider/provider.dart';
+//utils
+import '../../../../../../utils/constants/strings.dart';
+//providers
+import '../../../../../providers/download_provider.dart';
 //domain
 import '../../../../../../domain/models/enterprise_config.dart';
-
-//features
-import '../../features/download_region.dart';
-
 //components
 import 'components/header.dart';
 import 'components/map_view.dart';
+//services
+import '../../../../../../locator.dart';
+import '../../../../../../services/navigation.dart';
+final NavigationService _navigationService = locator<NavigationService>();
 
 class DownloaderPage extends StatefulWidget {
   const DownloaderPage({super.key, this.enterpriseConfig});
@@ -50,21 +49,15 @@ class _DownloaderPageState extends State<DownloaderPage> {
             ),
           ],
         ),
-        floatingActionButton: BlocBuilder<DownloadCubit, DownloadState>(
-          builder: (context, state) => FloatingActionButton.extended(
-            onPressed: state.region == null || state.regionTiles == null
+        floatingActionButton: Consumer<DownloadProvider>(
+          builder: (context, provider, _) => FloatingActionButton.extended(
+            onPressed: provider.region == null || provider.regionTiles == null
                 ? () {}
-                : () => Navigator.of(context).push(
-                      MaterialPageRoute<String>(
-                        builder: (BuildContext context) =>
-                            DownloadRegionPopup(region: state.region!, enterpriseConfig: widget.enterpriseConfig),
-                        fullscreenDialog: true,
-                      ),
-                    ),
+                : () => _navigationService.goTo(AppRoutes.downloader, arguments: provider.region),
             icon: const Icon(Icons.arrow_forward),
             label: Padding(
               padding: const EdgeInsets.only(left: 10),
-              child: state.regionTiles == null
+              child: provider.regionTiles == null
                   ? SizedBox(
                       height: 36,
                       width: 36,
@@ -78,7 +71,7 @@ class _DownloaderPageState extends State<DownloaderPage> {
                         ),
                       ),
                     )
-                  : Text('~${state.regionTiles} tiles'),
+                  : Text('${provider.regionTiles} tiles'),
             ),
           ),
         ),

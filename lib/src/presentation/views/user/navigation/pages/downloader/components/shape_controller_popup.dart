@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-//cubit
-import '../../../../../../cubits/download/download_cubit.dart';
-
+import 'package:provider/provider.dart';
+//providers
+import '../../../../../../providers/download_provider.dart';
 //utils
 import '../../../../../../../utils/constants/enums.dart';
 
@@ -36,8 +34,8 @@ class ShapeControllerPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.all(12),
-        child: BlocBuilder<DownloadCubit, DownloadState>(
-          builder: (context, state) => ListView.separated(
+        child: Consumer<DownloadProvider>(
+          builder: (context, provider, _) => ListView.separated(
             itemCount: regionShapes.length,
             shrinkWrap: true,
             itemBuilder: (context, i) {
@@ -53,10 +51,10 @@ class ShapeControllerPopup extends StatelessWidget {
                     : null,
                 leading: Icon(icon),
                 trailing:
-                    state.regionMode == mode ? const Icon(Icons.done) : null,
+                    provider.regionMode == mode ? const Icon(Icons.done) : null,
                 onTap: i != regionShapes.length - 1
                     ? () {
-                        state.regionMode = mode!;
+                        provider.regionMode = mode!;
                         Navigator.of(context).pop();
                       }
                     : null,
