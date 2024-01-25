@@ -62,8 +62,6 @@ class HomeViewState extends State<HomeView>
       helperFunctions.initLocationService();
       gpsBloc.startFollowingUser();
     }
-    print('***************');
-    print(_isInForeground);
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -72,8 +70,6 @@ class HomeViewState extends State<HomeView>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     _isInForeground = state == AppLifecycleState.resumed;
-    print('***************');
-    print(_isInForeground);
   }
 
   @override

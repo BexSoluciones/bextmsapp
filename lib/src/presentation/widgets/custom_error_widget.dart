@@ -1,17 +1,11 @@
-import 'package:bexdeliveries/main.dart';
-import 'package:bexdeliveries/src/presentation/cubits/database/database_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:restart_app/restart_app.dart';
 
 class CustomErrorWidget extends StatelessWidget {
   final String errorMessage;
-  final DatabaseCubit databaseCubit;
 
   const CustomErrorWidget(
-      {super.key, required this.errorMessage, required this.databaseCubit});
-
-  reloadApp() {
-    return runApp(MyApp(databaseCubit: databaseCubit));
-  }
+      {super.key, required this.errorMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +41,9 @@ class CustomErrorWidget extends StatelessWidget {
                   style: TextStyle(fontSize: 16.0),
                 ),
                 IconButton(
-                    onPressed: () => reloadApp(),
+                    onPressed: () {
+                      Restart.restartApp(webOrigin: '/');
+                    },
                     icon: const Icon(Icons.refresh, size: 40.0))
               ],
             ),

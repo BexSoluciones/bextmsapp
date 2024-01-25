@@ -180,7 +180,7 @@ Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(details);
     FlutterError.dumpErrorToConsole(details);
-    runApp(ErrorWidgetClass(details, databaseCubit));
+    runApp(ErrorWidgetClass(details));
   };
 
   workmanagerService.initialize(callbackDispatcher);
@@ -206,18 +206,53 @@ Future<void> main() async {
     }
   });
 
+  // runApp(
+  //   RestartWidget(
+  //     child: MyApp(databaseCubit: databaseCubit),
+  //   ),
+  // );
+
   runApp(MyApp(databaseCubit: databaseCubit));
 }
 
+// class RestartWidget extends StatefulWidget {
+//   const RestartWidget({super.key, required this.child});
+//
+//   final Widget child;
+//
+//   static void restartApp(BuildContext context) {
+//     context.findAncestorStateOfType<RestartWidgetState>()?.restartApp();
+//   }
+//
+//   @override
+//   RestartWidgetState createState() => RestartWidgetState();
+// }
+//
+// class RestartWidgetState extends State<RestartWidget> {
+//   Key key = UniqueKey();
+//
+//   void restartApp() {
+//     setState(() {
+//       key = UniqueKey();
+//     });
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return KeyedSubtree(
+//       key: key,
+//       child: widget.child,
+//     );
+//   }
+// }
+
 class ErrorWidgetClass extends StatelessWidget {
   final FlutterErrorDetails errorDetails;
-  final DatabaseCubit databaseCubit;
-  const ErrorWidgetClass(this.errorDetails, this.databaseCubit, {super.key});
+  const ErrorWidgetClass(this.errorDetails, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return CustomErrorWidget(
-      databaseCubit: databaseCubit,
       errorMessage: errorDetails.exceptionAsString(),
     );
   }
