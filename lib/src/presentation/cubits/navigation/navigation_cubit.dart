@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:bexdeliveries/src/domain/models/warehouse.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -138,8 +139,12 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           );
         }
 
-        var warehouse =
-            await _databaseRepository.findWarehouse(works.first.warehouseId!);
+        Warehouse? warehouse;
+
+        if (works.first.warehouseId != null) {
+          warehouse =
+              await _databaseRepository.findWarehouse(works.first.warehouseId!);
+        }
 
         if (warehouse != null) {
           markers.add(

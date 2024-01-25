@@ -7,13 +7,13 @@ import '../work.dart';
 class PredictionResponse extends Equatable {
   final int? id;
   final double? likelihood;
-  final int workId;
-  final int zoneId;
-  final String workcode;
-  final List<ListOrder> listOrders;
-  final List<Work> works;
-  final List<Different> differences;
-  final bool used;
+  final int? workId;
+  final int? zoneId;
+  final String? workcode;
+  final List<ListOrder>? listOrders;
+  final List<Work>? works;
+  final List<Different>? differences;
+  final bool? used;
 
   const PredictionResponse({
     required this.id,

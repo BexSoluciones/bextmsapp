@@ -473,37 +473,38 @@ class ProcessingQueueBloc
             if (response is DataSuccess) {
               var prediction = response.data;
 
-              var historyOrder = HistoryOrder(
-                  id: prediction?.id,
-                  workId: prediction!.workId,
-                  workcode: body['workcode'],
-                  zoneId: prediction.zoneId,
-                  listOrder: prediction.listOrders,
-                  works: prediction.works,
-                  different: prediction.differences,
-                  likelihood: prediction.likelihood,
-                  used: prediction.used);
+              if (prediction != null) {
+                var historyOrder = HistoryOrder(
+                    id: prediction?.id,
+                    workId: prediction!.workId!,
+                    workcode: body['workcode'],
+                    zoneId: prediction.zoneId,
+                    listOrder: prediction.listOrders!,
+                    works: prediction.works!,
+                    different: prediction.differences!,
+                    likelihood: prediction.likelihood!,
+                    used: prediction.used);
 
-              await _databaseRepository.insertHistory(historyOrder);
+                await _databaseRepository.insertHistory(historyOrder);
 
-              if (historyOrder.used!) {
-                _storageService.setBool(
-                    '${historyOrder.workcode}-usedHistoric', true);
-                _storageService.setBool(
-                    '${historyOrder.workcode}-recentlyUpdated', true);
-                _storageService.setBool(
-                    '${historyOrder.workcode}-showAgain', true);
-                _storageService.setBool(
-                    '${historyOrder.workcode}-oneOrMoreFinished', true);
+                if (historyOrder.used!) {
+                  _storageService.setBool(
+                      '${historyOrder.workcode}-usedHistoric', true);
+                  _storageService.setBool(
+                      '${historyOrder.workcode}-recentlyUpdated', true);
+                  _storageService.setBool(
+                      '${historyOrder.workcode}-showAgain', true);
+                  _storageService.setBool(
+                      '${historyOrder.workcode}-oneOrMoreFinished', true);
 
-                await helperFunctions.useHistoricFromSync(
-                    workcode: historyOrder.workcode!,
-                    historyId: historyOrder.id!,
-                    queue: queue);
-              } else {
-                _storageService.setBool(
-                    '${historyOrder.workcode}-showAgain', false);
-                queue.task = 'done';
+                  await helperFunctions.useHistoricFromSync(
+                      workcode: historyOrder.workcode!,
+                      historyId: historyOrder.id!,
+                      queue: queue);
+                } else {
+                  _storageService.setBool(
+                      '${historyOrder.workcode}-showAgain', false);
+                }
               }
 
               queue.task = 'done';
@@ -869,37 +870,38 @@ class ProcessingQueueBloc
           if (response is DataSuccess) {
             var prediction = response.data;
 
-            var historyOrder = HistoryOrder(
-                id: prediction?.id,
-                workId: prediction!.workId,
-                workcode: body['workcode'],
-                zoneId: prediction.zoneId,
-                listOrder: prediction.listOrders,
-                works: prediction.works,
-                different: prediction.differences,
-                likelihood: prediction.likelihood,
-                used: prediction.used);
+            if (prediction != null) {
+              var historyOrder = HistoryOrder(
+                  id: prediction?.id,
+                  workId: prediction!.workId!,
+                  workcode: body['workcode'],
+                  zoneId: prediction.zoneId,
+                  listOrder: prediction.listOrders!,
+                  works: prediction.works!,
+                  different: prediction.differences!,
+                  likelihood: prediction.likelihood!,
+                  used: prediction.used);
 
-            await _databaseRepository.insertHistory(historyOrder);
+              await _databaseRepository.insertHistory(historyOrder);
 
-            if (historyOrder.used!) {
-              _storageService.setBool(
-                  '${historyOrder.workcode}-usedHistoric', true);
-              _storageService.setBool(
-                  '${historyOrder.workcode}-recentlyUpdated', true);
-              _storageService.setBool(
-                  '${historyOrder.workcode}-showAgain', true);
-              _storageService.setBool(
-                  '${historyOrder.workcode}-oneOrMoreFinished', true);
+              if (historyOrder.used!) {
+                _storageService.setBool(
+                    '${historyOrder.workcode}-usedHistoric', true);
+                _storageService.setBool(
+                    '${historyOrder.workcode}-recentlyUpdated', true);
+                _storageService.setBool(
+                    '${historyOrder.workcode}-showAgain', true);
+                _storageService.setBool(
+                    '${historyOrder.workcode}-oneOrMoreFinished', true);
 
-              await helperFunctions.useHistoricFromSync(
-                  workcode: historyOrder.workcode!,
-                  historyId: historyOrder.id!,
-                  queue: queue);
-            } else {
-              _storageService.setBool(
-                  '${historyOrder.workcode}-showAgain', false);
-              queue.task = 'done';
+                await helperFunctions.useHistoricFromSync(
+                    workcode: historyOrder.workcode!,
+                    historyId: historyOrder.id!,
+                    queue: queue);
+              } else {
+                _storageService.setBool(
+                    '${historyOrder.workcode}-showAgain', false);
+              }
             }
 
             queue.task = 'done';
