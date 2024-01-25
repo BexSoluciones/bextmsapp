@@ -103,6 +103,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
         collectionCubit.goToSummary(state.work);
       }
     } else if (state is CollectionFailed && state.error != null) {
+      ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           duration: const Duration(seconds: 1),

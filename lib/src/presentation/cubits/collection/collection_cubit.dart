@@ -425,7 +425,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           emit(CollectionFailed(
               totalSummary: state.totalSummary,
               enterpriseConfig: state.enterpriseConfig,
-              error: 'La foto es es obligatoria.'));
+              error: 'La foto es obligatoria.'));
         } else {
           var imagesServer = <String>[];
           if (images.isNotEmpty) {
