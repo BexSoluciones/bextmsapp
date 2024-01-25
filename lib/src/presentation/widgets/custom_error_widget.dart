@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:restart_app/restart_app.dart';
 
 class CustomErrorWidget extends StatelessWidget {
   final String errorMessage;
 
-  const CustomErrorWidget({super.key, required this.errorMessage});
+  const CustomErrorWidget(
+      {super.key, required this.errorMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,17 @@ class CustomErrorWidget extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16.0),
                 ),
+                const SizedBox(height: 10.0),
+                const Text(
+                  'Reiniciar app',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16.0),
+                ),
+                IconButton(
+                    onPressed: () {
+                      Restart.restartApp(webOrigin: '/');
+                    },
+                    icon: const Icon(Icons.refresh, size: 40.0))
               ],
             ),
           ),

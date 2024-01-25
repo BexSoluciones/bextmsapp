@@ -6,7 +6,7 @@ import '../work.dart';
 
 class PredictionResponse extends Equatable {
   final int? id;
-  final double likelihood;
+  final double? likelihood;
   final int workId;
   final int zoneId;
   final String workcode;

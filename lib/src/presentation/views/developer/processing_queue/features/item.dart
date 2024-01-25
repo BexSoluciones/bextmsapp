@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-
+//utils
+import '../../../../../utils/constants/strings.dart';
 //models
 import '../../../../../domain/models/processing_queue.dart';
+//services
+import '../../../../../locator.dart';
+import '../../../../../services/navigation.dart';
 
-//feature
-import 'detail.dart';
-
+final NavigationService _navigationService = locator<NavigationService>();
 class ProcessingQueueCard extends StatelessWidget {
   final ProcessingQueue processingQueue;
 
@@ -14,15 +16,13 @@ class ProcessingQueueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      elevation: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: ListTile(
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) =>
-                ProcessingQueueCardDetail(processingQueue: processingQueue))),
+        onTap: () => _navigationService.goTo(AppRoutes.processingQueueDetail,
+            arguments: processingQueue),
         title: Text(
           'CODIGO: ${processingQueue.code}',
           style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),

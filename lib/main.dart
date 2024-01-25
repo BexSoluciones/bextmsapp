@@ -13,10 +13,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
-// import 'dart:io';
-// import 'dart:ui';
-// import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-// import 'package:path/path.dart' as p;
+import 'package:provider/provider.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
 //plugins
 // import 'package:charger_status/charger_status.dart';
@@ -48,8 +46,6 @@ import 'src/presentation/cubits/respawn/respawn_cubit.dart';
 import 'src/presentation/cubits/collection/collection_cubit.dart';
 import 'src/presentation/cubits/database/database_cubit.dart';
 import 'src/presentation/cubits/navigation/navigation_cubit.dart';
-import 'src/presentation/cubits/general/general_cubit.dart';
-import 'src/presentation/cubits/download/download_cubit.dart';
 import 'src/presentation/cubits/query/query_cubit.dart';
 import 'src/presentation/cubits/transaction/transaction_cubit.dart';
 import 'src/presentation/cubits/notification/count/count_cubit.dart';
@@ -71,6 +67,8 @@ import 'src/data/datasources/local/app_database.dart';
 
 //providers
 import 'src/presentation/providers/photo_provider.dart';
+import 'src/presentation/providers/general_provider.dart';
+import 'src/presentation/providers/download_provider.dart';
 
 //utils
 import 'src/utils/constants/strings.dart';
@@ -164,30 +162,20 @@ Future<void> main() async {
         headerMainLogger, error, 'Caught an error in the async operation!');
   }
 
-  // bool damagedDatabaseDeleted = false;
-  //
-  // await FlutterMapTileCaching.initialise(
-  //   errorHandler: (error) => damagedDatabaseDeleted = error.wasFatal,
-  //   debugMode: true,
-  // );
-  //
-  // _storageService.setBool('damaged_database_deleted', damagedDatabaseDeleted);
-  //
-  // await FMTC.instance.rootDirectory.migrator.fromV6(urlTemplates: []);
-  //
-  // if (_storageService.getBool('reset') ?? false) {
-  //   await FMTC.instance.rootDirectory.manage.reset();
-  // }
-  //
-  // final File newAppVersionFile = File(
-  //   p.join(
-  //     // ignore: invalid_use_of_internal_member, invalid_use_of_protected_member
-  //     FMTC.instance.rootDirectory.directory.absolute.path,
-  //     'newAppVersion.${Platform.isWindows ? 'exe' : 'apk'}',
-  //   ),
-  // );
-  //
-  // if (await newAppVersionFile.exists()) await newAppVersionFile.delete();
+  String? damagedDatabaseDeleted;
+
+  await FlutterMapTileCaching.initialise(
+    errorHandler: (error) => damagedDatabaseDeleted = error.message,
+    debugMode: true,
+  );
+
+  _storageService.setBool('damaged_database_deleted', damagedDatabaseDeleted);
+
+  await FMTC.instance.rootDirectory.migrator.fromV6(urlTemplates: []);
+
+  if (_storageService.getBool('reset') ?? false) {
+    await FMTC.instance.rootDirectory.manage.reset();
+  }
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(details);
@@ -205,7 +193,7 @@ Future<void> main() async {
 
   var cron = Cron();
   final helperFunction = HelperFunctions();
-  cron.schedule(Schedule.parse('*/15 * * * *'), () async {
+  cron.schedule(Schedule.parse('*/10 * * * *'), () async {
     try {
       workmanagerService
           .sendProcessing(_storageService, _databaseRepository, _apiRepository)
@@ -218,12 +206,50 @@ Future<void> main() async {
     }
   });
 
+  // runApp(
+  //   RestartWidget(
+  //     child: MyApp(databaseCubit: databaseCubit),
+  //   ),
+  // );
+
   runApp(MyApp(databaseCubit: databaseCubit));
 }
+
+// class RestartWidget extends StatefulWidget {
+//   const RestartWidget({super.key, required this.child});
+//
+//   final Widget child;
+//
+//   static void restartApp(BuildContext context) {
+//     context.findAncestorStateOfType<RestartWidgetState>()?.restartApp();
+//   }
+//
+//   @override
+//   RestartWidgetState createState() => RestartWidgetState();
+// }
+//
+// class RestartWidgetState extends State<RestartWidget> {
+//   Key key = UniqueKey();
+//
+//   void restartApp() {
+//     setState(() {
+//       key = UniqueKey();
+//     });
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return KeyedSubtree(
+//       key: key,
+//       child: widget.child,
+//     );
+//   }
+// }
 
 class ErrorWidgetClass extends StatelessWidget {
   final FlutterErrorDetails errorDetails;
   const ErrorWidgetClass(this.errorDetails, {super.key});
+
   @override
   Widget build(BuildContext context) {
     return CustomErrorWidget(
@@ -442,15 +468,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             create: (context) => RejectCubit(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)
-            ),
+                BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => RespawnCubit(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)
-            ),
+                BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => CollectionCubit(
@@ -471,12 +495,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(
               create: (context) =>
                   TransactionCubit(locator<DatabaseRepository>())),
-          BlocProvider(
-            create: (context) => GeneralCubit(),
-          ),
-          BlocProvider(
-            create: (context) => DownloadCubit(),
-          ),
           BlocProvider(
             create: (context) => QueryCubit(locator<DatabaseRepository>()),
           ),
@@ -519,33 +537,45 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   lightScheme = lightColorScheme;
                   darkScheme = darkColorScheme;
 
-                  return MaterialApp(
-                    debugShowCheckedModeBanner: false,
-                    title: appTitle,
-                    theme: ThemeData(
-                      useMaterial3: true,
-                      colorScheme: state.isDarkTheme ? lightScheme : darkScheme,
-                      // extensions: [lightCustomColors],
-                    ),
-                    darkTheme: ThemeData(
-                      useMaterial3: true,
-                      colorScheme: state.isDarkTheme ? lightScheme : darkScheme,
-                      // extensions: [darkCustomColors],
-                    ),
-                    themeMode: ThemeMode.system,
-                    navigatorKey: locator<NavigationService>().navigatorKey,
-                    navigatorObservers: [
-                      locator<FirebaseAnalyticsService>()
-                          .appAnalyticsObserver(),
-                    ],
-                    onUnknownRoute: (RouteSettings settings) =>
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => UndefinedView(
-                                  name: settings.name,
-                                )),
-                    initialRoute: '/splash',
-                    onGenerateRoute: Routes.onGenerateRoutes,
-                  );
+                  return MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider<GeneralProvider>(
+                          create: (context) => GeneralProvider(),
+                        ),
+                        ChangeNotifierProvider<DownloadProvider>(
+                          create: (context) => DownloadProvider(),
+                        ),
+                      ],
+                      child: MaterialApp(
+                        debugShowCheckedModeBanner: false,
+                        title: appTitle,
+                        theme: ThemeData(
+                          useMaterial3: true,
+                          colorScheme:
+                              state.isDarkTheme ? lightScheme : darkScheme,
+                          // extensions: [lightCustomColors],
+                        ),
+                        darkTheme: ThemeData(
+                          useMaterial3: true,
+                          colorScheme:
+                              state.isDarkTheme ? lightScheme : darkScheme,
+                          // extensions: [darkCustomColors],
+                        ),
+                        themeMode: ThemeMode.system,
+                        navigatorKey: locator<NavigationService>().navigatorKey,
+                        navigatorObservers: [
+                          locator<FirebaseAnalyticsService>()
+                              .appAnalyticsObserver(),
+                        ],
+                        onUnknownRoute: (RouteSettings settings) =>
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    UndefinedView(
+                                      name: settings.name,
+                                    )),
+                        initialRoute: '/splash',
+                        onGenerateRoute: Routes.onGenerateRoutes,
+                      ));
                 })),
               );
             })));

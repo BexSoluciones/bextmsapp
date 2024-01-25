@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:validators/validators.dart' as validators;
 
-//cubit
-import '../../../../cubits/download/download_cubit.dart';
-import '../../../../cubits/general/general_cubit.dart';
-
-import '../components/header.dart';
+//providers
+import '../../../../providers/download_provider.dart';
+import '../../../../providers/general_provider.dart';
 
 //widgets
+import '../components/header.dart';
 import '../../../../widgets/loading_indicator_widget.dart';
 
 class StoreEditorPopup extends StatefulWidget {
@@ -48,13 +47,14 @@ class _StoreEditorPopupState extends State<StoreEditorPopup> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<DownloadCubit, DownloadState>(
-        builder: (context, state) => PopScope(
-          onPopInvoked: (bool pop) {
-            scaffoldMessenger.showSnackBar(
-              const SnackBar(content: Text('Changes not saved')),
-            );
+  Widget build(BuildContext context) => Consumer<DownloadProvider>(
+        builder: (context, downloadProvider, _) => PopScope(
+          onPopInvoked: (pop) async {
+            if (!pop) {
+              scaffoldMessenger.showSnackBar(
+                const SnackBar(content: Text('Changes not saved')),
+              );
+            }
           },
           canPop: true,
           child: Scaffold(
@@ -67,8 +67,8 @@ class _StoreEditorPopupState extends State<StoreEditorPopup> {
               cacheModeValue: _cacheModeValue,
               context: context,
             ),
-            body: BlocBuilder<GeneralCubit, GeneralState>(
-              builder: (context, state) => Padding(
+            body: Consumer<GeneralProvider>(
+              builder: (context, provider, _) => Padding(
                 padding: const EdgeInsets.all(12),
                 child: FutureBuilder<Map<String, String>?>(
                   future: widget.existingStoreName == null
@@ -133,7 +133,7 @@ class _StoreEditorPopupState extends State<StoreEditorPopup> {
                                     .get(
                                       Uri.parse(
                                         NetworkTileProvider().getTileUrl(
-                                          Coords(1, 1)..z = 1,
+                                          const TileCoordinates(1, 1, 1),
                                           TileLayer(urlTemplate: i),
                                         ),
                                       ),
@@ -152,6 +152,7 @@ class _StoreEditorPopupState extends State<StoreEditorPopup> {
 
                                 if (!validators.isURL(
                                   input,
+                                  protocols: ['http', 'https'],
                                   requireProtocol: true,
                                 )) {
                                   return 'Invalid URL';
@@ -170,7 +171,7 @@ class _StoreEditorPopupState extends State<StoreEditorPopup> {
                                   AutovalidateMode.onUserInteraction,
                               keyboardType: TextInputType.url,
                               initialValue: metadata.data!.isEmpty
-                                  ? 'https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}@2x?access_token={accessToken}'
+                                  ? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
                                   : metadata.data!['sourceURL'],
                               textInputAction: TextInputAction.next,
                             ),

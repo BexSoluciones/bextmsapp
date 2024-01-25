@@ -103,8 +103,10 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
         collectionCubit.goToSummary(state.work);
       }
     } else if (state is CollectionFailed && state.error != null) {
+      ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          duration: const Duration(seconds: 1),
           backgroundColor: Colors.red,
           content: Text(
             state.error!,
@@ -130,6 +132,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 
   Widget _buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionCubit, CollectionState>(
+      buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
         if (state is CollectionLoading ||
@@ -298,13 +301,12 @@ class _MyDialogState extends State<MyDialog> with FormatNumber {
         ),
         TextButton(
           child: showText ? const Text('Si') : Text(seconds.toString()),
-          onPressed: ()  {
+          onPressed: () {
             Navigator.of(context).pop();
             context
                 .read<CollectionCubit>()
                 .confirmTransaction(widget.arguments)
-                .then((value) {
-            });
+                .then((value) {});
             context
                 .read<CollectionCubit>()
                 .getCollection(widget.id, widget.orderNumber);

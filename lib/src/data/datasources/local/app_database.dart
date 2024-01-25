@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bexdeliveries/src/domain/models/payment.dart';
 import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:flutter/material.dart';

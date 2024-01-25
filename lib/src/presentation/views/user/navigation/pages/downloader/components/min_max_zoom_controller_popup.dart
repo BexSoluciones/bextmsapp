@@ -1,10 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
-//cubit
-import '../../../../../../cubits/download/download_cubit.dart';
+//providers
+import '../../../../../../providers/download_provider.dart';
 
 class MinMaxZoomControllerPopup extends StatelessWidget {
   const MinMaxZoomControllerPopup({
@@ -19,14 +18,15 @@ class MinMaxZoomControllerPopup extends StatelessWidget {
           right: 12,
           bottom: 12 + MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: BlocBuilder<DownloadCubit, DownloadState>(
-          builder: (context, state) => Column(
+        child: Consumer<DownloadProvider>(
+          child: const Text(
+            'Change Min/Max Zoom Levels',
+          ),
+          builder: (context, provider, child) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Change Min/Max Zoom Levels',
-              ),
+              child!,
               const SizedBox(height: 10),
               TextFormField(
                 decoration: const InputDecoration(
@@ -36,14 +36,14 @@ class MinMaxZoomControllerPopup extends StatelessWidget {
                 validator: (input) {
                   if (input == null || input.isEmpty) return 'Required';
                   if (int.parse(input) < 1) return 'Must be 1 or more';
-                  if (int.parse(input) > state.maxZoom) {
+                  if (int.parse(input) > provider.maxZoom) {
                     return 'Must be less than maximum zoom';
                   }
 
                   return null;
                 },
                 onChanged: (input) {
-                  if (input.isNotEmpty) state.minZoom = int.parse(input);
+                  if (input.isNotEmpty) provider.minZoom = int.parse(input);
                 },
                 keyboardType: TextInputType.number,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -52,7 +52,7 @@ class MinMaxZoomControllerPopup extends StatelessWidget {
                   _NumericalRangeFormatter(min: 1, max: 22),
                 ],
                 textInputAction: TextInputAction.next,
-                initialValue: state.minZoom.toString(),
+                initialValue: provider.minZoom.toString(),
               ),
               const SizedBox(height: 5),
               TextFormField(
@@ -63,14 +63,14 @@ class MinMaxZoomControllerPopup extends StatelessWidget {
                 validator: (input) {
                   if (input == null || input.isEmpty) return 'Required';
                   if (int.parse(input) > 22) return 'Must be 22 or less';
-                  if (int.parse(input) < state.minZoom) {
+                  if (int.parse(input) < provider.minZoom) {
                     return 'Must be more than minimum zoom';
                   }
 
                   return null;
                 },
                 onChanged: (input) {
-                  if (input.isNotEmpty) state.maxZoom = int.parse(input);
+                  if (input.isNotEmpty) provider.maxZoom = int.parse(input);
                 },
                 keyboardType: TextInputType.number,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -79,7 +79,7 @@ class MinMaxZoomControllerPopup extends StatelessWidget {
                   _NumericalRangeFormatter(min: 1, max: 22),
                 ],
                 textInputAction: TextInputAction.done,
-                initialValue: state.maxZoom.toString(),
+                initialValue: provider.maxZoom.toString(),
               ),
             ],
           ),

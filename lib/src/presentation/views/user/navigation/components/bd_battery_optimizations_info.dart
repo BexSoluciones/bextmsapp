@@ -37,18 +37,18 @@ class _BackgroundDownloadBatteryOptimizationsInfoState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Apps that support background downloading can request extra permissions to help prevent the background process being stopped by the system. Specifically, the 'ignore battery optimisations' permission helps most. The API has a method to manage this permission.",
+                    "Las aplicaciones que admiten la descarga en segundo plano pueden solicitar permisos adicionales para ayudar a evitar que el sistema detenga el proceso en segundo plano. Específicamente, el permiso 'ignorar optimizaciones de batería' es el que más ayuda. La API tiene un método para gestionar este permiso.",
                     textAlign: TextAlign.justify,
                   ),
                   const SizedBox(height: 10),
                   Text(
                     snapshot.hasError
-                        ? 'This platform currently does not support this API: it is only supported on Android.'
+                        ? 'Actualmente, esta plataforma no admite esta API: solo es compatible con Android.'
                         : snapshot.data == null
-                            ? 'Checking if this permission is currently granted to this application...'
+                            ? 'Comprobando si este permiso está actualmente concedido a esta aplicación...'
                             : (!snapshot.data!
-                                ? 'This application does not have this permission granted to it currently. Tap the button below to use the API method to request the permission.'
-                                : 'This application does currently have this permission granted to it.'),
+                                ? 'Esta aplicación no tiene este permiso otorgado actualmente. Toque el botón a continuación para utilizar el método API para solicitar el permiso.'
+                                : 'Esta aplicación actualmente tiene este permiso otorgado.'),
                     textAlign: TextAlign.justify,
                   ),
                   if (!(snapshot.data ?? true))
@@ -62,7 +62,7 @@ class _BackgroundDownloadBatteryOptimizationsInfoState
                               .requestIgnoreBatteryOptimizations();
                           setState(() {});
                         },
-                        child: const Text('Request Permission'),
+                        child: const Text('Pedir permiso'),
                       ),
                     ),
                 ],

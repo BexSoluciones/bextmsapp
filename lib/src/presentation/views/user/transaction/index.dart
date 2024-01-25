@@ -90,10 +90,10 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
 
   void buildBlocListener(
       BuildContext context, ProcessingQueueState state) async {
-    print(state);
     if (state.status == ProcessingQueueStatus.failure && state.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          duration: const Duration(seconds: 1),
           backgroundColor: Colors.red,
           content: Text(
             state.error!,
@@ -106,6 +106,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
 
   Widget _buildBlocConsumer() {
     return BlocConsumer<ProcessingQueueBloc, ProcessingQueueState>(
+      buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
         switch (state.status) {
@@ -228,6 +229,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                     .add(ProcessingQueueCancel());
                 ScaffoldMessenger.of(_scaffoldKey.currentContext ?? context)
                     .showSnackBar(const SnackBar(
+                        duration: Duration(seconds: 1),
                         backgroundColor: Colors.green,
                         content: Text('Todo se esta enviando exitosamente')));
               })

@@ -31,6 +31,10 @@ class AppRoutes {
   static const notes = '/create-note';
 
   static const navigation = '/navigation';
+  static const editStore = '/edit-store-popup';
+  static const importStore = '/import-store-popup';
+  static const recovery = '/recovery-popup';
+  static const downloader = '/downloader-popup';
   //SUMMARY ROUTES
   static const summary = '/summary';
   static const summaryNavigation = '/summary-navigation';
@@ -60,6 +64,7 @@ class AppRoutes {
   //DEVELOPER ROUTES
   static const database = '/database';
   static const processingQueue = '/processing-queue';
+  static const processingQueueDetail = '/processing-queue-detail';
   static const transactions = '/transactions';
   static const locations = '/locations';
   static const issue = '/issues';

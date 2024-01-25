@@ -63,38 +63,38 @@ class _FillIssueViewState extends State<FillIssueView> {
                         Padding(
                           padding: const EdgeInsets.all(15.0),
                           child: DefaultButton(
-                              color:
-                                  state.images != null && state.images.length != 0
-                                      ? Colors.green
-                                      : theme.primaryColor,
-                              widget:
-                                  state.images != null && state.images.length != 0
-                                      ? const Row(
-                                          children: [
-                                            Text('Foto Cargada Exitosamente'),
-                                            Icon(Icons.camera_alt,
-                                                color: Colors.white),
-                                          ],
-                                        )
-                                      : const Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                              Text('La foto es requerida',
-                                                  style: TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.white)),
-                                              Icon(Icons.camera_alt,
-                                                  color: Colors.white)
-                                            ]),
+                              color: state.images != null &&
+                                      state.images.length != 0
+                                  ? Colors.green
+                                  : theme.primaryColor,
+                              widget: state.images != null &&
+                                      state.images.length != 0
+                                  ? const Row(
+                                      children: [
+                                        Text('Foto Cargada Exitosamente'),
+                                        Icon(Icons.camera_alt,
+                                            color: Colors.white),
+                                      ],
+                                    )
+                                  : const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                          Text('La foto es requerida',
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.white)),
+                                          Icon(Icons.camera_alt,
+                                              color: Colors.white)
+                                        ]),
                               press: () async {
-                                await Navigator.of(context).pushNamed(
-                                    AppRoutes.camera,
+                                await _navigationService.goTo(AppRoutes.camera,
                                     arguments: (state.status == 'work')
                                         ? state.workId.toString() +
                                             state.codmotvis!
                                         : (state.status == 'summary')
-                                            ? state.selectedSummaryId.toString() +
+                                            ? state.selectedSummaryId
+                                                    .toString() +
                                                 state.codmotvis!
                                             : _storageService
                                                     .getInt('user_id')!
@@ -127,7 +127,8 @@ class _FillIssueViewState extends State<FillIssueView> {
                                                 style: TextStyle(
                                                     fontSize: 14,
                                                     color: Colors.white)),
-                                            Icon(Icons.edit, color: Colors.white)
+                                            Icon(Icons.edit,
+                                                color: Colors.white)
                                           ]),
                                 press: () async {
                                   await _navigationService.goTo(
@@ -136,7 +137,8 @@ class _FillIssueViewState extends State<FillIssueView> {
                                         ? state.workId.toString() +
                                             state.codmotvis!
                                         : (state.status == 'summary')
-                                            ? state.selectedSummaryId.toString() +
+                                            ? state.selectedSummaryId
+                                                    .toString() +
                                                 state.codmotvis!
                                             : _storageService
                                                     .getInt('user_id')!
@@ -176,7 +178,8 @@ class _FillIssueViewState extends State<FillIssueView> {
                                 fontSize: 16,
                                 fontWeight: FontWeight.normal)),
                         press: () async {
-                          if (await validateParameters(issuesBloc: issuesBloc)) {
+                          if (await validateParameters(
+                              issuesBloc: issuesBloc)) {
                             issuesBloc.add(DataIssue());
 
                             if (context.mounted) {
@@ -187,7 +190,8 @@ class _FillIssueViewState extends State<FillIssueView> {
                                   context: context,
                                   builder: (context) => CustomConfirmDialog(
                                         title: 'Novedad Creada',
-                                        message: 'Novedad reportada con exito !!',
+                                        message:
+                                            'Novedad reportada con exito !!',
                                         onConfirm: () => Navigator.pop(context),
                                         buttonText: 'Aceptar',
                                         cancelButtom: false,
@@ -208,7 +212,6 @@ class _FillIssueViewState extends State<FillIssueView> {
   }
 
   Future<bool> validateParameters({required IssuesBloc issuesBloc}) async {
-
     if (issuesBloc.state.selectedIssue!.firm == 1) {
       var firmApplication = await helperFunctions.getFirm(
           'firm-${(issuesBloc.state.status == 'work') ? issuesBloc.state.workId.toString() + issuesBloc.state.codmotvis! : (issuesBloc.state.status == 'summary') ? issuesBloc.state.selectedSummaryId.toString() + issuesBloc.state.codmotvis! : _storageService.getInt('user_id')!.toString() + issuesBloc.state.codmotvis!}');
@@ -235,7 +238,13 @@ class _FillIssueViewState extends State<FillIssueView> {
     }
     if (issuesBloc.state.selectedIssue!.photo == 1) {
       var images = await helperFunctions.getImages(
-          (issuesBloc.state.status == 'work') ? issuesBloc.state.workId.toString() + issuesBloc.state.codmotvis! : (issuesBloc.state.status == 'summary') ? issuesBloc.state.selectedSummaryId.toString() + issuesBloc.state.codmotvis! : _storageService.getInt('user_id')!.toString() + issuesBloc.state.codmotvis!);
+          (issuesBloc.state.status == 'work')
+              ? issuesBloc.state.workId.toString() + issuesBloc.state.codmotvis!
+              : (issuesBloc.state.status == 'summary')
+                  ? issuesBloc.state.selectedSummaryId.toString() +
+                      issuesBloc.state.codmotvis!
+                  : _storageService.getInt('user_id')!.toString() +
+                      issuesBloc.state.codmotvis!);
       if (images.isNotEmpty) {
         print('photos Ok');
       } else {

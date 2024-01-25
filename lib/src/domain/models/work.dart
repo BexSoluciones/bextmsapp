@@ -100,6 +100,20 @@ class WorkAdditional {
   final String? type;
   final double? latitude;
   final double? longitude;
+
+  Map<String, dynamic> toJson() {
+    final data = <String, dynamic>{};
+    data['order_number'] = orderNumber;
+    data['total_summary'] = totalSummary;
+    data['total_payment'] = totalPayment;
+    data['status'] = status;
+    data['type'] = type;
+    data['latitude'] = latitude;
+    data['longitude'] = longitude;
+    return data;
+  }
+
+
 }
 
 class WorkTypes {

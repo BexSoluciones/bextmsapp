@@ -54,7 +54,7 @@ class _ItemDescriptionState extends State<ItemDescription> {
               padding: const EdgeInsets.all(16.0),
               child: DataTable(
                 columnSpacing: 20.0,
-                dataRowHeight: 60.0,
+                dataRowMinHeight: 60.0,
                 headingRowHeight: 30.0,
                 columns: const [
                   DataColumn(

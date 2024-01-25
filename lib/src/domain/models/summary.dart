@@ -101,8 +101,8 @@ class Summary {
         this.idPacking,
         this.packing,
         this.expedition,
-        required this.createdAt,
-        required this.updatedAt,
+        this.createdAt,
+        this.updatedAt,
         this.validate
       });
 

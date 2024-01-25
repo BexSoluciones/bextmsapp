@@ -436,6 +436,11 @@ class HelperFunctions with FormatDate {
       return;
     }
 
+    location.changeNotificationOptions(
+        iconName: '@mipmap/ic_launcher',
+        title: 'Servicio de ubicación en segundo plano en ejecución',
+        onTapBringToFront: false);
+
     await location.enableBackgroundMode(enable: true);
   }
 

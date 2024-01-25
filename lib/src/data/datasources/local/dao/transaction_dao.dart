@@ -18,10 +18,10 @@ class TransactionDao {
   List<TransactionValidate> parseValidateTransactions(
       List<Map<String, dynamic>> transactionList) {
     final transactions = <TransactionValidate>[];
-    transactionList.forEach((transactionMap) {
+    for (var transactionMap in transactionList) {
       final transaction = TransactionValidate.fromJson(transactionMap);
       transactions.add(transaction);
-    });
+    }
     return transactions;
   }
 
@@ -29,14 +29,21 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     var deliveryList = await db!.query(t.tableTransactions,
+        columns: ['work_id', 'status'],
         where: 'status = ? and workcode = ?',
         whereArgs: ['delivery', workcode]);
     var partialList = await db.query(t.tableTransactions,
-        where: 'status = ? and workcode = ?', whereArgs: ['partial', workcode]);
+        columns: ['work_id', 'status'],
+        where: 'status = ? and workcode = ?',
+        whereArgs: ['partial', workcode]);
     var respawnList = await db.query(t.tableTransactions,
-        where: 'status = ? and workcode = ?', whereArgs: ['respawn', workcode]);
+        columns: ['work_id', 'status'],
+        where: 'status = ? and workcode = ?',
+        whereArgs: ['respawn', workcode]);
     var rejectList = await db.query(t.tableTransactions,
-        where: 'status = ? and workcode = ?', whereArgs: ['reject', workcode]);
+        columns: ['work_id', 'status'],
+        where: 'status = ? and workcode = ?',
+        whereArgs: ['reject', workcode]);
 
     var deliveries = parseTransactions(deliveryList);
     var partials = parseTransactions(partialList);
@@ -53,13 +60,36 @@ class TransactionDao {
   Future<List<WorkAdditional>> getClientsResJetDel(
       String workcode, String reason) async {
     final db = await _appDatabase.streamDatabase;
+
     final transactionList = await db!.rawQuery('''
     SELECT
       $tableTransactions.${TransactionFields.workcode},
       $tableTransactions.${TransactionFields.orderNumber},
       $tableTransactions.${TransactionFields.status},
-      $tableWorks.*,
-      $tableSummaries.*
+      $tableTransactions.${TransactionFields.payments},
+      $tableWorks.${WorkFields.id},
+      $tableWorks.${WorkFields.workcode},
+      $tableWorks.${WorkFields.nameTransporter},
+      $tableWorks.${WorkFields.date},
+      $tableWorks.${WorkFields.latitude},
+      $tableWorks.${WorkFields.longitude},
+      $tableWorks.${WorkFields.numberCustomer},
+      $tableWorks.${WorkFields.type},
+      $tableWorks.${WorkFields.customer},
+      $tableWorks.${WorkFields.address},
+      $tableSummaries.${SummaryFields.id},
+      $tableSummaries.${SummaryFields.workId},
+      $tableSummaries.${SummaryFields.orderNumber},
+      $tableSummaries.${SummaryFields.coditem},
+      $tableSummaries.${SummaryFields.nameItem},
+      $tableSummaries.${SummaryFields.amount},
+      $tableSummaries.${SummaryFields.codeWarehouse},
+      $tableSummaries.${SummaryFields.cant},
+      $tableSummaries.${SummaryFields.unitOfMeasurement},
+      $tableSummaries.${SummaryFields.grandTotalCopy},
+      $tableSummaries.${SummaryFields.price},
+      $tableSummaries.${SummaryFields.typeItem},
+      $tableSummaries.${SummaryFields.typeTransaction}
     FROM
       $tableTransactions
     INNER JOIN
@@ -70,9 +100,9 @@ class TransactionDao {
       $tableTransactions.${TransactionFields.workId} = $tableWorks.${WorkFields.id} AND 
       $tableSummaries.${SummaryFields.id} = $tableTransactions.${TransactionFields.summaryId} 
     WHERE
-      $tableTransactions.${TransactionFields.status} = '$reason'
+      $tableTransactions.${TransactionFields.status} = ?
       AND $tableTransactions.${TransactionFields.workcode} = ?
-  ''', [workcode]);
+  ''', [reason, workcode]);
 
     final worksList = <WorkAdditional>[];
     for (var row in transactionList) {
@@ -90,33 +120,42 @@ class TransactionDao {
       );
 
       final summary = Summary(
-          id: int.parse(row[SummaryFields.id].toString()),
-          workId: int.parse(row[SummaryFields.workId].toString()),
-          orderNumber: row[SummaryFields.orderNumber].toString(),
-          coditem: row[SummaryFields.coditem].toString(),
-          nameItem: row[SummaryFields.nameItem].toString(),
-          amount: row[SummaryFields.amount].toString(),
-          codeWarehouse: row[SummaryFields.codeWarehouse].toString(),
-          cant: double.parse(row[SummaryFields.cant].toString()),
-          unitOfMeasurement: row[SummaryFields.unitOfMeasurement].toString(),
-          grandTotal:
-              double.parse(row[SummaryFields.grandTotalCopy].toString()),
-          price: double.parse(row[SummaryFields.price].toString()),
-          typeItem: row[SummaryFields.typeItem].toString(),
-          typeTransaction: row[SummaryFields.typeTransaction].toString(),
-          minus: 0,
-          createdAt: '',
-          updatedAt: '');
+        id: int.parse(row[SummaryFields.id].toString()),
+        workId: int.parse(row[SummaryFields.workId].toString()),
+        orderNumber: row[SummaryFields.orderNumber].toString(),
+        coditem: row[SummaryFields.coditem].toString(),
+        nameItem: row[SummaryFields.nameItem].toString(),
+        amount: row[SummaryFields.amount].toString(),
+        codeWarehouse: row[SummaryFields.codeWarehouse].toString(),
+        cant: double.parse(row[SummaryFields.cant].toString()),
+        unitOfMeasurement: row[SummaryFields.unitOfMeasurement].toString(),
+        grandTotal: double.parse(row[SummaryFields.grandTotalCopy].toString()),
+        price: double.parse(row[SummaryFields.price].toString()),
+        typeItem: row[SummaryFields.typeItem].toString(),
+        typeTransaction: row[SummaryFields.typeTransaction].toString(),
+        minus: 0,
+      );
 
       var totalSummary = await getTotalSummariesWork(
           row[TransactionFields.orderNumber].toString());
+
+      var totalPayment = 0.0;
+
+      if (row[t.TransactionFields.payments] != null) {
+        var payments = List<Payment>.from(
+            jsonDecode(row[t.TransactionFields.payments] as String)
+                .map((e) => Payment.fromJson(e)));
+
+        totalPayment += payments.fold<double>(
+            0, (sum, item) => sum + double.parse(item.paid));
+      }
 
       final workAdditional = WorkAdditional(
           work: work,
           orderNumber: row[TransactionFields.orderNumber].toString(),
           totalSummary: totalSummary,
-          totalPayment: 0.0,
-          status: row[SummaryFields.status].toString(),
+          totalPayment: totalPayment,
+          status: row[t.TransactionFields.status].toString(),
           type: row[SummaryFields.type].toString(),
           latitude: double.parse(row[TransactionFields.latitude].toString()),
           longitude: double.parse(row[TransactionFields.longitude].toString()),
@@ -131,7 +170,10 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     var transactionList = await db!.query(t.tableTransactions,
-        where: 'status = ? OR status = ?', whereArgs: ['delivery', 'partial']);
+        columns: ['work_id', 'status', 'payments'],
+        where: 'status = ? OR status = ?',
+        whereArgs: ['delivery', 'partial']);
+
     var transactions = parseTransactions(transactionList);
 
     var sum = 0.0;
@@ -158,6 +200,34 @@ class TransactionDao {
       var summary = Summary.fromJson(element);
       sum += summary.grandTotalCopy!;
     }
+    return sum;
+  }
+
+  Future<double> countTotalCollectionWorksByWorkcode(String workcode) async {
+    final db = await _appDatabase.streamDatabase;
+
+    var transactionList = await db!.query(t.tableTransactions,
+        columns: ['work_id', 'status', 'payments'],
+        where:
+            'status != ? AND status != ? AND status != ? AND status != ? AND status != ? AND workcode = ?',
+        whereArgs: [
+          'reject',
+          'respawn',
+          'start',
+          'arrived',
+          'summary',
+          workcode
+        ]);
+
+    var transactions = parseTransactions(transactionList);
+
+    var sum = 0.0;
+
+    for (var value in transactions) {
+      sum += value.payments!
+          .fold(0, (value, element) => value + double.parse(element.paid));
+    }
+
     return sum;
   }
 
@@ -247,10 +317,12 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     final transactionList = await db!.query(t.tableTransactions,
+        columns: ['id'],
         where: 'work_id = ? AND status != ? AND status != ? AND status != ?',
         whereArgs: [workId, 'arrived', 'start', 'summary']);
 
     final summaryList = await db.query(tableSummaries,
+        columns: ['id', 'order_number'],
         where: 'work_id = ?',
         whereArgs: [workId],
         groupBy: '$tableSummaries.${SummaryFields.orderNumber}');
@@ -284,7 +356,9 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     var transactionList = await db!.query(t.tableTransactions,
-        where: 'workcode = ? AND status = ?', whereArgs: [workcode, status]);
+        columns: ['id'],
+        where: 'workcode = ? AND status = ?',
+        whereArgs: [workcode, status]);
 
     return transactionList.isNotEmpty;
   }
@@ -293,10 +367,10 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     final transactionList = await db!.query(t.tableTransactions,
-        where: 'work_id = ? AND status = ?', whereArgs: [workId, status]);
-
-    final transactions = parseTransactions(transactionList);
-    return transactions.isNotEmpty;
+        columns: ['id'],
+        where: 'work_id = ? AND status = ?',
+        whereArgs: [workId, status]);
+    return transactionList.isNotEmpty;
   }
 
   Future<bool> checkLastTransaction(String workcode) async {
@@ -342,7 +416,9 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     final transactionList = await db!.query(t.tableTransactions,
-        where: 'workcode = ? AND status = ?', whereArgs: [workcode, status]);
+        columns: ['id'],
+        where: 'workcode = ? AND status = ?',
+        whereArgs: [workcode, status]);
 
     yield transactionList.isNotEmpty;
   }
@@ -398,7 +474,6 @@ class TransactionDao {
     var formattedToday = DateTime(today.year, today.month, today.day);
     var formattedDatesToValidate = DateTime(
         datesToValidate.year, datesToValidate.month, datesToValidate.day);
-    var formattedTodayStr = formattedToday.toIso8601String().split('T')[0];
     var formattedDatesToValidateStr =
         formattedDatesToValidate.toIso8601String().split('T')[0];
 

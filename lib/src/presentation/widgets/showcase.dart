@@ -81,6 +81,7 @@ Widget buildPhoneShowcase(Work work, GlobalKey one, BuildContext context) {
         //summaryCubit.error(work.id!, 'No tiene número de celular');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
+            duration: Duration(seconds: 1),
             backgroundColor: Colors.red,
             content: Text(
               'No tiene número de celular',
@@ -129,6 +130,7 @@ Widget buildWhatsAppShowcase(Work work, GlobalKey two,BuildContext context) {
         //summaryCubit.error(work.id!, 'No tiene número de celular');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
+            duration: Duration(seconds: 1),
             backgroundColor: Colors.red,
             content: Text(
               'No tiene número de celular',
