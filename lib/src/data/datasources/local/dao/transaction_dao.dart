@@ -317,10 +317,12 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     final transactionList = await db!.query(t.tableTransactions,
+        columns: ['id'],
         where: 'work_id = ? AND status != ? AND status != ? AND status != ?',
         whereArgs: [workId, 'arrived', 'start', 'summary']);
 
     final summaryList = await db.query(tableSummaries,
+        columns: ['id', 'order_number'],
         where: 'work_id = ?',
         whereArgs: [workId],
         groupBy: '$tableSummaries.${SummaryFields.orderNumber}');
@@ -354,7 +356,9 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     var transactionList = await db!.query(t.tableTransactions,
-        where: 'workcode = ? AND status = ?', whereArgs: [workcode, status]);
+        columns: ['id'],
+        where: 'workcode = ? AND status = ?',
+        whereArgs: [workcode, status]);
 
     return transactionList.isNotEmpty;
   }
@@ -363,10 +367,10 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     final transactionList = await db!.query(t.tableTransactions,
-        where: 'work_id = ? AND status = ?', whereArgs: [workId, status]);
-
-    final transactions = parseTransactions(transactionList);
-    return transactions.isNotEmpty;
+        columns: ['id'],
+        where: 'work_id = ? AND status = ?',
+        whereArgs: [workId, status]);
+    return transactionList.isNotEmpty;
   }
 
   Future<bool> checkLastTransaction(String workcode) async {
@@ -412,7 +416,9 @@ class TransactionDao {
     final db = await _appDatabase.streamDatabase;
 
     final transactionList = await db!.query(t.tableTransactions,
-        where: 'workcode = ? AND status = ?', whereArgs: [workcode, status]);
+        columns: ['id'],
+        where: 'workcode = ? AND status = ?',
+        whereArgs: [workcode, status]);
 
     yield transactionList.isNotEmpty;
   }

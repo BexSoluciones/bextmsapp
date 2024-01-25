@@ -109,10 +109,14 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                buildPhoneShowcase(widget.arguments.work, widget.one,context),
-                buildWhatsAppShowcase(widget.arguments.work, widget.two,context),
+                buildPhoneShowcase(widget.arguments.work, widget.one, context),
+                buildWhatsAppShowcase(
+                    widget.arguments.work, widget.two, context),
                 buildMapShowcase(context, widget.arguments.work, widget.three),
-                state.summaries.isNotEmpty ? buildPublishShowcase(widget.four, state.summaries.first.id) : Container(),
+                state.summaries.isNotEmpty
+                    ? buildPublishShowcase(
+                        widget.four, state.summaries.first.id)
+                    : Container(),
               ],
             ),
           ),
