@@ -14,8 +14,7 @@ import '../../../presentation/views/developer/transactions/index.dart';
 Map<String, RouteType> developerRoutes = {
   AppRoutes.processingQueue: (context, settings) => const ProcessingQueueView(),
   AppRoutes.processingQueueDetail: (context, settings) =>
-      ProcessingQueueCardDetail(
-          processingQueue: settings.arguments as ProcessingQueue),
+      ProcessingQueueCardDetail(id: settings.arguments as int),
   AppRoutes.locations: (context, settings) => const LocationsView(),
   AppRoutes.transactions: (context, settings) => const TransactionsView(),
 };

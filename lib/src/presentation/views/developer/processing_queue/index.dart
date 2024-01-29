@@ -58,7 +58,6 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
     });
     changeFilterValue(processingQueueBloc.itemsFilter.first['key']);
     changeStateValue(processingQueueBloc.itemsState.first['key']);
-    // TODO: implement initState
     super.initState();
   }
 
@@ -83,81 +82,81 @@ class _ProcessingQueueViewState extends State<ProcessingQueueView> {
             expandedHeight: 100,
             pinned: true,
             forceElevated: innerBoxIsScrolled,
-            bottom: PreferredSize(
-              preferredSize:
-                  const Size.fromHeight(120.0), // here the desired height
-              child: Padding(
-                padding: const EdgeInsets.only(top: 15, left: 15, right: 15, bottom: 5),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 10),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.grey, width: 2.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: kPrimaryColor, width: 2.0),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: kPrimaryColor, width: 2.0),
-                          ),
-                          hintStyle: TextStyle(
-                            color: Colors.orange,
-                          ),
-                        ),
-                        style: const TextStyle(
-                          color: kPrimaryColor,
-                        ),
-                        value: processingQueueBloc.state.dropdownFilterValue,
-                        items: processingQueueBloc.itemsFilter.map((item) {
-                          return DropdownMenuItem(
-                            value: item['key'],
-                            child: Text(item['value']!),
-                          );
-                        }).toList(),
-                        onChanged: changeFilterValue),
-                    gapH12,
-                    DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 10),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.grey, width: 2.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: kPrimaryColor, width: 2.0),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: kPrimaryColor, width: 2.0),
-                          ),
-                          hintStyle: TextStyle(
-                            color: Colors.orange,
-                          ),
-                        ),
-                        style: const TextStyle(
-                          color: kPrimaryColor,
-                        ),
-                        value: processingQueueBloc.state.dropdownStateValue,
-                        items: processingQueueBloc.itemsState.map((item) {
-                          return DropdownMenuItem(
-                            value: item['key'],
-                            child: Text(item['value']!),
-                          );
-                        }).toList(),
-                        onChanged: changeStateValue),
-                  ],
-                ),
-              ),
-            ),
+            // bottom: PreferredSize(
+            //   preferredSize:
+            //       const Size.fromHeight(120.0), // here the desired height
+            //   child: Padding(
+            //     padding: const EdgeInsets.only(top: 15, left: 15, right: 15, bottom: 5),
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         DropdownButtonFormField<String>(
+            //             decoration: const InputDecoration(
+            //               contentPadding: EdgeInsets.symmetric(
+            //                   horizontal: 10, vertical: 10),
+            //               focusedBorder: OutlineInputBorder(
+            //                 borderSide:
+            //                     BorderSide(color: Colors.grey, width: 2.0),
+            //               ),
+            //               enabledBorder: OutlineInputBorder(
+            //                 borderSide:
+            //                     BorderSide(color: kPrimaryColor, width: 2.0),
+            //               ),
+            //               errorBorder: OutlineInputBorder(
+            //                 borderSide:
+            //                     BorderSide(color: kPrimaryColor, width: 2.0),
+            //               ),
+            //               hintStyle: TextStyle(
+            //                 color: Colors.orange,
+            //               ),
+            //             ),
+            //             style: const TextStyle(
+            //               color: kPrimaryColor,
+            //             ),
+            //             value: processingQueueBloc.state.dropdownFilterValue,
+            //             items: processingQueueBloc.itemsFilter.map((item) {
+            //               return DropdownMenuItem(
+            //                 value: item['key'],
+            //                 child: Text(item['value']!),
+            //               );
+            //             }).toList(),
+            //             onChanged: changeFilterValue),
+            //         gapH12,
+            //         DropdownButtonFormField<String>(
+            //             decoration: const InputDecoration(
+            //               contentPadding: EdgeInsets.symmetric(
+            //                   horizontal: 10, vertical: 10),
+            //               focusedBorder: OutlineInputBorder(
+            //                 borderSide:
+            //                     BorderSide(color: Colors.grey, width: 2.0),
+            //               ),
+            //               enabledBorder: OutlineInputBorder(
+            //                 borderSide:
+            //                     BorderSide(color: kPrimaryColor, width: 2.0),
+            //               ),
+            //               errorBorder: OutlineInputBorder(
+            //                 borderSide:
+            //                     BorderSide(color: kPrimaryColor, width: 2.0),
+            //               ),
+            //               hintStyle: TextStyle(
+            //                 color: Colors.orange,
+            //               ),
+            //             ),
+            //             style: const TextStyle(
+            //               color: kPrimaryColor,
+            //             ),
+            //             value: processingQueueBloc.state.dropdownStateValue,
+            //             items: processingQueueBloc.itemsState.map((item) {
+            //               return DropdownMenuItem(
+            //                 value: item['key'],
+            //                 child: Text(item['value']!),
+            //               );
+            //             }).toList(),
+            //             onChanged: changeStateValue),
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ),
         ],
         // The content of the scroll view

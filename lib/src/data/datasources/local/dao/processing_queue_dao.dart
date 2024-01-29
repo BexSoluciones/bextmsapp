@@ -44,7 +44,7 @@ class ProcessingQueueDao {
   ) async {
     final db = await _appDatabase.streamDatabase;
     var processingQueueList = await db!.rawQuery('''
-      SELECT * FROM $tableProcessingQueues
+      SELECT id, code, task, created_at, updated_at, _error FROM $tableProcessingQueues
       ORDER BY $tableProcessingQueues.${ProcessingQueueFields.createdAt} DESC
       LIMIT $limit
       OFFSET $page
@@ -52,6 +52,16 @@ class ProcessingQueueDao {
 
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues;
+  }
+
+  Future<ProcessingQueue> findProcessingQueue(int id) async {
+    final db = await _appDatabase.streamDatabase;
+    final processingQueueList = await db!
+        .query(tableProcessingQueues,
+        columns: ['task', 'code', 'body'],
+        where: 'id = ?', whereArgs: [id]);
+    final processingQueues = parseProcessingQueues(processingQueueList);
+    return processingQueues.first;
   }
 
   Stream<List<ProcessingQueue>> watchAllProcessingQueues() async* {

@@ -67,6 +67,7 @@ class ProcessingQueueBloc
             dropdownFilterValue: 'all',
             dropdownStateValue: 'all')) {
     on<ProcessingQueueAdd>(_add);
+    on<ProcessingQueueOne>(_one);
     on<ProcessingQueueObserve>(_observe);
     on<ProcessingQueueSender>(_sender);
     on<ProcessingQueueCancel>(_cancel);
@@ -133,6 +134,14 @@ class ProcessingQueueBloc
       var queues = await _databaseRepository.getAllProcessingQueuesIncomplete();
       sendProcessingQueues(queues);
     }
+  }
+
+  void _one(ProcessingQueueOne event, emit) async {
+    emit(state.copyWith(status: ProcessingQueueStatus.loading));
+    var processingQueue = await _databaseRepository.findProcessingQueue(event.id);
+    emit(state.copyWith(
+        status: ProcessingQueueStatus.success,
+        processingQueue: processingQueue));
   }
 
   void _all(event, emit) async {

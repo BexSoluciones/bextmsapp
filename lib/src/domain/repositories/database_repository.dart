@@ -121,6 +121,7 @@ abstract class DatabaseRepository {
       String? code, String? task);
   Future<List<ProcessingQueue>> getAllProcessingQueuesPaginated(
       int? page, int? limit);
+  Future<ProcessingQueue> findProcessingQueue(int id);
   Stream<List<ProcessingQueue>> watchAllProcessingQueues();
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete();
   Future<int> countProcessingQueueIncompleteToTransactions();

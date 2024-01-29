@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:cron/cron.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -198,7 +197,6 @@ Future<void> main() async {
       workmanagerService
           .sendProcessing(_storageService, _databaseRepository, _apiRepository)
           .then((value) {
-        logDebug(headerDeveloperLogger, value.toString());
         workmanagerService.completeWorks(_databaseRepository, _apiRepository);
       });
     } on SocketException catch (error, stackTrace) {
@@ -206,45 +204,8 @@ Future<void> main() async {
     }
   });
 
-  // runApp(
-  //   RestartWidget(
-  //     child: MyApp(databaseCubit: databaseCubit),
-  //   ),
-  // );
-
   runApp(MyApp(databaseCubit: databaseCubit));
 }
-
-// class RestartWidget extends StatefulWidget {
-//   const RestartWidget({super.key, required this.child});
-//
-//   final Widget child;
-//
-//   static void restartApp(BuildContext context) {
-//     context.findAncestorStateOfType<RestartWidgetState>()?.restartApp();
-//   }
-//
-//   @override
-//   RestartWidgetState createState() => RestartWidgetState();
-// }
-//
-// class RestartWidgetState extends State<RestartWidget> {
-//   Key key = UniqueKey();
-//
-//   void restartApp() {
-//     setState(() {
-//       key = UniqueKey();
-//     });
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return KeyedSubtree(
-//       key: key,
-//       child: widget.child,
-//     );
-//   }
-// }
 
 class ErrorWidgetClass extends StatelessWidget {
   final FlutterErrorDetails errorDetails;
@@ -520,64 +481,48 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(
               create: (context) => CountCubit(locator<DatabaseRepository>())),
         ],
-        child: BlocProvider(
-            create: (context) => ThemeBloc(),
-            child:
-                BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  FocusScope.of(context).requestFocus(FocusNode());
-                },
-                child: OverlaySupport(child: DynamicColorBuilder(builder:
-                    (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-                  ColorScheme lightScheme;
-                  ColorScheme darkScheme;
-
-                  lightScheme = lightColorScheme;
-                  darkScheme = darkColorScheme;
-
-                  return MultiProvider(
-                      providers: [
-                        ChangeNotifierProvider<GeneralProvider>(
-                          create: (context) => GeneralProvider(),
-                        ),
-                        ChangeNotifierProvider<DownloadProvider>(
-                          create: (context) => DownloadProvider(),
-                        ),
-                      ],
-                      child: MaterialApp(
-                        debugShowCheckedModeBanner: false,
-                        title: appTitle,
-                        theme: ThemeData(
-                          useMaterial3: true,
-                          colorScheme:
-                              state.isDarkTheme ? lightScheme : darkScheme,
-                          // extensions: [lightCustomColors],
-                        ),
-                        darkTheme: ThemeData(
-                          useMaterial3: true,
-                          colorScheme:
-                              state.isDarkTheme ? lightScheme : darkScheme,
-                          // extensions: [darkCustomColors],
-                        ),
-                        themeMode: ThemeMode.system,
-                        navigatorKey: locator<NavigationService>().navigatorKey,
-                        navigatorObservers: [
-                          locator<FirebaseAnalyticsService>()
-                              .appAnalyticsObserver(),
-                        ],
-                        onUnknownRoute: (RouteSettings settings) =>
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    UndefinedView(
-                                      name: settings.name,
-                                    )),
-                        initialRoute: '/splash',
-                        onGenerateRoute: Routes.onGenerateRoutes,
-                      ));
-                })),
-              );
-            })));
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode());
+          },
+          child: OverlaySupport(
+              child: MultiProvider(
+                  providers: [
+                ChangeNotifierProvider<GeneralProvider>(
+                  create: (context) => GeneralProvider(),
+                ),
+                ChangeNotifierProvider<DownloadProvider>(
+                  create: (context) => DownloadProvider(),
+                ),
+              ],
+                  child: MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    title: appTitle,
+                    theme: ThemeData(
+                      useMaterial3: true,
+                      colorScheme: lightColorScheme,
+                      // extensions: [lightCustomColors],
+                    ),
+                    darkTheme: ThemeData(
+                      useMaterial3: true,
+                      colorScheme: darkColorScheme,
+                      // extensions: [darkCustomColors],
+                    ),
+                    themeMode: ThemeMode.system,
+                    navigatorKey: locator<NavigationService>().navigatorKey,
+                    navigatorObservers: [
+                      locator<FirebaseAnalyticsService>()
+                          .appAnalyticsObserver(),
+                    ],
+                    onUnknownRoute: (RouteSettings settings) =>
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => UndefinedView(
+                                  name: settings.name,
+                                )),
+                    initialRoute: '/splash',
+                    onGenerateRoute: Routes.onGenerateRoutes,
+                  ))),
+        ));
   }
 }
