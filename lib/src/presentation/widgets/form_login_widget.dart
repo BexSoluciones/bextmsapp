@@ -102,9 +102,11 @@ extension PasswordWidget on LoginViewState {
 }
 
 extension LoginButton on LoginViewState {
+
   Future<bool> isGpsEnabled() async {
-    Location location = Location();
-    return await location.serviceEnabled();
+    //TODO [Andres Cardenas] chane too geolocator permissions
+    // return await service;
+    return false;
   }
 
   Widget buildButton(BuildContext context, LoginState state, bool remember) {
@@ -117,14 +119,14 @@ extension LoginButton on LoginViewState {
 
   Future<void> buildOnPressed(BuildContext context, bool remember) async {
     if (formKey.currentState!.validate()) {
-      Location location = Location();
-      var isGpsEnabled = await location.serviceEnabled();
-      if (isGpsEnabled) {
-        context.read<LoginCubit>().onPressedLogin(username, password, remember);
-      } else {
-        buildSnackBar(context,
-            'El GPS no está activado. Activa el GPS y vuelve a intentarlo.');
-      }
+      //TODO [Andres Cardenas] chane too geolocator permissions
+      // var isGpsEnabled = await location.serviceEnabled();
+      // if (isGpsEnabled && context.mounted) {
+      //   context.read<LoginCubit>().onPressedLogin(username, password, remember);
+      // } else {
+      //   buildSnackBar(context,
+      //       'El GPS no está activado. Activa el GPS y vuelve a intentarlo.');
+      // }
     }
   }
 

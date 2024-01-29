@@ -59,7 +59,8 @@ class HomeViewState extends State<HomeView>
     homeCubit.getUser();
     gpsBloc.startFollowingUser();
     if (enterpriseConfig != null && enterpriseConfig.backgroundLocation!) {
-      helperFunctions.initLocationService();
+      //TODO [Andres Cardenas] change request permission to geolocator
+      // helperFunctions.initLocationService();
       gpsBloc.startFollowingUser();
     }
     super.initState();

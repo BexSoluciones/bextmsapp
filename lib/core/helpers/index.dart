@@ -16,7 +16,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
-import 'package:location/location.dart' as loc;
 import 'package:yaml/yaml.dart';
 
 //blocs
@@ -55,7 +54,6 @@ final NavigationService _navigationService = locator<NavigationService>();
 final ApiRepository _apiRepository = locator<ApiRepository>();
 
 class HelperFunctions with FormatDate {
-  loc.Location location = loc.Location();
 
   Future<bool> checkConnection() async {
     try {
@@ -423,46 +421,46 @@ class HelperFunctions with FormatDate {
     }
   }
 
-  Future<void> initLocationService() async {
-    final bool serviceEnabled = await checkAndEnableLocationService();
-    if (!serviceEnabled) {
-      await location.enableBackgroundMode(enable: false);
-      return;
-    }
+  // Future<void> initLocationService() async {
+  //   final bool serviceEnabled = await checkAndEnableLocationService();
+  //   if (!serviceEnabled) {
+  //     await location.enableBackgroundMode(enable: false);
+  //     return;
+  //   }
+  //
+  //   final loc.PermissionStatus permissionStatus =
+  //       await checkAndRequestLocationPermission();
+  //   if (permissionStatus != loc.PermissionStatus.granted) {
+  //     await location.enableBackgroundMode(enable: false);
+  //     return;
+  //   }
+  //
+  //   location.changeNotificationOptions(
+  //       iconName: '@mipmap/ic_launcher',
+  //       title: 'Servicio de ubicación en segundo plano en ejecución',
+  //       onTapBringToFront: false);
+  //
+  //   await location.enableBackgroundMode(enable: true);
+  // }
+  //
+  // Future<bool> checkAndEnableLocationService() async {
+  //   final bool serviceEnabled = await location.serviceEnabled();
+  //   if (!serviceEnabled) {
+  //     final bool requestedService = await location.requestService();
+  //     if (!requestedService) {
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // }
 
-    final loc.PermissionStatus permissionStatus =
-        await checkAndRequestLocationPermission();
-    if (permissionStatus != loc.PermissionStatus.granted) {
-      await location.enableBackgroundMode(enable: false);
-      return;
-    }
-
-    location.changeNotificationOptions(
-        iconName: '@mipmap/ic_launcher',
-        title: 'Servicio de ubicación en segundo plano en ejecución',
-        onTapBringToFront: false);
-
-    await location.enableBackgroundMode(enable: true);
-  }
-
-  Future<bool> checkAndEnableLocationService() async {
-    final bool serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      final bool requestedService = await location.requestService();
-      if (!requestedService) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  Future<loc.PermissionStatus> checkAndRequestLocationPermission() async {
-    loc.PermissionStatus permissionStatus = await location.hasPermission();
-    if (permissionStatus == loc.PermissionStatus.denied) {
-      permissionStatus = await location.requestPermission();
-    }
-    return permissionStatus;
-  }
+  // Future<loc.PermissionStatus> checkAndRequestLocationPermission() async {
+  //   loc.PermissionStatus permissionStatus = await location.hasPermission();
+  //   if (permissionStatus == loc.PermissionStatus.denied) {
+  //     permissionStatus = await location.requestPermission();
+  //   }
+  //   return permissionStatus;
+  // }
 
   Future<bool> deleteWorks(Work work) async {
     var dob = DateTime.parse(work.date!);
