@@ -1,6 +1,7 @@
 //utils
 import 'dart:convert';
 import 'dart:io';
+import 'package:bexdeliveries/core/cache/strategy/cache_or_async_strategy.dart';
 import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:workmanager/workmanager.dart';
@@ -109,19 +110,30 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   @override
   Future<DataState<ReasonResponse>> reasons({
     required ReasonRequest request,
-  }) {
-    return getStateOf<ReasonResponse>(
-      request: () => _apiService.reasons(),
-    );
+  }) async {
+    return await _cacheManager
+        .from<DataState<ReasonResponse>>("reasons")
+        .withSerializer((result) => DataSuccess(ReasonResponse.fromMap(result)))
+        .withAsync(() => getStateOf<ReasonResponse>(
+              request: () => _apiService.reasons(),
+            ))
+        .withStrategy(CacheOrAsyncStrategy())
+        .execute();
   }
 
   @override
   Future<DataState<AccountResponse>> accounts({
     required AccountRequest request,
-  }) {
-    return getStateOf<AccountResponse>(
-      request: () => _apiService.accounts(),
-    );
+  }) async {
+    return await _cacheManager
+        .from<DataState<AccountResponse>>("reasons")
+        .withSerializer(
+            (result) => DataSuccess(AccountResponse.fromMap(result)))
+        .withAsync(() => getStateOf<AccountResponse>(
+              request: () => _apiService.accounts(),
+            ))
+        .withStrategy(CacheOrAsyncStrategy())
+        .execute();
   }
 
   @override
@@ -172,7 +184,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }) async {
     return await _cacheManager
         .from<DataState<WorkResponse>>("works-${request.id}")
-        .withSerializer((result) => WorkResponse.fromMap(result))
+        .withSerializer((result) => DataSuccess(WorkResponse.fromMap(result)))
         .withAsync(() => getStateOf<WorkResponse>(
               request: () => _apiService.works(
                   id: request.id,
@@ -184,7 +196,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
                   date: request.date,
                   from: request.from),
             ))
-        .withStrategy(AsyncOrCacheStrategy())
+        .withStrategy(CacheOrAsyncStrategy())
         .execute();
   }
 
@@ -273,7 +285,6 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
       );
       return null;
     }
-
   }
 
   @override
@@ -328,7 +339,6 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     } catch (e) {
       return null;
     }
-
   }
 
   @override

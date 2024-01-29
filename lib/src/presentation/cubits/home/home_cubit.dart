@@ -244,7 +244,9 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
               for (var w in worksF.keys) {
                 var wn = responseWorks.data!.works
                     .where((element) => element.workcode == w);
-                warehouses.add(wn.first.warehouse!);
+                if (wn.first.warehouse != null) {
+                  warehouses.add(wn.first.warehouse!);
+                }
               }
               final distinct = warehouses.unique((x) => x.id);
               await _databaseRepository.insertWarehouses(distinct);
@@ -313,7 +315,9 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             }
           } else if (response is DataFailed) {
             emit(state.copyWith(
-                status: HomeStatus.failure, error: response!.error, user: user));
+                status: HomeStatus.failure,
+                error: response!.error,
+                user: user));
           }
         } else {
           emit(state.copyWith(
@@ -383,7 +387,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   }
 
   Future<void> schedule() async {
-
     print(isBusy);
 
     if (isBusy) return;
@@ -393,9 +396,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
 
         var id = DateTime.now().second.toString();
 
-        workmanagerService.registerPeriodicTask(
-            'task_home', 'get_works_completed_and_send',
-            const Duration(minutes: 15));
+        workmanagerService.registerPeriodicTask('task_home',
+            'get_works_completed_and_send', const Duration(minutes: 15));
 
         emit(state.copyWith(status: HomeStatus.success));
       } catch (error, stackTrace) {
@@ -403,5 +405,4 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       }
     });
   }
-
 }

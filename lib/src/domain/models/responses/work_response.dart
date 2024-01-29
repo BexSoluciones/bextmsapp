@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 
 import '../work.dart';
@@ -10,9 +12,11 @@ class WorkResponse extends Equatable {
   factory WorkResponse.fromMap(Map<String, dynamic> map) {
     return WorkResponse(
       works: List<Work>.from(
-        map['works'].map<Work>(
-          (x) => Work.fromJson(x as Map<String, dynamic>),
-        ),
+        map['works'] != null
+            ? map['works']
+                .map<Work>((x) => Work.fromJson(x as Map<String, dynamic>))
+            : jsonDecode(map['data'])['works']
+                .map<Work>((x) => Work.fromJson(x as Map<String, dynamic>)),
       ),
     );
   }

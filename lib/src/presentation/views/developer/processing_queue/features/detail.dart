@@ -1,13 +1,10 @@
 import 'dart:convert';
-
-import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
-import 'package:bexdeliveries/src/utils/extensions/state_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-//models
-import '../../../../../domain/models/processing_queue.dart';
+//blocs
+import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 
 class ProcessingQueueCardDetail extends StatefulWidget {
   final int id;

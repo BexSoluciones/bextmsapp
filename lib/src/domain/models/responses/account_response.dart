@@ -22,6 +22,12 @@ class AccountResponse extends Equatable {
   @override
   bool get stringify => true;
 
+  Map<String, dynamic> toJson() {
+    final data = <String, dynamic>{};
+    data['accounts'] = accounts;
+    return data;
+  }
+
   @override
   List<Object> get props => [accounts];
 }
