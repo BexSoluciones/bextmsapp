@@ -1,9 +1,6 @@
 //utils
 import 'dart:convert';
 import 'dart:io';
-import 'package:bexdeliveries/core/cache/strategy/cache_or_async_strategy.dart';
-import 'package:bexdeliveries/src/services/logger.dart';
-import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'package:bexdeliveries/src/domain/models/requests/reason_m_request.dart';
@@ -67,6 +64,7 @@ import '../../locator.dart';
 import '../../services/workmanager.dart';
 import '../../../core/cache/cache_manager.dart';
 import '../../../core/cache/strategy/async_or_cache_strategy.dart';
+import '../../../core/cache/strategy/cache_or_async_strategy.dart';
 
 final CacheManager _cacheManager = locator<CacheManager>();
 final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
