@@ -421,6 +421,7 @@ class HelperFunctions with FormatDate {
     }
   }
 
+  //TODO [Andres Cardenas] REVIEW IF HAS DELETE OR MODIFIED
   // Future<void> initLocationService() async {
   //   final bool serviceEnabled = await checkAndEnableLocationService();
   //   if (!serviceEnabled) {
