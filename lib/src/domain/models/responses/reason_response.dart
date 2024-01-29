@@ -10,8 +10,6 @@ class ReasonResponse extends Equatable {
   const ReasonResponse({required this.reasons});
 
   factory ReasonResponse.fromMap(Map<String, dynamic> map) {
-    print(map);
-
     return ReasonResponse(
         reasons: List<Reason>.from(map['works'] != null
             ? map['works']

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:location_repository/location_repository.dart';
 
 //utils
 import '../../../domain/abstracts/format_abstract.dart';
@@ -29,20 +28,19 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class GeoReferenceCubit extends Cubit<GeoReferenceState> with FormatDate {
   final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
-  CurrentUserLocationEntity? currentLocation;
 
-  GeoReferenceCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc, this.gpsBloc)
+  GeoReferenceCubit(
+      this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
       : super(GeoReferenceInitial());
 
   Future<void> init() async {
     emit(GeoReferenceSuccess());
   }
 
-  Future<void> sendTransactionClient(SummaryArgument argument, Client client) async {
+  Future<void> sendTransactionClient(
+      SummaryArgument argument, Client client) async {
     emit(GeoReferenceLoading());
 
     var currentLocation = gpsBloc.state.lastKnownLocation;

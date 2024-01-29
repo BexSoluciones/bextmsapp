@@ -1,8 +1,5 @@
-
-import 'package:bexdeliveries/src/domain/models/work.dart';
 import 'package:bexdeliveries/src/services/remote_config.dart';
 import 'package:get_it/get_it.dart';
-import 'package:location_repository/location_repository.dart';
 
 //cache
 import '../core/cache/cache_manager.dart';
@@ -64,9 +61,5 @@ Future<void> initializeDependencies() async {
 
   locator.registerSingleton<DatabaseRepository>(
     DatabaseRepositoryImpl(locator<AppDatabase>()),
-  );
-
-  locator.registerSingleton<LocationRepository>(
-    LocationRepository(),
   );
 }

@@ -1,18 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:equatable/equatable.dart';
-import 'package:location_repository/location_repository.dart';
 
 //cubit
 import '../base/base_cubit.dart';
 
-//bloc
-import '../../blocs/processing_queue/processing_queue_bloc.dart';
-
 //domain
 import '../../../domain/models/work.dart';
-import '../../../domain/models/transaction.dart';
-import '../../../domain/models/processing_queue.dart';
 import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
@@ -26,8 +19,6 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
   final DatabaseRepository _databaseRepository;
-
-  CurrentUserLocationEntity? currentLocation;
 
   WorkCubit(this._databaseRepository) : super(const WorkLoading(), []);
 

@@ -12,7 +12,7 @@ import 'package:showcaseview/showcaseview.dart';
 //utils
 import '../../../../../../utils/constants/strings.dart';
 //blocs
-import '../../../../../blocs/location/location_bloc.dart';
+import '../../../../../blocs/gps/gps_bloc.dart';
 import '../../../../../blocs/network/network_bloc.dart';
 //cubit
 import '../../../../../cubits/navigation/navigation_cubit.dart';
@@ -54,7 +54,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   late NavigationCubit navigationCubit;
-  late LocationBloc locationBloc;
+  late GpsBloc gpsBloc;
   late NetworkBloc networkCubit;
 
   // Create your stream
@@ -81,8 +81,9 @@ class _MapPageState extends State<MapPage> {
 
   @override
   void didChangeDependencies() {
-    locationBloc = BlocProvider.of<LocationBloc>(context);
-    locationBloc.add(GetLocation());
+    gpsBloc = BlocProvider.of<GpsBloc>(context);
+    //TODO [Andres Cardenas] get one locations
+    // gpsBloc.add(GetLocation());
 
     navigationCubit = BlocProvider.of<NavigationCubit>(context);
     navigationCubit.getAllWorksByWorkcode(widget.workcode);

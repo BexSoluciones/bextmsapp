@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:core' hide Error;
+import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -10,8 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
@@ -51,7 +52,6 @@ import '../../src/services/logger.dart';
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
-final LocationRepository _locationRepository = locator<LocationRepository>();
 final ApiRepository _apiRepository = locator<ApiRepository>();
 
 class HelperFunctions with FormatDate {
@@ -380,10 +380,11 @@ class HelperFunctions with FormatDate {
   }
 
   Future<Widget?> showMapDirection(BuildContext context, Work work,
-      CurrentUserLocationEntity? location) async {
+      LatLng? location) async {
     final availableMaps = await MapLauncher.installedMaps;
 
-    location ??= await _locationRepository.getCurrentLocation();
+    // TODO [Andres Cardenas] get one location ///TEST
+    if(context.mounted) location ??= context.read<GpsBloc>().state.lastKnownLocation;
 
     if (availableMaps.length == 1) {
       await availableMaps.first.showDirections(
@@ -392,7 +393,7 @@ class HelperFunctions with FormatDate {
           double.parse(work.longitude!),
         ),
         destinationTitle: work.customer,
-        origin: Coords(location.latitude, location.longitude),
+        origin: Coords(location!.latitude, location.longitude),
         originTitle: 'Origen',
         waypoints: null,
         directionsMode: DirectionsMode.driving,

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
-import 'package:location_repository/location_repository.dart';
 import 'package:equatable/equatable.dart';
 
 //core
@@ -69,7 +68,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   bool _isSyncing = false;
 
   StreamSubscription? locationSubscription;
-  CurrentUserLocationEntity? currentLocation;
 
   HomeCubit(this._databaseRepository, this._apiRepository,
       this._processingQueueBloc, this.gpsBloc, this.networkBloc)
@@ -387,8 +385,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   }
 
   Future<void> schedule() async {
-    print(isBusy);
-
     if (isBusy) return;
     await run(() async {
       try {

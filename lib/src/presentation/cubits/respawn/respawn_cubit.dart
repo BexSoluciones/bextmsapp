@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:bexdeliveries/src/domain/models/enterprise_config.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:location_repository/location_repository.dart';
 
 //blocs
 import '../../blocs/gps/gps_bloc.dart';

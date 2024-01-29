@@ -9,7 +9,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:location_repository/location_repository.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -54,7 +53,6 @@ import 'src/presentation/cubits/ordersummaryreasons/ordersummaryreasons_cubit.da
 //blocs
 import 'src/presentation/blocs/network/network_bloc.dart';
 import 'src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
-import 'src/presentation/blocs/location/location_bloc.dart';
 import 'src/presentation/blocs/photo/photo_bloc.dart';
 import 'src/presentation/blocs/history_order/history_order_bloc.dart';
 import 'src/presentation/blocs/issues/issues_bloc.dart';
@@ -347,7 +345,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
         providers: [
-          RepositoryProvider(create: (context) => LocationRepository()),
           BlocProvider(
             create: (context) => PhotosBloc(
                 photoProvider: PhotoProvider(
@@ -365,11 +362,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ..add(ProcessingQueueObserve()),
           ),
           BlocProvider(
-              create: (context) => LocationBloc(
-                  locationRepository: context.read<LocationRepository>(),
-                  databaseRepository: locator<DatabaseRepository>())
-                ..add(GetLocation())),
-          BlocProvider(
             create: (context) => ThemeBloc(),
           ),
           BlocProvider(create: (_) => GpsBloc()),
@@ -381,7 +373,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               create: (context) => LoginCubit(
                   locator<ApiRepository>(),
                   locator<DatabaseRepository>(),
-                  locator<LocationRepository>(),
                   BlocProvider.of<ProcessingQueueBloc>(context),
                   BlocProvider.of<GpsBloc>(context))),
           BlocProvider(
@@ -401,21 +392,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(
             create: (context) => ConfirmCubit(
                 locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
                 BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => SummaryCubit(
                 locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
                 BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
             create: (context) => GeoReferenceCubit(
                 locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
                 BlocProvider.of<GpsBloc>(context)),
           ),
@@ -446,7 +434,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(
             create: (context) => NavigationCubit(
                 locator<DatabaseRepository>(),
-                locator<LocationRepository>(),
                 BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(

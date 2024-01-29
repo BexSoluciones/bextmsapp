@@ -4,7 +4,6 @@ import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 //core
@@ -39,15 +38,12 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final helperFunctions = HelperFunctions();
   final GpsBloc gpsBloc;
 
-  CurrentUserLocationEntity? currentLocation;
-
-  SummaryCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc, this.gpsBloc)
+  SummaryCubit(
+      this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
       : super(const SummaryLoading());
 
   Future<void> getAllSummariesByOrderNumber(int workId) async {
@@ -218,7 +214,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
       SummaryNavigationArgument arguments,
       DirectionsMode directionsMode) async {
     emit(const SummaryLoadingMap());
-    currentLocation ??= await _locationRepository.getCurrentLocation();
+    var currentLocation = gpsBloc.state.lastKnownLocation;
     if (context.mounted) {
       helperFunctions.showMapDirection(
           context, arguments.work, currentLocation!);

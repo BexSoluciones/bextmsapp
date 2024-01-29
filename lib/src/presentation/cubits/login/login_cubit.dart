@@ -6,7 +6,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
-import 'package:location_repository/location_repository.dart';
 
 //domain
 import '../../../../core/helpers/index.dart';
@@ -62,16 +61,14 @@ final NavigationService _navigationService = locator<NavigationService>();
 class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   final ApiRepository _apiRepository;
   final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
 
-  CurrentUserLocationEntity? currentLocation;
 
   var helperFunctions = HelperFunctions();
 
   LoginCubit(this._apiRepository, this._databaseRepository,
-      this._locationRepository, this._processingQueueBloc, this.gpsBloc)
+      this._processingQueueBloc, this.gpsBloc)
       : super(
             LoginSuccess(
                 enterprise: _storageService.getObject('enterprise') != null
@@ -136,7 +133,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         _storageService.setString('password', passwordController.text);
       }
 
-      currentLocation = await _locationRepository.getCurrentLocation();
+      var currentLocation = gpsBloc.state.lastKnownLocation;
       //var currentLocation = gpsBloc.state.lastKnownLocation;
 
       final response = await _apiRepository.login(
@@ -182,7 +179,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
                 device != null ? device['model'] : null,
                 version,
                 currentLocation!.latitude.toString(),
-                currentLocation!.longitude.toString(),
+                currentLocation.longitude.toString(),
                 now(),
                 'login'));
 

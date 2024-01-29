@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:location_repository/location_repository.dart';
 
 //blocs
 import '../../blocs/gps/gps_bloc.dart';
@@ -31,8 +30,6 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
-
-  CurrentUserLocationEntity? currentLocation;
 
   RejectCubit(this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
       : super(const RejectLoading());

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
-import 'package:location_repository/location_repository.dart';
 
 //utils
 import '../../../domain/models/arguments.dart';
@@ -34,11 +33,9 @@ final NavigationService _navigationService = locator<NavigationService>();
 class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
-  final LocationRepository _locationRepository;
   final GpsBloc gpsBloc;
-  CurrentUserLocationEntity? currentLocation;
 
-  ConfirmCubit(this._databaseRepository, this._locationRepository, this._processingQueueBloc, this.gpsBloc) : super(const ConfirmLoading(), null);
+  ConfirmCubit(this._databaseRepository, this._processingQueueBloc, this.gpsBloc) : super(const ConfirmLoading(), null);
 
   Future<void> init(Work work) async {
     emit(await _getWork(work));

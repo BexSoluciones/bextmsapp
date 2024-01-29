@@ -7,7 +7,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
-import 'package:location_repository/location_repository.dart';
 import 'package:routing_client_dart/routing_client_dart.dart';
 
 //core
@@ -43,14 +42,10 @@ class LayerMoodle {
 
 class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
   final helperFunctions = HelperFunctions();
   final GpsBloc gpsBloc;
 
-  CurrentUserLocationEntity? currentLocation;
-
-  NavigationCubit(
-      this._databaseRepository, this._locationRepository, this.gpsBloc)
+  NavigationCubit(this._databaseRepository, this.gpsBloc)
       : super(const NavigationState(status: NavigationStatus.initial), []);
 
   Future<void> getAllWorksByWorkcode(String workcode) async {
@@ -380,7 +375,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     BuildContext context,
     Work work,
   ) async {
-    currentLocation ??= await _locationRepository.getCurrentLocation();
+    var currentLocation = gpsBloc.state.lastKnownLocation;
     if (context.mounted) {
       helperFunctions.showMapDirection(context, work, currentLocation!);
     }

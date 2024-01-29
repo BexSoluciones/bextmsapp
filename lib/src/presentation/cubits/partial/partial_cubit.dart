@@ -9,7 +9,6 @@ import '../../../domain/models/arguments.dart';
 import '../../../domain/models/summary.dart';
 import '../../../domain/models/reason.dart';
 //repositories
-import 'package:location_repository/location_repository.dart';
 import '../../../domain/repositories/database_repository.dart';
 
 //blocs
