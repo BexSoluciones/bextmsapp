@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 
 import '../reason.dart';
@@ -8,13 +10,14 @@ class ReasonResponse extends Equatable {
   const ReasonResponse({required this.reasons});
 
   factory ReasonResponse.fromMap(Map<String, dynamic> map) {
+    print(map);
+
     return ReasonResponse(
-      reasons: List<Reason>.from(
-        map['works'].map<Reason>(
-          (x) => Reason.fromJson(x as Map<String, dynamic>),
-        ),
-      ),
-    );
+        reasons: List<Reason>.from(map['works'] != null
+            ? map['works']
+                .map<Reason>((x) => Reason.fromJson(x as Map<String, dynamic>))
+            : jsonDecode(map['data'])['reasons'].map<Reason>(
+                (x) => Reason.fromJson(x as Map<String, dynamic>))));
   }
 
   @override

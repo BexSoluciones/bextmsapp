@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 
 import '../account.dart';
@@ -5,16 +7,18 @@ import '../account.dart';
 class AccountResponse extends Equatable {
   final List<Account> accounts;
 
-  const AccountResponse({
-    required this.accounts
-  });
+  const AccountResponse({required this.accounts});
 
   factory AccountResponse.fromMap(Map<String, dynamic> map) {
     return AccountResponse(
       accounts: List<Account>.from(
-        map['accounts'].map<Account>(
-              (x) => Account.fromJson(x as Map<String, dynamic>),
-        ),
+        map['accounts'] != null
+            ? map['accounts'].map<Account>(
+                (x) => Account.fromJson(x as Map<String, dynamic>)
+              )
+            : jsonDecode(map['data'])['accounts'].map<Account>(
+                (x) => Account.fromJson(x as Map<String, dynamic>)
+              )
       ),
     );
   }

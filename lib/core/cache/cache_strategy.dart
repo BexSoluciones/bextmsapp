@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-
 import 'cache_manager.dart';
 import 'cache_wrapper.dart';
 import 'storage/storage.dart';
