@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart' as loc;
 import 'package:latlong2/latlong.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
@@ -54,7 +54,7 @@ final NavigationService _navigationService = locator<NavigationService>();
 final ApiRepository _apiRepository = locator<ApiRepository>();
 
 class HelperFunctions with FormatDate {
-
+  loc.Location location = loc.Location();
   Future<bool> checkConnection() async {
     try {
       final result = await InternetAddress.lookup('example.com');
@@ -421,47 +421,48 @@ class HelperFunctions with FormatDate {
     }
   }
 
-  //TODO [Andres Cardenas] REVIEW IF HAS DELETE OR MODIFIED
-  // Future<void> initLocationService() async {
-  //   final bool serviceEnabled = await checkAndEnableLocationService();
-  //   if (!serviceEnabled) {
-  //     await location.enableBackgroundMode(enable: false);
-  //     return;
-  //   }
-  //
-  //   final loc.PermissionStatus permissionStatus =
-  //       await checkAndRequestLocationPermission();
-  //   if (permissionStatus != loc.PermissionStatus.granted) {
-  //     await location.enableBackgroundMode(enable: false);
-  //     return;
-  //   }
-  //
-  //   location.changeNotificationOptions(
-  //       iconName: '@mipmap/ic_launcher',
-  //       title: 'Servicio de ubicación en segundo plano en ejecución',
-  //       onTapBringToFront: false);
-  //
-  //   await location.enableBackgroundMode(enable: true);
-  // }
-  //
-  // Future<bool> checkAndEnableLocationService() async {
-  //   final bool serviceEnabled = await location.serviceEnabled();
-  //   if (!serviceEnabled) {
-  //     final bool requestedService = await location.requestService();
-  //     if (!requestedService) {
-  //       return false;
-  //     }
-  //   }
-  //   return true;
-  // }
+   Future<void> initLocationService() async {
+     final bool serviceEnabled = await checkAndEnableLocationService();
+     if (!serviceEnabled) {
+       await location.enableBackgroundMode(enable: false);
+       return;
+     }
 
-  // Future<loc.PermissionStatus> checkAndRequestLocationPermission() async {
-  //   loc.PermissionStatus permissionStatus = await location.hasPermission();
-  //   if (permissionStatus == loc.PermissionStatus.denied) {
-  //     permissionStatus = await location.requestPermission();
-  //   }
-  //   return permissionStatus;
-  // }
+     final loc.PermissionStatus permissionStatus =
+        await checkAndRequestLocationPermission();
+     if (permissionStatus != loc.PermissionStatus.granted) {
+       await location.enableBackgroundMode(enable: false);
+       return;
+     }
+
+     /*location.changeNotificationOptions(
+         iconName: '@mipmap/ic_launcher',
+         title: 'Servicio de ubicación en segundo plano en ejecución',
+         onTapBringToFront: false);*/
+
+     await location.enableBackgroundMode(enable: true);
+   }
+
+
+
+   Future<bool> checkAndEnableLocationService() async {
+     final bool serviceEnabled = await location.serviceEnabled();
+     if (!serviceEnabled) {
+       final bool requestedService = await location.requestService();
+       if (!requestedService) {
+         return false;
+       }
+     }
+     return true;
+   }
+
+   Future<loc.PermissionStatus> checkAndRequestLocationPermission() async {
+     loc.PermissionStatus permissionStatus = await location.hasPermission();
+     if (permissionStatus == loc.PermissionStatus.denied) {
+       permissionStatus = await location.requestPermission();
+     }
+     return permissionStatus;
+   }
 
   Future<bool> deleteWorks(Work work) async {
     var dob = DateTime.parse(work.date!);

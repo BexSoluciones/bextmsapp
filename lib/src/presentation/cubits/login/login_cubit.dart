@@ -37,6 +37,7 @@ import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //bloc
+import '../../../services/geolocator.dart';
 import '../../blocs/gps/gps_bloc.dart';
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
 
@@ -133,8 +134,10 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         _storageService.setString('password', passwordController.text);
       }
 
-      var currentLocation = gpsBloc.state.lastKnownLocation;
       //var currentLocation = gpsBloc.state.lastKnownLocation;
+      //var currentLocation = gpsBloc.state.lastKnownLocation;
+      var location = await acquireCurrentLocationGeo();
+
 
       final response = await _apiRepository.login(
         request: LoginRequest(usernameController.text, passwordController.text),
@@ -178,8 +181,8 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
                 device != null ? device['id'] : null,
                 device != null ? device['model'] : null,
                 version,
-                currentLocation!.latitude.toString(),
-                currentLocation.longitude.toString(),
+                location!.latitude.toString(),
+                location.longitude.toString(),
                 now(),
                 'login'));
 
