@@ -69,85 +69,110 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   }
 
   Future<void> startFollowingUser() async {
-    add(OnStartFollowingUser());
-    final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
-
-    final isPermissionGranted = await _isPermissionGranted();
-    if (!isPermissionGranted) {
-      await askGpsAccess();
-    }
-
     try {
-      EnterpriseConfig? enterpriseConfig;
-      var storedConfig = _storageService.getObject('config');
-      if (storedConfig != null) {
-        enterpriseConfig = EnterpriseConfig.fromMap(storedConfig);
+      add(OnStartFollowingUser());
+
+      final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
+      final isPermissionGranted = await _isPermissionGranted();
+
+      if (!isPermissionGranted) {
+        await askGpsAccess();
       }
 
+      EnterpriseConfig? enterpriseConfig = _getEnterpriseConfigFromStorage();
+
       if (enterpriseConfig != null) {
-        var distances = enterpriseConfig.distance!;
-        final locationSettings = LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: enterpriseConfig.distance!,
-        );
+        LocationSettings locationSettings = _getLocationSettings(enterpriseConfig, isPermissionGranted, isLocationEnabled);
 
         if (!isPermissionGranted && !isLocationEnabled) {
           errorGpsAlertDialog(
-              onTap: () {
-                Geolocator.openLocationSettings();
-              },
-              context: _navigationService
-                  .navigatorKey.currentState!.overlay!.context,
-              error: 'error',
-              iconData: Icons.error,
-              buttonText: 'buttonText');
+            onTap: () => Geolocator.openLocationSettings(),
+            context: _navigationService.navigatorKey.currentState!.overlay!.context,
+            error: 'error',
+            iconData: Icons.error,
+            buttonText: 'buttonText',
+          );
         } else {
-          positionStream =
-              Geolocator.getPositionStream(locationSettings: locationSettings)
-                  .listen((event) {
-            final position = event;
-            if (enterpriseConfig != null &&
-                enterpriseConfig.backgroundLocation!) {
-              if (lastRecordedLocation != null) {
-                final distance = Geolocator.distanceBetween(
-                  lastRecordedLocation!.latitude,
-                  lastRecordedLocation!.longitude,
-                  position.latitude,
-                  position.longitude,
-                );
-                if (distance >= distances) {
-                  lastRecordedLocation =
-                      LatLng(position.latitude, position.longitude);
-                  saveLocation('location', position, 0);
-                }
-              } else {
-                lastRecordedLocation =
-                    LatLng(position.latitude, position.longitude);
-                saveLocation('location', position, 1);
-              }
-            }
-
-            add(OnNewUserLocationEvent(
-                position, LatLng(position.latitude, position.longitude)));
+          positionStream = Geolocator.getPositionStream(locationSettings: locationSettings).listen((event) {
+            _handleUserLocation(event, enterpriseConfig);
           });
         }
       }
     } catch (e, stackTrace) {
-      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      await _handleError(e, stackTrace);
     }
   }
 
-  Future getCurrentPosition() async {
-    try {
-      final position = await Geolocator.getCurrentPosition(forceAndroidLocationManager: true);
-      add(OnNewUserLocationEvent(
-          position, LatLng(position.latitude, position.longitude)));
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error getCurrentPosition: GPS:${e.toString()}');
-      }
+  EnterpriseConfig? _getEnterpriseConfigFromStorage() {
+    var storedConfig = _storageService.getObject('config');
+    return storedConfig != null ? EnterpriseConfig.fromMap(storedConfig) : null;
+  }
+
+  LocationSettings _getLocationSettings(EnterpriseConfig enterpriseConfig, bool isPermissionGranted, bool isLocationEnabled) {
+    var distances = enterpriseConfig.distance!;
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 2,
+        forceLocationManager: true,
+        intervalDuration: const Duration(seconds: 10),
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationText: "Servicio de ubicación en segundo plano en ejecución",
+          notificationTitle: "Running in Background",
+          enableWakeLock: true,
+        ),
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
+      return AppleSettings(
+        accuracy: LocationAccuracy.high,
+        activityType: ActivityType.fitness,
+        distanceFilter: distances,
+        pauseLocationUpdatesAutomatically: true,
+        showBackgroundLocationIndicator: false,
+      );
+    } else {
+      return const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 100,
+      );
     }
   }
+
+
+  Future<void> _handleUserLocation(Position position, EnterpriseConfig enterpriseConfig) async {
+    final distances = enterpriseConfig.distance!;
+    final lastKnownLocation = state.lastKnownLocation;
+    final isBackgroundLocationEnabled = enterpriseConfig.backgroundLocation ?? false;
+
+    if (kDebugMode) {
+      print('Las known location :${lastKnownLocation?.latitude}${lastKnownLocation?.longitude}');
+      print('position: ${position.latitude},${position.longitude}');
+    }
+
+    if (isBackgroundLocationEnabled && lastRecordedLocation != null) {
+      final distance = Geolocator.distanceBetween(
+        lastRecordedLocation!.latitude,
+        lastRecordedLocation!.longitude,
+        position.latitude,
+        position.longitude,
+      );
+
+      if (distance >= distances) {
+        lastRecordedLocation = LatLng(position.latitude, position.longitude);
+        await saveLocation('location', position, 0);
+      }
+    } else {
+      lastRecordedLocation = LatLng(position.latitude, position.longitude);
+      await saveLocation('location', position, 1);
+    }
+
+    add(OnNewUserLocationEvent(position, LatLng(position.latitude, position.longitude)));
+  }
+
+  Future<void> _handleError(dynamic e, StackTrace stackTrace) async {
+    await FirebaseCrashlytics.instance.recordError(e, stackTrace);
+  }
+
 
   void stopFollowingUser() {
     add(OnStopFollowingUser());
@@ -263,7 +288,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   Future<void> saveLocation(String type, Position position, int send) async {
     try {
       var lastLocation = await _databaseRepository.getLastLocation();
-
       var location = l.Location(
           latitude: position.latitude,
           longitude: position.longitude,
@@ -280,15 +304,15 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       if (lastLocation != null) {
         var currentPosition = LatLng(location.latitude, location.longitude);
         var radiusPosition =
-            LatLng(lastLocation.latitude, lastLocation.longitude);
+        LatLng(lastLocation.latitude, lastLocation.longitude);
 
         var diff = calculateRadiusBetweenTwoLatLng(
             currentPosition, radiusPosition, 30);
 
         var distance =
-            calculateDistanceBetweenTwoLatLng(currentPosition, radiusPosition);
+        calculateDistanceBetweenTwoLatLng(currentPosition, radiusPosition);
         var seconds =
-            calculateDateBetweenTwoLatLng(location.time, lastLocation.time);
+        calculateDateBetweenTwoLatLng(location.time, lastLocation.time);
 
         var speed = ((distance / seconds) * 18) / 5;
         if (diff == true) {
@@ -307,18 +331,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       }
 
       var count = await _databaseRepository.countLocationsManager();
-      if (count && send == 0) {
-        var processingQueue = ProcessingQueue(
-            body: await _databaseRepository.getLocationsToSend(),
-            task: 'incomplete',
-            code: 'store_locations',
-            createdAt: now(),
-            updatedAt: now());
-
-        await _databaseRepository.insertProcessingQueue(processingQueue);
-        await _databaseRepository.updateLocationsManager();
-      } else {
-        await _databaseRepository.insertLocation(location);
+      if (count) {
         var processingQueue = ProcessingQueue(
             body: await _databaseRepository.getLocationsToSend(),
             task: 'incomplete',
