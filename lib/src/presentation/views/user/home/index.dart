@@ -2,9 +2,11 @@ import 'dart:async';
 import 'package:bexdeliveries/src/config/size.dart';
 import 'package:bexdeliveries/src/domain/models/enterprise_config.dart';
 import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
+import 'package:bexdeliveries/src/presentation/widgets/upgrader_widget.dart';
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:upgrader/upgrader.dart';
 
 //cubit
 import '../../../cubits/home/home_cubit.dart';
@@ -40,7 +42,6 @@ class HomeViewState extends State<HomeView>
   final GlobalKey three = GlobalKey();
   final GlobalKey four = GlobalKey();
   final GlobalKey five = GlobalKey();
-  bool _isInForeground = true;
 
   late HomeCubit homeCubit;
   late GpsBloc gpsBloc;
@@ -49,7 +50,7 @@ class HomeViewState extends State<HomeView>
   void initState() {
     EnterpriseConfig? enterpriseConfig;
     var storedConfig = _storageService.getObject('config');
-    if(storedConfig != null) {
+    if (storedConfig != null) {
       enterpriseConfig = EnterpriseConfig.fromMap(storedConfig);
     }
     startHomeWidget();
@@ -63,14 +64,9 @@ class HomeViewState extends State<HomeView>
       // helperFunctions.initLocationService();
       gpsBloc.startFollowingUser();
     }
+
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    _isInForeground = state == AppLifecycleState.resumed;
   }
 
   @override
@@ -103,40 +99,43 @@ class HomeViewState extends State<HomeView>
   Widget build(BuildContext context) {
     final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(16);
-    return PopScope(
-        canPop: false,
-        child: Scaffold(
-          drawer: drawer(context, homeCubit.state.user),
-          appBar: AppBar(
-            iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
-            actions: [
-              StatusBar(one: one),
-              const VerticalDivider(
-                color: kPrimaryColor,
-                thickness: 1.0,
-              ),
-              SyncBar(two: two),
-              SearchBar(three: three),
-              LogoutBar(four: four),
-            ],
-            title:  Text(
-              'Servicios',
-              textScaler: TextScaler.linear(calculatedTextScaleFactor),
-              style: TextStyle(fontSize: calculatedFon, fontWeight: FontWeight.bold),
-            ),
-            notificationPredicate: (ScrollNotification notification) {
-              return notification.depth == 1;
-            },
-          ),
-          body: SafeArea(
-              child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: 20.0,
-                    left: 16.0,
-                    right: 16.0,
-                    bottom: 20.0,
+    return UpgraderDialog(
+        child: PopScope(
+            canPop: false,
+            child: Scaffold(
+              drawer: drawer(context, homeCubit.state.user),
+              appBar: AppBar(
+                iconTheme:
+                    IconThemeData(color: Theme.of(context).colorScheme.primary),
+                actions: [
+                  StatusBar(one: one),
+                  const VerticalDivider(
+                    color: kPrimaryColor,
+                    thickness: 1.0,
                   ),
-                  child: HomeListView(five: five))),
-        ));
+                  SyncBar(two: two),
+                  SearchBar(three: three),
+                  LogoutBar(four: four),
+                ],
+                title: Text(
+                  'Servicios',
+                  textScaler: TextScaler.linear(calculatedTextScaleFactor),
+                  style: TextStyle(
+                      fontSize: calculatedFon, fontWeight: FontWeight.bold),
+                ),
+                notificationPredicate: (ScrollNotification notification) {
+                  return notification.depth == 1;
+                },
+              ),
+              body: SafeArea(
+                  child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: 20.0,
+                        left: 16.0,
+                        right: 16.0,
+                        bottom: 20.0,
+                      ),
+                      child: HomeListView(five: five))),
+            )));
   }
 }

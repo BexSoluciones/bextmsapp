@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/presentation/widgets/upgrader_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -55,7 +56,7 @@ class LoginViewState extends State<LoginView> {
   void initState() {
     rememberSession();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      helperFunctions.versionCheck(context);
+      // helperFunctions.versionCheck(context);
     });
     super.initState();
   }
@@ -89,9 +90,11 @@ class LoginViewState extends State<LoginView> {
 
     loginCubit = BlocProvider.of<LoginCubit>(context);
 
-    return Scaffold(
-      body: BlocBuilder<LoginCubit, LoginState>(
-        builder: (context, state) => buildBlocConsumer(size),
+    return UpgraderDialog(
+      child: Scaffold(
+        body: BlocBuilder<LoginCubit, LoginState>(
+          builder: (context, state) => buildBlocConsumer(size),
+        ),
       ),
     );
   }
@@ -195,7 +198,8 @@ class LoginViewState extends State<LoginView> {
                                     ? state.enterprise!.name!
                                     : 'demo',
                                 maxLines: 2,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
                               ),
                               const Text(
                                 'bexsoluciones.com',

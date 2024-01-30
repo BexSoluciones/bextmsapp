@@ -139,7 +139,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
 
   Future getCurrentPosition() async {
     try {
-      final position = await Geolocator.getCurrentPosition();
+      final position = await Geolocator.getCurrentPosition(forceAndroidLocationManager: true);
       add(OnNewUserLocationEvent(
           position, LatLng(position.latitude, position.longitude)));
     } catch (e) {

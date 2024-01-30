@@ -13,6 +13,7 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:upgrader/upgrader.dart';
 
 //plugins
 // import 'package:charger_status/charger_status.dart';
@@ -432,8 +433,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
-            create: (context) => NavigationCubit(
-                locator<DatabaseRepository>(),
+            create: (context) => NavigationCubit(locator<DatabaseRepository>(),
                 BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
