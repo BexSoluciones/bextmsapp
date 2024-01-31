@@ -6,7 +6,6 @@ import 'package:bexdeliveries/src/presentation/widgets/upgrader_widget.dart';
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:upgrader/upgrader.dart';
 
 //cubit
 import '../../../cubits/home/home_cubit.dart';

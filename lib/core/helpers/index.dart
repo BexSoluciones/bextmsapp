@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
-import 'package:location/location.dart' as loc;
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
@@ -54,7 +54,6 @@ final NavigationService _navigationService = locator<NavigationService>();
 final ApiRepository _apiRepository = locator<ApiRepository>();
 
 class HelperFunctions with FormatDate {
-  loc.Location location = loc.Location();
   Future<bool> checkConnection() async {
     try {
       final result = await InternetAddress.lookup('example.com');
@@ -422,33 +421,31 @@ class HelperFunctions with FormatDate {
   }
 
    Future<void> initLocationService() async {
-     final bool serviceEnabled = await checkAndEnableLocationService();
+     final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
      if (!serviceEnabled) {
-       await location.enableBackgroundMode(enable: false);
        return;
      }
 
-     final loc.PermissionStatus permissionStatus =
-        await checkAndRequestLocationPermission();
-     if (permissionStatus != loc.PermissionStatus.granted) {
-       await location.enableBackgroundMode(enable: false);
-       return;
+     LocationPermission permission = await Geolocator.checkPermission();
+     if (permission == LocationPermission.denied) {
+       permission = await Geolocator.requestPermission();
+       if (permission == LocationPermission.denied) {
+         return Future.error('Location permissions are denied');
+       }
      }
 
-     /*location.changeNotificationOptions(
-         iconName: '@mipmap/ic_launcher',
-         title: 'Servicio de ubicación en segundo plano en ejecución',
-         onTapBringToFront: false);*/
-
-     await location.enableBackgroundMode(enable: true);
+     if (permission == LocationPermission.deniedForever) {
+       return Future.error(
+           'Location permissions are permanently denied, we cannot request permissions.');
+     }
    }
 
 
 
    Future<bool> checkAndEnableLocationService() async {
-     final bool serviceEnabled = await location.serviceEnabled();
+     final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
      if (!serviceEnabled) {
-       final bool requestedService = await location.requestService();
+       final bool requestedService = await Geolocator.openLocationSettings();
        if (!requestedService) {
          return false;
        }
@@ -456,12 +453,15 @@ class HelperFunctions with FormatDate {
      return true;
    }
 
-   Future<loc.PermissionStatus> checkAndRequestLocationPermission() async {
-     loc.PermissionStatus permissionStatus = await location.hasPermission();
-     if (permissionStatus == loc.PermissionStatus.denied) {
-       permissionStatus = await location.requestPermission();
+   Future<LocationPermission> checkAndRequestLocationPermission() async {
+     LocationPermission permission = await Geolocator.checkPermission();
+     if (permission == LocationPermission.denied) {
+       permission = await Geolocator.requestPermission();
+       if (permission == LocationPermission.denied) {
+         return Future.error('Location permissions are denied');
+       }
      }
-     return permissionStatus;
+     return permission;
    }
 
   Future<bool> deleteWorks(Work work) async {

@@ -55,7 +55,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     on<OnStopFollowingUser>(
         (event, emit) => emit(state.copyWith(followingUser: false)));
     on<OnNewUserLocationEvent>((event, emit) {
-      //('location', event.currentPosition);
       emit(state.copyWith(
         lastKnownLocation: event.newLocation,
         myLocationHistory: [...state.myLocationHistory, event.newLocation],
@@ -82,18 +81,22 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       EnterpriseConfig? enterpriseConfig = _getEnterpriseConfigFromStorage();
 
       if (enterpriseConfig != null) {
-        LocationSettings locationSettings = _getLocationSettings(enterpriseConfig, isPermissionGranted, isLocationEnabled);
+        LocationSettings locationSettings = _getLocationSettings(
+            enterpriseConfig, isPermissionGranted, isLocationEnabled);
 
         if (!isPermissionGranted && !isLocationEnabled) {
           errorGpsAlertDialog(
             onTap: () => Geolocator.openLocationSettings(),
-            context: _navigationService.navigatorKey.currentState!.overlay!.context,
+            context:
+                _navigationService.navigatorKey.currentState!.overlay!.context,
             error: 'error',
             iconData: Icons.error,
             buttonText: 'buttonText',
           );
         } else {
-          positionStream = Geolocator.getPositionStream(locationSettings: locationSettings).listen((event) {
+          positionStream =
+              Geolocator.getPositionStream(locationSettings: locationSettings)
+                  .listen((event) {
             _handleUserLocation(event, enterpriseConfig);
           });
         }
@@ -108,7 +111,8 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     return storedConfig != null ? EnterpriseConfig.fromMap(storedConfig) : null;
   }
 
-  LocationSettings _getLocationSettings(EnterpriseConfig enterpriseConfig, bool isPermissionGranted, bool isLocationEnabled) {
+  LocationSettings _getLocationSettings(EnterpriseConfig enterpriseConfig,
+      bool isPermissionGranted, bool isLocationEnabled) {
     var distances = enterpriseConfig.distance!;
     if (defaultTargetPlatform == TargetPlatform.android) {
       return AndroidSettings(
@@ -117,12 +121,14 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
         forceLocationManager: true,
         intervalDuration: const Duration(seconds: 10),
         foregroundNotificationConfig: const ForegroundNotificationConfig(
-          notificationText: "Servicio de ubicación en segundo plano en ejecución",
-          notificationTitle: "Running in Background",
+          notificationText:
+              "Servicio de ubicación en segundo plano en ejecución",
+          notificationTitle: "Bexdeliveries",
           enableWakeLock: true,
         ),
       );
-    } else if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
+    } else if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
       return AppleSettings(
         accuracy: LocationAccuracy.high,
         activityType: ActivityType.fitness,
@@ -138,14 +144,16 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     }
   }
 
-
-  Future<void> _handleUserLocation(Position position, EnterpriseConfig enterpriseConfig) async {
+  Future<void> _handleUserLocation(
+      Position position, EnterpriseConfig enterpriseConfig) async {
     final distances = enterpriseConfig.distance!;
     final lastKnownLocation = state.lastKnownLocation;
-    final isBackgroundLocationEnabled = enterpriseConfig.backgroundLocation ?? false;
+    final isBackgroundLocationEnabled =
+        enterpriseConfig.backgroundLocation ?? false;
 
     if (kDebugMode) {
-      print('Las known location :${lastKnownLocation?.latitude}${lastKnownLocation?.longitude}');
+      print(
+          'Las known location :${lastKnownLocation?.latitude}${lastKnownLocation?.longitude}');
       print('position: ${position.latitude},${position.longitude}');
     }
 
@@ -166,13 +174,13 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       await saveLocation('location', position, 1);
     }
 
-    add(OnNewUserLocationEvent(position, LatLng(position.latitude, position.longitude)));
+    add(OnNewUserLocationEvent(
+        position, LatLng(position.latitude, position.longitude)));
   }
 
   Future<void> _handleError(dynamic e, StackTrace stackTrace) async {
     await FirebaseCrashlytics.instance.recordError(e, stackTrace);
   }
-
 
   void stopFollowingUser() {
     add(OnStopFollowingUser());
@@ -304,15 +312,15 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       if (lastLocation != null) {
         var currentPosition = LatLng(location.latitude, location.longitude);
         var radiusPosition =
-        LatLng(lastLocation.latitude, lastLocation.longitude);
+            LatLng(lastLocation.latitude, lastLocation.longitude);
 
         var diff = calculateRadiusBetweenTwoLatLng(
             currentPosition, radiusPosition, 30);
 
         var distance =
-        calculateDistanceBetweenTwoLatLng(currentPosition, radiusPosition);
+            calculateDistanceBetweenTwoLatLng(currentPosition, radiusPosition);
         var seconds =
-        calculateDateBetweenTwoLatLng(location.time, lastLocation.time);
+            calculateDateBetweenTwoLatLng(location.time, lastLocation.time);
 
         var speed = ((distance / seconds) * 18) / 5;
         if (diff == true) {

@@ -21,7 +21,6 @@ class _UpgraderDialogState extends State<UpgraderDialog> {
 
   @override
   void initState() {
-    message = _remoteConfigService.getString('message');
     force = _remoteConfigService.getBool('force') ?? false;
     super.initState();
   }
@@ -30,14 +29,22 @@ class _UpgraderDialogState extends State<UpgraderDialog> {
   Widget build(BuildContext context) {
     return UpgradeAlert(
         upgrader: Upgrader(
-            debugDisplayAlways: true,
+            messages: MyUpgraderMessages(message),
             debugLogging: true,
             showReleaseNotes: true,
             dialogStyle: Platform.isAndroid
                 ? UpgradeDialogStyle.material
                 : UpgradeDialogStyle.cupertino,
-            // messages: UpgraderMessages(code: message),
             canDismissDialog: force),
         child: widget.child);
   }
+}
+
+class MyUpgraderMessages extends UpgraderMessages {
+
+  MyUpgraderMessages(String? message);
+
+  @override
+  String get title => '¡Nueva versión disponible!';
+
 }
