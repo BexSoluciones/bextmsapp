@@ -227,7 +227,11 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
           for (var w in worksF.keys) {
             var wn = responseWorks.data!.works
                 .where((element) => element.workcode == w);
-            warehouses.add(wn.first.warehouse!);
+
+            if(wn.first.warehouse != null) {
+              warehouses.add(wn.first.warehouse!);
+            }
+
           }
           final distinct = warehouses.unique((x) => x.id);
           await _databaseRepository.insertWarehouses(distinct);

@@ -124,7 +124,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     required AccountRequest request,
   }) async {
     return await _cacheManager
-        .from<DataState<AccountResponse>>("reasons")
+        .from<DataState<AccountResponse>>("accounts")
         .withSerializer(
             (result) => DataSuccess(AccountResponse.fromMap(result)))
         .withAsync(() => getStateOf<AccountResponse>(
@@ -194,7 +194,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
                   date: request.date,
                   from: request.from),
             ))
-        .withStrategy(CacheOrAsyncStrategy())
+        .withStrategy(AsyncOrCacheStrategy())
         .execute();
   }
 

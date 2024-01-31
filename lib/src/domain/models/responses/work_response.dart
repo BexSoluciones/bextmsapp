@@ -10,6 +10,9 @@ class WorkResponse extends Equatable {
   const WorkResponse({required this.works});
 
   factory WorkResponse.fromMap(Map<String, dynamic> map) {
+
+    print(map);
+
     return WorkResponse(
         works: List<Work>.from(map['works'] != null
             ? map['works']
