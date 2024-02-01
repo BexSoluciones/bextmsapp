@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:cron/cron.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -13,7 +14,6 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:upgrader/upgrader.dart';
 
 //plugins
 // import 'package:charger_status/charger_status.dart';
@@ -468,48 +468,58 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(
               create: (context) => CountCubit(locator<DatabaseRepository>())),
         ],
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            FocusScope.of(context).requestFocus(FocusNode());
-          },
-          child: OverlaySupport(
-              child: MultiProvider(
-                  providers: [
-                ChangeNotifierProvider<GeneralProvider>(
-                  create: (context) => GeneralProvider(),
-                ),
-                ChangeNotifierProvider<DownloadProvider>(
-                  create: (context) => DownloadProvider(),
-                ),
-              ],
-                  child: MaterialApp(
-                    debugShowCheckedModeBanner: false,
-                    title: appTitle,
-                    theme: ThemeData(
-                      useMaterial3: true,
-                      colorScheme: lightColorScheme,
-                      // extensions: [lightCustomColors],
-                    ),
-                    darkTheme: ThemeData(
-                      useMaterial3: true,
-                      colorScheme: darkColorScheme,
-                      // extensions: [darkCustomColors],
-                    ),
-                    themeMode: ThemeMode.system,
-                    navigatorKey: locator<NavigationService>().navigatorKey,
-                    navigatorObservers: [
-                      locator<FirebaseAnalyticsService>()
-                          .appAnalyticsObserver(),
+        child: BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
+          return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                FocusScope.of(context).requestFocus(FocusNode());
+              },
+              child: OverlaySupport(child: DynamicColorBuilder(builder:
+                  (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+                ColorScheme lightScheme;
+                ColorScheme darkScheme;
+
+                lightScheme = lightColorScheme;
+                darkScheme = darkColorScheme;
+                return MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider<GeneralProvider>(
+                        create: (context) => GeneralProvider(),
+                      ),
+                      ChangeNotifierProvider<DownloadProvider>(
+                        create: (context) => DownloadProvider(),
+                      ),
                     ],
-                    onUnknownRoute: (RouteSettings settings) =>
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => UndefinedView(
-                                  name: settings.name,
-                                )),
-                    initialRoute: '/splash',
-                    onGenerateRoute: Routes.onGenerateRoutes,
-                  ))),
-        ));
+                    child: MaterialApp(
+                      debugShowCheckedModeBanner: false,
+                      title: appTitle,
+                      theme: ThemeData(
+                        useMaterial3: true,
+                        colorScheme:
+                            state.isDarkTheme ? lightScheme : darkScheme,
+                        // extensions: [lightCustomColors],
+                      ),
+                      darkTheme: ThemeData(
+                        useMaterial3: true,
+                        colorScheme:
+                            state.isDarkTheme ? lightScheme : darkScheme,
+                        // extensions: [darkCustomColors],
+                      ),
+                      themeMode: ThemeMode.system,
+                      navigatorKey: locator<NavigationService>().navigatorKey,
+                      navigatorObservers: [
+                        locator<FirebaseAnalyticsService>()
+                            .appAnalyticsObserver(),
+                      ],
+                      onUnknownRoute: (RouteSettings settings) =>
+                          MaterialPageRoute(
+                              builder: (BuildContext context) => UndefinedView(
+                                    name: settings.name,
+                                  )),
+                      initialRoute: '/splash',
+                      onGenerateRoute: Routes.onGenerateRoutes,
+                    ));
+              })));
+        }));
   }
 }

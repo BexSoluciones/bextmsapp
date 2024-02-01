@@ -24,6 +24,8 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    // final bloc = BlocProvider.of<CameraBloc>(context);
+    // bloc.add(CameraInitialized());
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
