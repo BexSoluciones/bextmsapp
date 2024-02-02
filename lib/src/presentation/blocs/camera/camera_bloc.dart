@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bexdeliveries/src/domain/models/photo.dart';
 import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
+import 'package:bexdeliveries/src/services/logger.dart';
 
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
@@ -60,9 +61,9 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     } on CameraException catch (error) {
       _controller?.dispose();
       emit(CameraFailure(error: error.description!));
-    } catch (error,stackTrace) {
+    } catch (error, stackTrace) {
       emit(CameraFailure(error: error.toString()));
-      await FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      // await FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }
   }
 
@@ -71,23 +72,27 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       emit(CameraCaptureInProgress());
       try {
         final path = await cameraUtils.getPath();
-        final imageCount = await  countImagesInCache();
-        if (imageCount >= 3) {
-          emit(CameraCaptureFailure(error: 'Solo se permiten 3 fotos'));
-        } else {
-          await _controller?.setFocusMode(FocusMode.locked);
-          await _controller?.setExposureMode(ExposureMode.locked);
-          var picture = await _controller?.takePicture();
-          await _controller?.setFocusMode(FocusMode.locked);
-          await _controller?.setExposureMode(ExposureMode.locked);
-          var photo = Photo(name: picture!.name, path: picture.path);
-          await compressAndSaveImage(photo.path);
-          await databaseRepository.insertPhoto(photo);
-          emit(CameraCaptureSuccess(path));
-        }
+
+        await _controller?.takePicture();
+        emit(CameraCaptureSuccess(path));
+
+        // final imageCount = await countImagesInCache();
+        // if (imageCount >= 3) {
+        //   emit(CameraCaptureFailure(error: 'Solo se permiten 3 fotos'));
+        // } else {
+        //   // await _controller?.setFocusMode(FocusMode.locked);
+        //   // await _controller?.setExposureMode(ExposureMode.locked);
+        //
+        //   // await _controller?.setFocusMode(FocusMode.locked);
+        //   // await _controller?.setExposureMode(ExposureMode.locked);
+        //   // var photo = Photo(name: picture!.name, path: picture.path);
+        //   // await compressAndSaveImage(photo.path);
+        //   // await databaseRepository.insertPhoto(photo);
+        //
+        // }
       } on CameraException catch (error) {
         emit(CameraCaptureFailure(error: error.description!));
-      } catch (error,stackTrace) {
+      } catch (error, stackTrace) {
         emit(CameraFailure(error: error.toString()));
         await FirebaseCrashlytics.instance.recordError(error, stackTrace);
       }
@@ -95,7 +100,6 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       emit(const CameraFailure(error: 'Camera is not ready'));
     }
   }
-
 
   _mapCameraGalleryToState(CameraGallery event, emit) async {
     if (state is! CameraReady) {
@@ -115,8 +119,6 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
           final fileFormat = imageFile.path.split('.').last.toLowerCase();
 
           if (fileFormat == 'jpg' || fileFormat == 'png') {
-
-
             final fileName = imageFile.uri.pathSegments.last;
             final filePathInCache = '${cacheDirectory.path}/$fileName';
             await compressAndSaveImage(filePathInCache);
@@ -150,7 +152,6 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       final File compressedImage = File(imagePath)
         ..writeAsBytesSync(img.encodeJpg(image, quality: 80));
     } catch (error) {
-
       print('Error al comprimir la imagen: $error');
     }
   }
@@ -160,7 +161,6 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       return img.copyRotate(image, angle: 90);
     });
   }
-
 
   Future<int> countImagesInCache() async {
     try {

@@ -3,7 +3,6 @@
 // import 'package:bexdeliveries/src/presentation/providers/photo_provider.dart';
 // import 'package:bloc_test/bloc_test.dart';
 // import 'package:flutter_test/flutter_test.dart';
-//
 // import 'package:mockito/mockito.dart';
 //
 //
@@ -16,7 +15,7 @@ void main() {
 //   final photo2 = Photo(id: 2, name: "tv", path: "path/to/dir/tv");
 //   final photos = [photo1, photo2];
 //
-//   setUp(() {
+//   setUpAll(() {
 //     photoProvider = MockPhotoProvider();
 //     when(photoProvider.loadPhotos()).thenAnswer((_) => Future.value(photos));
 //   });
