@@ -31,6 +31,7 @@ void main() {
         ),
       ),
     );
+    when(cameraBloc.stream).thenAnswer((_) => const Stream.empty());
   });
 
   tearDown(() {
@@ -40,7 +41,6 @@ void main() {
   group('CameraScreen', () {
     testWidgets('Should show an empty container when state is CameraInitial',
         (WidgetTester tester) async {
-      when(cameraBloc.stream).thenAnswer((_) => const Stream.empty());
       when(cameraBloc.state).thenAnswer((_) => CameraInitial());
 
       await tester.pumpWidget(app);
@@ -51,7 +51,6 @@ void main() {
 
     testWidgets('Should show the camera preview when state is CameraReady',
         (WidgetTester tester) async {
-      when(cameraBloc.stream).thenAnswer((_) => const Stream.empty());
       when(cameraBloc.state).thenAnswer((_) => CameraReady());
       when(cameraBloc.getController()).thenAnswer(
         (_) => CameraController(
@@ -70,7 +69,6 @@ void main() {
 
     testWidgets('Should show the error message when state is CameraFailure',
         (WidgetTester tester) async {
-      when(cameraBloc.stream).thenAnswer((_) => const Stream.empty());
       when(cameraBloc.state).thenAnswer((_) => const CameraFailure(
           error: "MediaRecorderCamera permission not granted"));
 
@@ -85,7 +83,6 @@ void main() {
     testWidgets(
         'Should show an empty container when state is CameraCaptureInProgress',
         (WidgetTester tester) async {
-      when(cameraBloc.stream).thenAnswer((_) => const Stream.empty());
       when(cameraBloc.state).thenAnswer((_) => CameraCaptureInProgress());
 
       await tester.pumpWidget(app);
