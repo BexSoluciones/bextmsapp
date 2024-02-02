@@ -53,8 +53,8 @@ import '../../../services/workmanager.dart';
 
 part 'home_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final NavigationService _navigationService = locator<NavigationService>();
+final LocalStorageService storageService = locator<LocalStorageService>();
+final NavigationService navigationService = locator<NavigationService>();
 final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
 final helperFunctions = HelperFunctions();
 
@@ -78,8 +78,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   }
 
   void getUser() {
-    final user = _storageService.getObject('user') != null
-        ? User.fromJson(_storageService.getObject('user')!)
+    final user = storageService.getObject('user') != null
+        ? User.fromJson(storageService.getObject('user')!)
         : null;
     updateUser(user);
   }
@@ -100,8 +100,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       i++;
     }
 
-    final user = _storageService.getObject('user') != null
-        ? User.fromJson(_storageService.getObject('user')!)
+    final user = storageService.getObject('user') != null
+        ? User.fromJson(storageService.getObject('user')!)
         : null;
 
     return HomeState(status: HomeStatus.success, works: works, user: user);
@@ -136,8 +136,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
 
           var currentLocation = gpsBloc.state.lastKnownLocation;
 
-          final user = _storageService.getObject('user') != null
-              ? User.fromJson(_storageService.getObject('user')!)
+          final user = storageService.getObject('user') != null
+              ? User.fromJson(storageService.getObject('user')!)
               : null;
 
           final results = await Future.wait([
@@ -149,11 +149,11 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           if (results.isNotEmpty) {
             if (results[0] is DataSuccess) {
               var data = results[0].data as EnterpriseConfigResponse;
-              _storageService.setObject(
+              storageService.setObject(
                   'config', data.enterpriseConfig.toMap());
-              _storageService.setBool(
+              storageService.setBool(
                   'can_make_history', data.enterpriseConfig.canMakeHistory);
-              _storageService.setInt(
+              storageService.setInt(
                   'limit_days_works', data.enterpriseConfig.limitDaysWorks);
               if (data.enterpriseConfig.specifiedAccountTransfer == true) {
                 var response =
@@ -172,18 +172,18 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           }
 
           final response = await _apiRepository.login(
-            request: LoginRequest(_storageService.getString('username')!,
-                _storageService.getString('password')!),
+            request: LoginRequest(storageService.getString('username')!,
+                storageService.getString('password')!),
           );
 
           if (response is DataSuccess) {
             final login = response!.data!.login;
             var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
             var version = yaml['version'];
-            _storageService.setString('token', response.data!.login.token);
-            _storageService.setObject(
+            storageService.setString('token', response.data!.login.token);
+            storageService.setObject(
                 'user', response.data!.login.user!.toJson());
-            _storageService.setInt('user_id', response.data!.login.user!.id);
+            storageService.setInt('user_id', response.data!.login.user!.id);
 
             var device = await helperFunctions.getDevice();
 
@@ -229,9 +229,9 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                       .where((element) => element.transaction != null);
 
                   if (found.isNotEmpty) {
-                    _storageService.setBool('${work.workcode}-started', true);
-                    _storageService.setBool('${work..workcode}-confirm', true);
-                    _storageService.setBool('${work.workcode}-blocked', false);
+                    storageService.setBool('${work.workcode}-started', true);
+                    storageService.setBool('${work..workcode}-confirm', true);
+                    storageService.setBool('${work.workcode}-blocked', false);
                   }
                 }
               });
@@ -273,7 +273,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                       ProcessingQueueAdd(processingQueue: processingQueueWork));
 
                   if (worksF.first.zoneId != null &&
-                      _storageService.getBool('can_make_history') == true) {
+                      storageService.getBool('can_make_history') == true) {
                     var processingQueueHistoric = ProcessingQueue(
                         body: jsonEncode({
                           'zone_id': worksF.first.zoneId!,
@@ -362,13 +362,13 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           await _databaseRepository.emptyTransactions();
           await _databaseRepository.emptyReasons();
           // await _databaseRepository.emptyNotes();
-          _storageService.remove('user');
-          _storageService.remove('token');
-          _storageService.remove('can_make_history');
+          storageService.remove('user');
+          storageService.remove('token');
+          storageService.remove('can_make_history');
 
           emit(state.copyWith(status: HomeStatus.success));
           _isLoggingOut = false;
-          await _navigationService.goTo(AppRoutes.login);
+          await navigationService.goTo(AppRoutes.login);
         }
       } else {
         emit(state.copyWith(

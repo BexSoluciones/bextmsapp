@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/services/storage.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -17,13 +18,18 @@ import 'package:mockito/mockito.dart';
 //mocks
 import 'home_cubit_test.mocks.dart';
 import '../../firebase_mock.dart';
+//services
+import '../../locator_mock.dart';
+// import 'package:bexdeliveries/src/services/storage.dart';
+// import 'package:bexdeliveries/src/services/navigation.dart';
+// import 'package:bexdeliveries/src/services/workmanager.dart';
 
 @GenerateMocks([], customMocks: [
   MockSpec<DatabaseRepository>(onMissingStub: null),
   MockSpec<ApiRepository>(onMissingStub: null),
   MockSpec<ProcessingQueueBloc>(onMissingStub: null),
   MockSpec<GpsBloc>(onMissingStub: null),
-  MockSpec<NetworkBloc>(onMissingStub: null)
+  MockSpec<NetworkBloc>(onMissingStub: null),
 ])
 void main() {
   setupFirebaseAuthMocks();
@@ -33,17 +39,23 @@ void main() {
   late ProcessingQueueBloc processingQueueBloc;
   late GpsBloc gpsBloc;
   late NetworkBloc networkBloc;
+  late LocalStorageService storageService;
 
   setUpAll(() async {
+    await initializeTestDependencies();
     await Firebase.initializeApp();
+    
     databaseRepository = MockDatabaseRepository();
     apiRepository = MockApiRepository();
     processingQueueBloc = MockProcessingQueueBloc();
     gpsBloc = MockGpsBloc();
     networkBloc = MockNetworkBloc();
+    storageService = locator<LocalStorageService>();
 
     // Default responses
     when(databaseRepository.getAllWorks()).thenAnswer((_) => Future.value(List<Work>.empty()));
+    when(storageService.getObject(any)).thenAnswer((_) => anyNamed('user'));
+    
 
   });
 
