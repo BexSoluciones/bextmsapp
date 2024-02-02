@@ -26,7 +26,7 @@ class TransactionDao {
   }
 
   Future<WorkTypes> getWorkTypesFromWorkcode(String workcode) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var deliveryList = await db!.query(t.tableTransactions,
         columns: ['work_id', 'status'],
@@ -50,6 +50,7 @@ class TransactionDao {
     var respawns = parseTransactions(respawnList);
     var rejects = parseTransactions(rejectList);
 
+    _appDatabase.close();
     return WorkTypes(
         delivery: deliveries.length,
         partial: partials.length,
@@ -59,7 +60,7 @@ class TransactionDao {
 
   Future<List<WorkAdditional>> getClientsResJetDel(
       String workcode, String reason) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final transactionList = await db!.rawQuery('''
     SELECT
@@ -163,11 +164,12 @@ class TransactionDao {
       worksList.add(workAdditional);
     }
 
+    _appDatabase.close();
     return worksList;
   }
 
   Future<double> countTotalCollectionWorks() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var transactionList = await db!.query(t.tableTransactions,
         columns: ['work_id', 'status', 'payments'],
@@ -184,11 +186,13 @@ class TransactionDao {
         }
       }
     }
+
+    _appDatabase.close();
     return sum;
   }
 
   Future<double> getTotalSummariesWork(String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final summaryList = await db!.rawQuery('''
         SELECT $tableSummaries.* FROM $tableSummaries
@@ -200,11 +204,13 @@ class TransactionDao {
       var summary = Summary.fromJson(element);
       sum += summary.grandTotalCopy!;
     }
+
+    _appDatabase.close();
     return sum;
   }
 
   Future<double> countTotalCollectionWorksByWorkcode(String workcode) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var transactionList = await db!.query(t.tableTransactions,
         columns: ['work_id', 'status', 'payments'],
@@ -228,11 +234,12 @@ class TransactionDao {
           .fold(0, (value, element) => value + double.parse(element.paid));
     }
 
+    _appDatabase.close();
     return sum;
   }
 
   Future<int> countLeftClients(String workcode) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var validateList = await db?.rawQuery('''
           SELECT $tableWorks.${WorkFields.id} as work_id, 
@@ -256,32 +263,37 @@ class TransactionDao {
       }
     });
 
+    _appDatabase.close();
     return clients.toInt();
   }
 
   Future<bool> verifyTransactionExistence(
       int workId, String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     List<Map<String, dynamic>> result = await db!.rawQuery(
       'SELECT COUNT(*) FROM transactions WHERE work_Id = ? AND order_number = ? AND status != ?',
       [workId, orderNumber, 'summary'],
     );
 
     int count = Sqflite.firstIntValue(result)!;
+
+    _appDatabase.close();
     return count > 1;
   }
 
   Future<List<t.Transaction>> getAllTransactions() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final transactionList = await db!.rawQuery('''
         SELECT * FROM ${t.tableTransactions} 
         WHERE status != "start" and status != "arrived" and status != "summary" 
     ''');
+
+    _appDatabase.close();
     return parseTransactions(transactionList);
   }
 
   Future<String?> getDiffTime(int workId) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final transactionsList = await db!.rawQuery(
         'SELECT * FROM transactions WHERE work_id = $workId and status = "arrived" LIMIT 1');
@@ -310,11 +322,12 @@ class TransactionDao {
     var remainingSeconds = minuteSeconds % secondsInAMinute;
     var seconds = (remainingSeconds).ceil();
     // return the final
+    _appDatabase.close();
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   Future<bool> validateTransaction(int workId) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final transactionList = await db!.query(t.tableTransactions,
         columns: ['id'],
@@ -327,54 +340,61 @@ class TransactionDao {
         whereArgs: [workId],
         groupBy: '$tableSummaries.${SummaryFields.orderNumber}');
 
+    _appDatabase.close();
     return transactionList.isNotEmpty &&
         summaryList.isNotEmpty &&
         (transactionList.length == summaryList.length);
   }
 
   Future<bool> validateSubTransaction(int workId, String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final transactionList = await db!.query(t.tableTransactions,
         where: 'work_id = ? AND order_number = ? AND status != ?',
         whereArgs: [workId, orderNumber, 'summary']);
 
+    _appDatabase.close();
     return transactionList.isNotEmpty;
   }
 
   Future<bool> validateTransactionSummary(
       String workcode, String orderNumber, String status) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final transactionList = await db!.query(t.tableTransactions,
         where: 'workcode = ? AND order_number = ? AND status = ?',
         whereArgs: [workcode, orderNumber, status]);
+
+    _appDatabase.close();
     final transactions = parseTransactions(transactionList);
     return transactions.isNotEmpty;
   }
 
   Future<bool> validateTransactionStart(String workcode, String status) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var transactionList = await db!.query(t.tableTransactions,
         columns: ['id'],
         where: 'workcode = ? AND status = ?',
         whereArgs: [workcode, status]);
 
+    _appDatabase.close();
     return transactionList.isNotEmpty;
   }
 
   Future<bool> validateTransactionArrived(int workId, String status) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final transactionList = await db!.query(t.tableTransactions,
         columns: ['id'],
         where: 'work_id = ? AND status = ?',
         whereArgs: [workId, status]);
+
+    _appDatabase.close();
     return transactionList.isNotEmpty;
   }
 
   Future<bool> checkLastTransaction(String workcode) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var summaries = await db!.rawQuery('''
       select COUNT(distinct order_number) as count from summaries inner join works on works.id = summaries.work_id
@@ -389,6 +409,8 @@ class TransactionDao {
     var countSummaries = summaries[0]['count'] as int;
     var countTransactions = transactions[0]['count'] as int;
 
+    _appDatabase.close();
+
     if ((countSummaries - countTransactions) == 0) {
       return true;
     } else {
@@ -397,13 +419,15 @@ class TransactionDao {
   }
 
   Future<bool> checkLastProduct(int transactionId) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var validateIsLastProduct = await db!.rawQuery('''
       select id from processing_queues
       where relation_id = $transactionId
       order by id desc
     ''');
+
+    _appDatabase.close();
 
     if (validateIsLastProduct.last['status'] == 'processing') {
       return true;
@@ -413,7 +437,7 @@ class TransactionDao {
   }
 
   Stream<bool?> watchTransactionClient(String workcode, String status) async* {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final transactionList = await db!.query(t.tableTransactions,
         columns: ['id'],
@@ -438,7 +462,7 @@ class TransactionDao {
   }
 
   Future<void> insertTransactions(List<t.Transaction> transactions) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var batch = db!.batch();
     if (transactions.isNotEmpty) {
       await Future.forEach(transactions, (transaction) async {
@@ -459,13 +483,13 @@ class TransactionDao {
   }
 
   Future<void> emptyTransactions() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(t.tableTransactions, where: 'id > 0');
     return Future.value();
   }
 
   Future<int> deleteTransactionByDays() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var today = DateTime.now();
     var limitDaysWork = _storageService.getInt('limit_days_works') ?? 3;
     var datesToValidate = today.subtract(Duration(days: limitDaysWork));
@@ -503,7 +527,7 @@ class TransactionDao {
   }
 
   Future<int> deleteTransactionsByWorkcode(String workcode) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     return db!.delete(tableTransactions,
         where: 'workcode = ?', whereArgs: [workcode]);
   }

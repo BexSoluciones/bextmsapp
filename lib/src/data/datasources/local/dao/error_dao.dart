@@ -15,14 +15,14 @@ class ErrorDao {
   }
 
   Future<List<Error>> getAllErrors() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final errorList = await db!.query(tableErrors);
     final errors = parseErrors(errorList);
     return errors;
   }
 
   Future<Error?> findError(String zoneId) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final errorList =
     await db!.query(tableErrors, where: 'zone_id = ?', whereArgs: [zoneId]);
     final error = parseErrors(errorList);
@@ -49,7 +49,7 @@ class ErrorDao {
   }
 
   Future<void> insertErrors(List<Error> errors) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var batch = db!.batch();
 
     if (errors.isNotEmpty) {
@@ -68,7 +68,7 @@ class ErrorDao {
   }
 
   Future<void> emptyErrors() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableErrors, where: 'id > 0');
     return Future.value();
   }

@@ -42,7 +42,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     final bloc = BlocProvider.of<CameraBloc>(context);
 
     // App state changed before we got the chance to initialize.
-    if (!bloc.isInitialized()) return;
+    if (bloc.getController() == null || !bloc.isInitialized()!) return;
 
     if (state == AppLifecycleState.inactive) {
       bloc.add(CameraStopped());
@@ -81,7 +81,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                 ? Container(
                     key: MyPhotosKeys.cameraPreviewScreen,
                     child: CameraPreview(
-                        BlocProvider.of<CameraBloc>(context).getController()))
+                        BlocProvider.of<CameraBloc>(context).getController()!))
                 : state is CameraFailure
                     ? Error(key: MyPhotosKeys.errorScreen, message: state.error)
                     : Container(

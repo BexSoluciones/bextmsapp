@@ -26,8 +26,10 @@ class PhotosBloc extends Bloc<PhotosEvent, PhotosState> {
     emit(PhotosLoadInProgress());
     try {
       final photos = await photoProvider.loadPhotos();
+      print(photos);
       emit(PhotosLoadSuccess(photos: photos));
     } on Exception catch (error) {
+      print(error);
       emit(PhotosLoadFailure(error: error.toString()));
     }
   }

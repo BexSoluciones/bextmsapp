@@ -15,14 +15,14 @@ class NoteDao {
   }
 
   Future<List<Note>> getAllNotes() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final noteList = await db!.query(tableNotes);
     final notes = parseNotes(noteList);
     return notes;
   }
 
   Future<Note?> findNote(String zoneId) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final noteList =
     await db!.query(tableNotes, where: 'zone_id = ?', whereArgs: [zoneId]);
     final note = parseNotes(noteList);
@@ -49,7 +49,7 @@ class NoteDao {
   }
 
   Future<void> insertNotes(List<Note> notes) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var batch = db!.batch();
 
     if (notes.isNotEmpty) {
@@ -68,7 +68,7 @@ class NoteDao {
   }
 
   Future<void> emptyNotes() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableNotes, where: 'id > 0');
     return Future.value();
   }

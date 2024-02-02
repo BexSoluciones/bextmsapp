@@ -31,7 +31,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   final ResolutionPreset resolutionPreset;
   final CameraLensDirection cameraLensDirection;
 
-  late CameraController _controller;
+  CameraController? _controller;
 
   CameraBloc({
     required this.cameraUtils,
@@ -47,18 +47,18 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     on<CameraChange>(_mapCameraChangeToState);
   }
 
-  CameraController getController() => _controller;
+  CameraController? getController() => _controller;
 
-  bool isInitialized() => _controller.value.isInitialized;
+  bool? isInitialized() => _controller?.value.isInitialized;
 
   _mapCameraInitializedToState(CameraInitialized event, emit) async {
     try {
       _controller = await cameraUtils.getCameraController(
           resolutionPreset, cameraLensDirection);
-      await _controller.initialize();
+      await _controller?.initialize();
       emit(CameraReady());
     } on CameraException catch (error) {
-      _controller.dispose();
+      _controller?.dispose();
       emit(CameraFailure(error: error.description!));
     } catch (error,stackTrace) {
       emit(CameraFailure(error: error.toString()));
@@ -75,12 +75,12 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
         if (imageCount >= 3) {
           emit(CameraCaptureFailure(error: 'Solo se permiten 3 fotos'));
         } else {
-          await _controller.setFocusMode(FocusMode.locked);
-          await _controller.setExposureMode(ExposureMode.locked);
-          var picture = await _controller.takePicture();
-          await _controller.setFocusMode(FocusMode.locked);
-          await _controller.setExposureMode(ExposureMode.locked);
-          var photo = Photo(name: picture.name, path: picture.path);
+          await _controller?.setFocusMode(FocusMode.locked);
+          await _controller?.setExposureMode(ExposureMode.locked);
+          var picture = await _controller?.takePicture();
+          await _controller?.setFocusMode(FocusMode.locked);
+          await _controller?.setExposureMode(ExposureMode.locked);
+          var photo = Photo(name: picture!.name, path: picture.path);
           await compressAndSaveImage(photo.path);
           await databaseRepository.insertPhoto(photo);
           emit(CameraCaptureSuccess(path));
@@ -157,7 +157,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
 
   Future<img.Image> rotateImage(img.Image image) async {
     return await Future.microtask(() {
-      return img.copyRotate(image, 90);
+      return img.copyRotate(image, angle: 90);
     });
   }
 
@@ -192,13 +192,13 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraStoppedToState(CameraStopped event, emit) {
-    _controller.dispose();
+    _controller?.dispose();
     emit(CameraInitial());
   }
 
   @override
   Future<void> close() {
-    _controller.dispose();
+    _controller?.dispose();
     return super.close();
   }
 }

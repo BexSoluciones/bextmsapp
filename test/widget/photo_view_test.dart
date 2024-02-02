@@ -10,7 +10,7 @@
 //
 // class MockPhotosBloc extends MockBloc implements PhotosBloc {}
 //
-// void main() {
+void main() {
 //   PhotosBloc photosBloc;
 //
 //   final photos = [
@@ -93,4 +93,4 @@
 //           expect(find.text("Error loading photos"), findsOneWidget);
 //         });
 //   });
-// }
+}

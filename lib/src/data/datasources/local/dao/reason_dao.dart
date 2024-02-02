@@ -15,14 +15,14 @@ class ReasonDao {
   }
 
   Future<List<Reason>> getAllReasons() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final reasonList = await db!.query(tableReasons);
     final reasons = parseReasons(reasonList);
     return reasons;
   }
 
   Future<Reason?> findReason(String name) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final reasonList =
     await db!.query(tableReasons, where: 'nommotvis = ?', whereArgs: [name]);
     final reason = parseReasons(reasonList);
@@ -41,7 +41,7 @@ class ReasonDao {
   }
 
   Future<void> insertReasons(List<Reason> reasons) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var batch = db!.batch();
 
     if (reasons.isNotEmpty) {
@@ -64,7 +64,7 @@ class ReasonDao {
   }
 
   Future<void> emptyReasons() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableReasons, where: 'id > 0');
     return Future.value();
   }

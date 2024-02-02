@@ -15,14 +15,14 @@ class ClientDao {
   }
 
   Future<List<Client>> getAllClients() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final clientList = await db!.query(tableClients);
     final clients = parseClients(clientList);
     return clients;
   }
 
   Future<bool> validateClient(int id) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final clientList =
         await db!.query(tableClients, where: 'id = ?', whereArgs: [id]);
     final clients = parseClients(clientList);
@@ -30,7 +30,7 @@ class ClientDao {
   }
 
   Stream<List<Client>> watchAllClients() async* {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final clientList = await db!.query(tableClients);
     final clients = parseClients(clientList);
     yield clients;
@@ -45,7 +45,7 @@ class ClientDao {
   }
 
   Future<void> emptyClients() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableClients);
     return Future.value();
   }

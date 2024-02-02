@@ -1,14 +1,13 @@
 import 'dart:convert';
-import 'package:bexdeliveries/src/domain/models/payment.dart';
-import 'package:bexdeliveries/src/services/logger.dart';
-import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
-import 'package:sqflite_migration/sqflite_migration.dart';
-import 'package:sqlbrite/sqlbrite.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:synchronized/synchronized.dart';
+
+//utils
+import '../../../utils/constants/strings.dart';
 
 //models
 import '../../../domain/models/work.dart';
@@ -33,10 +32,12 @@ import '../../../domain/models/transaction_validate.dart';
 import '../../../domain/models/note.dart';
 import '../../../domain/models/error.dart';
 import '../../../domain/abstracts/format_abstract.dart';
+import '../../../domain/models/payment.dart';
 
 //services
 import '../../../locator.dart';
 import '../../../services/storage.dart';
+import '../../../services/logger.dart';
 
 //daos
 part '../local/dao/work_dao.dart';
@@ -57,8 +58,6 @@ part '../local/dao/note_dao.dart';
 part '../local/dao/error_dao.dart';
 
 class AppDatabase {
-  static BriteDatabase? _streamDatabase;
-
   // make this a singleton class
   // ignore: sort_constructors_first
   AppDatabase._privateConstructor();
@@ -369,10 +368,16 @@ class AppDatabase {
 
   Future<Database> _initDatabase(databaseName) async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
-    final config = MigrationConfig(
-        initializationScript: initialScript, migrationScripts: migrations);
     final path = join(documentsDirectory.path, databaseName);
-    return await openDatabaseWithMigration(path, config);
+    return await openDatabase(path, version: 1, onCreate: (database, version) async {
+      for (var migrate in initialScript) {
+        await database.execute(migrate);
+      }
+    }, onUpgrade: (database, previous, current) async {
+      for (var migrate in migrations) {
+        await database.execute(migrate);
+      }
+    });
   }
 
   Future<Database?> get database async {
@@ -384,39 +389,33 @@ class AppDatabase {
           dbName = 'default';
         }
         _database = await _initDatabase('$dbName.db');
-        _streamDatabase = BriteDatabase(_database!);
       }
     });
     return _database;
   }
 
-  Future<BriteDatabase?> get streamDatabase async {
-    await database;
-    return _streamDatabase;
-  }
-
   //INSERT METHODS
   Future<int> insert(String table, Map<String, dynamic> row) async {
-    final db = await instance.streamDatabase;
+    final db = await instance.database;
     return db!.insert(table, row);
   }
 
   //UPDATE METHODS
   Future<int> update(
       String table, Map<String, dynamic> value, String columnId, int id) async {
-    final db = await instance.streamDatabase;
+    final db = await instance.database;
     return db!.update(table, value, where: '$columnId = ?', whereArgs: [id]);
   }
 
   // //DELETE METHODS
   Future<int> delete(String table, String columnId, int id) async {
-    final db = await instance.streamDatabase;
+    final db = await instance.database;
     return db!.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 
   Future<bool> listenForTableChanges(
       String table, String column, String value) async {
-    final db = await instance.streamDatabase;
+    final db = await instance.database;
 
     var result = await db!
         .query(table, where: '$column = ?', whereArgs: [value], limit: 1);
@@ -454,8 +453,9 @@ class AppDatabase {
 
   ErrorDao get errorDao => ErrorDao(instance);
 
-  void close() {
+  void close() async {
     _database = null;
-    _streamDatabase!.close();
+    _database?.close();
+
   }
 }

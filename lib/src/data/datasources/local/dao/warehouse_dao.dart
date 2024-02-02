@@ -15,14 +15,14 @@ class WarehouseDao {
   }
 
   Future<List<Warehouse>> getAllWarehouses() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final warehouseList = await db!.query(tableWarehouses);
     final warehouses = parseWarehouses(warehouseList);
     return warehouses;
   }
 
   Future<Warehouse?> findWarehouse(int id) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final warehouseList =
         await db!.query(tableWarehouses, where: 'id = ?', whereArgs: [id]);
     final warehouses = parseWarehouses(warehouseList);
@@ -42,7 +42,7 @@ class WarehouseDao {
   }
 
   Future<void> insertWarehouses(List<Warehouse> warehouses) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var batch = db!.batch();
 
     if (warehouses.isNotEmpty) {
@@ -63,7 +63,7 @@ class WarehouseDao {
   }
 
   Future<void> emptyWarehouses() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableWarehouses, where: 'id > 0');
     return Future.value();
   }

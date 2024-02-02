@@ -8,9 +8,6 @@ import '../../../../../domain/models/photo.dart';
 import '../../../../../utils/constants/keys.dart';
 import '../../../../../utils/constants/strings.dart';
 
-//features
-import 'detail.dart';
-
 class PhotoCard extends StatelessWidget {
   final Photo photo;
 

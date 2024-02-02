@@ -19,7 +19,7 @@ class ProcessingQueueDao {
 
   Future<List<ProcessingQueue>> getAllProcessingQueues(
       String? code, String? task) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var processingQueueList = <Map<String, dynamic>>[];
     if (code != null) {
       processingQueueList = await db!
@@ -42,7 +42,7 @@ class ProcessingQueueDao {
     int? page,
     int? limit,
   ) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var processingQueueList = await db!.rawQuery('''
       SELECT id, code, task, created_at, updated_at, _error FROM $tableProcessingQueues
       ORDER BY $tableProcessingQueues.${ProcessingQueueFields.createdAt} DESC
@@ -55,7 +55,7 @@ class ProcessingQueueDao {
   }
 
   Future<ProcessingQueue> findProcessingQueue(int id) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final processingQueueList = await db!
         .query(tableProcessingQueues,
         columns: ['task', 'code', 'body'],
@@ -65,7 +65,7 @@ class ProcessingQueueDao {
   }
 
   Stream<List<ProcessingQueue>> watchAllProcessingQueues() async* {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final processingQueueList = await db!.query(tableProcessingQueues);
     final processingQueues = parseProcessingQueues(processingQueueList);
     yield processingQueues;
@@ -73,7 +73,7 @@ class ProcessingQueueDao {
 
   Stream<List<Map<String, dynamic>>>
       getProcessingQueueIncompleteToTransactions() async* {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final handleNames = {
       'store_transaction_start': 'Transacciones de inicio de servicio',
       'store_transaction_arrived': 'Transacciones de llegada de cliente',
@@ -142,7 +142,7 @@ class ProcessingQueueDao {
   }
 
   Future<int> countProcessingQueueIncompleteToTransactions() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final processingQueueList = await db!.query(tableProcessingQueues,
         where: 'task != ? AND code != ? AND code != ? AND code != ?',
         whereArgs: [
@@ -156,13 +156,13 @@ class ProcessingQueueDao {
   }
 
   Future<int> countAllTransactions() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final result = await db!.query(tableProcessingQueues);
     return result.length;
   }
 
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final processingQueueList = await db!.query(tableProcessingQueues,
         where: 'task = ? or task = ? or task = ?',
@@ -172,7 +172,7 @@ class ProcessingQueueDao {
   }
 
   Future<bool> validateIfProcessingQueueIsIncomplete() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final processingQueueList = await db!.query(tableProcessingQueues,
         where:
             'task = ? OR task = ? OR task = ? AND code != ? AND code != ? AND code != ?',
@@ -198,13 +198,13 @@ class ProcessingQueueDao {
   }
 
   Future<void> emptyProcessingQueue() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableProcessingQueues, where: 'code = "store_locations"');
     return Future.value();
   }
 
   Future<int> deleteProcessingQueueByDays() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var today = DateTime.now();
     var limitDaysWork = _storageService.getInt('limit_days_works') ?? 3;
     var datesToValidate = today.subtract(Duration(days: limitDaysWork));

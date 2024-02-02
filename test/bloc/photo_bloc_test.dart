@@ -9,7 +9,7 @@
 //
 // class MockPhotoProvider extends Mock implements PhotoProvider {}
 //
-// void main() {
+void main() {
 //   PhotoProvider photoProvider;
 //
 //   final photo1 = Photo(id: 1, name: "cat", path: "path/to/dir/cat");
@@ -138,4 +138,4 @@
 //       expect: <PhotosState>[],
 //     );
 //   });
-// }
+}

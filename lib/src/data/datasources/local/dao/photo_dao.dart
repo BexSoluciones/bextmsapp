@@ -15,14 +15,14 @@ class PhotoDao {
   }
 
   Future<List<Photo>> getAllPhotos() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final photoList = await db!.query(tablePhotos);
     final photos = parsePhotos(photoList);
     return photos;
   }
 
   Future<Photo?> findPhoto(String path) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final photoList =
     await db!.query(tablePhotos, where: 'path = ?', whereArgs: [path]);
     final photo = parsePhotos(photoList);
@@ -49,7 +49,7 @@ class PhotoDao {
   }
 
   Future<void> insertPhotos(List<Photo> photos) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var batch = db!.batch();
 
     if (photos.isNotEmpty) {
@@ -68,7 +68,7 @@ class PhotoDao {
   }
 
   Future<void> emptyPhotos() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tablePhotos, where: 'id > 0');
     return Future.value();
   }
