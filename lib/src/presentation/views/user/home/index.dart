@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:bexdeliveries/src/config/size.dart';
 import 'package:bexdeliveries/src/domain/models/enterprise_config.dart';
 import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
@@ -25,8 +26,6 @@ import 'features/list_view.dart';
 import 'features/search.dart';
 import 'features/sync.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
@@ -41,6 +40,9 @@ class HomeViewState extends State<HomeView>
   final GlobalKey three = GlobalKey();
   final GlobalKey four = GlobalKey();
   final GlobalKey five = GlobalKey();
+
+  final LocalStorageService _storageService = locator<LocalStorageService>();
+  final helperFunctions = HelperFunctions();
 
   late HomeCubit homeCubit;
   late GpsBloc gpsBloc;

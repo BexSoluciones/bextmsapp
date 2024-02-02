@@ -25,3 +25,8 @@ Future<void> initializeTestDependencies() async {
   // locator.registerSingleton<LoggerService>(logger);
 
 }
+
+Future<void> unregisterDependencies() async {
+  final storage = await LocalStorageService.getInstance();
+  locator.unregister<LocalStorageService>(instance: storage!);
+}

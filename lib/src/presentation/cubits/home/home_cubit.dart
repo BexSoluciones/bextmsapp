@@ -53,10 +53,7 @@ import '../../../services/workmanager.dart';
 
 part 'home_state.dart';
 
-final LocalStorageService storageService = locator<LocalStorageService>();
-final NavigationService navigationService = locator<NavigationService>();
-final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
-final helperFunctions = HelperFunctions();
+
 
 class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   final ApiRepository _apiRepository;
@@ -64,6 +61,11 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
   final NetworkBloc networkBloc;
+  final LocalStorageService storageService = locator<LocalStorageService>();
+  final NavigationService navigationService = locator<NavigationService>();
+  final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
+  final helperFunctions = HelperFunctions();
+
   bool _isLoggingOut = false;
   bool _isSyncing = false;
 
