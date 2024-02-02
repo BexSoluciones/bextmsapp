@@ -28,16 +28,14 @@ const String path = "path/to/directory";
 void main() async {
   setupFirebaseAuthMocks();
 
-  setUpAll(() async {
-    await Firebase.initializeApp();
-  });
-
   late MockDatabaseRepository databaseRepository;
   late MockCameraController cameraController;
   late MockCameraUtils cameraUtils;
   late MockCameraValue cameraValue;
 
-  setUpAll(() {
+  setUpAll(() async {
+    await Firebase.initializeApp();
+
     databaseRepository = MockDatabaseRepository();
     cameraController = MockCameraController();
     cameraUtils = MockCameraUtils();
