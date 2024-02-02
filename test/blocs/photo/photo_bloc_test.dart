@@ -1,12 +1,14 @@
-import 'package:bexdeliveries/src/domain/models/photo.dart';
-import 'package:bexdeliveries/src/presentation/blocs/photo/photo_bloc.dart';
-import 'package:bexdeliveries/src/presentation/providers/photo_provider.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-
 import 'package:mockito/annotations.dart';
-
+//domain
+import 'package:bexdeliveries/src/domain/models/photo.dart';
+//bloc
+import 'package:bexdeliveries/src/presentation/blocs/photo/photo_bloc.dart';
+//view
+import 'package:bexdeliveries/src/presentation/providers/photo_provider.dart';
+//mock
 import 'photo_bloc_test.mocks.dart';
 
 @GenerateMocks([PhotoProvider])

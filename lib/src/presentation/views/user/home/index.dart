@@ -28,7 +28,7 @@ import 'features/sync.dart';
 final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class HomeView extends StatefulWidget {
-  const HomeView({Key? key}) : super(key: key);
+  const HomeView({super.key});
 
   @override
   HomeViewState createState() => HomeViewState();
