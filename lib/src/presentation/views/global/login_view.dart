@@ -1,39 +1,33 @@
-import 'package:bexdeliveries/src/presentation/widgets/upgrader_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
 //core
 import '../../../../core/helpers/index.dart';
-
 //models
 import '../../../domain/models/enterprise.dart';
-
 //cubit
 import '../../cubits/login/login_cubit.dart';
-
 //blocs
 import '../../blocs/network/network_bloc.dart';
-
 //utils
 import '../../../utils/constants/colors.dart';
 import '../../../utils/extensions/app_theme.dart';
-
+import '../../../utils/constants/keys.dart';
 //service
 import '../../../locator.dart';
 import '../../../services/storage.dart';
-
 //widgets
 import '../../widgets/default_button_widget.dart';
+import '../../widgets/upgrader_widget.dart';
 
 part '../../widgets/form_login_widget.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class LoginView extends StatefulWidget {
-  const LoginView({Key? key}) : super(key: key);
+  const LoginView({super.key});
 
   @override
   LoginViewState createState() => LoginViewState();
@@ -56,9 +50,6 @@ class LoginViewState extends State<LoginView> {
   @override
   void initState() {
     rememberSession();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // helperFunctions.versionCheck(context);
-    });
     super.initState();
   }
 
@@ -120,6 +111,7 @@ class LoginViewState extends State<LoginView> {
               );
             } else if (networkState is NetworkSuccess) {
               return Scaffold(
+                key: MyLoginKeys.loginScreen,
                 body: SingleChildScrollView(
                   child: Container(
                     height: MediaQuery.of(context).size.height,
@@ -140,7 +132,7 @@ class LoginViewState extends State<LoginView> {
                         ),
                         Container(
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle, // Forma circular
+                              shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.3),
@@ -222,7 +214,7 @@ class LoginViewState extends State<LoginView> {
                             child: TextButton(
                                 onPressed: () {
                                   setState(() {
-                                    context.read<LoginCubit>().goToCompany();
+                                    loginCubit.goToCompany();
                                   });
                                 },
                                 child: Text(
@@ -239,14 +231,11 @@ class LoginViewState extends State<LoginView> {
               );
             } else {
               return const Center(
+                key: MyLoginKeys.emptyContainerScreen,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('Algo ocurrió mientras cargaba la información'),
-                    IconButton(
-                      icon: Icon(Icons.refresh),
-                      onPressed: null,
-                    )
                   ],
                 ),
               );

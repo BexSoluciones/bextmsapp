@@ -2,8 +2,10 @@ part of '../views/global/login_view.dart';
 
 extension SnackBarWidget on LoginViewState {
   ScaffoldFeatureController buildSnackBar(BuildContext context, String text) {
-    return ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(duration: const Duration(seconds: 1), content: Text(text)));
+    return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        key: MyInitialKeys.errorSnackBar,
+        duration: const Duration(seconds: 1),
+        content: Text(text)));
   }
 }
 
