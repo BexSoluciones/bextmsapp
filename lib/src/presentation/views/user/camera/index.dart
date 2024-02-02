@@ -24,8 +24,6 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    // final bloc = BlocProvider.of<CameraBloc>(context);
-    // bloc.add(CameraInitialized());
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
@@ -108,6 +106,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                             .add(CameraGallery()),
                       ),
                         const SizedBox(width: 30),
+                        //TODO: [Heider Zapa] review if generating error
                         FloatingActionButton(
                           backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
                           heroTag: 'showPhotoBtn',

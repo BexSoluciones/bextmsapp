@@ -15,7 +15,7 @@ import '../../../widgets/error.dart';
 import 'features/item.dart';
 
 class PhotoView extends StatefulWidget {
-  const PhotoView({Key? key}) : super(key: key);
+  const PhotoView({super.key});
 
   @override
   PhotoViewState createState() => PhotoViewState();
