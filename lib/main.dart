@@ -378,11 +378,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   BlocProvider.of<GpsBloc>(context))),
           BlocProvider(
               create: (context) => HomeCubit(
-                  locator<DatabaseRepository>(),
-                  locator<ApiRepository>(),
-                  BlocProvider.of<ProcessingQueueBloc>(context),
-                  BlocProvider.of<GpsBloc>(context),
-                  BlocProvider.of<NetworkBloc>(context))),
+                    locator<DatabaseRepository>(),
+                    locator<ApiRepository>(),
+                    BlocProvider.of<ProcessingQueueBloc>(context),
+                    BlocProvider.of<GpsBloc>(context),
+                    BlocProvider.of<NetworkBloc>(context),
+                    locator<LocalStorageService>(),
+                    locator<NavigationService>(),
+                    locator<WorkmanagerService>(),
+                  )),
           BlocProvider(
             create: (context) => HistoryOrderBloc(locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context)),

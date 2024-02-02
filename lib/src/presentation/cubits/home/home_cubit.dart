@@ -13,7 +13,7 @@ import '../base/base_cubit.dart';
 
 //blocs
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
-import 'package:bexdeliveries/src/presentation/blocs/network/network_bloc.dart';
+import '../../blocs/network/network_bloc.dart';
 import '../../blocs/gps/gps_bloc.dart';
 
 //utils
@@ -45,7 +45,6 @@ import '../../../domain/models/responses/enterprise_config_response.dart';
 import '../../../domain/models/responses/reason_response.dart';
 
 //service
-import '../../../locator.dart';
 import '../../../services/storage.dart';
 import '../../../services/navigation.dart';
 import '../../../services/logger.dart';
@@ -53,17 +52,15 @@ import '../../../services/workmanager.dart';
 
 part 'home_state.dart';
 
-
-
 class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   final ApiRepository _apiRepository;
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
   final NetworkBloc networkBloc;
-  final LocalStorageService storageService = locator<LocalStorageService>();
-  final NavigationService navigationService = locator<NavigationService>();
-  final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
+  final LocalStorageService storageService;
+  final NavigationService navigationService;
+  final WorkmanagerService workmanagerService;
   final helperFunctions = HelperFunctions();
 
   bool _isLoggingOut = false;
@@ -71,8 +68,15 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
 
   StreamSubscription? locationSubscription;
 
-  HomeCubit(this._databaseRepository, this._apiRepository,
-      this._processingQueueBloc, this.gpsBloc, this.networkBloc)
+  HomeCubit(
+      this._databaseRepository,
+      this._apiRepository,
+      this._processingQueueBloc,
+      this.gpsBloc,
+      this.networkBloc,
+      this.storageService,
+      this.navigationService,
+      this.workmanagerService)
       : super(const HomeState(status: HomeStatus.initial), null);
 
   Future<void> getAllWorks() async {
@@ -151,8 +155,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           if (results.isNotEmpty) {
             if (results[0] is DataSuccess) {
               var data = results[0].data as EnterpriseConfigResponse;
-              storageService.setObject(
-                  'config', data.enterpriseConfig.toMap());
+              storageService.setObject('config', data.enterpriseConfig.toMap());
               storageService.setBool(
                   'can_make_history', data.enterpriseConfig.canMakeHistory);
               storageService.setInt(
@@ -391,8 +394,6 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
     await run(() async {
       try {
         emit(state.copyWith(status: HomeStatus.loading));
-
-        var id = DateTime.now().second.toString();
 
         workmanagerService.registerPeriodicTask('task_home',
             'get_works_completed_and_send', const Duration(minutes: 15));
