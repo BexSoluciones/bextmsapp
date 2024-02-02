@@ -3,7 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
-import '../firebase_mock.dart';
+import '../../firebase_mock.dart';
 
 //mocks
 import 'camera_bloc_test.mocks.dart';
