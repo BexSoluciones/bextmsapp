@@ -12,10 +12,12 @@ import 'package:bexdeliveries/src/domain/repositories/api_repository.dart'
     as _i10;
 import 'package:bexdeliveries/src/domain/repositories/database_repository.dart'
     as _i9;
+import 'package:bexdeliveries/src/services/geolocator.dart' as _i13;
 import 'package:bexdeliveries/src/services/navigation.dart' as _i6;
 import 'package:bexdeliveries/src/services/storage.dart' as _i4;
 import 'package:bexdeliveries/src/services/workmanager.dart' as _i7;
 import 'package:flutter/material.dart' as _i1;
+import 'package:geolocator/geolocator.dart' as _i14;
 import 'package:mockito/mockito.dart' as _i2;
 import 'package:mockito/src/dummies.dart' as _i12;
 
@@ -411,4 +413,22 @@ class MockWorkmanagerService extends _i2.Mock
           ),
         ),
       ) as String);
+}
+
+/// A class which mocks [GeolocatorService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGeolocatorService extends _i2.Mock implements _i13.GeolocatorService {
+  MockGeolocatorService() {
+    _i2.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<_i14.Position?> acquireCurrentLocationGeo() => (super.noSuchMethod(
+        Invocation.method(
+          #acquireCurrentLocationGeo,
+          [],
+        ),
+        returnValue: _i5.Future<_i14.Position?>.value(),
+      ) as _i5.Future<_i14.Position?>);
 }

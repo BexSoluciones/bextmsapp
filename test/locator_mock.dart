@@ -1,17 +1,13 @@
-import 'package:bexdeliveries/src/services/navigation.dart';
-import 'package:bexdeliveries/src/services/workmanager.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 
 //services
 import 'package:bexdeliveries/src/services/storage.dart';
+import 'package:bexdeliveries/src/services/geolocator.dart';
+import 'package:bexdeliveries/src/services/navigation.dart';
+import 'package:bexdeliveries/src/services/workmanager.dart';
 
 import 'locator_mock.mocks.dart';
-// import 'services/navigation.dart';
-// import 'services/notifications.dart';
-// import 'services/analytics.dart';
-// import 'services/logger.dart';
-// import 'services/workmanager.dart';
 
 final locator = GetIt.instance;
 
@@ -19,6 +15,7 @@ final locator = GetIt.instance;
   MockSpec<LocalStorageService>(onMissingStub: null),
   MockSpec<NavigationService>(onMissingStub: null),
   MockSpec<WorkmanagerService>(onMissingStub: null),
+  MockSpec<GeolocatorService>(onMissingStub: null),
 ])
 Future<void> initializeTestDependencies() async {
   final storage = MockLocalStorageService();
@@ -29,6 +26,9 @@ Future<void> initializeTestDependencies() async {
 
   final workmanager = MockWorkmanagerService();
   locator.registerSingleton<MockWorkmanagerService>(workmanager);
+
+  final geolocator = MockGeolocatorService();
+  locator.registerSingleton<MockGeolocatorService>(geolocator);
 }
 
 Future<void> unregisterDependencies() async {
@@ -36,8 +36,11 @@ Future<void> unregisterDependencies() async {
   locator.unregister<LocalStorageService>(instance: storage);
 
   final navigation = MockNavigationService();
-  locator.registerSingleton<MockNavigationService>(navigation);
+  locator.unregister<MockNavigationService>(instance: navigation);
 
   final workmanager = MockWorkmanagerService();
-  locator.registerSingleton<MockWorkmanagerService>(workmanager);
+  locator.unregister<MockWorkmanagerService>(instance: workmanager);
+
+  final geolocator = MockGeolocatorService();
+  locator.unregister<MockGeolocatorService>(instance: geolocator);
 }

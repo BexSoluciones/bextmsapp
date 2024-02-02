@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/services/geolocator.dart';
 import 'package:bexdeliveries/src/services/remote_config.dart';
 import 'package:get_it/get_it.dart';
 
@@ -41,6 +42,9 @@ Future<void> initializeDependencies() async {
 
   final workmanager = await WorkmanagerService.getInstance();
   locator.registerSingleton<WorkmanagerService>(workmanager!);
+
+  final geolocator = await GeolocatorService.getInstance();
+  locator.registerSingleton<GeolocatorService>(geolocator!);
 
   final logger = LoggerService();
   locator.registerSingleton<LoggerService>(logger);

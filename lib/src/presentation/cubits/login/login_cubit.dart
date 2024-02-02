@@ -50,31 +50,36 @@ import '../../../utils/constants/strings.dart';
 import '../../../utils/extensions/list_extension.dart';
 
 //service
-import '../../../locator.dart';
 import '../../../services/storage.dart';
 import '../../../services/navigation.dart';
 
 part 'login_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final NavigationService _navigationService = locator<NavigationService>();
-
 class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
-  final ApiRepository _apiRepository;
   final DatabaseRepository _databaseRepository;
+  final ApiRepository _apiRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
-
+  final LocalStorageService storageService;
+  final NavigationService navigationService;
+  final GeolocatorService geolocatorService;
 
   var helperFunctions = HelperFunctions();
 
-  LoginCubit(this._apiRepository, this._databaseRepository,
-      this._processingQueueBloc, this.gpsBloc)
+  LoginCubit(
+      this._databaseRepository,
+      this._apiRepository,
+      this._processingQueueBloc,
+      this.gpsBloc,
+      this.storageService,
+      this.navigationService,
+      this.geolocatorService
+      )
       : super(
             LoginSuccess(
-                enterprise: _storageService.getObject('enterprise') != null
+                enterprise: storageService.getObject('enterprise') != null
                     ? Enterprise.fromMap(
-                        _storageService.getObject('enterprise')!)
+                        storageService.getObject('enterprise')!)
                     : null),
             null);
 
@@ -87,8 +92,8 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         request: EnterpriseConfigRequest());
     if (response is DataSuccess) {
       var data = response.data as EnterpriseConfigResponse;
-      _storageService.setObject('config', data.enterpriseConfig.toMap());
-      _storageService.setInt(
+      storageService.setObject('config', data.enterpriseConfig.toMap());
+      storageService.setInt(
           'limit_days_works', data.enterpriseConfig.limitDaysWorks);
     }
   }
@@ -125,19 +130,16 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
 
     await run(() async {
       emit(LoginLoading(
-          enterprise: _storageService.getObject('enterprise') != null
-              ? Enterprise.fromMap(_storageService.getObject('enterprise')!)
+          enterprise: storageService.getObject('enterprise') != null
+              ? Enterprise.fromMap(storageService.getObject('enterprise')!)
               : null));
 
       if (remember) {
-        _storageService.setString('username', usernameController.text);
-        _storageService.setString('password', passwordController.text);
+        storageService.setString('username', usernameController.text);
+        storageService.setString('password', passwordController.text);
       }
 
-      //var currentLocation = gpsBloc.state.lastKnownLocation;
-      //var currentLocation = gpsBloc.state.lastKnownLocation;
-      var location = await acquireCurrentLocationGeo();
-
+      var location = await geolocatorService.acquireCurrentLocationGeo();
 
       final response = await _apiRepository.login(
         request: LoginRequest(usernameController.text, passwordController.text),
@@ -150,12 +152,12 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         var version = yaml['version'];
         var token = await FirebaseMessaging.instance.getToken();
 
-        _storageService.setString('username', usernameController.text);
-        _storageService.setString('password', passwordController.text);
-        _storageService.setString('token', response.data!.login.token);
-        _storageService.setObject('user', response.data!.login.user!.toJson());
-        _storageService.setInt('user_id', response.data!.login.user!.id);
-        _storageService.setString('fcm_token', token);
+        storageService.setString('username', usernameController.text);
+        storageService.setString('password', passwordController.text);
+        storageService.setString('token', response.data!.login.token);
+        storageService.setObject('user', response.data!.login.user!.toJson());
+        storageService.setInt('user_id', response.data!.login.user!.id);
+        storageService.setString('fcm_token', token);
 
         Future.wait([getConfigEnterprise(), getReasons(), getAccounts()]);
 
@@ -163,8 +165,8 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
 
         var processingQueue = ProcessingQueue(
           body: jsonEncode({
-            'user_id': _storageService.getInt('user_id')!.toString(),
-            'fcm_token': '${_storageService.getString('fcm_token')}'
+            'user_id': storageService.getInt('user_id')!.toString(),
+            'fcm_token': '${storageService.getString('fcm_token')}'
           }),
           task: 'incomplete',
           code: 'post_firebase_token',
@@ -214,9 +216,9 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
                   .where((element) => element.transaction != null);
 
               if (found.isNotEmpty) {
-                _storageService.setBool('${work.workcode}-started', true);
-                _storageService.setBool('${work..workcode}-confirm', true);
-                _storageService.setBool('${work.workcode}-blocked', false);
+                storageService.setBool('${work.workcode}-started', true);
+                storageService.setBool('${work..workcode}-confirm', true);
+                storageService.setBool('${work.workcode}-blocked', false);
               }
             }
           });
@@ -228,10 +230,9 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
             var wn = responseWorks.data!.works
                 .where((element) => element.workcode == w);
 
-            if(wn.first.warehouse != null) {
+            if (wn.first.warehouse != null) {
               warehouses.add(wn.first.warehouse!);
             }
-
           }
           final distinct = warehouses.unique((x) => x.id);
           await _databaseRepository.insertWarehouses(distinct);
@@ -261,7 +262,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
                   ProcessingQueueAdd(processingQueue: processingQueueWork));
 
               if (worksF.first.zoneId != null &&
-                  _storageService.getBool('can_make_history') == true) {
+                  storageService.getBool('can_make_history') == true) {
                 var processingQueueHistoric = ProcessingQueue(
                     body: jsonEncode({
                       'zone_id': worksF.first.zoneId!,
@@ -284,34 +285,34 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
 
           emit(LoginSuccess(
               login: login,
-              enterprise: _storageService.getObject('enterprise') != null
-                  ? Enterprise.fromMap(_storageService.getObject('enterprise')!)
+              enterprise: storageService.getObject('enterprise') != null
+                  ? Enterprise.fromMap(storageService.getObject('enterprise')!)
                   : null));
         } else {
           emit(LoginFailed(
               error: responseWorks.error,
-              enterprise: _storageService.getObject('enterprise') != null
-                  ? Enterprise.fromMap(_storageService.getObject('enterprise')!)
+              enterprise: storageService.getObject('enterprise') != null
+                  ? Enterprise.fromMap(storageService.getObject('enterprise')!)
                   : null));
         }
       } else if (response is DataFailed) {
         emit(LoginFailed(
             error: response!.error,
-            enterprise: _storageService.getObject('enterprise') != null
-                ? Enterprise.fromMap(_storageService.getObject('enterprise')!)
+            enterprise: storageService.getObject('enterprise') != null
+                ? Enterprise.fromMap(storageService.getObject('enterprise')!)
                 : null));
       }
     });
   }
 
   void goToHome() {
-    _navigationService.replaceTo(AppRoutes.home);
+    navigationService.replaceTo(AppRoutes.home);
   }
 
   void goToCompany() {
-    _storageService.remove('company');
-    _storageService.remove('enterprise');
+    storageService.remove('company');
+    storageService.remove('enterprise');
 
-    _navigationService.replaceTo(AppRoutes.company);
+    navigationService.replaceTo(AppRoutes.company);
   }
 }

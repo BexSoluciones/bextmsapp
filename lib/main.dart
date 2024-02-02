@@ -80,6 +80,7 @@ import 'src/services/notifications.dart';
 import 'src/services/remote_config.dart';
 import 'src/services/logger.dart';
 import 'src/services/workmanager.dart';
+import 'src/services/geolocator.dart';
 
 //router
 import 'src/config/router/routes.dart';
@@ -372,10 +373,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(create: (context) => PoliticsCubit()),
           BlocProvider(
               create: (context) => LoginCubit(
-                  locator<ApiRepository>(),
-                  locator<DatabaseRepository>(),
-                  BlocProvider.of<ProcessingQueueBloc>(context),
-                  BlocProvider.of<GpsBloc>(context))),
+                    locator<DatabaseRepository>(),
+                    locator<ApiRepository>(),
+                    BlocProvider.of<ProcessingQueueBloc>(context),
+                    BlocProvider.of<GpsBloc>(context),
+                    locator<LocalStorageService>(),
+                    locator<NavigationService>(),
+                    locator<GeolocatorService>(),
+                  )),
           BlocProvider(
               create: (context) => HomeCubit(
                     locator<DatabaseRepository>(),
