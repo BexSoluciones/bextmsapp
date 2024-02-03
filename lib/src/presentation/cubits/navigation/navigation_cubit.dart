@@ -27,13 +27,10 @@ import '../../../domain/models/work.dart';
 import '../../../domain/repositories/database_repository.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/navigation.dart';
 import '../../../services/logger.dart';
 
 part 'navigation_state.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
 
 class LayerMoodle {
   LayerMoodle(this.polygons);
@@ -41,11 +38,12 @@ class LayerMoodle {
 }
 
 class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
-  final DatabaseRepository _databaseRepository;
+  final DatabaseRepository databaseRepository;
+  final NavigationService navigationService;
   final helperFunctions = HelperFunctions();
   final GpsBloc gpsBloc;
 
-  NavigationCubit(this._databaseRepository, this.gpsBloc)
+  NavigationCubit(this.databaseRepository, this.navigationService, this.gpsBloc)
       : super(const NavigationState(status: NavigationStatus.initial), []);
 
   Future<void> getAllWorksByWorkcode(String workcode) async {
@@ -85,7 +83,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   Future<NavigationState> _getAllWorksByWorkcode(String workcode) async {
     try {
       final worksDatabase =
-          await _databaseRepository.findAllWorksByWorkcode(workcode);
+          await databaseRepository.findAllWorksByWorkcode(workcode);
 
       var currentLocation = gpsBloc.state.lastKnownLocation;
 
@@ -104,7 +102,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           } else {
             work.color = 8;
           }
-          await _databaseRepository.updateWork(work);
+          await databaseRepository.updateWork(work);
         }
 
         works.add(work);
@@ -138,7 +136,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
         if (works.first.warehouseId != null) {
           warehouse =
-              await _databaseRepository.findWarehouse(works.first.warehouseId!);
+              await databaseRepository.findWarehouse(works.first.warehouseId!);
         }
 
         if (warehouse != null) {
@@ -208,7 +206,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         //TODO:: NOTES
         // final zoneId = works.first.zoneId;
         //
-        // var notes = await _databaseRepository.getAllNotes();
+        // var notes = await databaseRepository.getAllNotes();
         //
         // for (var note in notes) {
         //   markers.add(
@@ -243,7 +241,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           );
 
           List<LatLng> polylinesDatabase =
-              await _databaseRepository.getPolylines(workcode);
+              await databaseRepository.getPolylines(workcode);
           var polygons = Polyline(
               color:
                   Colors.primaries[Random().nextInt(Colors.primaries.length)],
@@ -259,7 +257,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
                   strokeWidth: 2),
             ];
           } else {
-            _databaseRepository.insertPolylines(workcode, polygons.points);
+            databaseRepository.insertPolylines(workcode, polygons.points);
             polylines = [
               Polyline(
                   points: polygons.points,
@@ -309,11 +307,11 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
       var currentLocation = gpsBloc.state.lastKnownLocation;
       position = LatLng(currentLocation!.latitude, currentLocation.longitude);
     }
-    _navigationService.goTo(AppRoutes.notes, arguments: position);
+    navigationService.goTo(AppRoutes.notes, arguments: position);
   }
 
   Future<void> showNote(Note note) async {
-    _navigationService.goTo(AppRoutes.notes, arguments: note);
+    navigationService.goTo(AppRoutes.notes, arguments: note);
   }
 
   Future<void> moveController(int index, double zoom) async {
@@ -345,15 +343,15 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
         if (index - 1 >= 0) {
           updateWorkFutures
-              .add(_databaseRepository.updateWork(data[index - 1]));
+              .add(databaseRepository.updateWork(data[index - 1]));
         }
 
         if (index + 1 < data.length) {
           updateWorkFutures
-              .add(_databaseRepository.updateWork(data[index + 1]));
+              .add(databaseRepository.updateWork(data[index + 1]));
         }
 
-        updateWorkFutures.add(_databaseRepository.updateWork(data[index]));
+        updateWorkFutures.add(databaseRepository.updateWork(data[index]));
 
         await Future.wait(updateWorkFutures).then((value) {
           state.mapController!.move(state.kWorkList![index], zoom);

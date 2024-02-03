@@ -20,22 +20,20 @@ import '../../../domain/abstracts/format_abstract.dart';
 import '../../../domain/repositories/database_repository.dart';
 
 //service
-import '../../../locator.dart';
 import '../../../services/navigation.dart';
 import '../../../services/storage.dart';
 
 part 'respawn_state.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
-
 class RespawnCubit extends Cubit<RespawnState> with FormatDate {
-  final DatabaseRepository _databaseRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
+  final DatabaseRepository databaseRepository;
+  final ProcessingQueueBloc processingQueueBloc;
   final GpsBloc gpsBloc;
+  final NavigationService navigationService;
+  final LocalStorageService storageService;
 
-  RespawnCubit(this._databaseRepository,
-      this._processingQueueBloc, this.gpsBloc)
+  RespawnCubit(this.databaseRepository, this.processingQueueBloc, this.gpsBloc,
+      this.storageService, this.navigationService)
       : super(const RespawnLoading());
 
   Future<void> getReasons() async {
@@ -43,14 +41,14 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
   }
 
   Future<RespawnState> _getReasons() async {
-    var enterpriseConfig = _storageService.getObject('config') != null
-        ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
+    var enterpriseConfig = storageService.getObject('config') != null
+        ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
         : null;
 
     List<Reason> reasons = [];
 
     if (enterpriseConfig != null && enterpriseConfig.hadReasonRespawn == true) {
-      reasons = await _databaseRepository.getAllReasons();
+      reasons = await databaseRepository.getAllReasons();
     }
 
     return RespawnSuccess(reasons: reasons, enterpriseConfig: enterpriseConfig);
@@ -60,15 +58,15 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
       String? nameReason, String? observation) async {
     emit(const RespawnLoading());
 
-    var enterpriseConfig = _storageService.getObject('config') != null
-        ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
+    var enterpriseConfig = storageService.getObject('config') != null
+        ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
         : null;
 
     List<Reason> reasons = [];
     Reason? reason;
 
     if (enterpriseConfig != null && enterpriseConfig.hadReasonRespawn == true) {
-      reasons = await _databaseRepository.getAllReasons();
+      reasons = await databaseRepository.getAllReasons();
 
       if (nameReason == null) {
         emit(RespawnFailed(
@@ -78,7 +76,7 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
         return;
       }
 
-      reason = await _databaseRepository.findReason(nameReason);
+      reason = await databaseRepository.findReason(nameReason);
 
       if (reason == null) {
         emit(RespawnFailed(
@@ -109,7 +107,7 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
     transaction.latitude = currentLocation!.latitude.toString();
     transaction.longitude = currentLocation.longitude.toString();
 
-    await _databaseRepository.insertTransaction(transaction);
+    await databaseRepository.insertTransaction(transaction);
 
     var processingQueue = ProcessingQueue(
         body: jsonEncode(transaction.toJson()),
@@ -118,19 +116,19 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
         createdAt: now(),
         updatedAt: now());
 
-    _processingQueueBloc
+    processingQueueBloc
         .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
     var validate =
-        await _databaseRepository.validateTransaction(arguments.work.id!);
+        await databaseRepository.validateTransaction(arguments.work.id!);
 
     emit(RespawnSuccess(reasons: reasons, enterpriseConfig: enterpriseConfig));
 
     if (validate == false) {
-      await _navigationService.goTo(AppRoutes.summary,
+      await navigationService.goTo(AppRoutes.summary,
           arguments: SummaryArgument(work: arguments.work));
     } else {
-      await _navigationService.goTo(AppRoutes.work,
+      await navigationService.goTo(AppRoutes.work,
           arguments: WorkArgument(work: arguments.work));
     }
   }

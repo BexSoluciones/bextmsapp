@@ -38,8 +38,8 @@ part 'collection_state.dart';
 
 class CollectionCubit extends BaseCubit<CollectionState, String?>
     with FormatDate {
-  final DatabaseRepository _databaseRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
+  final DatabaseRepository databaseRepository;
+  final ProcessingQueueBloc processingQueueBloc;
   final GpsBloc gpsBloc;
   final LocalStorageService storageService;
   final NavigationService navigationService;
@@ -47,7 +47,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
   final helperFunctions = HelperFunctions();
 
   CollectionCubit(
-      this._databaseRepository, this._processingQueueBloc, this.gpsBloc, this.storageService, this.navigationService)
+      this.databaseRepository, this.processingQueueBloc, this.gpsBloc, this.storageService, this.navigationService)
       : super(const CollectionLoading(), null);
 
   late TextEditingController transferController = TextEditingController();
@@ -134,7 +134,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
 
   Future<CollectionState> _getCollection(int workId, String orderNumber) async {
     var totalSummary =
-        await _databaseRepository.getTotalSummaries(workId, orderNumber);
+        await databaseRepository.getTotalSummaries(workId, orderNumber);
     total = 0;
     selectedAccount = null;
     selectedAccounts = [];
@@ -435,7 +435,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
             }
           }
 
-          var totalSummary = await _databaseRepository.getTotalSummaries(
+          var totalSummary = await databaseRepository.getTotalSummaries(
               arguments.work.id!, arguments.summary.orderNumber);
 
           var transaction = Transaction(
@@ -454,7 +454,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
               latitude: currentLocation!.latitude.toString(),
               longitude: currentLocation.longitude.toString());
 
-          var id = await _databaseRepository.insertTransaction(transaction);
+          var id = await databaseRepository.insertTransaction(transaction);
 
           var processingQueue = ProcessingQueue(
               body: jsonEncode(transaction.toJson()),
@@ -465,7 +465,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
               createdAt: now(),
               updatedAt: now());
 
-          _processingQueueBloc
+          processingQueueBloc
               .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
           if (status == 'partial') {
@@ -475,7 +475,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
                     .where((element) => element.summaryId == summary.id)
                     .toList();
 
-                var re = await _databaseRepository
+                var re = await databaseRepository
                     .findReason(reason[0].controller.text);
 
                 var transactionSummary = TransactionSummary(
@@ -491,7 +491,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
                     createdAt: now(),
                     updatedAt: now());
 
-                var id = await _databaseRepository
+                var id = await databaseRepository
                     .insertTransactionSummary(transactionSummary);
 
                 var processingQueue = ProcessingQueue(
@@ -504,7 +504,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
                   updatedAt: now(),
                 );
 
-                _processingQueueBloc
+                processingQueueBloc
                     .add(ProcessingQueueAdd(processingQueue: processingQueue));
               }
             });
@@ -515,7 +515,7 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
               .deleteFirm('firm-${arguments.summary.orderNumber}');
 
           var v =
-              await _databaseRepository.validateTransaction(arguments.work.id!);
+              await databaseRepository.validateTransaction(arguments.work.id!);
 
           cashController.clear();
           transferController.clear();

@@ -47,7 +47,7 @@ import 'src/presentation/cubits/database/database_cubit.dart';
 import 'src/presentation/cubits/navigation/navigation_cubit.dart';
 import 'src/presentation/cubits/query/query_cubit.dart';
 import 'src/presentation/cubits/transaction/transaction_cubit.dart';
-import 'src/presentation/cubits/notification/count/count_cubit.dart';
+import 'src/presentation/cubits/count/count_cubit.dart';
 import 'src/presentation/cubits/notification/notification_cubit.dart';
 import 'src/presentation/cubits/ordersummaryreasons/ordersummaryreasons_cubit.dart';
 
@@ -141,8 +141,8 @@ Future<void> main() async {
   await initializeDependencies();
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  final databaseCubit =
-      DatabaseCubit(locator<ApiRepository>(), locator<DatabaseRepository>());
+  final databaseCubit = DatabaseCubit(locator<ApiRepository>(),
+      locator<DatabaseRepository>(), locator<LocalStorageService>());
   await databaseCubit.getDatabase();
 
   final workmanagerService = locator<WorkmanagerService>();
@@ -373,9 +373,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   storageService: locator<LocalStorageService>(),
                   databaseRepository: locator<DatabaseRepository>())),
           BlocProvider(
-              create: (context) => InitialCubit(locator<ApiRepository>())),
+              create: (context) => InitialCubit(
+                  locator<ApiRepository>(),
+                  locator<LocalStorageService>(),
+                  locator<NavigationService>(),
+                  locator<NotificationService>())),
           BlocProvider(create: (context) => PermissionCubit()),
-          BlocProvider(create: (context) => PoliticsCubit()),
+          BlocProvider(
+              create: (context) =>
+                  PoliticsCubit(locator<LocalStorageService>())),
           BlocProvider(
               create: (context) => LoginCubit(
                     locator<DatabaseRepository>(),
@@ -405,71 +411,87 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 locator<NavigationService>()),
           ),
           BlocProvider(
-            create: (context) => WorkCubit(locator<DatabaseRepository>()),
+            create: (context) => WorkCubit(
+                locator<DatabaseRepository>(), locator<LocalStorageService>()),
           ),
           BlocProvider(
             create: (context) => ConfirmCubit(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)),
+                BlocProvider.of<GpsBloc>(context),
+                locator<LocalStorageService>(),
+                locator<NavigationService>()),
           ),
           BlocProvider(
             create: (context) => SummaryCubit(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)),
+                BlocProvider.of<GpsBloc>(context),
+                locator<LocalStorageService>(),
+                locator<NavigationService>()),
           ),
           BlocProvider(
             create: (context) => GeoReferenceCubit(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)),
+                BlocProvider.of<GpsBloc>(context),
+                locator<LocalStorageService>(),
+                locator<NavigationService>()),
           ),
           BlocProvider(
-            create: (context) => InventoryCubit(locator<DatabaseRepository>()),
+            create: (context) => InventoryCubit(locator<DatabaseRepository>(),
+                locator<LocalStorageService>(), locator<NavigationService>()),
           ),
           BlocProvider(
-            create: (context) => PartialCubit(locator<DatabaseRepository>()),
+            create: (context) => PartialCubit(
+                locator<DatabaseRepository>(), locator<NavigationService>()),
           ),
           BlocProvider(
             create: (context) => RejectCubit(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)),
+                BlocProvider.of<GpsBloc>(context),
+                locator<NavigationService>()),
           ),
           BlocProvider(
             create: (context) => RespawnCubit(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)),
+                BlocProvider.of<GpsBloc>(context),
+                locator<LocalStorageService>(),
+                locator<NavigationService>()),
           ),
           BlocProvider(
             create: (context) => CollectionCubit(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
+                BlocProvider.of<GpsBloc>(context),
+                locator<LocalStorageService>(),
+                locator<NavigationService>()),
+          ),
+          BlocProvider(
+            create: (context) => NavigationCubit(
+                locator<DatabaseRepository>(),
+                locator<NavigationService>(),
                 BlocProvider.of<GpsBloc>(context)),
           ),
           BlocProvider(
-            create: (context) => NavigationCubit(locator<DatabaseRepository>(),
-                BlocProvider.of<GpsBloc>(context)),
-          ),
-          BlocProvider(
-            create: (context) => DatabaseCubit(
-                locator<ApiRepository>(), locator<DatabaseRepository>()),
+            create: (context) => DatabaseCubit(locator<ApiRepository>(),
+                locator<DatabaseRepository>(), locator<LocalStorageService>()),
           ),
           BlocProvider(
               create: (context) =>
                   TransactionCubit(locator<DatabaseRepository>())),
           BlocProvider(
-            create: (context) => QueryCubit(locator<DatabaseRepository>()),
+            create: (context) => QueryCubit(
+                locator<DatabaseRepository>(), locator<NavigationService>()),
           ),
           BlocProvider(
             create: (context) => IssuesBloc(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
                 BlocProvider.of<GpsBloc>(context),
-                locator<LocalStorageService>()
-            ),
+                locator<LocalStorageService>()),
           ),
           BlocProvider(
             create: (context) => AccountBloc(locator<DatabaseRepository>()),

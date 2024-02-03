@@ -4,7 +4,7 @@ import 'package:badges/badges.dart' as badge;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //cubit
-import '../cubits/notification/count/count_cubit.dart';
+import '../cubits/count/count_cubit.dart';
 
 //config
 import '../../config/size.dart';

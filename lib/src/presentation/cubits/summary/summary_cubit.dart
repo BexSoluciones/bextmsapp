@@ -33,17 +33,16 @@ import '../../../services/storage.dart';
 
 part 'summary_state.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
-
 class SummaryCubit extends Cubit<SummaryState> with FormatDate {
-  final DatabaseRepository _databaseRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
+  final DatabaseRepository databaseRepository;
+  final ProcessingQueueBloc processingQueueBloc;
   final helperFunctions = HelperFunctions();
   final GpsBloc gpsBloc;
+  final NavigationService navigationService;
+  final LocalStorageService storageService;
 
-  SummaryCubit(
-      this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
+  SummaryCubit(this.databaseRepository, this.processingQueueBloc, this.gpsBloc,
+  this.storageService, this.navigationService)
       : super(const SummaryLoading());
 
   Future<void> getAllSummariesByOrderNumber(int workId) async {
@@ -52,12 +51,12 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
   Future<SummaryState> _getAllSummariesByOrderNumber(int workId) async {
     final summaries =
-        await _databaseRepository.getAllSummariesByOrderNumber(workId);
+        await databaseRepository.getAllSummariesByOrderNumber(workId);
 
-    var time = await _databaseRepository.getDiffTime(workId);
+    var time = await databaseRepository.getDiffTime(workId);
     var isArrived =
-        await _databaseRepository.validateTransactionArrived(workId, 'arrived');
-    var isGeoReferenced = await _databaseRepository.validateClient(workId);
+        await databaseRepository.validateTransactionArrived(workId, 'arrived');
+    var isGeoReferenced = await databaseRepository.validateClient(workId);
 
     return SummarySuccess(
         summaries: summaries,
@@ -69,15 +68,15 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
   Future<List> countBox(String orderNumber) async {
     final summaryFutures = await Future.wait([
-      _databaseRepository.getTotalPackageSummaries(orderNumber),
-      _databaseRepository.getTotalPackageSummariesLoose(orderNumber),
+      databaseRepository.getTotalPackageSummaries(orderNumber),
+      databaseRepository.getTotalPackageSummariesLoose(orderNumber),
     ]);
 
     return summaryFutures;
   }
 
   Future<void> getDiffTime(int workId) async {
-    var time = await _databaseRepository.getDiffTime(workId);
+    var time = await databaseRepository.getDiffTime(workId);
     emit(SummarySuccess(
         summaries: state.summaries,
         origin: state.origin,
@@ -90,9 +89,9 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
       Work work, Summary summary, Transaction transaction) async {
     emit(const SummaryLoading());
 
-    var vts = await _databaseRepository.validateTransactionSummary(
+    var vts = await databaseRepository.validateTransactionSummary(
         work.workcode!, summary.orderNumber, 'summary');
-    var isArrived = await _databaseRepository.validateTransactionArrived(
+    var isArrived = await databaseRepository.validateTransactionArrived(
         transaction.workId, 'arrived');
 
     if (isArrived && vts == false) {
@@ -101,7 +100,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
       transaction.latitude = currentLocation!.latitude.toString();
       transaction.longitude = currentLocation.longitude.toString();
 
-      var id = await _databaseRepository.insertTransaction(transaction);
+      var id = await databaseRepository.insertTransaction(transaction);
 
       var processingQueue = ProcessingQueue(
           body: jsonEncode(transaction.toJson()),
@@ -112,12 +111,12 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
           createdAt: now(),
           updatedAt: now());
 
-      _processingQueueBloc
+      processingQueueBloc
           .add(ProcessingQueueAdd(processingQueue: processingQueue));
     }
 
     final summaries =
-        await _databaseRepository.getAllSummariesByOrderNumber(work.id!);
+        await databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
     emit(SummarySuccess(
         summaries: summaries,
@@ -126,15 +125,15 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         isArrived: isArrived,
         isGeoReference: state.isGeoReference));
 
-    _navigationService.goTo(AppRoutes.inventory,
+    navigationService.goTo(AppRoutes.inventory,
         arguments: InventoryArgument(
             work: work, summary: summary, summaries: summaries));
   }
 
   bool validateDistance(
       currentLocation, double lat, double log, summaryId, int? ratio) {
-    if (_storageService.getBool('$summaryId-distance_ignore') != null &&
-        _storageService.getBool('$summaryId-distance_ignore') == true) {
+    if (storageService.getBool('$summaryId-distance_ignore') != null &&
+        storageService.getBool('$summaryId-distance_ignore') == true) {
       return true;
     } else {
       return helperFunctions.isWithinRadiusGeo(
@@ -152,13 +151,13 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     transaction.longitude = currentLocation.longitude.toString();
 
     final summaries =
-        await _databaseRepository.getAllSummariesByOrderNumber(work.id!);
+        await databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
     var isGeoReferenced =
-        await _databaseRepository.validateClient(transaction.workId);
+        await databaseRepository.validateClient(transaction.workId);
 
-    final enterpriseConfig = _storageService.getObject('config') != null
-        ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
+    final enterpriseConfig = storageService.getObject('config') != null
+        ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
         : null;
 
     logDebug(headerSummaryLogger, enterpriseConfig.toString());
@@ -189,7 +188,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
       }
     }
 
-    await _databaseRepository.insertTransaction(transaction);
+    await databaseRepository.insertTransaction(transaction);
 
     var processingQueue = ProcessingQueue(
         body: jsonEncode(transaction.toJson()),
@@ -198,7 +197,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         createdAt: now(),
         updatedAt: now());
 
-    _processingQueueBloc
+    processingQueueBloc
         .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
     emit(SummarySuccess(
@@ -220,14 +219,14 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
           context, arguments.work, currentLocation!);
     }
 
-    final summaries = await _databaseRepository
+    final summaries = await databaseRepository
         .getAllSummariesByOrderNumber(arguments.work.id!);
 
-    var isArrived = await _databaseRepository.validateTransactionArrived(
+    var isArrived = await databaseRepository.validateTransactionArrived(
         arguments.work.id!, 'arrived');
 
     var isGeoReferenced =
-        await _databaseRepository.validateClient(arguments.work.id!);
+        await databaseRepository.validateClient(arguments.work.id!);
 
     emit(SummarySuccess(
         summaries: summaries,
@@ -238,13 +237,12 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   }
 
   Future<void> error(int id, String error) async {
-    final summaries =
-        await _databaseRepository.getAllSummariesByOrderNumber(id);
+    final summaries = await databaseRepository.getAllSummariesByOrderNumber(id);
 
     var isArrived =
-        await _databaseRepository.validateTransactionArrived(id, 'arrived');
+        await databaseRepository.validateTransactionArrived(id, 'arrived');
 
-    var isGeoReferenced = await _databaseRepository.validateClient(id);
+    var isGeoReferenced = await databaseRepository.validateClient(id);
 
     emit(SummaryFailed(
         error: error,

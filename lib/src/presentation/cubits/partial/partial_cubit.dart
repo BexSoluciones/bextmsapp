@@ -11,9 +11,6 @@ import '../../../domain/models/reason.dart';
 //repositories
 import '../../../domain/repositories/database_repository.dart';
 
-//blocs
-import '../../blocs/processing_queue/processing_queue_bloc.dart';
-
 //utils
 import '../base/base_cubit.dart';
 
@@ -23,12 +20,11 @@ import '../../../services/navigation.dart';
 
 part 'partial_state.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-
 class PartialCubit extends BaseCubit<PartialState, List<ReasonProduct>?> {
-  final DatabaseRepository _databaseRepository;
+  final DatabaseRepository databaseRepository;
+  final NavigationService navigationService;
 
-  PartialCubit(this._databaseRepository)
+  PartialCubit(this.databaseRepository, this.navigationService)
       : super(const PartialLoading(), null);
 
   Future<void> init(InventoryArgument arguments) async {
@@ -36,10 +32,10 @@ class PartialCubit extends BaseCubit<PartialState, List<ReasonProduct>?> {
 
     await run(() async {
       final summaries =
-          await _databaseRepository.getAllSummariesByOrderNumberMoved(
+          await databaseRepository.getAllSummariesByOrderNumberMoved(
               arguments.work.id!, arguments.summary.orderNumber);
 
-      final reasons = await _databaseRepository.getAllReasons();
+      final reasons = await databaseRepository.getAllReasons();
 
       final list = summaries
           .map((e) => ReasonProduct(
@@ -70,7 +66,7 @@ class PartialCubit extends BaseCubit<PartialState, List<ReasonProduct>?> {
       } else {
         arguments.summaries = state.summaries;
         arguments.r = state.products;
-        _navigationService.goTo(AppRoutes.collection, arguments: arguments);
+        navigationService.goTo(AppRoutes.collection, arguments: arguments);
       }
     });
   }

@@ -10,17 +10,16 @@ import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //service
-import '../../../locator.dart';
 import '../../../services/storage.dart';
 
 part 'work_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
-  final DatabaseRepository _databaseRepository;
+  final DatabaseRepository databaseRepository;
+  final LocalStorageService storageService;
 
-  WorkCubit(this._databaseRepository) : super(const WorkLoading(), []);
+  WorkCubit(this.databaseRepository, this.storageService) : super(const WorkLoading(), []);
 
   int page = 0;
 
@@ -28,19 +27,19 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
     if (isBusy) return;
 
     await run(() async {
-      final works = await _databaseRepository.findAllWorksByWorkcode(workcode);
+      final works = await databaseRepository.findAllWorksByWorkcode(workcode);
 
       if (needRebuild) {
         data = [];
       }
 
-      var started = _storageService.getBool('$workcode-started');
-      var confirm = _storageService.getBool('$workcode-confirm');
+      var started = storageService.getBool('$workcode-started');
+      var confirm = storageService.getBool('$workcode-confirm');
 
       data = works;
 
       for (var d in data) {
-        d.summaries = await _databaseRepository.getAllSummariesByWorkcode(
+        d.summaries = await databaseRepository.getAllSummariesByWorkcode(
             d.id!, d.customer!);
       }
 
@@ -72,13 +71,13 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
   }
 
   void changeStarted(String workcode, bool data) {
-    _storageService.setBool('$workcode-started', data);
+    storageService.setBool('$workcode-started', data);
     emit(
         WorkSuccess(works: state.works, confirm: state.confirm, started: data));
   }
 
   void changeConfirm(String workcode, bool data) {
-    _storageService.setBool('$workcode-confirm', data);
+    storageService.setBool('$workcode-confirm', data);
     emit(WorkSuccess(
         works: state.works,
         visited: state.visited,
