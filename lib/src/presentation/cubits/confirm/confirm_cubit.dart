@@ -27,15 +27,14 @@ import '../../../services/navigation.dart';
 
 part 'confirm_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final NavigationService _navigationService = locator<NavigationService>();
-
 class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
+  final LocalStorageService storageService;
+  final NavigationService navigationService;
 
-  ConfirmCubit(this._databaseRepository, this._processingQueueBloc, this.gpsBloc) : super(const ConfirmLoading(), null);
+  ConfirmCubit(this._databaseRepository, this._processingQueueBloc, this.gpsBloc, this.storageService, this.navigationService) : super(const ConfirmLoading(), null);
 
   Future<void> init(Work work) async {
     emit(await _getWork(work));
@@ -53,7 +52,7 @@ class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
 
       var currentLocation = gpsBloc.state.lastKnownLocation;
 
-      _storageService.setBool('${arguments.work.workcode}-started', true);
+      storageService.setBool('${arguments.work.workcode}-started', true);
 
       var processingQueueStatus = ProcessingQueue(
           body: jsonEncode({
@@ -90,13 +89,13 @@ class ConfirmCubit extends BaseCubit<ConfirmState, String?> with FormatDate {
 
       _processingQueueBloc.add(ProcessingQueueAdd(processingQueue: processingQueueTransaction));
 
-      _navigationService.goTo(AppRoutes.work, arguments: arguments);
+      navigationService.goTo(AppRoutes.work, arguments: arguments);
 
     });
   }
 
   Future<void> out(arguments) async  {
-    _storageService.setBool('${arguments.work.workcode}-started', false);
-    _navigationService.goTo(AppRoutes.work, arguments: arguments);
+    storageService.setBool('${arguments.work.workcode}-started', false);
+    navigationService.goTo(AppRoutes.work, arguments: arguments);
   }
 }

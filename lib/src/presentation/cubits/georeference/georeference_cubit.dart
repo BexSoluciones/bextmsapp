@@ -23,16 +23,15 @@ import '../../../services/storage.dart';
 
 part 'georeference_state.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
-
 class GeoReferenceCubit extends Cubit<GeoReferenceState> with FormatDate {
-  final DatabaseRepository _databaseRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
+  final DatabaseRepository databaseRepository;
+  final ProcessingQueueBloc processingQueueBloc;
   final GpsBloc gpsBloc;
+  final NavigationService navigationService;
+  final LocalStorageService storageService;
 
   GeoReferenceCubit(
-      this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
+      this.databaseRepository, this.processingQueueBloc, this.gpsBloc, this.storageService, this.navigationService)
       : super(GeoReferenceInitial());
 
   Future<void> init() async {
@@ -47,9 +46,9 @@ class GeoReferenceCubit extends Cubit<GeoReferenceState> with FormatDate {
 
     client.latitude = currentLocation!.latitude.toString();
     client.longitude = currentLocation.longitude.toString();
-    client.userId = _storageService.getInt('user_id');
+    client.userId = storageService.getInt('user_id');
 
-    await _databaseRepository.insertClient(client);
+    await databaseRepository.insertClient(client);
 
     var processingQueue = ProcessingQueue(
         body: jsonEncode(client.toJson()),
@@ -58,11 +57,11 @@ class GeoReferenceCubit extends Cubit<GeoReferenceState> with FormatDate {
         createdAt: now(),
         updatedAt: now());
 
-    _processingQueueBloc
+    processingQueueBloc
         .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
     emit(GeoReferenceFinished());
 
-    _navigationService.goTo(AppRoutes.summary, arguments: argument);
+    navigationService.goTo(AppRoutes.summary, arguments: argument);
   }
 }

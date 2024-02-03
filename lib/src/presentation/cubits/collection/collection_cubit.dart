@@ -36,19 +36,18 @@ import '../../../services/navigation.dart';
 
 part 'collection_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final NavigationService _navigationService = locator<NavigationService>();
-
 class CollectionCubit extends BaseCubit<CollectionState, String?>
     with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
+  final LocalStorageService storageService;
+  final NavigationService navigationService;
 
   final helperFunctions = HelperFunctions();
 
   CollectionCubit(
-      this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
+      this._databaseRepository, this._processingQueueBloc, this.gpsBloc, this.storageService, this.navigationService)
       : super(const CollectionLoading(), null);
 
   late TextEditingController transferController = TextEditingController();
@@ -142,8 +141,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
     dateController.text = date(null);
     return CollectionInitial(
         totalSummary: totalSummary,
-        enterpriseConfig: _storageService.getObject('config') != null
-            ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
+        enterpriseConfig: storageService.getObject('config') != null
+            ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
             : null);
   }
 
@@ -155,31 +154,31 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         goToSummary(state.work);
       }
     } else {
-      _navigationService.goBack();
+      navigationService.goBack();
     }
   }
 
   void goToFirm(String orderNumber) {
-    _navigationService.goTo(AppRoutes.firm, arguments: orderNumber);
+    navigationService.goTo(AppRoutes.firm, arguments: orderNumber);
   }
 
   void goToCamera(String orderNumber) {
-    _navigationService.goTo(AppRoutes.camera, arguments: orderNumber);
+    navigationService.goTo(AppRoutes.camera, arguments: orderNumber);
   }
 
   void goToCodeQR(String? qr) {
-    _navigationService.goTo(AppRoutes.codeQr, arguments: qr);
+    navigationService.goTo(AppRoutes.codeQr, arguments: qr);
   }
 
   void goToSummary(work) {
-    _navigationService.goTo(AppRoutes.summary,
+    navigationService.goTo(AppRoutes.summary,
         arguments: SummaryArgument(
           work: work,
         ));
   }
 
   void goToWork(work) {
-    _navigationService.goTo(AppRoutes.work,
+    navigationService.goTo(AppRoutes.work,
         arguments: WorkArgument(
           work: work,
         ));
@@ -208,16 +207,16 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         }
 
         if (arguments.summary.typeOfCharge == 'CREDITO' && total == 0) {
-          _storageService.setBool('firmRequired', false);
-          _storageService.setBool('photoRequired', false);
+          storageService.setBool('firmRequired', false);
+          storageService.setBool('photoRequired', false);
           return confirmTransaction(arguments);
         }
 
         if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
           if (total == state.totalSummary) {
-            _storageService.setBool('firmRequired', false);
-            _storageService.setBool('photoRequired', false);
+            storageService.setBool('firmRequired', false);
+            storageService.setBool('photoRequired', false);
             return confirmTransaction(arguments);
           } else {
             emit(CollectionFailed(
@@ -227,8 +226,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove != null && allowInsetsAbove == true)) {
-          _storageService.setBool('firmRequired', false);
-          _storageService.setBool('photoRequired', false);
+          storageService.setBool('firmRequired', false);
+          storageService.setBool('photoRequired', false);
 
           if (total != 0 && total <= state.totalSummary!.toDouble()) {
             return confirmTransaction(arguments);
@@ -240,8 +239,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
           if (total <= state.totalSummary!.toDouble()) {
-            _storageService.setBool('firmRequired', false);
-            _storageService.setBool('photoRequired', false);
+            storageService.setBool('firmRequired', false);
+            storageService.setBool('photoRequired', false);
             return confirmTransaction(arguments);
           } else {
             emit(CollectionFailed(
@@ -252,8 +251,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
         } else if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
             (allowInsetsAbove != null && allowInsetsAbove == true)) {
           if (total >= state.totalSummary!.toDouble()) {
-            _storageService.setBool('firmRequired', false);
-            _storageService.setBool('photoRequired', false);
+            storageService.setBool('firmRequired', false);
+            storageService.setBool('photoRequired', false);
             emit(CollectionWaiting(
                 totalSummary: state.totalSummary,
                 enterpriseConfig: state.enterpriseConfig));
@@ -267,8 +266,8 @@ class CollectionCubit extends BaseCubit<CollectionState, String?>
       } else {
         emit(CollectionInitial(
             totalSummary: state.totalSummary,
-            enterpriseConfig: _storageService.getObject('config') != null
-                ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
+            enterpriseConfig: storageService.getObject('config') != null
+                ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
                 : null));
       }
     });
