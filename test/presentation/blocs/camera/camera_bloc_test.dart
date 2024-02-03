@@ -3,9 +3,11 @@ import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
-import '../../firebase_mock.dart';
+import '../../../firebase_mock.dart';
 
 //mocks
+import '../../../locator_mock.dart';
+import '../../../locator_mock.mocks.dart';
 import 'camera_bloc_test.mocks.dart';
 
 //domain
@@ -51,7 +53,9 @@ void main() async {
     blocTest<CameraBloc, CameraState>(
       'Should initialize the camera controller',
       build: () => CameraBloc(
-          cameraUtils: cameraUtils, databaseRepository: databaseRepository),
+          cameraUtils: cameraUtils,
+          databaseRepository: databaseRepository,
+          navigationService: locator<MockNavigationService>()),
       act: (CameraBloc bloc) => bloc.add(CameraInitialized()),
       expect: <CameraState>() => [
         CameraReady(),
@@ -65,7 +69,9 @@ void main() async {
             CameraException("cameraPermission",
                 "MediaRecorderCamera permission not granted")));
         return CameraBloc(
-            cameraUtils: cameraUtils, databaseRepository: databaseRepository);
+            cameraUtils: cameraUtils,
+            databaseRepository: databaseRepository,
+            navigationService: locator<MockNavigationService>());
       },
       act: (CameraBloc bloc) => bloc.add(CameraInitialized()),
       expect: <CameraState>() => [
@@ -79,7 +85,9 @@ void main() async {
         when(cameraUtils.getCameraController(any, any)).thenAnswer(
             (_) => Future.error(Exception("Bad state: no element")));
         return CameraBloc(
-            cameraUtils: cameraUtils, databaseRepository: databaseRepository);
+            cameraUtils: cameraUtils,
+            databaseRepository: databaseRepository,
+            navigationService: locator<MockNavigationService>());
       },
       act: (CameraBloc bloc) => bloc.add(CameraInitialized()),
       expect: <CameraState>() => [
@@ -131,11 +139,12 @@ void main() async {
     blocTest<CameraBloc, CameraState>(
       'Should pass nothing (camera is not ready)',
       build: () => CameraBloc(
-          cameraUtils: cameraUtils, databaseRepository: databaseRepository),
+          cameraUtils: cameraUtils,
+          databaseRepository: databaseRepository,
+          navigationService: locator<MockNavigationService>()),
       act: (CameraBloc bloc) => bloc.add(CameraCaptured()),
-      expect: <CameraState>() => [
-        const CameraFailure(error: 'Camera is not ready')
-      ],
+      expect: <CameraState>() =>
+          [const CameraFailure(error: 'Camera is not ready')],
     );
   });
 
@@ -143,7 +152,9 @@ void main() async {
     blocTest<CameraBloc, CameraState>(
       'Should dispose the camera',
       build: () => CameraBloc(
-          cameraUtils: cameraUtils, databaseRepository: databaseRepository),
+          cameraUtils: cameraUtils,
+          databaseRepository: databaseRepository,
+          navigationService: locator<MockNavigationService>()),
       act: (CameraBloc bloc) => bloc
         ..add(CameraInitialized())
         ..add(CameraStopped()),

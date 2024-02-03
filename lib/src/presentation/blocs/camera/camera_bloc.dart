@@ -24,19 +24,19 @@ import '../../../services/navigation.dart';
 part 'camera_event.dart';
 part 'camera_state.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-
 class CameraBloc extends Bloc<CameraEvent, CameraState> {
   final CameraUtils cameraUtils;
   final DatabaseRepository databaseRepository;
   final ResolutionPreset resolutionPreset;
   final CameraLensDirection cameraLensDirection;
+  final NavigationService navigationService;
 
   CameraController? _controller;
 
   CameraBloc({
     required this.cameraUtils,
     required this.databaseRepository,
+    required this.navigationService,
     this.resolutionPreset = ResolutionPreset.medium,
     this.cameraLensDirection = CameraLensDirection.back,
   }) : super(CameraInitial()) {
@@ -183,7 +183,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraFolderToState(CameraFolder event, emit) {
-    _navigationService.goTo(AppRoutes.photo, arguments: event.path);
+    navigationService.goTo(AppRoutes.photo, arguments: event.path);
     emit(CameraReady());
   }
 

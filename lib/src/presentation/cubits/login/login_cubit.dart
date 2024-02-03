@@ -56,8 +56,8 @@ import '../../../services/navigation.dart';
 part 'login_state.dart';
 
 class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
-  final DatabaseRepository _databaseRepository;
-  final ApiRepository _apiRepository;
+  final DatabaseRepository databaseRepository;
+  final ApiRepository apiRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
   final LocalStorageService storageService;
@@ -67,8 +67,8 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   var helperFunctions = HelperFunctions();
 
   LoginCubit(
-      this._databaseRepository,
-      this._apiRepository,
+      this.databaseRepository,
+      this.apiRepository,
       this._processingQueueBloc,
       this.gpsBloc,
       this.storageService,
@@ -88,7 +88,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   }
 
   Future<void> getConfigEnterprise() async {
-    var response = await _apiRepository.getConfigEnterprise(
+    var response = await apiRepository.getConfigEnterprise(
         request: EnterpriseConfigRequest());
     if (response is DataSuccess) {
       var data = response.data as EnterpriseConfigResponse;
@@ -99,17 +99,17 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   }
 
   Future<void> getReasons() async {
-    var response = await _apiRepository.reasons(request: ReasonRequest());
+    var response = await apiRepository.reasons(request: ReasonRequest());
     if (response is DataSuccess) {
       var data = response.data as ReasonResponse;
-      _databaseRepository.insertReasons(data.reasons);
+      databaseRepository.insertReasons(data.reasons);
     }
   }
 
   Future<void> getAccounts() async {
-    var response = await _apiRepository.accounts(request: AccountRequest());
+    var response = await apiRepository.accounts(request: AccountRequest());
     if (response is DataSuccess) {
-      _databaseRepository.insertAccounts(response.data!.accounts);
+      databaseRepository.insertAccounts(response.data!.accounts);
     }
   }
 
@@ -119,7 +119,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         localWorks.toSet().difference(externalWorks.toSet()).toList();
     if (difference.isNotEmpty) {
       for (var key in difference) {
-        await _databaseRepository.updateStatusWork(key!, 'complete');
+        await databaseRepository.updateStatusWork(key!, 'complete');
       }
     }
   }
@@ -141,7 +141,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
 
       var location = await geolocatorService.acquireCurrentLocationGeo();
 
-      final response = await _apiRepository.login(
+      final response = await apiRepository.login(
         request: LoginRequest(usernameController.text, passwordController.text),
       );
 
@@ -177,7 +177,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
         _processingQueueBloc
             .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
-        final responseWorks = await _apiRepository.works(
+        final responseWorks = await apiRepository.works(
             request: WorkRequest(
                 login.user!.id!,
                 device != null ? device['id'] : null,
@@ -235,13 +235,13 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
             }
           }
           final distinct = warehouses.unique((x) => x.id);
-          await _databaseRepository.insertWarehouses(distinct);
+          await databaseRepository.insertWarehouses(distinct);
 
           //TODO:: refactoring
           var workcodes = groupBy(works, (Work work) => work.workcode);
 
           if (workcodes.isNotEmpty) {
-            var localWorks = await _databaseRepository.getAllWorks();
+            var localWorks = await databaseRepository.getAllWorks();
             var localWorkcode = groupBy(localWorks, (Work obj) => obj.workcode);
             await differenceWorks(
                 localWorkcode.keys.toList(), workcodes.keys.toList());
@@ -279,9 +279,9 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
             }
           }
 
-          await _databaseRepository.insertWorks(works);
-          await _databaseRepository.insertSummaries(summaries);
-          await _databaseRepository.insertTransactions(transactions);
+          await databaseRepository.insertWorks(works);
+          await databaseRepository.insertSummaries(summaries);
+          await databaseRepository.insertTransactions(transactions);
 
           emit(LoginSuccess(
               login: login,

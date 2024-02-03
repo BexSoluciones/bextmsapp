@@ -30,19 +30,21 @@ import '../../widgets/error_alert_dialog.dart';
 part 'gps_event.dart';
 part 'gps_state.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
-
-LatLng? lastRecordedLocation;
-
 class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
+
+  final NavigationService navigationService;
+  final LocalStorageService storageService;
+  final DatabaseRepository databaseRepository;
+
   StreamSubscription? gpsServiceSubscription;
   StreamSubscription? positionStream;
-
+  LatLng? lastRecordedLocation;
   bool showingDialog = false;
 
-  GpsBloc()
+  GpsBloc(
+      {required this.navigationService,
+      required this.storageService,
+      required this.databaseRepository})
       : super(const GpsState(
             isGpsEnabled: false, isGpsPermissionGranted: false)) {
     on<GpsAndPermissionEvent>((event, emit) => emit(state.copyWith(
@@ -64,7 +66,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   }
 
   Stream<List<l.Location>> get locations {
-    return _databaseRepository.watchAllLocations();
+    return databaseRepository.watchAllLocations();
   }
 
   Future<void> startFollowingUser() async {
@@ -88,7 +90,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
           errorGpsAlertDialog(
             onTap: () => Geolocator.openLocationSettings(),
             context:
-                _navigationService.navigatorKey.currentState!.overlay!.context,
+                navigationService.navigatorKey.currentState!.overlay!.context,
             error: 'error',
             iconData: Icons.error,
             buttonText: 'buttonText',
@@ -107,7 +109,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   }
 
   EnterpriseConfig? _getEnterpriseConfigFromStorage() {
-    var storedConfig = _storageService.getObject('config');
+    var storedConfig = storageService.getObject('config');
     return storedConfig != null ? EnterpriseConfig.fromMap(storedConfig) : null;
   }
 
@@ -209,7 +211,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
             Geolocator.openLocationSettings();
           },
           context:
-              _navigationService.navigatorKey.currentState!.overlay!.context,
+              navigationService.navigatorKey.currentState!.overlay!.context,
           error: 'error',
           iconData: Icons.error,
           buttonText: 'buttonText');
@@ -233,7 +235,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       } else {
         if (showingDialog) {
           Navigator.pop(
-              _navigationService.navigatorKey.currentState!.overlay!.context);
+              navigationService.navigatorKey.currentState!.overlay!.context);
           showingDialog = false;
         }
       }
@@ -295,7 +297,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
 
   Future<void> saveLocation(String type, Position position, int send) async {
     try {
-      var lastLocation = await _databaseRepository.getLastLocation();
+      var lastLocation = await databaseRepository.getLastLocation();
       var location = l.Location(
           latitude: position.latitude,
           longitude: position.longitude,
@@ -305,7 +307,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
           isMock: position.isMocked,
           speed: position.speed,
           speedAccuracy: position.speedAccuracy,
-          userId: _storageService.getInt('user_id') ?? 0,
+          userId: storageService.getInt('user_id') ?? 0,
           time: DateTime.now(),
           send: 0);
 
@@ -325,30 +327,30 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
         var speed = ((distance / seconds) * 18) / 5;
         if (diff == true) {
           if (speed < 10) {
-            _storageService.setBool('is_walking', true);
+            storageService.setBool('is_walking', true);
           } else if (speed > 10) {
-            _storageService.setBool('is_walking', false);
+            storageService.setBool('is_walking', false);
           }
 
-          await _databaseRepository.insertLocation(location);
+          await databaseRepository.insertLocation(location);
         } else {
           logDebugFine(headerDeveloperLogger, 'no se ha movido');
         }
       } else {
-        await _databaseRepository.insertLocation(location);
+        await databaseRepository.insertLocation(location);
       }
 
-      var count = await _databaseRepository.countLocationsManager();
+      var count = await databaseRepository.countLocationsManager();
       if (count) {
         var processingQueue = ProcessingQueue(
-            body: await _databaseRepository.getLocationsToSend(),
+            body: await databaseRepository.getLocationsToSend(),
             task: 'incomplete',
             code: 'store_locations',
             createdAt: now(),
             updatedAt: now());
 
-        await _databaseRepository.insertProcessingQueue(processingQueue);
-        await _databaseRepository.updateLocationsManager();
+        await databaseRepository.insertProcessingQueue(processingQueue);
+        await databaseRepository.updateLocationsManager();
       }
     } catch (e, stackTrace) {
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);

@@ -366,7 +366,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(
             create: (context) => ThemeBloc(),
           ),
-          BlocProvider(create: (_) => GpsBloc()),
+          BlocProvider(
+              create: (_) => GpsBloc(
+                  navigationService: locator<NavigationService>(),
+                  storageService: locator<LocalStorageService>(),
+                  databaseRepository: locator<DatabaseRepository>())),
           BlocProvider(
               create: (context) => InitialCubit(locator<ApiRepository>())),
           BlocProvider(create: (context) => PermissionCubit()),

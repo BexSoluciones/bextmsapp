@@ -17,10 +17,10 @@ import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing
 import 'package:mockito/mockito.dart';
 //mocks
 import 'home_cubit_test.mocks.dart';
-import '../../firebase_mock.dart';
+import '../../../firebase_mock.dart';
 //services
-import '../../locator_mock.dart';
-import '../../locator_mock.mocks.dart';
+import '../../../locator_mock.dart';
+import '../../../locator_mock.mocks.dart';
 
 @GenerateMocks([], customMocks: [
   MockSpec<DatabaseRepository>(onMissingStub: null),

@@ -110,6 +110,7 @@ dev_dependencies:
     git:
       url: https://github.com/hivedb/hive
       path: hive_generator
+  http_mock_adapter: ^0.6.1
 
 flutter_icons:
   ios: true
