@@ -18,22 +18,21 @@ import '../../../domain/abstracts/format_abstract.dart';
 import '../../../domain/repositories/database_repository.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/storage.dart';
 import '../../../services/navigation.dart';
 
 part 'history_order_event.dart';
 part 'history_order_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final NavigationService _navigationService = locator<NavigationService>();
-
 class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState>
     with FormatDate {
-  final DatabaseRepository _databaseRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
+  final DatabaseRepository databaseRepository;
+  final ProcessingQueueBloc processingQueueBloc;
+  final LocalStorageService storageService;
+  final NavigationService navigationService;
 
-  HistoryOrderBloc(this._databaseRepository, this._processingQueueBloc)
+  HistoryOrderBloc(this.databaseRepository, this.processingQueueBloc,
+      this.storageService, this.navigationService)
       : super(HistoryOrderInitial()) {
     on<HistoryOrderInitialRequest>(_requestHistory);
     on<ChangeCurrentWork>(_changeCurrentWork);
@@ -45,9 +44,9 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState>
     HistoryOrderInitialRequest event,
     Emitter<HistoryOrderState> emit,
   ) async {
-    if (_storageService.getBool('${event.work.workcode}-oneOrMoreFinished') ==
+    if (storageService.getBool('${event.work.workcode}-oneOrMoreFinished') ==
         true) {
-      await _navigationService.goTo(AppRoutes.work,
+      await navigationService.goTo(AppRoutes.work,
           arguments: WorkArgument(
             work: event.work,
           ));
@@ -55,25 +54,25 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState>
 
     emit(HistoryOrderLoading());
 
-    historyOrder = await _databaseRepository.getHistoryOrder(
+    historyOrder = await databaseRepository.getHistoryOrder(
         event.work.workcode!, event.work.zoneId ?? 0);
 
     if (historyOrder != null) {
       emit(HistoryOrderShow(historyOrder: historyOrder));
 
       bool? showAgain;
-      showAgain = _storageService.getBool('${event.work.workcode}-showAgain');
+      showAgain = storageService.getBool('${event.work.workcode}-showAgain');
 
       (historyOrder != null && showAgain == false)
-          ? await _navigationService.goTo(AppRoutes.history,
+          ? await navigationService.goTo(AppRoutes.history,
               arguments: HistoryArgument(
                   work: event.work,
                   likelihood: historyOrder!.likelihood!,
                   differents: historyOrder!.different))
-          : await _navigationService.goTo(AppRoutes.work,
+          : await navigationService.goTo(AppRoutes.work,
               arguments: WorkArgument(work: event.work));
     } else {
-      await _navigationService.goTo(AppRoutes.work,
+      await navigationService.goTo(AppRoutes.work,
           arguments: WorkArgument(work: event.work));
 
       emit(HistoryOrderError(error: 'Error obteniendo el historico'));
@@ -86,13 +85,13 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState>
   ) async {
     emit(HistoryOrderLoading());
 
-    await _databaseRepository.insertWorks(historyOrder!.works);
+    await databaseRepository.insertWorks(historyOrder!.works);
 
     useHistoric(event.work.workcode!, historyOrder!.id!);
 
     emit(HistoryOrderChanged(historyOrder: historyOrder));
 
-    await _navigationService.goTo(AppRoutes.work,
+    await navigationService.goTo(AppRoutes.work,
         arguments: WorkArgument(work: event.work));
   }
 
@@ -108,7 +107,7 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState>
       updatedAt: now(),
     );
 
-    _processingQueueBloc
+    processingQueueBloc
         .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
     processingQueue = ProcessingQueue(
@@ -118,10 +117,10 @@ class HistoryOrderBloc extends Bloc<HistoryOrderEvent, HistoryOrderState>
         createdAt: now(),
         updatedAt: now());
 
-    _processingQueueBloc
+    processingQueueBloc
         .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
-    _storageService.setBool('$workcode-routing', true);
-    _storageService.setBool('$workcode-historic', true);
+    storageService.setBool('$workcode-routing', true);
+    storageService.setBool('$workcode-historic', true);
   }
 }

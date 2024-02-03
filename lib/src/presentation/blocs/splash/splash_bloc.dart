@@ -10,11 +10,11 @@ import '../../../utils/constants/strings.dart';
 part 'splash_event.dart';
 part 'splash_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
+class SplashBloc extends Bloc<SplashEvent, SplashState> {
+  final LocalStorageService storageService;
 
-class SplashScreenBloc extends Bloc<SplashScreenEvent, SplashScreenState> {
-  SplashScreenBloc() : super(Initial()){
-    on<HandleNavigateScreenEvent>(_observe);
+  SplashBloc({required this.storageService}) : super(Initial()) {
+    on<HandleNavigateEvent>(_observe);
   }
 
   void _observe(event, emit) async {
@@ -23,12 +23,12 @@ class SplashScreenBloc extends Bloc<SplashScreenEvent, SplashScreenState> {
       if (firstTime == null || firstTime == false) {
         emit(const Loaded(route: AppRoutes.politics));
       } else {
-        var token = _storageService.getString('token');
-        var company = _storageService.getString('company');
+        var token = storageService.getString('token');
+        var company = storageService.getString('company');
 
         if (token != null) {
           emit(const Loaded(route: AppRoutes.home));
-        } else if(company != null) {
+        } else if (company != null) {
           emit(const Loaded(route: AppRoutes.login));
         } else {
           emit(const Loaded(route: AppRoutes.company));
@@ -37,10 +37,10 @@ class SplashScreenBloc extends Bloc<SplashScreenEvent, SplashScreenState> {
     });
   }
 
-  Stream<SplashScreenState> mapEventToState(
-      SplashScreenEvent event,
-      ) async* {
-    if (event is HandleNavigateScreenEvent) {
+  Stream<SplashState> mapEventToState(
+    SplashState event,
+  ) async* {
+    if (event is HandleNavigateEvent) {
       yield Loading();
       await Future.delayed(const Duration(seconds: 3));
       isFirstTime().then((firstTime) async* {
@@ -50,26 +50,22 @@ class SplashScreenBloc extends Bloc<SplashScreenEvent, SplashScreenState> {
           validateSession();
         }
       });
-
     }
   }
 
   Future<bool?> isFirstTime() async {
-    return _storageService.getBool('first_time');
+    return storageService.getBool('first_time');
   }
 
   Stream<Loaded> validateSession() async* {
-    var token = _storageService.getString('token');
-    var company = _storageService.getString('company');
+    var token = storageService.getString('token');
+    var company = storageService.getString('company');
     if (token != null) {
       yield const Loaded(route: AppRoutes.home);
-    } else if(company != null) {
+    } else if (company != null) {
       yield const Loaded(route: AppRoutes.login);
     } else {
       yield const Loaded(route: AppRoutes.company);
     }
   }
-
-
-
 }

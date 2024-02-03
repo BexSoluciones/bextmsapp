@@ -1,5 +1,5 @@
 part of 'splash_bloc.dart';
 
-abstract class SplashScreenEvent {}
+abstract class SplashEvent {}
 
-class HandleNavigateScreenEvent extends SplashScreenEvent {}
+class HandleNavigateEvent extends SplashEvent {}

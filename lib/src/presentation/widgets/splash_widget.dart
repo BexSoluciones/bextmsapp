@@ -8,7 +8,7 @@ import '../blocs/splash/splash_bloc.dart';
 import '../../utils/constants/colors.dart';
 
 class SplashScreenWidget extends StatefulWidget {
-  const SplashScreenWidget({ Key? key }) : super(key: key);
+  const SplashScreenWidget({ super.key });
 
   @override
   SplashScreenWidgetState createState() => SplashScreenWidgetState();
@@ -54,6 +54,6 @@ class SplashScreenWidgetState extends State<SplashScreenWidget> {
 
   //This method will dispatch the navigateToHomeScreen event.
   void _dispatchEvent(BuildContext context) {
-    BlocProvider.of<SplashScreenBloc>(context).add(HandleNavigateScreenEvent());
+    BlocProvider.of<SplashBloc>(context).add(HandleNavigateEvent());
   }
 }

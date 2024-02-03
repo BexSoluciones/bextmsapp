@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/services/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -41,8 +42,8 @@ class _SplashViewState extends State<SplashView> {
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
             child: BlocProvider(
-              create: (_) => SplashScreenBloc(),
-              child: BlocListener<SplashScreenBloc, SplashScreenState>(
+              create: (_) => SplashBloc(storageService: locator<LocalStorageService>()),
+              child: BlocListener<SplashBloc, SplashState>(
                 listener: (context, state) {
                   if (state is Loaded) {
                     _navigationService.goTo(state.route!);

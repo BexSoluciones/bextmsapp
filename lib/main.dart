@@ -360,7 +360,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             create: (context) => ProcessingQueueBloc(
                 locator<DatabaseRepository>(),
                 locator<ApiRepository>(),
-                BlocProvider.of<NetworkBloc>(context))
+                BlocProvider.of<NetworkBloc>(context),
+                locator<LocalStorageService>())
               ..add(ProcessingQueueObserve()),
           ),
           BlocProvider(
@@ -397,8 +398,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     locator<WorkmanagerService>(),
                   )),
           BlocProvider(
-            create: (context) => HistoryOrderBloc(locator<DatabaseRepository>(),
-                BlocProvider.of<ProcessingQueueBloc>(context)),
+            create: (context) => HistoryOrderBloc(
+                locator<DatabaseRepository>(),
+                BlocProvider.of<ProcessingQueueBloc>(context),
+                locator<LocalStorageService>(),
+                locator<NavigationService>()),
           ),
           BlocProvider(
             create: (context) => WorkCubit(locator<DatabaseRepository>()),
@@ -463,7 +467,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             create: (context) => IssuesBloc(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
-                BlocProvider.of<GpsBloc>(context)),
+                BlocProvider.of<GpsBloc>(context),
+                locator<LocalStorageService>()
+            ),
           ),
           BlocProvider(
             create: (context) => AccountBloc(locator<DatabaseRepository>()),

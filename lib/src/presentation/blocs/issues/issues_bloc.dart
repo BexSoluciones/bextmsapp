@@ -24,15 +24,15 @@ import '../../../services/storage.dart';
 part 'issues_event.dart';
 part 'issues_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class IssuesBloc extends Bloc<IssuesEvent, IssuesState> with FormatDate {
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
+  final LocalStorageService storageService;
   final helperFunctions = HelperFunctions();
 
-  IssuesBloc(this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
+  IssuesBloc(this._databaseRepository, this._processingQueueBloc, this.gpsBloc, this.storageService)
       : super(IssuesState()) {
     on<GetIssuesList>(_getIssuesList);
     on<GetUserId>(_getUserId);
@@ -128,13 +128,13 @@ class IssuesBloc extends Bloc<IssuesEvent, IssuesState> with FormatDate {
     var location = gpsBloc.state.lastKnownLocation;
 
     var firmApplication = await helperFunctions.getFirm(
-        'firm-${(state.status == 'work') ? state.workId.toString() + state.codmotvis! : (state.status == 'summary') ? state.selectedSummaryId.toString() + state.codmotvis! : _storageService.getInt('user_id')!.toString() + state.codmotvis!}');
+        'firm-${(state.status == 'work') ? state.workId.toString() + state.codmotvis! : (state.status == 'summary') ? state.selectedSummaryId.toString() + state.codmotvis! : storageService.getInt('user_id')!.toString() + state.codmotvis!}');
 
     var images = await helperFunctions.getImages((state.status == 'work')
         ? state.workId.toString() + state.codmotvis!
         : (state.status == 'summary')
             ? state.selectedSummaryId.toString() + state.codmotvis!
-            : _storageService.getInt('user_id')!.toString() + state.codmotvis!);
+            : storageService.getInt('user_id')!.toString() + state.codmotvis!);
 
     var imagesPath = <String>[];
     var firmApplicationPath = <String>[];
@@ -155,7 +155,7 @@ class IssuesBloc extends Bloc<IssuesEvent, IssuesState> with FormatDate {
 
     var news = News(
         status: state.status!,
-        userId: _storageService.getInt('user_id')!,
+        userId: storageService.getInt('user_id')!,
         workId: (state.status == 'summary' || state.status == 'general')
             ? null
             : state.workId,
@@ -194,7 +194,7 @@ class IssuesBloc extends Bloc<IssuesEvent, IssuesState> with FormatDate {
     if (state.selectedIssue?.tipocliente != null &&
         state.selectedIssue?.tipocliente.toLowerCase() == 'unlock' &&
         state.selectedIssue!.codmotvis == '01') {
-      _storageService.setBool(
+      storageService.setBool(
           '${state.selectedSummaryId}-distance_ignore', true);
     }
   }
