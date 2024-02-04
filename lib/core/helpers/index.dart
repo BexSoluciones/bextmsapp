@@ -440,8 +440,6 @@ class HelperFunctions with FormatDate {
      }
    }
 
-
-
    Future<bool> checkAndEnableLocationService() async {
      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
      if (!serviceEnabled) {

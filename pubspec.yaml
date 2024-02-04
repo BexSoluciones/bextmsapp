@@ -104,7 +104,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.1
   flutter_launcher_icons: ^0.13.1
-  build_runner: ^2.4.6
+  build_runner: ^2.4.8
   bloc_test: ^9.1.5
   hive_generator:
     git:

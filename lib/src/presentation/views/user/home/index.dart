@@ -59,7 +59,7 @@ class HomeViewState extends State<HomeView>
     gpsBloc = BlocProvider.of<GpsBloc>(context);
     homeCubit.getAllWorks();
     homeCubit.getUser();
-    gpsBloc.startFollowingUser();
+    gpsBloc.add(OnStartFollowingUser());
     if (enterpriseConfig != null && enterpriseConfig.backgroundLocation!) {
       helperFunctions.initLocationService();
     }

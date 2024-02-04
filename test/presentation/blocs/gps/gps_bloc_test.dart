@@ -23,7 +23,7 @@ void main() {
     expect(GpsBloc(databaseRepository: databaseRepository,
         navigationService: locator<MockNavigationService>(),
         storageService: locator<MockLocalStorageService>()).state,
-        GpsInitial()
+        const GpsInitial(isGpsEnabled: false, isGpsPermissionGranted: false)
     );
   });
 
