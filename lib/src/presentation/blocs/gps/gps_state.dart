@@ -13,11 +13,11 @@ class GpsState extends Equatable {
 
   const GpsState(
       {required this.isGpsEnabled,
-        required this.isGpsPermissionGranted,
-        //PROPERTIES TO CONTROL USER GPS ACTION
-        this.followingUser = false,
-        this.lastKnownLocation,
-        myLocationHistory})
+      required this.isGpsPermissionGranted,
+      //PROPERTIES TO CONTROL USER GPS ACTION
+      this.followingUser = false,
+      this.lastKnownLocation,
+      myLocationHistory})
       : myLocationHistory = myLocationHistory ?? const [];
 
   GpsState copyWith({
@@ -30,22 +30,19 @@ class GpsState extends Equatable {
       GpsState(
           isGpsEnabled: isGpsEnabled ?? this.isGpsEnabled,
           isGpsPermissionGranted:
-          isGpsPermissionGranted ?? this.isGpsPermissionGranted,
-
-          //PROPERTIES TO CONTROLL USER GPS ACTION
-
+              isGpsPermissionGranted ?? this.isGpsPermissionGranted,
           followingUser: followingUser ?? this.followingUser,
           lastKnownLocation: lastKnownLocation ?? this.lastKnownLocation,
           myLocationHistory: myLocationHistory ?? this.myLocationHistory);
 
   @override
   List<Object?> get props => [
-    isGpsEnabled,
-    isGpsPermissionGranted,
-    followingUser,
-    myLocationHistory,
-    lastKnownLocation
-  ];
+        isGpsEnabled,
+        isGpsPermissionGranted,
+        followingUser,
+        myLocationHistory,
+        lastKnownLocation
+      ];
 
   @override
   String toString() =>

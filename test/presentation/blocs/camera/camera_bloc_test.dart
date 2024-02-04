@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import '../../../firebase_mock.dart';
 
 //mocks
@@ -17,7 +18,7 @@ import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
 import 'package:bexdeliveries/src/utils/resources/camera.dart';
 //bloc
 import 'package:bexdeliveries/src/presentation/blocs/camera/camera_bloc.dart';
-import 'package:mockito/mockito.dart';
+
 
 const String path = "path/to/directory";
 
@@ -98,23 +99,25 @@ void main() async {
 
   group('CameraCaptured', () {
     //TODO: [Heider Zapa review]
-    // blocTest<CameraBloc, CameraState>(
-    //   'Should capture a photo',
-    //   build: () {
-    //     when(cameraController.value).thenAnswer((_) => cameraValue);
-    //     when(cameraController.takePicture()).thenAnswer((_) => Future.value());
-    //     return CameraBloc(
-    //         cameraUtils: cameraUtils, databaseRepository: databaseRepository);
-    //   },
-    //   act: (CameraBloc bloc) => bloc
-    //     ..add(CameraInitialized())
-    //     ..add(CameraCaptured()),
-    //   expect: <CameraState>() => [
-    //     CameraReady(),
-    //     CameraCaptureInProgress(),
-    //     const CameraCaptureSuccess(path)
-    //   ],
-    // );
+    blocTest<CameraBloc, CameraState>(
+      'Should capture a photo',
+      build: () {
+        when(cameraController.value).thenAnswer((_) => cameraValue);
+        when(cameraController.takePicture()).thenAnswer((_) => Future.value());
+        return CameraBloc(
+            cameraUtils: cameraUtils,
+            databaseRepository: databaseRepository,
+            navigationService: locator<MockNavigationService>());
+      },
+      act: (CameraBloc bloc) => bloc
+        ..add(CameraInitialized())
+        ..add(CameraCaptured()),
+      expect: <CameraState>() => [
+        CameraReady(),
+        CameraCaptureInProgress(),
+        const CameraCaptureSuccess(path)
+      ],
+    );
     //
     // blocTest<CameraBloc, CameraState>(
     //   'Should throw an error (problem with the camera)',

@@ -19,7 +19,6 @@ import '../../../domain/abstracts/format_abstract.dart';
 import '../../../utils/constants/strings.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/navigation.dart';
 import '../../../services/storage.dart';
 import '../../../services/logger.dart';
@@ -63,10 +62,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       ));
     });
     _init();
-  }
-
-  Stream<List<l.Location>> get locations {
-    return databaseRepository.watchAllLocations();
   }
 
   Future<void> startFollowingUser() async {

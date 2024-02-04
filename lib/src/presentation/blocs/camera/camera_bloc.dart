@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:bexdeliveries/src/domain/models/photo.dart';
 import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
-import 'package:bexdeliveries/src/services/logger.dart';
 
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
@@ -18,7 +17,6 @@ import '../../../utils/resources/camera.dart';
 import '../../../utils/constants/strings.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/navigation.dart';
 
 part 'camera_event.dart';
