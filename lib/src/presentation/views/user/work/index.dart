@@ -34,7 +34,7 @@ final NavigationService _navigationService = locator<NavigationService>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class WorkView extends StatefulWidget {
-  const WorkView({Key? key, required this.arguments}) : super(key: key);
+  const WorkView({super.key, required this.arguments});
 
   final WorkArgument arguments;
 

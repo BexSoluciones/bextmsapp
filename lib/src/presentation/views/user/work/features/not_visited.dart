@@ -2,7 +2,7 @@ import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 //utils
 import '../../../../../utils/constants/nums.dart';
@@ -20,8 +20,7 @@ import '../../../../../utils/extensions/scroll_controller_extension.dart';
 import 'sub-item.dart';
 
 class NotVisitedViewWork extends StatefulWidget {
-  const NotVisitedViewWork({Key? key, required this.workcode})
-      : super(key: key);
+  const NotVisitedViewWork({super.key, required this.workcode});
 
   final String workcode;
 
@@ -31,6 +30,36 @@ class NotVisitedViewWork extends StatefulWidget {
 
 class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
   bool isLoading = false;
+  late WorkCubit workCubit;
+  static const _pageSize = 20;
+
+  final PagingController<int, Work> _pagingController =
+      PagingController(firstPageKey: 0);
+
+  Future<void> _fetchPage(int pageKey) async {
+    try {
+      final newItems = await workCubit.getAllWorksByWorkcodePaginated(
+          widget.workcode, pageKey, _pageSize);
+      final isLastPage = newItems.length < _pageSize;
+      if (isLastPage) {
+        _pagingController.appendLastPage(newItems);
+      } else {
+        final nextPageKey = pageKey + newItems.length;
+        _pagingController.appendPage(newItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
+
+  @override
+  void initState() {
+    workCubit = BlocProvider.of<WorkCubit>(context);
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPage(pageKey);
+    });
+    super.initState();
+  }
 
   @override
   void setState(fn) {
@@ -42,12 +71,6 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
   @override
   Widget build(BuildContext context) {
     final calculatedTextScaleFactor = textScaleFactor(context);
-    final workCubit = BlocProvider.of<WorkCubit>(context);
-    final scrollController = ScrollController();
-
-    scrollController.onScrollEndsListener(() {
-      workCubit.getAllWorksByWorkcode(widget.workcode, false);
-    });
 
     return SafeArea(
         child: BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
@@ -55,21 +78,16 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
         case WorkLoading:
           return const Center(child: CupertinoActivityIndicator());
         case WorkSuccess:
-          return _buildWork(scrollController, widget.workcode, state.notVisited,
-              state.noMoreData, state.started, calculatedTextScaleFactor);
+          return _buildWork(widget.workcode, state.notVisited, state.noMoreData,
+              state.started, calculatedTextScaleFactor);
         default:
           return const SizedBox();
       }
     }));
   }
 
-  Widget _buildWork(
-      ScrollController scrollController,
-      String workcode,
-      List<Work> works,
-      bool noMoreData,
-      bool isStarted,
-      double calculatedTextScaleFactor) {
+  Widget _buildWork(String workcode, List<Work> works, bool noMoreData,
+      bool isStarted, double calculatedTextScaleFactor) {
     return Padding(
         padding: const EdgeInsets.only(
             left: kDefaultPadding, right: kDefaultPadding, top: 10.0),
@@ -86,36 +104,25 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.primary))),
             ),
-            Flexible(
-                flex: 16,
-                child: buildStaticBody(works, scrollController, isStarted)),
-            if (!noMoreData)
-              const Padding(
-                padding: EdgeInsets.only(top: 14, bottom: 32),
-                child: CupertinoActivityIndicator(),
-              ),
+            Flexible(flex: 16, child: buildStaticBody(isStarted)),
           ],
         ));
   }
 
-  Widget buildStaticBody(
-      List<Work> works, ScrollController scrollController, bool isStarted) {
-    if (works.isEmpty) {
+  Widget buildStaticBody(bool isStarted) {
+    if (_pagingController.itemList != null && _pagingController.itemList!.isEmpty) {
       return const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('No tienes clientes por visitar.')
-          ],
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [Text('No tienes clientes por visitar.')],
       );
     } else {
-      return ListView.builder(
-        controller: scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: works.length,
-        itemBuilder: (context, index) {
-          final work = works[index];
+      return PagedListView<int, Work>(
+        shrinkWrap: true,
+        pagingController: _pagingController,
+        builderDelegate: PagedChildBuilderDelegate<Work>(
+            itemBuilder: (context, work, index) {
           return SubItemWork(index: index, work: work, enabled: isStarted);
-        },
+        }),
       );
     }
   }

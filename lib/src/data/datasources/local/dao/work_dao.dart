@@ -70,7 +70,7 @@ class WorkDao {
   }
 
   Future<List<Work>> findAllWorksPaginatedByWorkcode(
-      String workcode, int page) async {
+      String workcode, int page, int limit) async {
     final db = await _appDatabase.database;
     final workList = await db!.rawQuery('''
         SELECT $tableWorks.*, 
@@ -87,10 +87,8 @@ class WorkDao {
         WHERE $tableWorks.${WorkFields.workcode} = "$workcode" AND $tableWorks.${WorkFields.status} != 'complete'
         GROUP BY $tableWorks.${WorkFields.numberCustomer}, $tableWorks.${WorkFields.codePlace}
         ORDER BY $tableWorks.${WorkFields.order} ASC
-        LIMIT $page, 10
-        
+        LIMIT $page, $limit
      ''');
-    //LIMIT $limit
     _appDatabase.close();
     final works = parseWorks(workList);
     return works;

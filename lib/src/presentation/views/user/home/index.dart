@@ -49,20 +49,12 @@ class HomeViewState extends State<HomeView>
 
   @override
   void initState() {
-    EnterpriseConfig? enterpriseConfig;
-    var storedConfig = _storageService.getObject('config');
-    if (storedConfig != null) {
-      enterpriseConfig = EnterpriseConfig.fromMap(storedConfig);
-    }
     startHomeWidget();
     homeCubit = BlocProvider.of<HomeCubit>(context);
     gpsBloc = BlocProvider.of<GpsBloc>(context);
     homeCubit.getAllWorks();
     homeCubit.getUser();
     gpsBloc.add(OnStartFollowingUser());
-    if (enterpriseConfig != null && enterpriseConfig.backgroundLocation!) {
-      helperFunctions.initLocationService();
-    }
 
     super.initState();
     WidgetsBinding.instance.addObserver(this);

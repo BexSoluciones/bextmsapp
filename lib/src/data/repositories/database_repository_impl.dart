@@ -46,8 +46,8 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   @override
   Future<List<Work>> findAllWorksPaginatedByWorkcode(
-      String workcode, int page) async {
-    return _appDatabase.workDao.findAllWorksPaginatedByWorkcode(workcode, page);
+      String workcode, int page, int limit) async {
+    return _appDatabase.workDao.findAllWorksPaginatedByWorkcode(workcode, page, limit);
   }
 
   @override
