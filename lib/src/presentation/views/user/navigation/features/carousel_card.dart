@@ -42,9 +42,6 @@ class _CarouselCardState extends State<CarouselCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () async {
-          // context.read<NavigationCubit>().clean();
-
-          logDebugFine(headerNavigationLogger, widget.work.hasCompleted.toString());
           if (widget.work.hasCompleted != null &&
               widget.work.hasCompleted == 0) {
             _navigationService.goTo(AppRoutes.summary,

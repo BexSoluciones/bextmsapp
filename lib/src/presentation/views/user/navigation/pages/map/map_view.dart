@@ -272,7 +272,7 @@ class _MapPageState extends State<MapPage> {
                         try {
                           var position =
                               LatLng(location.latitude, location.longitude);
-                          await navigationCubit.createNote(position);
+                          // await navigationCubit.createNote(position);
                         } catch (e) {
                           if (kDebugMode) {
                             print(e);
