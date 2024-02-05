@@ -70,24 +70,21 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       emit(CameraCaptureInProgress());
       try {
         final path = await cameraUtils.getPath();
+        final imageCount = await countImagesInCache();
+        if (imageCount >= 3) {
+          emit(CameraCaptureFailure(error: 'Solo se permiten 3 fotos'));
+        } else {
+          await _controller?.setFocusMode(FocusMode.locked);
+          await _controller?.setExposureMode(ExposureMode.locked);
+          final picture = await _controller?.takePicture();
+          emit(CameraCaptureSuccess(path));
+          await _controller?.setFocusMode(FocusMode.locked);
+          await _controller?.setExposureMode(ExposureMode.locked);
+          var photo = Photo(name: picture!.name, path: picture.path);
+          await compressAndSaveImage(photo.path);
+          await databaseRepository.insertPhoto(photo);
 
-        await _controller?.takePicture();
-        emit(CameraCaptureSuccess(path));
-
-        // final imageCount = await countImagesInCache();
-        // if (imageCount >= 3) {
-        //   emit(CameraCaptureFailure(error: 'Solo se permiten 3 fotos'));
-        // } else {
-        //   // await _controller?.setFocusMode(FocusMode.locked);
-        //   // await _controller?.setExposureMode(ExposureMode.locked);
-        //
-        //   // await _controller?.setFocusMode(FocusMode.locked);
-        //   // await _controller?.setExposureMode(ExposureMode.locked);
-        //   // var photo = Photo(name: picture!.name, path: picture.path);
-        //   // await compressAndSaveImage(photo.path);
-        //   // await databaseRepository.insertPhoto(photo);
-        //
-        // }
+        }
       } on CameraException catch (error) {
         emit(CameraCaptureFailure(error: error.description!));
       } catch (error, stackTrace) {
@@ -181,7 +178,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraFolderToState(CameraFolder event, emit) {
-    navigationService.goTo(AppRoutes.photo, arguments: event.path);
+    // navigationService.goTo(AppRoutes.photo, arguments: event.path);
     emit(CameraReady());
   }
 

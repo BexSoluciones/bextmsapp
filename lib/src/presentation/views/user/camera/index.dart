@@ -59,7 +59,6 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
             content: Text("foto tomada exitosamente"),
           ));
           BlocProvider.of<CameraBloc>(context).add(CameraInitialized());
-          //Navigator.of(context).pop(state.path);
           BlocProvider.of<PhotosBloc>(context).add(PhotosLoaded());
         } else if (state is CameraCaptureFailure) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
