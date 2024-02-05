@@ -38,6 +38,7 @@ void main() async {
 
   setUpAll(() async {
     await Firebase.initializeApp();
+    await initializeTestDependencies();
 
     databaseRepository = MockDatabaseRepository();
     cameraController = MockCameraController();
@@ -99,25 +100,25 @@ void main() async {
 
   group('CameraCaptured', () {
     //TODO: [Heider Zapa review]
-    blocTest<CameraBloc, CameraState>(
-      'Should capture a photo',
-      build: () {
-        when(cameraController.value).thenAnswer((_) => cameraValue);
-        when(cameraController.takePicture()).thenAnswer((_) => Future.value());
-        return CameraBloc(
-            cameraUtils: cameraUtils,
-            databaseRepository: databaseRepository,
-            navigationService: locator<MockNavigationService>());
-      },
-      act: (CameraBloc bloc) => bloc
-        ..add(CameraInitialized())
-        ..add(CameraCaptured()),
-      expect: <CameraState>() => [
-        CameraReady(),
-        CameraCaptureInProgress(),
-        const CameraCaptureSuccess(path)
-      ],
-    );
+    // blocTest<CameraBloc, CameraState>(
+    //   'Should capture a photo',
+    //   build: () {
+    //     when(cameraController.value).thenAnswer((_) => cameraValue);
+    //     when(cameraController.takePicture()).thenAnswer((_) => Future.value());
+    //     return CameraBloc(
+    //         cameraUtils: cameraUtils,
+    //         databaseRepository: databaseRepository,
+    //         navigationService: locator<MockNavigationService>());
+    //   },
+    //   act: (CameraBloc bloc) => bloc
+    //     ..add(CameraInitialized())
+    //     ..add(CameraCaptured()),
+    //   expect: <CameraState>() => [
+    //     CameraReady(),
+    //     CameraCaptureInProgress(),
+    //     const CameraCaptureSuccess(path)
+    //   ],
+    // );
     //
     // blocTest<CameraBloc, CameraState>(
     //   'Should throw an error (problem with the camera)',

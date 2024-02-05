@@ -103,34 +103,5 @@ void main() {
       expect: () => [const LoginLoading(), const LoginSuccess()],
     );
 
-    // blocTest<LoginCubit, LoginState>(
-    //   'Should sync works',
-    //   build: () => LoginCubit(
-    //       databaseRepository,
-    //       apiRepository,
-    //       processingQueueBloc,
-    //       gpsBloc,
-    //       networkBloc,
-    //       storageService,
-    //       navigationService,
-    //       workmanagerService),
-    //   act: (LoginCubit bloc) => bloc.sync(),
-    //   expect: <LoginState>() => [isA<LoginState>()],
-    // );
-    //
-    // blocTest<LoginCubit, LoginState>(
-    //   'Should logout',
-    //   build: () => LoginCubit(
-    //       databaseRepository,
-    //       apiRepository,
-    //       processingQueueBloc,
-    //       gpsBloc,
-    //       networkBloc,
-    //       storageService,
-    //       navigationService,
-    //       workmanagerService),
-    //   act: (LoginCubit bloc) => bloc.logout(),
-    //   expect: <LoginState>() => [isA<LoginState>()],
-    // );
   });
 }
