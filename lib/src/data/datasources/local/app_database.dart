@@ -1,13 +1,12 @@
 import 'dart:convert';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:synchronized/synchronized.dart';
-
-//utils
-import '../../../utils/constants/strings.dart';
+// import 'package:sqflite_migration/sqflite_migration.dart';
 
 //models
 import '../../../domain/models/work.dart';
@@ -37,7 +36,6 @@ import '../../../domain/models/payment.dart';
 //services
 import '../../../locator.dart';
 import '../../../services/storage.dart';
-import '../../../services/logger.dart';
 
 //daos
 part '../local/dao/work_dao.dart';
@@ -253,6 +251,8 @@ class AppDatabase {
         ${ProcessingQueueFields.task} TEXT DEFAULT NULL,
         ${ProcessingQueueFields.code} TEXT DEFAULT NULL,
         ${ProcessingQueueFields.error} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL,
+        ${ProcessingQueueFields.relationId} INTEGER DEFAULT NULL,
         ${ProcessingQueueFields.createdAt} TEXT DEFAULT NULL,
         ${ProcessingQueueFields.updatedAt} TEXT DEFAULT NULL
       )
@@ -311,14 +311,48 @@ class AppDatabase {
     '''
        CREATE TABLE IF NOT EXISTS $tableAccount (
         ${AccountFields.id} INTEGER PRIMARY KEY,
-        ${AccountFields.idAccount} INTEGER NOT NULL ,
         ${AccountFields.accountId} INTEGER DEFAULT NULL,
         ${AccountFields.name} TEXT DEFAULT NULL,
         ${AccountFields.bankId} INTEGER DEFAULT NULL,
         ${AccountFields.accountNumber} INTEGER DEFAULT NULL,
-        ${AccountFields.code_qr} TEXT DEFAULT NULL,
+        ${AccountFields.codeQr} TEXT DEFAULT NULL,
         ${AccountFields.createdAt} TEXT DEFAULT NULL
       )
+    ''',
+    '''
+      CREATE INDEX IF NOT EXISTS workcode_index ON $tableWorks(${WorkFields.workcode})
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tablePhotos (
+        ${PhotoFields.id} INTEGER PRIMARY KEY,
+        ${PhotoFields.name} TEXT DEFAULT NULL,
+        ${PhotoFields.path} TEXT DEFAULT NULL
+      )
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS polylines (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        workcode TEXT,
+        polylines TEXT
+      )
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tableNotes (
+        ${NoteFields.id} INTEGER PRIMARY KEY,
+        ${NoteFields.latitude} TEXT DEFAULT NULL,
+        ${NoteFields.longitude} TEXT DEFAULT NULL,
+        ${NoteFields.observation} TEXT DEFAULT NULL,
+        ${NoteFields.images} TEXT DEFAULT NULL,
+        ${NoteFields.zoneId} INTEGER DEFAULT NULL
+      )
+    ''',
+    '''
+    CREATE TABLE IF NOT EXISTS $tableErrors (
+      ${ErrorFields.id} INTEGER PRIMARY KEY,
+      ${ErrorFields.errorMessage} TEXT DEFAULT NULL,
+      ${ErrorFields.stackTrace}  TEXT DEFAULT NULL,
+      ${ErrorFields.createdAt} TEXT DEFAULT NULL
+     )
     '''
   ];
 
@@ -369,13 +403,24 @@ class AppDatabase {
   Future<Database> _initDatabase(databaseName) async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final path = join(documentsDirectory.path, databaseName);
-    return await openDatabase(path, version: 1, onCreate: (database, version) async {
-      for (var migrate in initialScript) {
-        await database.execute(migrate);
+    return await openDatabase(path, version: 2,
+        onCreate: (database, version) async {
+      try {
+        for (var migrate in initialScript) {
+          await database.execute(migrate);
+        }
+      } catch (error, stackTrace) {
+        await FirebaseCrashlytics.instance.recordError(error, stackTrace);
       }
-    }, onUpgrade: (database, previous, current) async {
-      for (var migrate in migrations) {
-        await database.execute(migrate);
+    }, onUpgrade: (database, oldVersion, newVersion) async {
+      try {
+        for (int i = oldVersion + 1; i <= newVersion; i++) {
+          for (var migrate in migrations) {
+            await database.execute(migrate);
+          }
+        }
+      } catch (error, stackTrace) {
+        await FirebaseCrashlytics.instance.recordError(error, stackTrace);
       }
     });
   }
@@ -456,6 +501,5 @@ class AppDatabase {
   void close() async {
     _database = null;
     _database?.close();
-
   }
 }

@@ -302,7 +302,7 @@ class _FormCollectionState extends State<FormCollection>
                                             null) {
                                           widget.collectionCubit.goToCodeQR(
                                               widget.collectionCubit
-                                                  .selectedAccount!.code_qr);
+                                                  .selectedAccount!.codeQr);
                                         } else {
                                           widget.collectionCubit.error();
                                         }

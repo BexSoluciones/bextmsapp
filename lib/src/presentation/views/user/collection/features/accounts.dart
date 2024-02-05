@@ -152,7 +152,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                       IconButton(
                         icon: const Icon(Icons.qr_code_2),
                         onPressed: () => widget.collectionCubit.goToCodeQR(
-                            widget.collectionCubit.selectedAccount?.code_qr),
+                            widget.collectionCubit.selectedAccount?.codeQr),
                       ),
                     ],
                   )
