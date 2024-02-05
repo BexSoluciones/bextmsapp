@@ -64,51 +64,10 @@ class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
           visited: visited,
           notVisited: notVisited,
           notGeoreferenced: notGeoReferenced,
+          // noMoreData: noMoreData,
           started: started ?? false,
           confirm: confirm ?? false));
     });
-  }
-
-  Future<List<Work>> getAllWorksByWorkcodePaginated(
-      String workcode, int page, int limit) async {
-    final works = await databaseRepository.findAllWorksPaginatedByWorkcode(
-        workcode, page, limit);
-
-    var started = storageService.getBool('$workcode-started');
-    var confirm = storageService.getBool('$workcode-confirm');
-
-    data = works;
-
-    for (var d in data) {
-      d.summaries = await databaseRepository.getAllSummariesByWorkcode(
-          d.id!, d.customer!);
-    }
-
-    final visited = data
-        .where((element) =>
-            element.hasCompleted != null && element.hasCompleted == 1)
-        .toList();
-
-    final notVisited = data
-        .where((element) =>
-            element.hasCompleted != null && element.hasCompleted == 0)
-        .toList();
-
-    final notGeoReferenced = data
-        .where(
-            (element) => element.latitude == null && element.longitude == null)
-        .toList();
-
-    emit(WorkSuccess(
-        workcode: workcode,
-        works: data,
-        visited: visited,
-        notVisited: notVisited,
-        notGeoreferenced: notGeoReferenced,
-        started: started ?? false,
-        confirm: confirm ?? false));
-
-    return data;
   }
 
   void changeStarted(String workcode, bool data) {

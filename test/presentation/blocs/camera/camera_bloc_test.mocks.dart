@@ -150,6 +150,7 @@ class MockDatabaseRepository extends _i1.Mock
   _i8.Future<List<_i9.Work>> findAllWorksPaginatedByWorkcode(
     String? workcode,
     int? page,
+    int? limit,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -157,6 +158,7 @@ class MockDatabaseRepository extends _i1.Mock
           [
             workcode,
             page,
+            limit,
           ],
         ),
         returnValue: _i8.Future<List<_i9.Work>>.value(<_i9.Work>[]),
