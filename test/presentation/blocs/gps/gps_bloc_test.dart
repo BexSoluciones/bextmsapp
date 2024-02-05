@@ -19,12 +19,14 @@ void main() {
     databaseRepository = MockDatabaseRepository();
   });
 
-  test('initial state is get user loading', () {
-    expect(GpsBloc(databaseRepository: databaseRepository,
-        navigationService: locator<MockNavigationService>(),
-        storageService: locator<MockLocalStorageService>()).state,
-        const GpsInitial(isGpsEnabled: false, isGpsPermissionGranted: false)
-    );
+  test('initial state is gps initial with no permissions', () {
+    expect(
+        GpsBloc(
+                databaseRepository: databaseRepository,
+                navigationService: locator<MockNavigationService>(),
+                storageService: locator<MockLocalStorageService>())
+            .state,
+        const GpsInitial(isGpsEnabled: false, isGpsPermissionGranted: false));
   });
 
   group('GpsPermissions', () {
@@ -43,15 +45,9 @@ void main() {
     // );
   });
 
-  group('GpsGetCurrentPosition',  () {
+  group('GpsGetCurrentPosition', () {});
 
-  });
+  group('GpsStartFollowingUser', () {});
 
-  group('GpsStartFollowingUser',  () {
-
-  });
-
-  group('GpsStopFollowingUser',  () {
-
-  });
+  group('GpsStopFollowingUser', () {});
 }

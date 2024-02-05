@@ -18,12 +18,10 @@ import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/storage.dart';
 
 part 'issues_event.dart';
 part 'issues_state.dart';
-
 
 class IssuesBloc extends Bloc<IssuesEvent, IssuesState> with FormatDate {
   final DatabaseRepository _databaseRepository;
@@ -32,7 +30,8 @@ class IssuesBloc extends Bloc<IssuesEvent, IssuesState> with FormatDate {
   final LocalStorageService storageService;
   final helperFunctions = HelperFunctions();
 
-  IssuesBloc(this._databaseRepository, this._processingQueueBloc, this.gpsBloc, this.storageService)
+  IssuesBloc(this._databaseRepository, this._processingQueueBloc, this.gpsBloc,
+      this.storageService)
       : super(IssuesState()) {
     on<GetIssuesList>(_getIssuesList);
     on<GetUserId>(_getUserId);
