@@ -178,6 +178,8 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraFolderToState(CameraFolder event, emit) {
+    emit(CameraCaptureFailure(
+        error: 'Temporalmente desabilitado'));
     // navigationService.goTo(AppRoutes.photo, arguments: event.path);
     emit(CameraReady());
   }

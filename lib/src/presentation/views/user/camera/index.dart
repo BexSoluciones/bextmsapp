@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:badges/badges.dart' as B;
 
 //bloc
 import '../../../blocs/camera/camera_bloc.dart';
@@ -88,30 +89,57 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                         const SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         FloatingActionButton(
-                          backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer
+                              .withOpacity(0.7),
                           heroTag: 'takePhotoBtn',
                           child: const Icon(Icons.camera_alt),
                           onPressed: () => BlocProvider.of<CameraBloc>(context)
                               .add(CameraCaptured()),
                         ),
-                      const SizedBox(width: 30),
-                      FloatingActionButton(
-                        backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
-                        heroTag: 'GalleryPhotoBtn',
-                        child: const Icon(Icons.photo),
-                        onPressed: () => BlocProvider.of<CameraBloc>(context)
-                            .add(CameraGallery()),
-                      ),
+                        const SizedBox(width: 30),
+                        FloatingActionButton(
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer
+                              .withOpacity(0.7),
+                          heroTag: 'GalleryPhotoBtn',
+                          child: const Icon(Icons.photo),
+                          onPressed: () => BlocProvider.of<CameraBloc>(context)
+                              .add(CameraGallery()),
+                        ),
                         const SizedBox(width: 30),
                         //TODO: [Heider Zapa] review if generating error
                         FloatingActionButton(
-                          backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer
+                              .withOpacity(0.7),
                           heroTag: 'showPhotoBtn',
                           onPressed: () => BlocProvider.of<CameraBloc>(context)
                               .add(const CameraFolder(path: '')),
-                          child: const Icon(Icons.folder),
+                          child: FutureBuilder<int>(
+                              future: context.read<CameraBloc>().countImagesInCache(),
+                              builder: (context, snapshot) {
+                                return B.Badge(
+                                  position:
+                                      B.BadgePosition.topEnd(top: -5, end: -5),
+                                  badgeContent: Text(
+                                      snapshot.hasData
+                                          ? snapshot.data.toString()
+                                          : '0',
+                                      style:
+                                          const TextStyle(color: Colors.white)),
+                                  child: const SizedBox(
+                                    width: 60,
+                                    height: 60,
+                                    child: Icon(Icons.folder),
+                                  ),
+                                );
+                              }),
                         ),
                         const SizedBox(
                           width: 10,
