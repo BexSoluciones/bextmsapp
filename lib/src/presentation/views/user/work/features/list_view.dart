@@ -1,4 +1,5 @@
 import 'package:bexdeliveries/src/config/size.dart';
+import 'package:bexdeliveries/src/presentation/widgets/icon_svg_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -114,15 +115,12 @@ class ListViewWorkState extends State<ListViewWork> {
   Widget buildStaticBody(works) {
     if (works.isEmpty) {
       return SliverToBoxAdapter(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            //TODO: [Heider Zapa] change for svg
-            //Lottie.asset('assets/animations/36499-page-not-found.json'),
-            Text('No hay clients asociadas a este servicio ${widget.workcode}.')
-          ],
-        ),
-      );
+          child: SvgWidget(
+        path: 'assets/icons/not-results.svg',
+        messages: [
+          'No hay clients asociadas a este servicio ${widget.workcode}.'
+        ],
+      ));
     } else {
       return SliverList(
         delegate: SliverChildBuilderDelegate(

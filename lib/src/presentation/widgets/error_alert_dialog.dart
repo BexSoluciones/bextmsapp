@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../utils/constants/colors.dart';
 
@@ -15,7 +16,6 @@ errorGpsAlertDialog(
         barrierDismissible: false,
         context: context,
         builder: (_) {
-          Size size = MediaQuery.of(context).size;
           ThemeData theme = Theme.of(context);
           return PopScope(
             canPop: false,
@@ -39,11 +39,8 @@ errorGpsAlertDialog(
                       const SizedBox(
                         height: 20,
                       ),
-                      //TODO: [Heider Zapa] change for svg
-                      // Lottie.asset(
-                      //     'assets/animations/137331-map-marker-gps-city-navigation-location-sign.json',
-                      //     height: 100,
-                      //     width: 100),
+                      SvgPicture.asset('assets/icons/pin.svg',
+                          height: 100, width: 100),
                       const SizedBox(
                         height: 20,
                       ),
