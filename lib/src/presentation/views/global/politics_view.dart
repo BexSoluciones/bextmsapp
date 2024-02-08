@@ -10,9 +10,6 @@ import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/nums.dart';
 import '../../../utils/constants/gaps.dart';
 
-// animation
-import 'package:lottie/lottie.dart';
-
 //services
 import '../../../locator.dart';
 import '../../../services/navigation.dart';
@@ -58,8 +55,9 @@ class PoliticsViewState extends State<PoliticsView> {
                   padding: const EdgeInsets.all(kDefaultPadding),
                   child: ListView(children: [
                     gapH12,
-                    Lottie.asset('assets/animations/47956-area-map.json',
-                        height: 300, width: 300),
+                    //TODO: [Heider Zapa] change for svg
+                    // Lottie.asset('assets/animations/47956-area-map.json',
+                    //     height: 300, width: 300),
                     gapH12,
                     const Text(
                         'Tu ubicación actual se mostrará en el mapa y se usará para rutas, búsquedas de sitios y estimaciones del tiempo de entrega de tus pedidos.',

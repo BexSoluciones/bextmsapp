@@ -2,7 +2,6 @@ import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 
 //cubit
 import '../../../../cubits/georeference/georeference_cubit.dart';
@@ -84,7 +83,8 @@ Widget _buildGeoReference(context, state, size, SummaryArgument argument) {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Lottie.asset('assets/animations/18199-location-pin-on-a-map.json'),
+            //TODO: [Heider Zapa] change for svg
+            //Lottie.asset('assets/animations/18199-location-pin-on-a-map.json'),
             const Text('¿Deseas georeferenciar este cliente?',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600)),

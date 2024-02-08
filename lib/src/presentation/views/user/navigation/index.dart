@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:badges/badges.dart';
@@ -187,8 +186,9 @@ class _NavigationScreenState extends State<NavigationView> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Lottie.asset('assets/animations/1611-online-offline.json',
-                      height: 180, width: 180),
+                  //TODO: [Heider Zapa] change for svg
+                  // Lottie.asset('assets/animations/1611-online-offline.json',
+                  //     height: 180, width: 180),
                   const Text('No tienes conexión o tu conexión es lenta.'),
                   const Text(
                       'Actualmente los mapas no funcionan sin internet 😔.',

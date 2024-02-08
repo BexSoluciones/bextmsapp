@@ -2,8 +2,6 @@ import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:lottie/lottie.dart';
 
 //utils
 import '../../../../../utils/constants/nums.dart';
@@ -21,8 +19,7 @@ import '../../../../../utils/extensions/scroll_controller_extension.dart';
 import 'sub-item.dart';
 
 class NotVisitedViewWork extends StatefulWidget {
-  const NotVisitedViewWork({Key? key, required this.workcode})
-      : super(key: key);
+  const NotVisitedViewWork({super.key, required this.workcode});
 
   final String workcode;
 

@@ -1,7 +1,7 @@
+import 'package:bexdeliveries/src/presentation/widgets/icon_svg_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 
 //utils
 import '../../../utils/constants/nums.dart';
@@ -113,17 +113,10 @@ class InitialViewState extends State<InitialView> {
   }
 
   Widget _buildNetworkFailed() {
-    return Center(
-      key: MyInitialKeys.errorScreen,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Lottie.asset('assets/animations/1611-online-offline.json',
-              height: 180, width: 180),
-          const Text('No tiene conexión o tu conexión es lenta.')
-        ],
-      ),
-    );
+    return const SvgWidget(
+        key: MyInitialKeys.errorScreen,
+        path: 'assets/icons/offline.svg',
+        message: 'No tiene conexión o tu conexión es lenta.');
   }
 
   Widget _buildBodyNetworkSuccess(Size size, InitialState state) {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 
 //blocs
 import '../../../blocs/history_order/history_order_bloc.dart';
@@ -72,10 +71,10 @@ class _HistoryViewState extends State<HistoryView> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Lottie.asset(
-                              'assets/animations/13357-route-finder.json',
-                              height: 180,
-                              width: 180),
+                          // Lottie.asset(
+                          //     'assets/animations/13357-route-finder.json',
+                          //     height: 180,
+                          //     width: 180),
                           Text(
                               '¿Deseas usar este histórico con probabilidad de ${widget.arguments.likelihood.toStringAsFixed(2)}%?',
                               textAlign: TextAlign.center,

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //cubit
@@ -177,7 +176,8 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Lottie.asset('assets/animations/36499-page-not-found.json'),
+          //TODO: [Heider Zapa] change for svg
+          //Lottie.asset('assets/animations/36499-page-not-found.json'),
           Text(
               'No hay facturas para el cliente ${widget.arguments.work.customer}.',
               maxLines: 2)

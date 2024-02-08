@@ -22,8 +22,8 @@ import '../../../../../providers/general_provider.dart';
 import '../../../../../../domain/models/arguments.dart';
 import '../../../../../../domain/models/enterprise_config.dart';
 //widgets
+import '../../../../../widgets/icon_svg_widget.dart';
 import '../../../../../widgets/loading_indicator_widget.dart';
-import '../../../../../widgets/lottie_widget.dart';
 import '../../features/carousel_card.dart';
 //services
 import '../../../../../../locator.dart';
@@ -102,7 +102,6 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-
     return Scaffold(
         appBar: buildAppBar,
         body: BlocBuilder<NavigationCubit, NavigationState>(
@@ -270,8 +269,8 @@ class _MapPageState extends State<MapPage> {
                       },
                       onTap: (position, location) async {
                         try {
-                          var position =
-                              LatLng(location.latitude, location.longitude);
+                          // var position =
+                          //     LatLng(location.latitude, location.longitude);
                           // await navigationCubit.createNote(position);
                         } catch (e) {
                           if (kDebugMode) {
@@ -316,8 +315,8 @@ class _MapPageState extends State<MapPage> {
                     ),
                   ],
                 ))
-            : const LottieWidget(
-                path: 'assets/animations/58404-geo-location-icon.json',
+            : const SvgWidget(
+                path: 'assets/icons/pin.svg',
                 message: 'No hay clientes con geolocalización.'),
         state.carouselData != null &&
                 state.carouselData!.isNotEmpty &&

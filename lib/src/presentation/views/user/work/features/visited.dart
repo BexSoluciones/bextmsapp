@@ -2,7 +2,6 @@ import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 
 //utils
 import '../../../../../utils/constants/nums.dart';
@@ -14,7 +13,7 @@ import '../../../../cubits/work/work_cubit.dart';
 import 'sub-item.dart';
 
 class VisitedViewWork extends StatefulWidget {
-  const VisitedViewWork({Key? key, required this.workcode}) : super(key: key);
+  const VisitedViewWork({super.key, required this.workcode});
 
   final String workcode;
 

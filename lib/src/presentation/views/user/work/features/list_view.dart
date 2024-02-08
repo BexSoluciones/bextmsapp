@@ -1,7 +1,6 @@
 import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //cubit
@@ -118,7 +117,8 @@ class ListViewWorkState extends State<ListViewWork> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Lottie.asset('assets/animations/36499-page-not-found.json'),
+            //TODO: [Heider Zapa] change for svg
+            //Lottie.asset('assets/animations/36499-page-not-found.json'),
             Text('No hay clients asociadas a este servicio ${widget.workcode}.')
           ],
         ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:lottie/lottie.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 //core
 import '../../../../core/helpers/index.dart';
@@ -20,6 +19,7 @@ import '../../../locator.dart';
 import '../../../services/storage.dart';
 //widgets
 import '../../widgets/default_button_widget.dart';
+import '../../widgets/icon_svg_widget.dart';
 import '../../widgets/upgrader_widget.dart';
 
 part '../../widgets/form_login_widget.dart';
@@ -99,16 +99,9 @@ class LoginViewState extends State<LoginView> {
           child: BlocBuilder<NetworkBloc, NetworkState>(
               builder: (context, networkState) {
             if (networkState is NetworkFailure) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Lottie.asset('assets/animations/1611-online-offline.json',
-                        height: 180, width: 180),
-                    const Text('No tienes conexión o tu conexión es lenta.')
-                  ],
-                ),
-              );
+              return const SvgWidget(
+                  path: 'assets/icons/offline.svg',
+                  message: 'No tiene conexión o tu conexión es lenta.');
             } else if (networkState is NetworkSuccess) {
               return Scaffold(
                 key: MyLoginKeys.loginScreen,

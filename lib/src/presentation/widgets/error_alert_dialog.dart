@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../utils/constants/colors.dart';
 
@@ -40,10 +39,11 @@ errorGpsAlertDialog(
                       const SizedBox(
                         height: 20,
                       ),
-                      Lottie.asset(
-                          'assets/animations/137331-map-marker-gps-city-navigation-location-sign.json',
-                          height: 100,
-                          width: 100),
+                      //TODO: [Heider Zapa] change for svg
+                      // Lottie.asset(
+                      //     'assets/animations/137331-map-marker-gps-city-navigation-location-sign.json',
+                      //     height: 100,
+                      //     width: 100),
                       const SizedBox(
                         height: 20,
                       ),
@@ -58,16 +58,6 @@ errorGpsAlertDialog(
                       const SizedBox(
                         height: 20,
                       ),
-                      /*  Text(
-                        textAlign: TextAlign.center,
-                        error,
-                        style: TextStyle(
-                          color: theme.primaryColor,
-                        ),
-                      ),
-                      const SizedBox(6
-                        height: 20,
-                      ), */
                       InkWell(
                         onTap: onTap,
                         child: Container(
@@ -89,28 +79,6 @@ errorGpsAlertDialog(
                       const SizedBox(
                         height: 20,
                       ),
-                      /*                     InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                            height: 40,
-                            width: size.width * 0.5,
-                            decoration: BoxDecoration(
-                              //  color: activeColor,
-                              border: Border.all(color: theme.hoverColor),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Center(
-                              child: Text(
-                                buttonText,
-                                style: TextStyle(
-                                  color: theme.hoverColor,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            )),
-                      ) */
                     ]),
               ),
             ),
