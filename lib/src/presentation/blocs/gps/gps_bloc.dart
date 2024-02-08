@@ -57,6 +57,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       );
       emit(updatedState);
     });
+    _init();
   }
 
   Future<void> _requestPermissions(GpsPermissionGranted event, emit) async {
@@ -75,15 +76,37 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     }
   }
 
-  Future<void> _checkGpsStatus(GpsEnabled event, emit) async {
+  Future<bool?> _checkGpsStatus(GpsEnabled event, emit) async {
     try {
       final isEnable = await Geolocator.isLocationServiceEnabled();
 
-      if (isEnable) {
-        emit(const GpsEnabled(isGpsEnabled: true));
-      } else {
-        emit(const GpsEnabled(isGpsEnabled: false));
-      }
+      gpsServiceSubscription =
+          Geolocator.getServiceStatusStream().listen((event) {
+            final isEnabled = (event.index == 1) ? true : false;
+            if (isEnabled == false && showingDialog == false) {
+              errorGpsAlertDialog(
+                  onTap: () {
+                    Geolocator.openLocationSettings();
+                  },
+                  context:
+                  navigationService.navigatorKey.currentState!.overlay!.context,
+                  error: 'error',
+                  iconData: Icons.error,
+                  buttonText: 'buttonText');
+              showingDialog = true;
+            } else {
+              if (showingDialog) {
+                Navigator.pop(
+                    navigationService.navigatorKey.currentState!.overlay!.context);
+                showingDialog = false;
+              }
+            }
+            add(GpsPermissionGranted(
+              isGpsPermissionGranted: state.isGpsPermissionGranted,
+            ));
+          });
+
+      return isEnable;
     } catch (e) {
       emit(GpsFailed(
           isGpsEnabled: state.isGpsEnabled,
@@ -91,6 +114,22 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
           error: e.toString()));
     }
   }
+
+  Future<void> _init() async {
+    final gpsInitStatus = await Future.wait([
+      _checkGpsStatus(const GpsEnabled(isGpsEnabled: false),null),
+      _isPermissionGranted(),
+    ]);
+
+    final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
+    if (isLocationEnabled) {
+      add(OnStartFollowingUser());
+    }
+    add(GpsPermissionGranted(
+      isGpsPermissionGranted: gpsInitStatus[0]!,
+    ));
+  }
+
 
   Future<void> askGpsAccess() async {
     final status = await Permission.location.request();
