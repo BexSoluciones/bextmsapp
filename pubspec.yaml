@@ -61,7 +61,7 @@ dependencies:
   carousel_slider: ^4.2.1
   shimmer: ^3.0.0
   validators: ^3.0.0
-  camera: ^0.10.5
+  camera: ^0.10.5+9
   image: ^4.1.6
   image_picker: ^1.0.7
   image_cropper: ^4.0.1
@@ -93,7 +93,6 @@ dependencies:
   flutter_web_browser: ^0.17.1
   whatsapp_unilink: ^2.1.0
   flutter_local_notifications: ^14.1.5
-  launch_review: ^3.0.1
   workmanager: ^0.5.2
   cron: ^0.6.0
   restart_app: ^1.2.1

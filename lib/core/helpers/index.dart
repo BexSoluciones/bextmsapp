@@ -5,7 +5,6 @@ import 'dart:core' hide Error;
 import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +15,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
-import 'package:yaml/yaml.dart';
 
 //blocs
 import '../../src/domain/models/requests/login_request.dart';
@@ -40,7 +38,6 @@ import '../../src/utils/resources/data_state.dart';
 //widgets
 import '../../src/presentation/widgets/show_map_direction_widget.dart';
 import '../../src/presentation/widgets/custom_dialog.dart';
-import '../../src/presentation/widgets/update_dialog_widget.dart';
 
 //locator
 import '../../src/locator.dart';
@@ -111,52 +108,6 @@ class HelperFunctions with FormatDate {
       _storageService.setString('token', login.token);
     } else {
       logDebug(headerDeveloperLogger, response!.error!);
-    }
-  }
-
-  Future<FirebaseRemoteConfig> setupRemoteConfig() async {
-    final remoteConfig = FirebaseRemoteConfig.instance;
-
-    RemoteConfigValue(null, ValueSource.valueStatic);
-    return remoteConfig;
-  }
-
-  void versionCheck(context) async {
-    final isConnected = await checkConnection();
-    if (isConnected) {
-      var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
-      var currentVersion = double.parse(
-          yaml['version'].trim().replaceAll('.', '').split('+')[0]);
-
-      //Get Latest version info from firebase config
-      final remoteConfig = await setupRemoteConfig();
-
-      try {
-        // Using default duration to force fetching from remote server.
-        await remoteConfig.setConfigSettings(RemoteConfigSettings(
-          fetchTimeout: const Duration(seconds: 0),
-          minimumFetchInterval: Duration.zero,
-        ));
-        await remoteConfig.fetchAndActivate();
-
-        var force = remoteConfig.getBool('force_activate');
-        var forceUpdate = remoteConfig.getBool('force_update');
-        var message = remoteConfig.getString('message');
-
-        var newVersion = double.parse(remoteConfig
-            .getString('force_update_current_version')
-            .trim()
-            .replaceAll('.', ''));
-
-        if (force && newVersion > currentVersion) {
-          await UpdateDialog(skipUpdate: forceUpdate, message: message)
-              .showVersionDialog(context);
-        }
-      } on PlatformException catch (exception, stackTrace) {
-        await handleException(exception, stackTrace);
-      } catch (exception, stackTrace) {
-        await handleException(exception, stackTrace);
-      }
     }
   }
 

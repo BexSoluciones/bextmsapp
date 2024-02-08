@@ -61,7 +61,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       emit(CameraFailure(error: error.description!));
     } catch (error, stackTrace) {
       emit(CameraFailure(error: error.toString()));
-      // await FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      await FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }
   }
 

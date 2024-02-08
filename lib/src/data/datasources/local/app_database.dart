@@ -56,8 +56,7 @@ part '../local/dao/note_dao.dart';
 part '../local/dao/error_dao.dart';
 
 class AppDatabase {
-  // make this a singleton class
-  // ignore: sort_constructors_first
+
   AppDatabase._privateConstructor();
   static final AppDatabase instance = AppDatabase._privateConstructor();
   static var lock = Lock();

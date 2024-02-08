@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:bexdeliveries/src/config/size.dart';
-import 'package:bexdeliveries/src/domain/models/enterprise_config.dart';
 import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
 import 'package:bexdeliveries/src/presentation/widgets/upgrader_widget.dart';
 import 'package:flutter/material.dart' hide SearchBar;
@@ -68,7 +67,6 @@ class HomeViewState extends State<HomeView>
 
   void startHomeWidget() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      helperFunctions.versionCheck(context);
       await _isFirstLaunch().then((result) {
         if (result == null || result == false) {
           ShowCaseWidget.of(context)
