@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 //cubit
@@ -55,9 +56,7 @@ class PoliticsViewState extends State<PoliticsView> {
                   padding: const EdgeInsets.all(kDefaultPadding),
                   child: ListView(children: [
                     gapH12,
-                    //TODO: [Heider Zapa] change for svg
-                    // Lottie.asset('assets/animations/47956-area-map.json',
-                    //     height: 300, width: 300),
+                    SvgPicture.asset('assets/icons/map.svg', height: 180, width: 180),
                     gapH12,
                     const Text(
                         'Tu ubicación actual se mostrará en el mapa y se usará para rutas, búsquedas de sitios y estimaciones del tiempo de entrega de tus pedidos.',

@@ -101,7 +101,7 @@ class LoginViewState extends State<LoginView> {
             if (networkState is NetworkFailure) {
               return const SvgWidget(
                   path: 'assets/icons/offline.svg',
-                  message: 'No tiene conexión o tu conexión es lenta.');
+                  messages: ['No tiene conexión o tu conexión es lenta.']);
             } else if (networkState is NetworkSuccess) {
               return Scaffold(
                 key: MyLoginKeys.loginScreen,

@@ -18,6 +18,7 @@ import '../../../../../utils/constants/strings.dart';
 
 //features
 import '../../../../widgets/default_button_widget.dart';
+import '../../../../widgets/icon_svg_widget.dart';
 import '../../../../widgets/showcase.dart';
 import 'item_summary.dart';
 
@@ -173,14 +174,10 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
 
   Widget _buildList(isArrived, List<Summary> summaries) {
     if (summaries.isEmpty) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          //TODO: [Heider Zapa] change for svg
-          //Lottie.asset('assets/animations/36499-page-not-found.json'),
-          Text(
-              'No hay facturas para el cliente ${widget.arguments.work.customer}.',
-              maxLines: 2)
+      return SvgWidget(
+        path: 'assets/icons/not-results.svg',
+        messages: [
+          'No hay facturas para el cliente ${widget.arguments.work.customer}.'
         ],
       );
     } else {

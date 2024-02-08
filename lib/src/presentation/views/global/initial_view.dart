@@ -116,7 +116,7 @@ class InitialViewState extends State<InitialView> {
     return const SvgWidget(
         key: MyInitialKeys.errorScreen,
         path: 'assets/icons/offline.svg',
-        message: 'No tiene conexión o tu conexión es lenta.');
+        messages: ['No tiene conexión o tu conexión es lenta.']);
   }
 
   Widget _buildBodyNetworkSuccess(Size size, InitialState state) {

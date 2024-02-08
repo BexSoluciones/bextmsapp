@@ -2,6 +2,7 @@ import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 
 //cubit
 import '../../../../cubits/georeference/georeference_cubit.dart';
@@ -83,8 +84,7 @@ Widget _buildGeoReference(context, state, size, SummaryArgument argument) {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            //TODO: [Heider Zapa] change for svg
-            //Lottie.asset('assets/animations/18199-location-pin-on-a-map.json'),
+            SvgPicture.asset('assets/icons/map.svg', height: 180, width: 180),
             const Text('¿Deseas georeferenciar este cliente?',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600)),
@@ -95,7 +95,8 @@ Widget _buildGeoReference(context, state, size, SummaryArgument argument) {
             const Spacer(),
             DefaultButton(
                 widget: Text(
-                    argument.work.latitude != null && argument.work.longitude != null
+                    argument.work.latitude != null &&
+                            argument.work.longitude != null
                         ? 'Actualizar'
                         : 'Guardar',
                     style: const TextStyle(fontSize: 20, color: Colors.white)),
@@ -104,7 +105,8 @@ Widget _buildGeoReference(context, state, size, SummaryArgument argument) {
                       id: argument.work.id,
                       nit: argument.work.numberCustomer,
                       operativeCenter: argument.work.codePlace,
-                      action: argument.work.latitude != null && argument.work.longitude != null
+                      action: argument.work.latitude != null &&
+                              argument.work.longitude != null
                           ? 'update'
                           : 'save',
                       userId: null);

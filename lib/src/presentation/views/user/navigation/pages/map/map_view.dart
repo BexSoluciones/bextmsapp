@@ -317,7 +317,7 @@ class _MapPageState extends State<MapPage> {
                 ))
             : const SvgWidget(
                 path: 'assets/icons/pin.svg',
-                message: 'No hay clientes con geolocalización.'),
+                messages: ['No hay clientes con geolocalización.']),
         state.carouselData != null &&
                 state.carouselData!.isNotEmpty &&
                 state.works != null &&
