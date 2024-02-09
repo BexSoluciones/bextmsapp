@@ -60,6 +60,8 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     _init();
   }
 
+  goBack() => navigationService.goBack();
+
   Future<void> _requestPermissions(GpsPermissionGranted event, emit) async {
     try {
       final isLocationEnabled = await Geolocator.isLocationServiceEnabled();

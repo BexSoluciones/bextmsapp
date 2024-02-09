@@ -46,6 +46,11 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   NavigationCubit(this.databaseRepository, this.navigationService, this.gpsBloc)
       : super(const NavigationState(status: NavigationStatus.initial), []);
 
+
+  goBack() => navigationService.goBack();
+
+  goTo(routeName, arguments) => navigationService.goTo(routeName, arguments: arguments);
+
   Future<void> getAllWorksByWorkcode(String workcode) async {
     if (isBusy) return;
     try {

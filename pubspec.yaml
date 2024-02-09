@@ -8,8 +8,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  charger_status:
-    path: plugins/charger_status
+#  charger_status:
+#    path: plugins/charger_status
 
   #icons
   cupertino_icons: ^1.0.2

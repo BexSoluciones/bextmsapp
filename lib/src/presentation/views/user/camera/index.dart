@@ -5,6 +5,7 @@ import 'package:badges/badges.dart' as B;
 
 //bloc
 import '../../../blocs/camera/camera_bloc.dart';
+import '../../../blocs/gps/gps_bloc.dart';
 
 //utils
 import '../../../../utils/constants/keys.dart';
@@ -22,10 +23,13 @@ class CameraView extends StatefulWidget {
 
 class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   final globalKey = GlobalKey<ScaffoldState>();
+  late GpsBloc gpsBloc;
 
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    gpsBloc = BlocProvider.of<GpsBloc>(context);
+    gpsBloc.add(OnStopFollowingUser());
     super.initState();
   }
 
@@ -69,84 +73,93 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
           ));
         }
       },
-      builder: (_, state) => Scaffold(
-            key: globalKey,
-            backgroundColor: Colors.black,
-            appBar: AppBar(
-              title: const Text("Camera"),
+      builder: (_, state) => PopScope(
+        canPop: false,
+        child: Scaffold(
+              key: globalKey,
+              backgroundColor: Colors.black,
+              appBar: AppBar(
+                title: const Text("Camera"),
+                leading: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new),
+                    onPressed: () {
+                      gpsBloc.add(OnStartFollowingUser());
+                      gpsBloc.goBack();
+                    }),
+              ),
+              body: state is CameraReady
+                  ? Container(
+                      key: MyPhotosKeys.cameraPreviewScreen,
+                      child: CameraPreview(
+                          BlocProvider.of<CameraBloc>(context).getController()!))
+                  : state is CameraFailure
+                      ? Error(key: MyPhotosKeys.errorScreen, message: state.error)
+                      : Container(
+                          key: MyPhotosKeys.emptyContainerScreen,
+                        ),
+              floatingActionButton: state is CameraReady
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                          const SizedBox(width: 10),
+                          FloatingActionButton(
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withOpacity(0.7),
+                            heroTag: 'takePhotoBtn',
+                            child: const Icon(Icons.camera_alt),
+                            onPressed: () => BlocProvider.of<CameraBloc>(context)
+                                .add(CameraCaptured()),
+                          ),
+                          const SizedBox(width: 30),
+                          FloatingActionButton(
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withOpacity(0.7),
+                            heroTag: 'GalleryPhotoBtn',
+                            child: const Icon(Icons.photo),
+                            onPressed: () => BlocProvider.of<CameraBloc>(context)
+                                .add(CameraGallery()),
+                          ),
+                          const SizedBox(width: 30),
+                          //TODO: [Heider Zapa] review if generating error
+                          FloatingActionButton(
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withOpacity(0.7),
+                            heroTag: 'showPhotoBtn',
+                            onPressed: () => BlocProvider.of<CameraBloc>(context)
+                                .add(const CameraFolder(path: '')),
+                            child: FutureBuilder<int>(
+                                future: context.read<CameraBloc>().countImagesInCache(),
+                                builder: (context, snapshot) {
+                                  return B.Badge(
+                                    position:
+                                        B.BadgePosition.topEnd(top: -5, end: -5),
+                                    badgeContent: Text(
+                                        snapshot.hasData
+                                            ? snapshot.data.toString()
+                                            : '0',
+                                        style:
+                                            const TextStyle(color: Colors.white)),
+                                    child: const SizedBox(
+                                      width: 60,
+                                      height: 60,
+                                      child: Icon(Icons.folder),
+                                    ),
+                                  );
+                                }),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                        ])
+                  : Container(),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerFloat,
             ),
-            body: state is CameraReady
-                ? Container(
-                    key: MyPhotosKeys.cameraPreviewScreen,
-                    child: CameraPreview(
-                        BlocProvider.of<CameraBloc>(context).getController()!))
-                : state is CameraFailure
-                    ? Error(key: MyPhotosKeys.errorScreen, message: state.error)
-                    : Container(
-                        key: MyPhotosKeys.emptyContainerScreen,
-                      ),
-            floatingActionButton: state is CameraReady
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                        const SizedBox(width: 10),
-                        FloatingActionButton(
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer
-                              .withOpacity(0.7),
-                          heroTag: 'takePhotoBtn',
-                          child: const Icon(Icons.camera_alt),
-                          onPressed: () => BlocProvider.of<CameraBloc>(context)
-                              .add(CameraCaptured()),
-                        ),
-                        const SizedBox(width: 30),
-                        FloatingActionButton(
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer
-                              .withOpacity(0.7),
-                          heroTag: 'GalleryPhotoBtn',
-                          child: const Icon(Icons.photo),
-                          onPressed: () => BlocProvider.of<CameraBloc>(context)
-                              .add(CameraGallery()),
-                        ),
-                        const SizedBox(width: 30),
-                        //TODO: [Heider Zapa] review if generating error
-                        FloatingActionButton(
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer
-                              .withOpacity(0.7),
-                          heroTag: 'showPhotoBtn',
-                          onPressed: () => BlocProvider.of<CameraBloc>(context)
-                              .add(const CameraFolder(path: '')),
-                          child: FutureBuilder<int>(
-                              future: context.read<CameraBloc>().countImagesInCache(),
-                              builder: (context, snapshot) {
-                                return B.Badge(
-                                  position:
-                                      B.BadgePosition.topEnd(top: -5, end: -5),
-                                  badgeContent: Text(
-                                      snapshot.hasData
-                                          ? snapshot.data.toString()
-                                          : '0',
-                                      style:
-                                          const TextStyle(color: Colors.white)),
-                                  child: const SizedBox(
-                                    width: 60,
-                                    height: 60,
-                                    child: Icon(Icons.folder),
-                                  ),
-                                );
-                              }),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                      ])
-                : Container(),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerFloat,
-          ));
+      ));
 }

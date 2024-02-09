@@ -30,8 +30,6 @@ import '../../../../../../locator.dart';
 import '../../../../../../services/navigation.dart';
 import 'build_attribution.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-
 class LayerMoodle {
   LayerMoodle(this.polygons);
   List<Polyline> polygons = <Polyline>[];
@@ -82,8 +80,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void didChangeDependencies() {
     gpsBloc = BlocProvider.of<GpsBloc>(context);
-    //TODO [Andres Cardenas] get one locations
-    // gpsBloc.add(GetLocation());
+    gpsBloc.add(OnStopFollowingUser());
 
     navigationCubit = BlocProvider.of<NavigationCubit>(context);
     navigationCubit.getAllWorksByWorkcode(widget.workcode);
@@ -102,34 +99,38 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Scaffold(
-        appBar: buildAppBar,
-        body: BlocBuilder<NavigationCubit, NavigationState>(
-          builder: (context, navigationState) {
-            if (navigationState.status == NavigationStatus.loading) {
-              return const Center(child: CupertinoActivityIndicator());
-            } else if (navigationState.status == NavigationStatus.success ||
-                navigationState.status == NavigationStatus.failure) {
-              return _buildBody(size, navigationState);
-            } else {
-              return const SizedBox();
-            }
-          },
-        ),
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'btn1',
-          onPressed: () async {
-            await navigationCubit.getCurrentPosition(zoom);
-          },
-          child: const Icon(Icons.my_location),
-        ));
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+          appBar: buildAppBar,
+          body: BlocBuilder<NavigationCubit, NavigationState>(
+            builder: (context, navigationState) {
+              if (navigationState.status == NavigationStatus.loading) {
+                return const Center(child: CupertinoActivityIndicator());
+              } else if (navigationState.status == NavigationStatus.success ||
+                  navigationState.status == NavigationStatus.failure) {
+                return _buildBody(size, navigationState);
+              } else {
+                return const SizedBox();
+              }
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            heroTag: 'btn1',
+            onPressed: () async {
+              await navigationCubit.getCurrentPosition(zoom);
+            },
+            child: const Icon(Icons.my_location),
+          )),
+    );
   }
 
   AppBar get buildAppBar => AppBar(
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new),
             onPressed: () {
-              _navigationService.goBack();
+              gpsBloc.add(OnStartFollowingUser());
+              navigationCubit.goBack();
             }),
         title: BlocSelector<NavigationCubit, NavigationState, bool>(
           selector: (state) => state.status == NavigationStatus.success,
@@ -167,8 +168,8 @@ class _MapPageState extends State<MapPage> {
                         onPressed: () {
                           var work = navigationState
                               .works![navigationState.pageIndex ?? 0];
-                          _navigationService.goTo(AppRoutes.summaryNavigation,
-                              arguments: SummaryNavigationArgument(work: work));
+                          navigationCubit.goTo(AppRoutes.summaryNavigation,
+                              SummaryNavigationArgument(work: work));
                         }));
               } else {
                 // Handle other states or return an empty widget
@@ -344,7 +345,7 @@ class _MapPageState extends State<MapPage> {
                   },
                 ),
               )
-            : Container(),
+            : const SizedBox(),
       ],
     );
   }

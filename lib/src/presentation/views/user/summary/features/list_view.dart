@@ -30,15 +30,14 @@ final NavigationService _navigationService = locator<NavigationService>();
 
 class ListViewSummary extends StatefulWidget {
   const ListViewSummary(
-      {Key? key,
+      {super.key,
       required this.summaryCubit,
       required this.arguments,
       required this.one,
       required this.two,
       required this.three,
       required this.four,
-      required this.five})
-      : super(key: key);
+      required this.five});
 
   final SummaryCubit summaryCubit;
   final SummaryArgument arguments;
