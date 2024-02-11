@@ -441,7 +441,7 @@ class AppDatabase {
   //INSERT METHODS
   Future<int> insert(String table, Map<String, dynamic> row) async {
     final db = await instance.database;
-    return db!.insert(table, row);
+    return await db!.transaction((txn) => txn.insert(table, row));
   }
 
   //UPDATE METHODS

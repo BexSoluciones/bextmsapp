@@ -5,7 +5,7 @@ import '../../../../utils/constants/colors.dart';
 import '../../../widgets/painter_widget.dart';
 
 class FirmView extends StatefulWidget {
-  const FirmView({Key? key, required this.orderNumber}) : super(key: key);
+  const FirmView({super.key, required this.orderNumber});
 
   @override
   FirmViewState createState() => FirmViewState();

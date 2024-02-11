@@ -12,7 +12,7 @@ import '../../../../domain/models/arguments.dart';
 import '../../../widgets/default_button_widget.dart';
 
 class ConfirmWorkView extends StatefulWidget {
-  const ConfirmWorkView({Key? key, required this.arguments}) : super(key: key);
+  const ConfirmWorkView({super.key, required this.arguments});
 
   final WorkArgument arguments;
 

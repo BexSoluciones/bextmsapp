@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bexdeliveries/src/services/navigation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -12,8 +13,9 @@ part 'splash_state.dart';
 
 class SplashBloc extends Bloc<SplashEvent, SplashState> {
   final LocalStorageService storageService;
+  final NavigationService navigationService;
 
-  SplashBloc({required this.storageService}) : super(Initial()) {
+  SplashBloc({required this.storageService, required this.navigationService}) : super(Initial()) {
     on<HandleNavigateEvent>(_observe);
   }
 

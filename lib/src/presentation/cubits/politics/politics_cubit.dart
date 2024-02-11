@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/services/navigation.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
@@ -13,8 +14,9 @@ part 'politics_state.dart';
 
 class PoliticsCubit extends BaseCubit<PoliticsState, String?> {
   final LocalStorageService storageService;
+  final NavigationService navigationService;
 
-  PoliticsCubit(this.storageService)
+  PoliticsCubit(this.storageService, this.navigationService)
       : super(PoliticsSuccess(token: storageService.getString('token')), null);
 
   Future<void> goTo() async {

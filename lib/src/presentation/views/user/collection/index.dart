@@ -23,7 +23,7 @@ import './features/form.dart';
 import './features/header.dart';
 
 class CollectionView extends StatefulWidget {
-  const CollectionView({Key? key, required this.arguments}) : super(key: key);
+  const CollectionView({super.key, required this.arguments});
 
   final InventoryArgument arguments;
 

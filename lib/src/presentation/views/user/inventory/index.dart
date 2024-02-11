@@ -21,7 +21,7 @@ import 'features/bottom_bar.dart';
 final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class InventoryView extends StatefulWidget {
-  const InventoryView({Key? key, required this.arguments}) : super(key: key);
+  const InventoryView({super.key, required this.arguments});
 
   final InventoryArgument arguments;
 

@@ -380,8 +380,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   locator<NotificationService>())),
           BlocProvider(create: (context) => PermissionCubit()),
           BlocProvider(
-              create: (context) =>
-                  PoliticsCubit(locator<LocalStorageService>())),
+              create: (context) => PoliticsCubit(locator<LocalStorageService>(),
+                  locator<NavigationService>())),
           BlocProvider(
               create: (context) => LoginCubit(
                     locator<DatabaseRepository>(),

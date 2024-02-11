@@ -58,7 +58,7 @@ part 'login_state.dart';
 class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   final DatabaseRepository databaseRepository;
   final ApiRepository apiRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
+  final ProcessingQueueBloc processingQueueBloc;
   final GpsBloc gpsBloc;
   final LocalStorageService storageService;
   final NavigationService navigationService;
@@ -69,12 +69,11 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   LoginCubit(
       this.databaseRepository,
       this.apiRepository,
-      this._processingQueueBloc,
+      this.processingQueueBloc,
       this.gpsBloc,
       this.storageService,
       this.navigationService,
-      this.geolocatorService
-      )
+      this.geolocatorService)
       : super(
             LoginSuccess(
                 enterprise: storageService.getObject('enterprise') != null
@@ -174,7 +173,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
           updatedAt: now(),
         );
 
-        _processingQueueBloc
+        processingQueueBloc
             .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
         final responseWorks = await apiRepository.works(
@@ -258,7 +257,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
                   createdAt: now(),
                   updatedAt: now());
 
-              _processingQueueBloc.add(
+              processingQueueBloc.add(
                   ProcessingQueueAdd(processingQueue: processingQueueWork));
 
               if (worksF.first.zoneId != null &&
@@ -273,7 +272,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
                     createdAt: now(),
                     updatedAt: now());
 
-                _processingQueueBloc.add(ProcessingQueueAdd(
+                processingQueueBloc.add(ProcessingQueueAdd(
                     processingQueue: processingQueueHistoric));
               }
             }

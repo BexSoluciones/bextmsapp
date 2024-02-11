@@ -1,14 +1,17 @@
 import 'dart:async';
-import 'package:bexdeliveries/core/helpers/index.dart';
-import 'package:bexdeliveries/src/config/size.dart';
-import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
-import 'package:bexdeliveries/src/presentation/widgets/upgrader_widget.dart';
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
 
+//config
+import '../../../../config/size.dart';
+import '../../../../../core/helpers/index.dart';
+
 //cubit
 import '../../../cubits/home/home_cubit.dart';
+
+//blocs
+import '../../../blocs/gps/gps_bloc.dart';
 
 //utils
 import '../../../../utils/constants/colors.dart';
@@ -19,6 +22,7 @@ import '../../../../services/storage.dart';
 
 //widgets
 import '../../../widgets/drawer_widget.dart';
+import '../../../widgets/upgrader_widget.dart';
 import 'features/status.dart';
 import 'features/logout.dart';
 import 'features/list_view.dart';

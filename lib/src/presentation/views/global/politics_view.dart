@@ -11,14 +11,8 @@ import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/nums.dart';
 import '../../../utils/constants/gaps.dart';
 
-//services
-import '../../../locator.dart';
-import '../../../services/navigation.dart';
-
 //widgets
 import '../../widgets/default_button_widget.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
 
 class PoliticsView extends StatefulWidget {
   const PoliticsView({super.key});
@@ -44,7 +38,7 @@ class PoliticsViewState extends State<PoliticsView> {
       body: BlocConsumer<PoliticsCubit, PoliticsState>(
         listener: (context, state) {
           if (state is PoliticsSuccess) {
-            _navigationService.goTo(state.route!);
+            politicsCubit.navigationService.goTo(state.route!);
           }
         },
         builder: (context, state) => SingleChildScrollView(

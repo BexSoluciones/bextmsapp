@@ -114,7 +114,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                 buildMapShowcase(context, widget.arguments.work, widget.three),
                 state.summaries.isNotEmpty
                     ? buildPublishShowcase(
-                        widget.four, state.summaries.first.id)
+                        context, widget.four, state.summaries.first.id)
                     : Container(),
               ],
             ),

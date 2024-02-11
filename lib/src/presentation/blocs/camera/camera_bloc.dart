@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:bexdeliveries/src/domain/models/photo.dart';
-import 'package:bexdeliveries/src/domain/repositories/database_repository.dart';
-
+import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
@@ -12,9 +10,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 
+//domain
+import '../../../domain/models/photo.dart';
+import '../../../domain/repositories/database_repository.dart';
+
 //utils
 import '../../../utils/resources/camera.dart';
-import '../../../utils/constants/strings.dart';
 
 //services
 import '../../../services/navigation.dart';
@@ -30,6 +31,8 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   final NavigationService navigationService;
 
   CameraController? _controller;
+
+  final helperFunctions = HelperFunctions();
 
   CameraBloc({
     required this.cameraUtils,
@@ -74,15 +77,19 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
         if (imageCount >= 3) {
           emit(CameraCaptureFailure(error: 'Solo se permiten 3 fotos'));
         } else {
+          //BLOC CAMERA TO TAKE PICTURE FAST [https://github.com/flutter/flutter/issues/84957]
           await _controller?.setFocusMode(FocusMode.locked);
           await _controller?.setExposureMode(ExposureMode.locked);
+
           final picture = await _controller?.takePicture();
-          emit(CameraCaptureSuccess(path));
-          await _controller?.setFocusMode(FocusMode.locked);
-          await _controller?.setExposureMode(ExposureMode.locked);
+          // REVERT CAMERA CONFIGURATION [https://github.com/flutter/flutter/issues/84957]
+          await _controller?.setFocusMode(FocusMode.auto);
+          await _controller?.setExposureMode(ExposureMode.auto);
+
           var photo = Photo(name: picture!.name, path: picture.path);
           await compressAndSaveImage(photo.path);
           await databaseRepository.insertPhoto(photo);
+          emit(CameraCaptureSuccess(path));
 
         }
       } on CameraException catch (error) {
@@ -137,7 +144,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     }
   }
 
-  Future<void> compressAndSaveImage(String imagePath) async {
+  Future<File?> compressAndSaveImage(String imagePath) async {
     try {
       final File originalImage = File(imagePath);
       img.Image image = img.decodeImage(originalImage.readAsBytesSync())!;
@@ -146,8 +153,10 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
       }
       final File compressedImage = File(imagePath)
         ..writeAsBytesSync(img.encodeJpg(image, quality: 80));
-    } catch (error) {
-      print('Error al comprimir la imagen: $error');
+      return compressedImage;
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
+      return null;
     }
   }
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class UndefinedView extends StatelessWidget {
   @override
-  const UndefinedView({Key? key, this.name}) : super(key: key);
+  const UndefinedView({super.key, this.name});
 
   final String? name;
 

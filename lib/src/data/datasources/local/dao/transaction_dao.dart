@@ -463,22 +463,26 @@ class TransactionDao {
 
   Future<void> insertTransactions(List<t.Transaction> transactions) async {
     final db = await _appDatabase.database;
-    var batch = db!.batch();
-    if (transactions.isNotEmpty) {
-      await Future.forEach(transactions, (transaction) async {
-        var d = await db.query(t.tableTransactions,
-            where: 'id = ?', whereArgs: [transaction.id]);
-        var w = parseTransactions(d);
-        if (w.isEmpty) {
-          batch.insert(t.tableTransactions, transaction.toJson());
-        } else {
-          batch.update(t.tableTransactions, transaction.toJson(),
-              where: 'id = ?', whereArgs: [transaction.id]);
-        }
-      });
-    }
 
-    await batch.commit(noResult: false, continueOnError: true);
+    await db!.transaction((txn) async {
+      var batch = txn.batch();
+      if (transactions.isNotEmpty) {
+        await Future.forEach(transactions, (transaction) async {
+          var d = await txn.query(t.tableTransactions,
+              where: 'id = ?', whereArgs: [transaction.id]);
+          var w = parseTransactions(d);
+          if (w.isEmpty) {
+            batch.insert(t.tableTransactions, transaction.toJson());
+          } else {
+            batch.update(t.tableTransactions, transaction.toJson(),
+                where: 'id = ?', whereArgs: [transaction.id]);
+          }
+        });
+      }
+
+      await batch.commit(noResult: false, continueOnError: true);
+    });
+
     return Future.value();
   }
 

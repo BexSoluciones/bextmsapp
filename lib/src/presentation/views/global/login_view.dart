@@ -14,17 +14,13 @@ import '../../blocs/network/network_bloc.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/extensions/app_theme.dart';
 import '../../../utils/constants/keys.dart';
-//service
-import '../../../locator.dart';
-import '../../../services/storage.dart';
+
 //widgets
 import '../../widgets/default_button_widget.dart';
 import '../../widgets/icon_svg_widget.dart';
 import '../../widgets/upgrader_widget.dart';
 
 part '../../widgets/form_login_widget.dart';
-
-final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -54,8 +50,8 @@ class LoginViewState extends State<LoginView> {
   }
 
   void rememberSession() {
-    var usernameStorage = _storageService.getString('username');
-    var passwordStorage = _storageService.getString('password');
+    var usernameStorage = loginCubit.storageService.getString('username');
+    var passwordStorage = loginCubit.storageService.getString('password');
 
     if (usernameStorage != null) {
       setState(() {

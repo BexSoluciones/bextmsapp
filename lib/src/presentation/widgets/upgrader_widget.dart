@@ -31,6 +31,7 @@ class _UpgraderDialogState extends State<UpgraderDialog> {
         upgrader: Upgrader(
             messages: MyUpgraderMessages(message),
             debugLogging: true,
+            showLater: false,
             showReleaseNotes: true,
             dialogStyle: Platform.isAndroid
                 ? UpgradeDialogStyle.material
