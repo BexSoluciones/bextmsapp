@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:latlong2/latlong.dart';
+// import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+// import 'package:latlong2/latlong.dart';
 // import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 //utils
@@ -23,12 +23,7 @@ import '../../../../../../domain/models/arguments.dart';
 import '../../../../../../domain/models/enterprise_config.dart';
 //widgets
 import '../../../../../widgets/icon_svg_widget.dart';
-import '../../../../../widgets/loading_indicator_widget.dart';
 import '../../features/carousel_card.dart';
-//services
-import '../../../../../../locator.dart';
-import '../../../../../../services/navigation.dart';
-import 'build_attribution.dart';
 
 class LayerMoodle {
   LayerMoodle(this.polygons);

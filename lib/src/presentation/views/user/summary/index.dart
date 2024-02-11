@@ -14,20 +14,12 @@ import '../../../cubits/summary/summary_cubit.dart';
 //widgets
 import '../../../widgets/icon_wifi_widget.dart';
 
-//services
-import '../../../../locator.dart';
-import '../../../../services/storage.dart';
-import '../../../../services/navigation.dart';
-
 //features
 import 'features/header.dart';
 import 'features/list_view.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
-
 class SummaryView extends StatefulWidget {
-  const SummaryView({Key? key, required this.arguments}) : super(key: key);
+  const SummaryView({super.key, required this.arguments});
 
   final SummaryArgument arguments;
 
@@ -72,9 +64,9 @@ class SummaryViewState extends State<SummaryView> {
   }
 
   Future<bool?> _isFirstLaunch() async {
-    var isFirstLaunch = _storageService.getBool('summary-is-init');
+    var isFirstLaunch = summaryCubit.storageService.getBool('summary-is-init');
     if (isFirstLaunch == null || isFirstLaunch == false) {
-      _storageService.setBool('summary-is-init', true);
+      summaryCubit.storageService.setBool('summary-is-init', true);
     }
     return isFirstLaunch;
   }
@@ -98,9 +90,9 @@ class SummaryViewState extends State<SummaryView> {
                     onPressed: () {
                       if (widget.arguments.origin != null &&
                           widget.arguments.origin == 'navigation') {
-                        _navigationService.goBack();
+                        summaryCubit.navigationService.goBack();
                       } else {
-                        _navigationService.goTo(AppRoutes.work,
+                        summaryCubit.navigationService.goTo(AppRoutes.work,
                             arguments:
                                 WorkArgument(work: widget.arguments.work));
                       }

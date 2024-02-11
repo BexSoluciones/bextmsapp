@@ -411,8 +411,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 locator<NavigationService>()),
           ),
           BlocProvider(
-            create: (context) => WorkCubit(
-                locator<DatabaseRepository>(), locator<LocalStorageService>()),
+            create: (context) => WorkCubit(locator<DatabaseRepository>(),
+                locator<LocalStorageService>(), locator<NavigationService>()),
           ),
           BlocProvider(
             create: (context) => ConfirmCubit(

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/network/network_bloc.dart';
 
 class IconConnection extends StatelessWidget {
-  const IconConnection({Key? key}) : super(key: key);
+  const IconConnection({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -14,9 +14,6 @@ import '../../../../../utils/constants/nums.dart';
 //features
 import 'item_work.dart';
 
-//widgets
-import '../../../../widgets/skeleton_loader_widget.dart';
-
 //extensions
 import '../../../../../utils/extensions/scroll_controller_extension.dart';
 
@@ -65,7 +62,9 @@ class ListViewWorkState extends State<ListViewWork> {
     return BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
       switch (state.runtimeType) {
         case WorkLoading:
-          return const SkeletonLoading(cant: 10);
+          return const Center(
+            child: CupertinoActivityIndicator(),
+          );
         case WorkSuccess:
           return _buildWork(scrollController, widget.workcode, state.works,
               state.noMoreData, calculatedTextScaleFactor, calculatedFon);

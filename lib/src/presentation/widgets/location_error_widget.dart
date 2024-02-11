@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class LocationErrorWidget extends StatelessWidget {
   const LocationErrorWidget({
-    Key? key,
+    super.key,
     required this.errorMessage,
-  }) : super(key: key);
+  });
   final String errorMessage;
   @override
   Widget build(BuildContext context) {

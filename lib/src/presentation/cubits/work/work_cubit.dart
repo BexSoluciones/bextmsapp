@@ -11,14 +11,16 @@ import '../../../domain/abstracts/format_abstract.dart';
 
 //service
 import '../../../services/storage.dart';
+import '../../../services/navigation.dart';
 
 part 'work_state.dart';
 
 class WorkCubit extends BaseCubit<WorkState, List<Work>> with FormatDate {
   final DatabaseRepository databaseRepository;
   final LocalStorageService storageService;
+  final NavigationService navigationService;
 
-  WorkCubit(this.databaseRepository, this.storageService)
+  WorkCubit(this.databaseRepository, this.storageService, this.navigationService)
       : super(const WorkLoading(), []);
 
   int page = 0;

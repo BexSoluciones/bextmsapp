@@ -42,7 +42,7 @@ class DifferentItem extends StatelessWidget {
                           //   style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${differentItem.address}',
+                          differentItem.address,
                           style: const TextStyle(fontSize: 13),
                         ),
                         //Text('orden: ${differentItem.order}')

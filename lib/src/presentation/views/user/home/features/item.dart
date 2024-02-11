@@ -102,7 +102,7 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                                   title: 'Guardar historico',
                                   message:
                                       '¿Está seguro que desea guardar el historico?',
-                                  cancelButtom: false,
+                                  cancelButton: false,
                                   buttonText: 'Aceptar',
                                   onConfirm: () =>
                                       _handleNavigation(widget.work, context)));

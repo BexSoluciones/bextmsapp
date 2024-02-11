@@ -7,7 +7,7 @@ import './features/single_image.dart';
 class QrView extends StatefulWidget {
   final String? codeQr;
 
-  const QrView({Key? key, this.codeQr}) : super(key: key);
+  const QrView({super.key, this.codeQr});
 
   @override
   State<QrView> createState() => _QrViewState();

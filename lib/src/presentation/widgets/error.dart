@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class Error extends StatelessWidget {
   final String message;
 
-  const Error({Key? key, this.message = "Camera Error"}) : super(key: key);
+  const Error({super.key, this.message = "Camera Error"});
 
   @override
   Widget build(BuildContext context) {

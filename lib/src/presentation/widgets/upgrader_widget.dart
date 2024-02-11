@@ -5,8 +5,6 @@ import 'dart:io' show Platform;
 import '../../locator.dart';
 import '../../services/remote_config.dart';
 
-final RemoteConfigService _remoteConfigService = locator<RemoteConfigService>();
-
 class UpgraderDialog extends StatefulWidget {
   final Widget child;
   const UpgraderDialog({super.key, required this.child});
@@ -19,9 +17,12 @@ class _UpgraderDialogState extends State<UpgraderDialog> {
   String? message;
   bool force = false;
 
+  final RemoteConfigService remoteConfigService =
+      locator<RemoteConfigService>();
+
   @override
   void initState() {
-    force = _remoteConfigService.getBool('force') ?? false;
+    force = remoteConfigService.getBool('force') ?? false;
     super.initState();
   }
 
@@ -42,10 +43,8 @@ class _UpgraderDialogState extends State<UpgraderDialog> {
 }
 
 class MyUpgraderMessages extends UpgraderMessages {
-
   MyUpgraderMessages(String? message);
 
   @override
   String get title => '¡Nueva versión disponible!';
-
 }

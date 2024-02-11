@@ -7,8 +7,7 @@ class CustomTextView extends StatelessWidget {
   final CustomTextProperty customTextProperty;
 
   const CustomTextView(
-      {Key? key, required this.customTextProperty, required this.displayText})
-      : super(key: key);
+      {super.key, required this.customTextProperty, required this.displayText});
 
   @override
   Widget build(BuildContext context) {

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
 
 class VersionWidget extends StatelessWidget {
-  const VersionWidget({Key? key}) : super(key: key);
+  const VersionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
