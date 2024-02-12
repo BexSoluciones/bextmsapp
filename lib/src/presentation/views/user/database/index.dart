@@ -32,7 +32,9 @@ class DatabaseViewState extends State<DatabaseView> {
 
     return BlocConsumer<DatabaseCubit, DatabaseState>(
       listener: (context, state) {
-        isLoading = state is DatabaseLoading;
+        if(state is DatabaseLoading) {
+          isLoading = true;
+        }
 
         if (state is DatabaseInitial) {
           databaseCubit.getDatabase();

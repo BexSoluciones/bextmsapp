@@ -58,12 +58,10 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       collectionCubit.cashController.addListener(() {
         collectionCubit.listenForCash();
-        // setState(() {});
       });
       collectionCubit.transferController.addListener(() {
         if (!collectionCubit.isEditing) {
           collectionCubit.listenForTransfer();
-          // setState(() {});
         }
       });
     });

@@ -56,7 +56,6 @@ part '../local/dao/note_dao.dart';
 part '../local/dao/error_dao.dart';
 
 class AppDatabase {
-
   AppDatabase._privateConstructor();
   static final AppDatabase instance = AppDatabase._privateConstructor();
   static var lock = Lock();
@@ -448,7 +447,8 @@ class AppDatabase {
   Future<int> update(
       String table, Map<String, dynamic> value, String columnId, int id) async {
     final db = await instance.database;
-    return db!.update(table, value, where: '$columnId = ?', whereArgs: [id]);
+    return await db!.transaction((txn) =>
+        txn.update(table, value, where: '$columnId = ?', whereArgs: [id]));
   }
 
   // //DELETE METHODS
