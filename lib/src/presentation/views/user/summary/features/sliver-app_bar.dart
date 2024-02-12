@@ -66,7 +66,7 @@ class AppBarSummary extends StatelessWidget {
                         fontSize: 18,
                         color:
                             Theme.of(context).colorScheme.secondaryContainer)))
-            : Container(),
+            : const SizedBox(),
         const SizedBox(width: 5)
       ],
       pinned: true,
@@ -195,7 +195,7 @@ class AppBarSummary extends StatelessWidget {
                                             ],
                                           ),
                                         )
-                                      : Container(),
+                                      : const SizedBox(),
                                 ],
                               ),
                             )),

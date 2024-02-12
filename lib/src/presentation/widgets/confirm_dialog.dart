@@ -59,7 +59,7 @@ class _CustomConfirmDialogState extends State<CustomConfirmDialog> {
                               saving ? null : Navigator.of(context).pop(),
                           child: const Text('Cancelar'),
                         )
-                      : Container(),
+                      : const SizedBox(),
                   const SizedBox(width: 10),
                   Visibility(
                     visible: !saving,
@@ -76,7 +76,7 @@ class _CustomConfirmDialogState extends State<CustomConfirmDialog> {
                   ),
                   Visibility(
                     visible: saving,
-                    child: MyCircularProgressIndicator(),
+                    child: const MyCircularProgressIndicator(),
                   ),
                 ],
               ),

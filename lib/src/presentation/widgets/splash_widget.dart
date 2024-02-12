@@ -26,7 +26,6 @@ class SplashScreenWidgetState extends State<SplashScreenWidget> {
     return  Stack(
       fit: StackFit.expand,
       children: <Widget>[
-        Container(),
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,

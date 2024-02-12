@@ -42,7 +42,7 @@ class HeaderSummary extends StatelessWidget {
                 buildMapShowcase(context, arguments.work, three),
                 summaries.isNotEmpty
                     ? buildPublishShowcase(context, four, summaries.first.id)
-                    : Container(),
+                    : const SizedBox(),
               ],
             ),
           ),

@@ -165,7 +165,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                                 press: () => context
                                     .read<ProcessingQueueBloc>()
                                     .add(ProcessingQueueSender()))
-                            : Container()
+                            : const SizedBox()
                       ],
                     )));
           }
