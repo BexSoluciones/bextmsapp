@@ -73,7 +73,7 @@ class AppBarInventory extends StatelessWidget {
                       }
                     },
                     icon: const Icon(Icons.change_circle_outlined)))
-            : Container(),
+            : const SizedBox(),
         const SizedBox(width: 5)
       ],
       pinned: true,
@@ -203,7 +203,7 @@ class AppBarInventory extends StatelessWidget {
                                             ],
                                           ),
                                         )
-                                      : Container(),
+                                      : const SizedBox(),
                                 ],
                               ),
                             )),

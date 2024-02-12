@@ -115,7 +115,7 @@ class _RespawnViewState extends State<RespawnView> {
                     setState: setState,
                     typeAheadController: reasonController,
                   )
-                : Container(),
+                : const SizedBox(),
             const Spacer(),
             if (state.error != null)
               Text(state.error!,

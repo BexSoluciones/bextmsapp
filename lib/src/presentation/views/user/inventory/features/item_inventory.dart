@@ -139,12 +139,12 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                       Text('(${widget.summary.count ?? 1})')
                                     ],
                                   )
-                                : Container(),
+                                : const SizedBox(),
                           ],
                         ),
                         widget.summary.idPacking != null &&
                                 widget.summary.packing != null
-                            ? Container()
+                            ? const SizedBox()
                             : Text(
                                 'U.M. ${double.parse(widget.summary.unitOfMeasurement).toStringAsFixed(2)} - N.M ${widget.summary.nameOfMeasurement}',
                                 style: TextStyle(color: Colors.grey[500]),

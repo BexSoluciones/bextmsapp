@@ -312,7 +312,7 @@ class _FormCollectionState extends State<FormCollection>
                                 )
                               ],
                             )
-                          : Container();
+                          : const SizedBox();
                     }),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
                     selector: (state) =>
@@ -400,7 +400,7 @@ class _FormCollectionState extends State<FormCollection>
                                 }
                               },
                             )
-                          : Container();
+                          : const SizedBox();
                     }),
                 const SizedBox(height: 10),
                 BlocSelector<CollectionCubit, CollectionState, bool>(
@@ -453,7 +453,7 @@ class _FormCollectionState extends State<FormCollection>
                                 }
                               },
                             )
-                          : Container();
+                          : const SizedBox();
                     }),
                 const SizedBox(height: 30),
                 Row(
