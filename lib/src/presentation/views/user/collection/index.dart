@@ -35,6 +35,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   final _formKey = GlobalKey<FormState>();
 
   late CollectionCubit collectionCubit;
+  late FocusScopeNode currentFocus;
 
   @override
   void setState(VoidCallback fn) {
@@ -46,6 +47,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   @override
   void initState() {
     super.initState();
+
     context.read<AccountBloc>().add(LoadAccountListEvent());
     collectionCubit = BlocProvider.of<CollectionCubit>(context);
 
@@ -68,31 +70,35 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void unFocus() {
+    currentFocus = FocusScope.of(context);
+    if (!currentFocus.hasPrimaryFocus) {
+      currentFocus.unfocus();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    FocusScopeNode currentFocus;
-
-    void unfocus() {
-      currentFocus = FocusScope.of(context);
-      if (!currentFocus.hasPrimaryFocus) {
-        currentFocus.unfocus();
-      }
-    }
-
-    return GestureDetector(
-        onTap: unfocus,
-        child: Scaffold(
-            resizeToAvoidBottomInset: true,
-            appBar: AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new),
-                onPressed: () => context.read<CollectionCubit>().goBack(),
-              ),
-            ),
-            body: BlocBuilder<CollectionCubit, CollectionState>(
-              builder: (_, state) => _buildBlocConsumer(size),
-            )));
+    return Scaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new),
+            onPressed: () => collectionCubit.goBack(),
+          ),
+        ),
+        body: GestureDetector(
+          onTap: unFocus,
+          child: BlocBuilder<CollectionCubit, CollectionState>(
+            builder: (_, state) => _buildBlocConsumer(size),
+          ),
+        ));
   }
 
   void buildBlocListener(BuildContext context, CollectionState state) async {
@@ -170,8 +176,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
                   left: kDefaultPadding, right: kDefaultPadding),
               child: DefaultButton(
                   widget: const Icon(Icons.edit, color: Colors.white),
-                  press: () => context
-                      .read<CollectionCubit>()
+                  press: () => collectionCubit
                       .goToFirm(widget.arguments.summary.orderNumber))),
           SizedBox(height: size.height * 0.05),
           BlocSelector<CollectionCubit, CollectionState, bool>(
@@ -223,14 +228,13 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 
 class MyDialog extends StatefulWidget {
   const MyDialog(
-      {Key? key,
+      {super.key,
       required this.id,
       required this.orderNumber,
       required this.totalSummary,
       required this.total,
       required this.arguments,
-      required this.context})
-      : super(key: key);
+      required this.context});
 
   final int id;
   final String orderNumber;
@@ -240,10 +244,10 @@ class MyDialog extends StatefulWidget {
   final BuildContext context;
 
   @override
-  _MyDialogState createState() => _MyDialogState();
+  MyDialogState createState() => MyDialogState();
 }
 
-class _MyDialogState extends State<MyDialog> with FormatNumber {
+class MyDialogState extends State<MyDialog> with FormatNumber {
   var seconds = 5;
   var showText = false;
   Timer? timer;

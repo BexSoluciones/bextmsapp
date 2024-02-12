@@ -96,6 +96,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
     if (isArrived && vts == false) {
       var currentLocation = gpsBloc.state.lastKnownLocation;
+      currentLocation ??= gpsBloc.lastRecordedLocation;
 
       transaction.latitude = currentLocation!.latitude.toString();
       transaction.longitude = currentLocation.longitude.toString();

@@ -8,11 +8,10 @@ import '../../../../../domain/abstracts/format_abstract.dart';
 
 class HeaderInventory extends StatelessWidget with FormatNumber {
   HeaderInventory(
-      {Key? key,
+      {super.key,
       required this.arguments,
       required this.totalSummaries,
-      required this.two})
-      : super(key: key);
+      required this.two});
 
   final InventoryArgument arguments;
   final double? totalSummaries;
@@ -20,7 +19,6 @@ class HeaderInventory extends StatelessWidget with FormatNumber {
 
   @override
   Widget build(BuildContext context) {
-    final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(16);
     return SliverPersistentHeader(
         pinned: true,
@@ -38,7 +36,6 @@ class HeaderInventory extends StatelessWidget with FormatNumber {
                       child: Text(
                           'TOTAL A RECAUDAR: \$${formatter.format(totalSummaries ?? 0.0)}',
                           textAlign: TextAlign.start,
-                          textScaleFactor: calculatedTextScaleFactor,
                           style:  TextStyle(
                               fontSize: calculatedFon, fontWeight: FontWeight.bold)),
                     )),

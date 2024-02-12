@@ -14,11 +14,10 @@ import 'item_inventory.dart';
 
 class ListViewInventory extends StatefulWidget {
   const ListViewInventory(
-      {Key? key,
+      {super.key,
         required this.arguments,
         required this.three,
-        required this.isArrived})
-      : super(key: key);
+        required this.isArrived});
 
   final InventoryArgument arguments;
   final GlobalKey three;

@@ -1,4 +1,5 @@
 import 'package:bexdeliveries/src/config/size.dart';
+import 'package:bexdeliveries/src/presentation/cubits/summary/summary_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -21,17 +22,12 @@ import '../../../../widgets/icon_wifi_widget.dart';
 import '../../../../../locator.dart';
 import '../../../../../services/navigation.dart';
 
-class AppBarInventory extends StatelessWidget {
-  AppBarInventory(
-      {super.key,
-      required this.arguments,
-      required this.isArrived,
-      required this.one});
+class AppBarSummary extends StatelessWidget {
+  const AppBarSummary(
+      {super.key, required this.arguments, required this.summaryCubit});
 
-  final InventoryArgument arguments;
-  final bool isArrived;
-  final GlobalKey one;
-  final NavigationService navigationService = locator<NavigationService>();
+  final SummaryArgument arguments;
+  final SummaryCubit summaryCubit;
 
   Future<void> vibrate() async {
     var hasVibrate = await Vibration.hasVibrator();
@@ -47,33 +43,27 @@ class AppBarInventory extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.primary,
       leading: IconButton(
           onPressed: () {
-            context.read<InventoryCubit>().reset(arguments.summary.validate!,
-                arguments.work.id!, arguments.summary.orderNumber);
-            navigationService.goTo(AppRoutes.summary,
-                arguments: SummaryArgument(work: arguments.work));
+            if (arguments.origin != null && arguments.origin == 'navigation') {
+              summaryCubit.navigationService.goBack();
+            } else {
+              summaryCubit.navigationService.goTo(AppRoutes.work,
+                  arguments: WorkArgument(work: arguments.work));
+            }
           },
           icon: Icon(Icons.arrow_back_ios_new,
               color: Theme.of(context).colorScheme.secondaryContainer)),
       actions: [
-        const IconConnection(),
-        isArrived == true
-            ? Showcase(
-                key: one,
-                disableMovingAnimation: true,
-                title: 'Zap!',
-                description:
-                    'Aqui puedes reordar todas las cantidades como las tenias. 😁',
-                child: IconButton(
-                    onPressed: () async {
-                      await vibrate();
-                      if (context.mounted) {
-                        BlocProvider.of<InventoryCubit>(context).reset(
-                            arguments.summary.validate!,
-                            arguments.work.id!,
-                            arguments.summary.orderNumber);
-                      }
-                    },
-                    icon: Icon(Icons.change_circle_outlined,
+        const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: IconConnection(),
+        ),
+        summaryCubit.state.time != null
+            ? GestureDetector(
+                onTap: () async =>
+                    await summaryCubit.getDiffTime(arguments.work.id!),
+                child: Text('Tiempo ${summaryCubit.state.time}',
+                    style: TextStyle(
+                        fontSize: 18,
                         color:
                             Theme.of(context).colorScheme.secondaryContainer)))
             : Container(),
@@ -103,52 +93,20 @@ class AppBarInventory extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (arguments.summary.expedition != null)
-                                    Text.rich(
-                                      TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: 'EXPEDICIÓN: ',
-                                            style: TextStyle(
-                                                fontSize: calculatedFon,
-                                                fontWeight: FontWeight.bold,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .secondaryContainer),
-                                          ),
-                                          TextSpan(
-                                              text:
-                                                  arguments.summary.expedition,
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.normal,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .secondaryContainer)),
-                                        ],
-                                      ),
-                                    ),
                                   Text.rich(
                                     TextSpan(
                                       children: [
                                         TextSpan(
-                                          text: 'DOCUMENTO: ',
+                                          text: 'SERVICIO: ',
                                           style: TextStyle(
-                                              fontSize: calculatedFon,
-                                              fontWeight: FontWeight.bold,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondaryContainer),
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
                                         ),
                                         TextSpan(
-                                            text:
-                                                '${arguments.work.type}-${arguments.summary.orderNumber}',
-                                            style: TextStyle(
-                                                fontSize: calculatedFon,
-                                                fontWeight: FontWeight.normal,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .secondaryContainer)),
+                                            text: arguments.work.workcode,
+                                            style:  TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
                                       ],
                                     ),
                                   ),

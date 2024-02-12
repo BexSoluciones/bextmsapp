@@ -16,8 +16,7 @@ import '../../../../../utils/constants/nums.dart';
 import '../../../../widgets/default_button_widget.dart';
 
 class SummaryNavigationView extends StatefulWidget {
-  const SummaryNavigationView({Key? key, required this.arguments})
-      : super(key: key);
+  const SummaryNavigationView({super.key, required this.arguments});
 
   final SummaryNavigationArgument arguments;
 

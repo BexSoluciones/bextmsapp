@@ -1,4 +1,3 @@
-import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,25 +7,18 @@ import 'package:flutter_svg/svg.dart';
 import '../../../../cubits/georeference/georeference_cubit.dart';
 
 //domain
-import '../../../../../domain/models/work.dart';
+import '../../../../../domain/models/arguments.dart';
 import '../../../../../domain/models/client.dart';
 
 //utils
 import '../../../../../utils/constants/nums.dart';
 
-//services
-import '../../../../../locator.dart';
-import '../../../../../services/navigation.dart';
-
 //widgets
 
 import '../../../../widgets/default_button_widget.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-
 class SummaryGeoReferenceView extends StatefulWidget {
-  const SummaryGeoReferenceView({Key? key, required this.argument})
-      : super(key: key);
+  const SummaryGeoReferenceView({super.key, required this.argument});
 
   final SummaryArgument argument;
 
@@ -54,7 +46,7 @@ class SummaryGeoReferenceViewState extends State<SummaryGeoReferenceView> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new),
             onPressed: () {
-              _navigationService.goBack();
+              geoReferenceCubit.navigationService.goBack();
               setState(() {});
             },
           ),
@@ -65,7 +57,8 @@ class SummaryGeoReferenceViewState extends State<SummaryGeoReferenceView> {
             case GeoReferenceLoading:
               return const Center(child: CupertinoActivityIndicator());
             case GeoReferenceSuccess:
-              return _buildGeoReference(context, state, size, widget.argument);
+              return _buildGeoReference(
+                  context, state, size, widget.argument, geoReferenceCubit);
             default:
               return const SizedBox();
           }
@@ -73,7 +66,8 @@ class SummaryGeoReferenceViewState extends State<SummaryGeoReferenceView> {
   }
 }
 
-Widget _buildGeoReference(context, state, size, SummaryArgument argument) {
+Widget _buildGeoReference(context, state, size, SummaryArgument argument,
+    GeoReferenceCubit geoReferenceCubit) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.all(kDefaultPadding),
@@ -120,7 +114,7 @@ Widget _buildGeoReference(context, state, size, SummaryArgument argument) {
                 widget: const Text('Cancelar',
                     // textScaleFactor: textScaleFactor(context),
                     style: TextStyle(fontSize: 20, color: Colors.white)),
-                press: () => _navigationService.goBack())
+                press: () => geoReferenceCubit.navigationService.goBack())
           ],
         ),
       ),

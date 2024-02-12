@@ -19,7 +19,7 @@ import '../../../../../utils/constants/strings.dart';
 //features
 import '../../../../widgets/default_button_widget.dart';
 import '../../../../widgets/icon_svg_widget.dart';
-import '../../../../widgets/showcase.dart';
+
 import 'item_summary.dart';
 
 //services
@@ -59,8 +59,23 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return BlocBuilder<SummaryCubit, SummaryState>(
-        builder: (_, state) => _buildBlocConsumer(size));
+    return BlocConsumer<SummaryCubit, SummaryState>(
+      listener: buildBlocListener,
+      builder: (context, state) {
+        if (state is SummaryLoading) {
+          return const SliverToBoxAdapter(
+            child: Align(
+              alignment: Alignment.center,
+              child: CupertinoActivityIndicator(),
+            ),
+          );
+        } else if (state is SummarySuccess || state is SummaryFailed) {
+          return _buildSummary(state, size);
+        } else {
+          return const SliverToBoxAdapter(child: SizedBox());
+        }
+      },
+    );
   }
 
   void buildBlocListener(BuildContext context, SummaryState state) async {
@@ -77,144 +92,48 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
     }
   }
 
-  Widget _buildBlocConsumer(Size size) {
-    return BlocConsumer<SummaryCubit, SummaryState>(
-      listener: buildBlocListener,
-      builder: (context, state) {
-        if (state is SummaryLoading) {
-          return const Align(
-            alignment: Alignment.center,
-            child: CupertinoActivityIndicator(),
-          );
-        } else if (state is SummarySuccess || state is SummaryFailed) {
-          return _buildSummary(state, size);
-        } else {
-          return const SizedBox();
-        }
-      },
-    );
-  }
-
   Widget _buildSummary(SummaryState state, Size size) {
-    return SizedBox(
-      width: size.width,
-      height: size.height / 1.55,
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                buildPhoneShowcase(widget.arguments.work, widget.one, context),
-                buildWhatsAppShowcase(
-                    widget.arguments.work, widget.two, context),
-                buildMapShowcase(context, widget.arguments.work, widget.three),
-                state.summaries.isNotEmpty
-                    ? buildPublishShowcase(
-                        context, widget.four, state.summaries.first.id)
-                    : Container(),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: _buildList(state.isArrived, state.summaries),
-          ),
-          BlocSelector<SummaryCubit, SummaryState, bool>(
-              selector: (state) =>
-                  state.isArrived == true && state.isGeoReference == false,
-              builder: (c, x) {
-                return x
-                    ? Padding(
-                        padding: const EdgeInsets.all(kDefaultPadding),
-                        child: DefaultButton(
-                            widget: const Text('¿Quieres georeferenciarlo?',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 18)),
-                            press: () => _navigationService.goTo(
-                                AppRoutes.summaryGeoReference,
-                                arguments: widget.arguments)),
-                      )
-                    : Container();
-              }),
-          BlocSelector<SummaryCubit, SummaryState, bool>(
-              selector: (state) => state.isArrived == false,
-              builder: (c, x) {
-                return x
-                    ? Padding(
-                        padding: const EdgeInsets.all(kDefaultPadding),
-                        child: DefaultButton(
-                            widget: const Text('¿Llegaste donde el cliente?',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 18)),
-                            press: () async {
-                              var transaction = Transaction(
-                                  workId: widget.arguments.work.id!,
-                                  workcode: widget.arguments.work.workcode!,
-                                  status: 'arrived',
-                                  start: now(),
-                                  end: now(),
-                                  latitude: null,
-                                  longitude: null,
-                                  firm: null);
-                              widget.summaryCubit.sendTransactionArrived(
-                                  context, widget.arguments.work, transaction);
-                            }),
-                      )
-                    : Container();
-              }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildList(isArrived, List<Summary> summaries) {
-    if (summaries.isEmpty) {
-      return SvgWidget(
-        path: 'assets/icons/not-results.svg',
-        messages: [
-          'No hay facturas para el cliente ${widget.arguments.work.customer}.'
-        ],
+    if (state.summaries.isEmpty) {
+      return SliverToBoxAdapter(
+        child: SvgWidget(
+          path: 'assets/icons/not-results.svg',
+          messages: [
+            'No hay facturas para el cliente ${widget.arguments.work.customer}.'
+          ],
+        ),
       );
     } else {
-      return Padding(
-          padding: const EdgeInsets.only(
-              left: kDefaultPadding, right: kDefaultPadding),
-          child: ListView.separated(
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: summaries.length,
-            separatorBuilder: (BuildContext context, int index) =>
-                const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              final summary = summaries[index];
-              if (index == 0) {
-                return showCaseClientTile(context, summary);
-              } else {
-                return ItemSummary(
-                    summary: summary,
-                    arguments: widget.arguments,
-                    isArrived: isArrived,
-                    onTap: () async {
-                      var transaction = Transaction(
-                        workId: widget.arguments.work.id!,
-                        summaryId: summary.id,
-                        workcode: widget.arguments.work.workcode!,
-                        orderNumber: summary.orderNumber,
-                        status: 'summary',
-                        start: now(),
-                        end: now(),
-                        latitude: null,
-                        longitude: null,
-                      );
-                      widget.summaryCubit.sendTransactionSummary(
-                          widget.arguments.work, summary, transaction);
-                    });
-              }
-            },
-          ));
+      return SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            final summary = state.summaries[index];
+            if (index == 0) {
+              return showCaseClientTile(context, summary);
+            } else {
+              return ItemSummary(
+                  summary: summary,
+                  arguments: widget.arguments,
+                  isArrived: state.isArrived!,
+                  onTap: () async {
+                    var transaction = Transaction(
+                      workId: widget.arguments.work.id!,
+                      summaryId: summary.id,
+                      workcode: widget.arguments.work.workcode!,
+                      orderNumber: summary.orderNumber,
+                      status: 'summary',
+                      start: now(),
+                      end: now(),
+                      latitude: null,
+                      longitude: null,
+                    );
+                    widget.summaryCubit.sendTransactionSummary(
+                        widget.arguments.work, summary, transaction);
+                  });
+            }
+          },
+          childCount: state.summaries.length,
+        ),
+      );
     }
   }
 
