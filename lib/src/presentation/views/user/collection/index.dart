@@ -58,12 +58,12 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       collectionCubit.cashController.addListener(() {
         collectionCubit.listenForCash();
-        setState(() {});
+        // setState(() {});
       });
       collectionCubit.transferController.addListener(() {
         if (!collectionCubit.isEditing) {
           collectionCubit.listenForTransfer();
-          setState(() {});
+          // setState(() {});
         }
       });
     });
@@ -93,12 +93,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
             onPressed: () => collectionCubit.goBack(),
           ),
         ),
-        body: GestureDetector(
-          onTap: unFocus,
-          child: BlocBuilder<CollectionCubit, CollectionState>(
-            builder: (_, state) => _buildBlocConsumer(size),
-          ),
-        ));
+        body: GestureDetector(onTap: unFocus, child: buildBlocConsumer(size)));
   }
 
   void buildBlocListener(BuildContext context, CollectionState state) async {
@@ -136,7 +131,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
     }
   }
 
-  Widget _buildBlocConsumer(Size size) {
+  Widget buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionCubit, CollectionState>(
       buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,

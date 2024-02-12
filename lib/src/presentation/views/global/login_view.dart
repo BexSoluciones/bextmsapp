@@ -79,11 +79,7 @@ class LoginViewState extends State<LoginView> {
     loginCubit = BlocProvider.of<LoginCubit>(context);
 
     return UpgraderDialog(
-      child: Scaffold(
-        body: BlocBuilder<LoginCubit, LoginState>(
-          builder: (context, state) => buildBlocConsumer(size),
-        ),
-      ),
+      child: Scaffold(body: buildBlocConsumer(size)),
     );
   }
 

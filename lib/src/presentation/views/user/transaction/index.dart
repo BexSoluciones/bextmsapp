@@ -81,9 +81,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
             ],
           ),
         ),
-        body: BlocBuilder<ProcessingQueueBloc, ProcessingQueueState>(
-          builder: (_, state) => _buildBlocConsumer(),
-        ));
+        body: buildBlocConsumer());
   }
 
   void buildBlocListener(
@@ -102,7 +100,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
     }
   }
 
-  Widget _buildBlocConsumer() {
+  Widget buildBlocConsumer() {
     return BlocConsumer<ProcessingQueueBloc, ProcessingQueueState>(
       buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,

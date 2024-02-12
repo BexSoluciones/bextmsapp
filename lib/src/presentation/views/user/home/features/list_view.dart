@@ -33,9 +33,7 @@ class _HomeListViewState extends State<HomeListView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeCubit, HomeState>(
-      builder: (_, state) => _buildBlocConsumer(),
-    );
+    return buildBlocConsumer();
   }
 
   void buildBlocListener(BuildContext context, HomeState state) async {
@@ -52,7 +50,7 @@ class _HomeListViewState extends State<HomeListView> {
     }
   }
 
-  Widget _buildBlocConsumer() {
+  Widget buildBlocConsumer() {
     return BlocConsumer<HomeCubit, HomeState>(
       // buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
