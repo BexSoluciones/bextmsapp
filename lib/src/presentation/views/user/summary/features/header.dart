@@ -27,7 +27,7 @@ class HeaderSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverPersistentHeader(
-        pinned: true,
+        floating: true,
         delegate: _SliverAppBarDelegate(
             child: PreferredSize(
           preferredSize: const Size.fromHeight(50.0),

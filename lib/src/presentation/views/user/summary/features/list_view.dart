@@ -8,25 +8,13 @@ import '../../../../cubits/summary/summary_cubit.dart';
 
 //domain
 import '../../../../../domain/models/arguments.dart';
-import '../../../../../domain/models/summary.dart';
 import '../../../../../domain/models/transaction.dart';
 import '../../../../../domain/abstracts/format_abstract.dart';
 
-//utils
-import '../../../../../utils/constants/nums.dart';
-import '../../../../../utils/constants/strings.dart';
-
 //features
-import '../../../../widgets/default_button_widget.dart';
 import '../../../../widgets/icon_svg_widget.dart';
 
 import 'item_summary.dart';
-
-//services
-import '../../../../../locator.dart';
-import '../../../../../services/navigation.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
 
 class ListViewSummary extends StatefulWidget {
   const ListViewSummary(

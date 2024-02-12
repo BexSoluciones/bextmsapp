@@ -72,7 +72,7 @@ class AppBarSummary extends StatelessWidget {
       pinned: true,
       snap: false,
       floating: false,
-      expandedHeight: MediaQuery.of(context).size.height * 0.28,
+      expandedHeight: MediaQuery.of(context).size.height * 0.26,
       flexibleSpace: FlexibleSpaceBar(
           collapseMode: CollapseMode.pin,
           centerTitle: true,
