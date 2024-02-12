@@ -81,7 +81,7 @@ class _FormCollectionState extends State<FormCollection>
                                           size: 32, color: kPrimaryColor),
                                       onPressed: () => widget.collectionCubit
                                           .goToCamera(widget.orderNumber))
-                                  : Container();
+                                  : const SizedBox();
                             }),
                       ]),
                     ]),
@@ -180,7 +180,7 @@ class _FormCollectionState extends State<FormCollection>
                                                       .state
                                                       .enterpriseConfig!
                                                       .codeQr))
-                                          : Container();
+                                          : const SizedBox();
                                     }),
                               ],
                             )

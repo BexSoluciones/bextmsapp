@@ -157,7 +157,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                             width: 10,
                           ),
                         ])
-                  : Container(),
+                  : const SizedBox(),
               floatingActionButtonLocation:
                   FloatingActionButtonLocation.centerFloat,
             ),

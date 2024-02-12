@@ -33,7 +33,7 @@ class ProcessingQueueCard extends StatelessWidget {
             Text('Tarea: ${processingQueue.task}'),
             processingQueue.error != null
                 ? Text('Error ${processingQueue.error}')
-                : Container(),
+                : const SizedBox(),
             Text('Fecha inicio ${processingQueue.createdAt}'),
             Text('Fecha fin      ${processingQueue.updatedAt}'),
           ],

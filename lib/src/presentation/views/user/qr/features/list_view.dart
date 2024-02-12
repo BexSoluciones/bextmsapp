@@ -58,7 +58,7 @@ class ListViewQr extends StatelessWidget {
                                       fit: BoxFit.cover,
                                     ),
                                   )
-                                : Container(),
+                                : const SizedBox(),
                             const SizedBox(height: 10),
                             Text(
                               'Código QR para ${account.name}',
@@ -82,7 +82,7 @@ class ListViewQr extends StatelessWidget {
                   ),
                 );
               } else {
-                return Container();
+                return const SizedBox();
               }
             },
           );

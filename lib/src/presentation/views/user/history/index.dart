@@ -106,7 +106,7 @@ class _HistoryViewState extends State<HistoryView> {
                                                 .arguments.differents[index],
                                             index: index);
                                       }))
-                              : Container(),
+                              : const SizedBox(),
                           SizedBox(height: getProportionateScreenHeight(10)),
                           BlocConsumer<HistoryOrderBloc, HistoryOrderState>(
                             listener: (context, state) {

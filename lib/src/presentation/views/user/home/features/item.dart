@@ -190,8 +190,8 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                               color: Colors.deepOrange,
                               Icons.swipe_left_outlined),
                         ))
-                      : Container(),
-                  Container(),
+                      : const SizedBox(),
+                  const SizedBox(),
                 ],
               ),
             ),

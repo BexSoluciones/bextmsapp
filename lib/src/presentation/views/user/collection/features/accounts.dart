@@ -99,7 +99,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                               size: 32, color: kPrimaryColor),
                           onPressed: () => widget.collectionCubit.goToCodeQR(
                               widget.state.enterpriseConfig!.codeQr))
-                      : Container()
+                      : const SizedBox()
                 ],
               ),
               TextFormField(

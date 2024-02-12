@@ -84,7 +84,7 @@ class _HomeListViewState extends State<HomeListView> {
             return ItemWork(work: work);
           }
         } else {
-          return Container();
+          return const SizedBox();
         }
       },
     );
