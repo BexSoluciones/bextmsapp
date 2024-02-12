@@ -179,7 +179,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                                         Icons.exposure_minus_1,
                                                         color:
                                                             Colors.grey[500])))
-                                            : Container(),
+                                            : const SizedBox(),
                                         GestureDetector(
                                             onTap: () => widget.isArrived &&
                                                     widget.enterpriseConfig
@@ -189,7 +189,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                                     context: context,
                                                     builder: (BuildContext
                                                             context) =>
-                                                        Container())
+                                                        const SizedBox())
                                                 : null,
                                             child: Text(
                                               widget.summary.cant
@@ -217,7 +217,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                                         Icons.exposure_plus_1,
                                                         color:
                                                             Colors.grey[500])))
-                                            : Container()
+                                            : const SizedBox()
                                       ])),
                               Text(
                                 'TOTAL: \$${formatter.format(widget.summary.grandTotal)}',

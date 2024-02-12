@@ -151,7 +151,7 @@ class HeaderReject extends StatelessWidget {
                             ],
                           ),
                         )
-                      : Container(),
+                      : const SizedBox(),
                 ],
               ),
             )),

@@ -41,7 +41,7 @@ class BottomViewSummary extends StatelessWidget with FormatDate {
                               AppRoutes.summaryGeoReference,
                               arguments: arguments)),
                     )
-                  : Container();
+                  : const SizedBox();
             }),
         BlocSelector<SummaryCubit, SummaryState, bool>(
             selector: (state) => state.isArrived == false,
@@ -67,7 +67,7 @@ class BottomViewSummary extends StatelessWidget with FormatDate {
                                 context, arguments.work, transaction);
                           }),
                     )
-                  : Container();
+                  : const SizedBox();
             }),
       ],
     );
