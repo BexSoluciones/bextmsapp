@@ -1,5 +1,6 @@
 part of 'summary_cubit.dart';
 
+
 abstract class SummaryState extends Equatable {
   final List<Summary> summaries;
   final String? origin;

@@ -5,6 +5,7 @@ import 'package:image/image.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //cubit
+import '../../../../../domain/models/summary.dart';
 import '../../../../cubits/summary/summary_cubit.dart';
 
 //domain
@@ -50,12 +51,8 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
 
     return BlocConsumer<SummaryCubit, SummaryState>(
       buildWhen: (current, previous) {
-        print('******summary build*******');
-        print(current != previous);
-        print(current is SummaryChanged);
-        print(current is SummaryLoading);
-
-        return current != previous && (current is SummaryChanged || current is SummaryLoading);
+        return current.runtimeType != previous.runtimeType &&
+            (current is SummaryChanged || current is SummaryLoading);
       },
       listener: buildBlocListener,
       builder: (context, state) {
@@ -104,6 +101,16 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
         delegate: SliverChildBuilderDelegate(
           (BuildContext context, int index) {
             final summary = state.summaries[index];
+            // return BlocSelector<SummaryCubit, SummaryState, Summary>(
+            //   selector: (state) {
+            //     return state.summaries.firstWhere(
+            //       (element) => element.hasTransaction == 0,
+            //     );
+            //   },
+            //   builder: (context, x) {
+            //
+            //   },
+            // );
             if (index == 0) {
               return showCaseClientTile(context, summary);
             } else {

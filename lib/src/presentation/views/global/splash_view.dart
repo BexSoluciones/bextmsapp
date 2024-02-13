@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/helpers/index.dart';
 
 //bloc
+import '../../../config/size.dart';
 import '../../blocs/splash/splash_bloc.dart';
 import '../../widgets/splash_widget.dart';
 
@@ -31,6 +32,7 @@ class _SplashViewState extends State<SplashView> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return Scaffold(
       body: SizedBox(
         width: MediaQuery.of(context).size.width,

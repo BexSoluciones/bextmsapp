@@ -85,7 +85,6 @@ class AppBarInventory extends StatelessWidget {
       expandedHeight: MediaQuery.of(context).size.height * 0.28,
       flexibleSpace: FlexibleSpaceBar(
           collapseMode: CollapseMode.pin,
-          centerTitle: true,
           background: SafeArea(
             child: Container(
                 constraints: BoxConstraints(
@@ -244,8 +243,7 @@ class AppBarInventory extends StatelessWidget {
                       ),
                     ])),
           )),
-      title: Text(arguments.work.workcode!,
-          textAlign: TextAlign.center,
+      title: Text("SERVICIO: ${arguments.work.workcode}",
           style: TextStyle(
               fontSize: calculatedFon,
               fontWeight: FontWeight.normal,
