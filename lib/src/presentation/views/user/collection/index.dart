@@ -110,7 +110,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 
       if (state.validate == true) {
         collectionBloc.add(
-            CollectionNavigate(route: AppRoutes.work, arguments: state.work));
+            CollectionNavigate(route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));
       } else if (state.validate == false) {
         collectionBloc.add(CollectionNavigate(
             route: AppRoutes.summary,

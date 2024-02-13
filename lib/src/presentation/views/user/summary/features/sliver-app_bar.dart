@@ -57,16 +57,21 @@ class AppBarSummary extends StatelessWidget {
           padding: EdgeInsets.all(8.0),
           child: IconConnection(),
         ),
-        summaryCubit.state.time != null
-            ? GestureDetector(
-                onTap: () async =>
-                    await summaryCubit.getDiffTime(arguments.work.id!),
-                child: Text('Tiempo ${summaryCubit.state.time}',
-                    style: TextStyle(
-                        fontSize: 18,
-                        color:
-                            Theme.of(context).colorScheme.secondaryContainer)))
-            : const SizedBox(),
+        BlocSelector<SummaryCubit, SummaryState, bool>(
+            selector: (state) => state.time != null,
+            builder: (context, x) {
+              return x
+                  ? GestureDetector(
+                      onTap: () async =>
+                          await summaryCubit.getDiffTime(arguments.work.id!),
+                      child: Text('Tiempo ${summaryCubit.state.time}',
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer)))
+                  : const SizedBox();
+            }),
         const SizedBox(width: 5)
       ],
       pinned: true,
@@ -100,13 +105,19 @@ class AppBarSummary extends StatelessWidget {
                                           text: 'SERVICIO: ',
                                           style: TextStyle(
                                               fontSize: 16,
-                                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondaryContainer),
                                         ),
                                         TextSpan(
                                             text: arguments.work.workcode,
-                                            style:  TextStyle(
+                                            style: TextStyle(
                                                 fontSize: 16,
-                                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
+                                                fontWeight: FontWeight.normal,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondaryContainer)),
                                       ],
                                     ),
                                   ),

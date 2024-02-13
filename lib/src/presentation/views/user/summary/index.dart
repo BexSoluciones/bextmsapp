@@ -89,7 +89,6 @@ class SummaryViewState extends State<SummaryView> {
     return Stack(
       children: [
         CustomScrollView(
-          shrinkWrap: true,
           slivers: [
             AppBarSummary(
               arguments: widget.arguments,
@@ -113,7 +112,7 @@ class SummaryViewState extends State<SummaryView> {
           ],
         ),
         Positioned(
-          bottom: 0,
+          bottom: 10,
           left: 0,
           right: 0,
           child: BottomViewSummary(

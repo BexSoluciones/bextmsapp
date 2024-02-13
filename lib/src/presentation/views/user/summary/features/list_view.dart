@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image/image.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //cubit
@@ -49,7 +50,12 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
 
     return BlocConsumer<SummaryCubit, SummaryState>(
       buildWhen: (current, previous) {
-        return current is SummaryChanged;
+        print('*************');
+        print(current != previous);
+        print(current is SummaryChanged);
+        print(current is SummaryLoading);
+
+        return current != previous && (current is SummaryChanged || current is SummaryLoading);
       },
       listener: buildBlocListener,
       builder: (context, state) {

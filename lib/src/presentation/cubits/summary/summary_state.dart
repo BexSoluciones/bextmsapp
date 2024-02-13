@@ -22,7 +22,6 @@ abstract class SummaryState extends Equatable {
   List<Object?> get props => [
         summaries,
         origin,
-        time,
         isArrived,
         isGeoReference,
         error,
