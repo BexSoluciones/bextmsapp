@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:bexdeliveries/src/presentation/cubits/summary/summary_cubit.dart';
+import 'package:bexdeliveries/src/presentation/cubits/work/work_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,6 +37,8 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   final _formKey = GlobalKey<FormState>();
 
   late CollectionBloc collectionBloc;
+  late SummaryCubit summaryCubit;
+  late WorkCubit workCubit;
   late FocusScopeNode currentFocus;
 
   @override
@@ -50,6 +54,8 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 
     context.read<AccountBloc>().add(LoadAccountListEvent());
     collectionBloc = BlocProvider.of<CollectionBloc>(context);
+    summaryCubit = BlocProvider.of<SummaryCubit>(context);
+    workCubit = BlocProvider.of<WorkCubit>(context);
 
     collectionBloc.add(CollectionLoading(
         workId: widget.arguments.work.id!,
@@ -100,18 +106,13 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   }
 
   void buildBlocListener(BuildContext context, CollectionState state) async {
-    print('***************');
-    print(state.status);
-
     if (state.status == CollectionStatus.success &&
         state.formSubmissionStatus == FormSubmissionStatus.success) {
-      print('**************');
-      print(state.validate);
-
       if (state.validate == true) {
         collectionBloc.add(
             CollectionNavigate(route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));
       } else if (state.validate == false) {
+        summaryCubit.getAllSummariesByOrderNumberChanged(widget.arguments.work.id!);
         collectionBloc.add(CollectionNavigate(
             route: AppRoutes.summary,
             arguments: SummaryArgument(work: state.work!)));

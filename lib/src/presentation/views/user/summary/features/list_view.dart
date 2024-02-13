@@ -50,7 +50,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
 
     return BlocConsumer<SummaryCubit, SummaryState>(
       buildWhen: (current, previous) {
-        print('*************');
+        print('******summary build*******');
         print(current != previous);
         print(current is SummaryChanged);
         print(current is SummaryLoading);

@@ -1,22 +1,16 @@
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 //config
 import '../../../../../config/size.dart';
-
-//cubit
-import '../../../../../presentation/cubits/summary/summary_cubit.dart';
 
 //domain
 import '../../../../../domain/models/summary.dart';
 import '../../../../../domain/models/arguments.dart';
 import '../../../../../domain/abstracts/format_abstract.dart';
 
-class ItemSummary extends StatefulWidget {
-  const ItemSummary(
+class ItemSummary extends StatelessWidget with FormatNumber {
+  ItemSummary(
       {super.key,
       required this.arguments,
       required this.summary,
@@ -27,48 +21,6 @@ class ItemSummary extends StatefulWidget {
   final Summary summary;
   final bool isArrived;
   final void Function()? onTap;
-
-  @override
-  State<ItemSummary> createState() => _ItemSummaryState();
-}
-
-class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
-  late SummaryCubit summaryCubit;
-
-  int totalSummary = 0;
-  int totalLooseSummary = 0;
-
-  @override
-  void setState(fn) {
-    if (mounted) {
-      super.setState(fn);
-    }
-  }
-
-  @override
-  void initState() {
-    summaryCubit = BlocProvider.of<SummaryCubit>(context);
-
-    if (widget.summary.expedition != null) {
-      countBox();
-    }
-
-    super.initState();
-  }
-
-  Future<void> countBox() async {
-    var response = await summaryCubit.countBox(widget.summary.orderNumber);
-
-    setState(() {
-      totalSummary = response[0] as int;
-      totalLooseSummary = response[1] as int;
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,8 +35,8 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: ListTile(
-            enabled: widget.summary.hasTransaction == 0,
-            onTap: widget.onTap,
+            enabled: summary.hasTransaction == 0,
+            onTap: onTap,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
@@ -96,16 +48,17 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${widget.summary.type} - ${widget.summary.orderNumber}',
+                      '${summary.type} - ${summary.orderNumber}',
                       textScaler: TextScaler.linear(calculatedTextScaleFactor),
                       style: const TextStyle(fontSize: 16),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (widget.summary.expedition != null)
+                    if (summary.expedition != null)
                       Text(
-                        'Expedición: ${widget.summary.expedition}',
-                        textScaler: TextScaler.linear(calculatedTextScaleFactor),
+                        'Expedición: ${summary.expedition}',
+                        textScaler:
+                            TextScaler.linear(calculatedTextScaleFactor),
                         style: TextStyle(
                             fontSize: 16,
                             color: Theme.of(context).colorScheme.scrim),
@@ -117,26 +70,30 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  Text(
-                    'Items: ${widget.summary.expedition != null ? (totalSummary + totalLooseSummary) : widget.summary.count.toString()}',
-                    textScaler: TextScaler.linear(calculatedTextScaleFactor),
-                    style: TextStyle(
-                        fontSize: 14, color: Theme.of(context).colorScheme.scrim),
-                  ),
-                ]),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Items: ${summary.expedition != null ? (summary.totalSummary! + summary.totalLooseSummary!) : summary.count.toString()}',
+                        textScaler:
+                            TextScaler.linear(calculatedTextScaleFactor),
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.scrim),
+                      ),
+                    ]),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Total:  ${formatter.format(widget.summary.grandTotalCopy)}',
+                      'Total:  ${formatter.format(summary.grandTotalCopy)}',
                       textScaler: TextScaler.linear(calculatedTextScaleFactor),
                       style: TextStyle(
                           fontSize: 14,
                           color: Theme.of(context).colorScheme.scrim),
                     ),
                     Text(
-                      'Tipo: ${widget.summary.typeOfCharge}',
+                      'Tipo: ${summary.typeOfCharge}',
                       textScaler: TextScaler.linear(calculatedTextScaleFactor),
                       style: TextStyle(
                           fontSize: 14,
@@ -146,9 +103,9 @@ class _ItemSummaryState extends State<ItemSummary> with FormatNumber {
                 )
               ],
             ),
-            trailing: widget.summary.loading!
+            trailing: summary.loading!
                 ? const CupertinoActivityIndicator()
-                : widget.summary.typeTransaction == 'entrega'
+                : summary.typeTransaction == 'entrega'
                     ? Icon(Icons.local_shipping,
                         color: Theme.of(context).colorScheme.scrim)
                     : Icon(Icons.hail,
