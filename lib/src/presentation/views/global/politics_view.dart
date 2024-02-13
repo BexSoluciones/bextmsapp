@@ -27,6 +27,7 @@ class PoliticsViewState extends State<PoliticsView> {
 
   @override
   void initState() {
+    politicsCubit = BlocProvider.of<PoliticsCubit>(context);
     super.initState();
   }
 
@@ -104,6 +105,6 @@ class PoliticsViewState extends State<PoliticsView> {
   }
 
   void _dispatchEvent(BuildContext context) {
-    BlocProvider.of<PoliticsCubit>(context).goTo();
+    politicsCubit.goTo();
   }
 }
