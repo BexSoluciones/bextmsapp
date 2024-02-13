@@ -76,9 +76,9 @@ class PaymentDateInputField extends StatelessWidget {
           buildWhen: (previous, current) => current.date != previous.date,
           builder: (context, state) => textField(
                 context: context,
-                onChanged: (transfer) => context
+                onChanged: (date) => context
                     .read<CollectionBloc>()
-                    .add(CollectionPaymentTransferChanged(value: transfer)),
+                    .add(CollectionPaymentDateChanged(value: date)),
                 errorText: state.date.hasError ? state.date.errorMessage : null,
               ));
 }

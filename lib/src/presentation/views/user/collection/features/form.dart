@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 //blocs
 
 import '../../../../blocs/collection/collection_bloc.dart';
@@ -182,188 +181,144 @@ class _FormCollectionState extends State<FormCollection>
                                 // future.then((void value) => _closeModal(value));
                               });
                     }),
-                // BlocSelector<CollectionBloc, CollectionState, bool>(
-                //     selector: (state) =>
-                //         (state is CollectionInitial ||
-                //             state is CollectionLoading ||
-                //             state is CollectionFailed) &&
-                //         state.enterpriseConfig != null &&
-                //         state.enterpriseConfig!.specifiedAccountTransfer ==
-                //             true &&
-                //         state.enterpriseConfig!.multipleAccounts == false,
-                //     builder: (c, x) {
-                //       return x
-                //           ? Row(
-                //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //               children: [
-                //                 const Row(children: [
-                //                   Text('NÚMERO DE CUENTA',
-                //                       style: TextStyle(fontSize: 14)),
-                //                   Icon(Icons.account_balance_outlined)
-                //                 ]),
-                //                 Row(
-                //                   children: [
-                //                     IconButton(
-                //                       icon: const Icon(Icons.qr_code_2),
-                //                       onPressed: () {
-                //                         if (widget.collectionCubit
-                //                                 .selectedAccount !=
-                //                             null) {
-                //                           widget.collectionCubit.goToCodeQR(
-                //                               widget.collectionCubit
-                //                                   .selectedAccount!.codeQr);
-                //                         } else {
-                //                           widget.collectionCubit.error();
-                //                         }
-                //                       },
-                //                     ),
-                //                   ],
-                //                 )
-                //               ],
-                //             )
-                //           : const SizedBox();
-                //     }),
-                // BlocSelector<CollectionBloc, CollectionState, bool>(
-                //     selector: (state) =>
-                //         (state is CollectionInitial ||
-                //             state is CollectionLoading ||
-                //             state is CollectionFailed) &&
-                //         state.enterpriseConfig != null &&
-                //         state.enterpriseConfig!.specifiedAccountTransfer ==
-                //             true &&
-                //         state.enterpriseConfig!.multipleAccounts == false,
-                //     builder: (c, x) {
-                //       return x
-                //           ? BlocBuilder<AccountBloc, AccountState>(
-                //               builder: (context, accountBlocState) {
-                //                 if (accountBlocState is AccountLoadingState) {
-                //                   return const CircularProgressIndicator();
-                //                 } else if (accountBlocState
-                //                     is AccountLoadedState) {
-                //                   return DropdownButtonFormField<Account>(
-                //                     itemHeight: null,
-                //                     isExpanded: true,
-                //                     value: accountBlocState.accounts.first,
-                //                     onChanged: (Account? newValue) {
-                //                       widget.collectionCubit.selectedAccount =
-                //                           newValue;
-                //                       setState(() {});
-                //                     },
-                //                     decoration: const InputDecoration(
-                //                       contentPadding:
-                //                           EdgeInsets.symmetric(horizontal: 10),
-                //                       focusedBorder: OutlineInputBorder(
-                //                         borderSide: BorderSide(
-                //                             color: Colors.grey, width: 2.0),
-                //                       ),
-                //                       enabledBorder: OutlineInputBorder(
-                //                         borderSide: BorderSide(
-                //                             color: kPrimaryColor, width: 2.0),
-                //                       ),
-                //                       errorBorder: OutlineInputBorder(
-                //                         borderSide: BorderSide(
-                //                             color: kPrimaryColor, width: 2.0),
-                //                       ),
-                //                       hintStyle: TextStyle(
-                //                         color: Colors.orange,
-                //                       ),
-                //                     ),
-                //                     style: const TextStyle(
-                //                       // fontSize: 10,
-                //                       color: kPrimaryColor,
-                //                     ),
-                //                     dropdownColor: Colors.white,
-                //                     validator: (value) {
-                //                       if (widget
-                //                               .collectionCubit
-                //                               .transferController
-                //                               .text
-                //                               .isNotEmpty &&
-                //                           value!.id == 0) {
-                //                         return 'Selecciona una opción válida';
-                //                       }
-                //                       return null;
-                //                     },
-                //                     items: accountBlocState.accounts
-                //                         .map((Account value) {
-                //                       return DropdownMenuItem<Account>(
-                //                         value: value,
-                //                         child: Text(
-                //                           value.accountNumber != null
-                //                               ? '${value.name} - ${value.accountNumber}'
-                //                               : value.name!,
-                //                           overflow: TextOverflow.visible,
-                //                           style: const TextStyle(
-                //                               color: Colors.black),
-                //                         ),
-                //                       );
-                //                     }).toList(),
-                //                   );
-                //                 } else if (accountBlocState
-                //                     is AccountErrorState) {
-                //                   return Text(
-                //                       'Error: ${accountBlocState.error}');
-                //                 } else {
-                //                   return const Text(
-                //                       'No se han cargado datos aún.');
-                //                 }
-                //               },
-                //             )
-                //           : const SizedBox();
-                //     }),
+                BlocSelector<CollectionBloc, CollectionState, bool>(
+                    selector: (state) =>
+                        state.canRenderView() &&
+                        state.enterpriseConfig != null &&
+                        state.enterpriseConfig!.specifiedAccountTransfer ==
+                            true &&
+                        state.enterpriseConfig!.multipleAccounts == false,
+                    builder: (c, x) {
+                      return x
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Row(children: [
+                                  Text('NÚMERO DE CUENTA',
+                                      style: TextStyle(fontSize: 14)),
+                                  Icon(Icons.account_balance_outlined)
+                                ]),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.qr_code_2),
+                                      onPressed: () {
+                                        // if (widget.collectionCubit
+                                        //         .selectedAccount !=
+                                        //     null) {
+                                        //   widget.collectionCubit.goToCodeQR(
+                                        //       widget.collectionCubit
+                                        //           .selectedAccount!.codeQr);
+                                        // } else {
+                                        //   widget.collectionCubit.error();
+                                        // }
+                                      },
+                                    ),
+                                  ],
+                                )
+                              ],
+                            )
+                          : const SizedBox();
+                    }),
+                BlocSelector<CollectionBloc, CollectionState, bool>(
+                    selector: (state) =>
+                        state.canRenderView() &&
+                        state.enterpriseConfig != null &&
+                        state.enterpriseConfig!.specifiedAccountTransfer ==
+                            true &&
+                        state.enterpriseConfig!.multipleAccounts == false,
+                    builder: (c, x) {
+                      return x
+                          ? BlocBuilder<AccountBloc, AccountState>(
+                              builder: (context, accountBlocState) {
+                                if (accountBlocState is AccountLoadingState) {
+                                  return const CircularProgressIndicator();
+                                } else if (accountBlocState
+                                    is AccountLoadedState) {
+                                  return DropdownButtonFormField<Account>(
+                                    itemHeight: null,
+                                    isExpanded: true,
+                                    value: accountBlocState.accounts.first,
+                                    onChanged: (Account? newValue) {
+                                      // widget.collectionCubit.selectedAccount =
+                                      //     newValue;
+                                      // setState(() {});
+                                    },
+                                    decoration: const InputDecoration(
+                                      contentPadding:
+                                          EdgeInsets.symmetric(horizontal: 10),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.grey, width: 2.0),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: kPrimaryColor, width: 2.0),
+                                      ),
+                                      errorBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: kPrimaryColor, width: 2.0),
+                                      ),
+                                      hintStyle: TextStyle(
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+                                    style: const TextStyle(
+                                      // fontSize: 10,
+                                      color: kPrimaryColor,
+                                    ),
+                                    dropdownColor: Colors.white,
+                                    validator: (value) {
+                                      // if (widget
+                                      //         .collectionCubit
+                                      //         .transferController
+                                      //         .text
+                                      //         .isNotEmpty &&
+                                      //     value!.id == 0) {
+                                      //   return 'Selecciona una opción válida';
+                                      // }
+                                      return null;
+                                    },
+                                    items: accountBlocState.accounts
+                                        .map((Account value) {
+                                      return DropdownMenuItem<Account>(
+                                        value: value,
+                                        child: Text(
+                                          value.accountNumber != null
+                                              ? '${value.name} - ${value.accountNumber}'
+                                              : value.name!,
+                                          overflow: TextOverflow.visible,
+                                          style: const TextStyle(
+                                              color: Colors.black),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  );
+                                } else if (accountBlocState
+                                    is AccountErrorState) {
+                                  return Text(
+                                      'Error: ${accountBlocState.error}');
+                                } else {
+                                  return const Text(
+                                      'No se han cargado datos aún.');
+                                }
+                              },
+                            )
+                          : const SizedBox();
+                    }),
                 const SizedBox(height: 10),
-                // BlocSelector<CollectionBloc, CollectionState, bool>(
-                //     selector: (state) =>
-                //         (state is CollectionInitial ||
-                //             state is CollectionLoading ||
-                //             state is CollectionFailed) &&
-                //         state.enterpriseConfig != null &&
-                //         state.enterpriseConfig!.specifiedAccountTransfer ==
-                //             true &&
-                //         state.enterpriseConfig!.multipleAccounts == false,
-                //     builder: (c, x) {
-                //       return x
-                //           ? TextField(
-                //               controller: widget.collectionCubit
-                //                   .dateController, //editing controller of this TextField
-                //               autofocus: false,
-                //               decoration: const InputDecoration(
-                //                 contentPadding: EdgeInsets.only(left: 15.0),
-                //                 focusedBorder: OutlineInputBorder(
-                //                   borderSide: BorderSide(
-                //                       color: kPrimaryColor, width: 2.0),
-                //                 ),
-                //                 enabledBorder: OutlineInputBorder(
-                //                   borderSide: BorderSide(
-                //                       color: kPrimaryColor, width: 2.0),
-                //                 ),
-                //                 errorBorder: OutlineInputBorder(
-                //                   borderSide: BorderSide(
-                //                       color: kPrimaryColor, width: 2.0),
-                //                 ),
-                //               ),
-                //               readOnly: true,
-                //               onTap: () async {
-                //                 var pickedDate = await showDatePicker(
-                //                     context: context,
-                //                     initialDate: DateTime.now(),
-                //                     firstDate: DateTime(2000),
-                //                     lastDate: DateTime(2101));
-                //
-                //                 if (pickedDate != null) {
-                //                   var formattedDate = DateFormat('yyyy-MM-dd')
-                //                       .format(pickedDate);
-                //                   setState(() {
-                //                     widget.collectionCubit.dateController.text =
-                //                         formattedDate; //set output date to TextField value.
-                //                   });
-                //                 } else {
-                //                   print('Fecha no seleccionada');
-                //                 }
-                //               },
-                //             )
-                //           : const SizedBox();
-                //     }),
+                BlocSelector<CollectionBloc, CollectionState, bool>(
+                    selector: (state) =>
+                        state.canRenderView() &&
+                        state.enterpriseConfig != null &&
+                        state.enterpriseConfig!.specifiedAccountTransfer ==
+                            true &&
+                        state.enterpriseConfig!.multipleAccounts == false,
+                    builder: (c, x) {
+                      return x
+                          ? const PaymentDateInputField()
+                          : const SizedBox();
+                    }),
                 const SizedBox(height: 30),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -48,6 +48,8 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     on<CollectionBack>(_back);
     on<CollectionPaymentEfectyChanged>(_onPaymentEfectyChanged);
     on<CollectionPaymentTransferChanged>(_onPaymentTransferChanged);
+    on<CollectionPaymentMultiTransferChanged>(_onPaymentMultiTransferChanged);
+    on<CollectionPaymentDateChanged>(_onPaymentDateChanged);
     on<CollectionButtonPressed>(_onCollectionButtonPressed);
     on<CollectionConfirmTransaction>(_onConfirmTransaction);
   }
@@ -96,10 +98,10 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     Emitter<CollectionState> emit,
   ) async {
     if (!state.isValid) return;
-
-    emit(state.copyWith(formSubmissionStatus: FormSubmissionStatus.submitting));
-
     try {
+      emit(state.copyWith(
+          formSubmissionStatus: FormSubmissionStatus.submitting));
+
       if (state.enterpriseConfig != null) {
         final allowInsetsBelow = state.enterpriseConfig!.allowInsetsBelow;
         final allowInsetsAbove = state.enterpriseConfig!.allowInsetsAbove;
@@ -110,8 +112,6 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
             state.account == null) {
           emit(state.copyWith(
               status: CollectionStatus.error,
-              totalSummary: state.totalSummary,
-              enterpriseConfig: state.enterpriseConfig,
               error: 'Selecciona un numero de cuenta'));
         }
 
@@ -133,8 +133,6 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           } else {
             emit(state.copyWith(
                 status: CollectionStatus.error,
-                totalSummary: state.totalSummary,
-                enterpriseConfig: state.enterpriseConfig,
                 error: 'el recaudo debe ser igual al total'));
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
@@ -147,10 +145,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
             return add(
                 CollectionConfirmTransaction(arguments: event.arguments));
           } else {
-            emit(state.copyWith(
-                status: CollectionStatus.waiting,
-                totalSummary: state.totalSummary,
-                enterpriseConfig: state.enterpriseConfig));
+            emit(state.copyWith(status: CollectionStatus.waiting));
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
@@ -162,8 +157,6 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           } else {
             emit(state.copyWith(
                 status: CollectionStatus.error,
-                totalSummary: state.totalSummary,
-                enterpriseConfig: state.enterpriseConfig,
                 error: 'el recaudo debe ser igual o menor al total'));
           }
         } else if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
@@ -171,15 +164,10 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           if (state.total >= state.totalSummary!.toDouble()) {
             storageService.setBool('firmRequired', false);
             storageService.setBool('photoRequired', false);
-            emit(state.copyWith(
-                status: CollectionStatus.waiting,
-                totalSummary: state.totalSummary,
-                enterpriseConfig: state.enterpriseConfig));
+            emit(state.copyWith(status: CollectionStatus.waiting));
           } else {
             emit(state.copyWith(
                 status: CollectionStatus.error,
-                totalSummary: state.totalSummary,
-                enterpriseConfig: state.enterpriseConfig,
                 error: 'el recaudo debe ser igual o mayor al total'));
           }
         }
@@ -309,9 +297,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           payments.isEmpty &&
           (status == 'delivery' || status == 'partial')) {
         emit(state.copyWith(
-            status: CollectionStatus.error,
-            totalSummary: state.totalSummary,
-            enterpriseConfig: state.enterpriseConfig,
+            formSubmissionStatus: FormSubmissionStatus.failure,
             error:
                 'No hay pagos para el recaudo que cumpla con las condiciones.'));
       } else {
@@ -332,9 +318,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
             state.enterpriseConfig!.hadTakePicture == true &&
             images.isEmpty) {
           emit(state.copyWith(
-              status: CollectionStatus.error,
-              totalSummary: state.totalSummary,
-              enterpriseConfig: state.enterpriseConfig,
+              formSubmissionStatus: FormSubmissionStatus.failure,
               error: 'La foto es obligatoria.'));
         } else {
           var imagesServer = <String>[];
@@ -520,6 +504,45 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           state.transfer.value.isEmpty) {
         emit(state.copyWith(total: double.tryParse(state.efecty.value)!));
       }
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
+    }
+  }
+
+  Future<void> _onPaymentDateChanged(
+    CollectionPaymentDateChanged event,
+    Emitter<CollectionState> emit,
+  ) async {
+    try {
+      // var pickedDate = await showDatePicker(
+      //     context: context,
+      //     initialDate: DateTime.now(),
+      //     firstDate: DateTime(2000),
+      //     lastDate: DateTime(2101));
+      //
+      // if (pickedDate != null) {
+      //   var formattedDate = DateFormat('yyyy-MM-dd')
+      //       .format(pickedDate);
+      //
+      //   emit(state.copyWith(
+      //       date: PaymentDate.create(formattedDate),
+      //       formSubmissionStatus: FormSubmissionStatus.initial));
+      // } else {
+      //   print('Fecha no seleccionada');
+      // }
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
+    }
+  }
+
+  Future<void> _onPaymentMultiTransferChanged(
+    CollectionPaymentMultiTransferChanged event,
+    Emitter<CollectionState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(
+          multiTransfer: PaymentMultiTransfer.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
     } catch (error, stackTrace) {
       helperFunctions.handleException(error, stackTrace);
     }

@@ -51,8 +51,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
 
     return BlocConsumer<SummaryCubit, SummaryState>(
       buildWhen: (current, previous) {
-        return current.runtimeType != previous.runtimeType &&
-            (current is SummaryChanged || current is SummaryLoading);
+        return current.runtimeType != previous.runtimeType;
       },
       listener: buildBlocListener,
       builder: (context, state) {

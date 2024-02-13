@@ -49,6 +49,8 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   }
 
   Future<SummaryState> _getAllSummariesByOrderNumber(int workId) async {
+    emit(const SummaryLoading());
+
     final summaries =
         await databaseRepository.getAllSummariesByOrderNumber(workId);
 

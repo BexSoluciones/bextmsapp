@@ -1,18 +1,20 @@
 import 'dart:async';
-import 'package:bexdeliveries/src/presentation/cubits/summary/summary_cubit.dart';
-import 'package:bexdeliveries/src/presentation/cubits/work/work_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+//cubits
+import '../../../cubits/summary/summary_cubit.dart';
+import '../../../cubits/work/work_cubit.dart';
+
 //blocs
-import '../../../../utils/constants/strings.dart';
 import '../../../blocs/collection/collection_bloc.dart';
 import '../../../blocs/account/account_bloc.dart';
 
 //utils
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/nums.dart';
+import '../../../../utils/constants/strings.dart';
 
 //domain
 import '../../../../domain/models/arguments.dart';
@@ -91,7 +93,13 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 
   Widget buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionBloc, CollectionState>(
-      buildWhen: (previous, current) => previous != current,
+      buildWhen: (previous, current) {
+        print('***previous***');
+        print(previous.status);
+        print('***current***');
+        print(current.status);
+        return previous.status != current.status;
+      },
       listener: buildBlocListener,
       builder: (context, state) {
         if (state.status == CollectionStatus.loading) {
@@ -109,10 +117,11 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
     if (state.status == CollectionStatus.success &&
         state.formSubmissionStatus == FormSubmissionStatus.success) {
       if (state.validate == true) {
-        collectionBloc.add(
-            CollectionNavigate(route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));
+        collectionBloc.add(CollectionNavigate(
+            route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));
       } else if (state.validate == false) {
-        summaryCubit.getAllSummariesByOrderNumberChanged(widget.arguments.work.id!);
+        summaryCubit
+            .getAllSummariesByOrderNumberChanged(widget.arguments.work.id!);
         collectionBloc.add(CollectionNavigate(
             route: AppRoutes.summary,
             arguments: SummaryArgument(work: state.work!)));
