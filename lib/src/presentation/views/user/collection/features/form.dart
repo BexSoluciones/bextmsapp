@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 //blocs
+import '../../../../../locator.dart';
+import '../../../../../services/navigation.dart';
+import '../../../../../utils/constants/strings.dart';
 import '../../../../blocs/account/account_bloc.dart';
 //cubits
 import '../../../../cubits/collection/collection_cubit.dart';
@@ -14,6 +17,7 @@ import '../../../../../domain/abstracts/format_abstract.dart';
 //widgets
 import '../../../../widgets/default_button_widget.dart';
 import '../features/accounts.dart';
+final NavigationService _navigationService = locator<NavigationService>();
 
 class FormCollection extends StatefulWidget {
   final GlobalKey formKey;
@@ -34,6 +38,7 @@ class FormCollection extends StatefulWidget {
 
 class _FormCollectionState extends State<FormCollection>
     with FormatNumber, FormatDate {
+
   @override
   void setState(VoidCallback fn) {
     if (mounted) {
@@ -157,8 +162,8 @@ class _FormCollectionState extends State<FormCollection>
                                 IconButton(
                                     icon: const Icon(Icons.camera_alt,
                                         size: 32, color: kPrimaryColor),
-                                    onPressed: () => widget.collectionCubit
-                                        .goToCamera(widget.orderNumber)),
+                                    onPressed: () => _navigationService.goTo(AppRoutes.camera, arguments: widget.orderNumber)
+                                ),
                                 BlocSelector<CollectionCubit, CollectionState,
                                         bool>(
                                     bloc: widget.collectionCubit,
