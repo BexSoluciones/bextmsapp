@@ -14,7 +14,7 @@ class PaymentEfectyInputField extends StatelessWidget {
           buildWhen: (previous, current) => current.efecty != previous.efecty,
           builder: (context, state) => textField(
                 context: context,
-                hintTxt: 'Efectivo',
+                prefixText: '',
                 onChanged: (efecty) => context
                     .read<CollectionBloc>()
                     .add(CollectionPaymentEfectyChanged(value: efecty)),
@@ -40,7 +40,7 @@ class PaymentTransferInputField extends StatelessWidget {
                 errorText: state.transfer.hasError
                     ? state.transfer.errorMessage
                     : null,
-                hintTxt: 'Transferencia',
+                prefixText: '',
               ));
 }
 
@@ -60,6 +60,6 @@ class PaymentMultiTransferInputField extends StatelessWidget {
                 errorText: state.multiTransfer.hasError
                     ? state.multiTransfer.errorMessage
                     : null,
-                hintTxt: 'Transferencia',
+                prefixText: '',
               ));
 }

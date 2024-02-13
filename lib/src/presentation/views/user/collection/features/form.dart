@@ -464,7 +464,7 @@ class _FormCollectionState extends State<FormCollection>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Total:', style: TextStyle(fontSize: 20)),
-                      Text('\$${formatter.format(widget.state.total)}',
+                      Text('\$${formatter.format(widget.state.total ?? 0)}',
                           style: const TextStyle(fontSize: 20)),
                     ]),
               ],

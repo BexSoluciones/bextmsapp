@@ -88,6 +88,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
       buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
+        print(state.status);
         if (state.status == CollectionStatus.loading) {
           return const Center(child: CupertinoActivityIndicator());
         } else if (state.status == CollectionStatus.initial ||
@@ -146,11 +147,11 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
               type: widget.arguments.summary.typeOfCharge!,
               total: state.totalSummary ?? 0.0),
           SizedBox(height: size.height * 0.02),
-          // FormCollection(
-          //     formKey: _formKey,
-          //     collectionCubit: collectionCubit,
-          //     state: state,
-          //     orderNumber: widget.arguments.summary.orderNumber),
+          FormCollection(
+              formKey: _formKey,
+              collectionBloc: collectionBloc,
+              state: state,
+              orderNumber: widget.arguments.summary.orderNumber),
           Padding(
               padding: const EdgeInsets.only(
                   left: kDefaultPadding, right: kDefaultPadding),

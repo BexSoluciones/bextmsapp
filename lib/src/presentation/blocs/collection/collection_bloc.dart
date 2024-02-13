@@ -62,7 +62,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           event.workId, event.orderNumber);
 
       emit(state.copyWith(
-          status: CollectionStatus.success,
+          status: CollectionStatus.initial,
           totalSummary: totalSummary,
           enterpriseConfig: storageService.getObject('config') != null
               ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
@@ -321,8 +321,8 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           firm = base64Encode(base64Firm);
         }
 
-        var images =
-            await helperFunctions.getImages(event.arguments.summary.orderNumber);
+        var images = await helperFunctions
+            .getImages(event.arguments.summary.orderNumber);
 
         if (state.enterpriseConfig != null &&
             state.enterpriseConfig!.hadTakePicture == true &&
@@ -417,22 +417,22 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
             });
           }
 
-          await helperFunctions.deleteImages(event.arguments.summary.orderNumber);
+          await helperFunctions
+              .deleteImages(event.arguments.summary.orderNumber);
           await helperFunctions
               .deleteFirm('firm-${event.arguments.summary.orderNumber}');
 
-          var v =
-              await databaseRepository.validateTransaction(event.arguments.work.id!);
+          var v = await databaseRepository
+              .validateTransaction(event.arguments.work.id!);
 
           emit(state.copyWith(
-            status: CollectionStatus.success,
-            formSubmissionStatus: FormSubmissionStatus.success,
-            efecty: PaymentEfecty.empty,
-            transfer: PaymentTransfer.empty,
-            accounts: null,
-            account: null,
-            work: event.arguments.work
-          ));
+              status: CollectionStatus.success,
+              formSubmissionStatus: FormSubmissionStatus.success,
+              efecty: PaymentEfecty.empty,
+              transfer: PaymentTransfer.empty,
+              accounts: null,
+              account: null,
+              work: event.arguments.work));
         }
       }
     } catch (error, stackTrace) {
@@ -446,11 +446,40 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
   Future<void> _onPaymentEfectyChanged(
     CollectionPaymentEfectyChanged event,
     Emitter<CollectionState> emit,
-  ) async =>
+  ) async {
+    if (state.transfer.value.isNotEmpty && state.efecty.value.isNotEmpty) {
       emit(state.copyWith(
-        efecty: PaymentEfecty.create(event.value),
-        formSubmissionStatus: FormSubmissionStatus.initial,
-      ));
+          total: double.tryParse(state.efecty.value)! +
+              double.tryParse(state.transfer.value)!));
+    } else if (state.efecty.value.isNotEmpty && state.accounts!.isNotEmpty) {
+      emit(state.copyWith(total: 0));
+      var cashValue = double.tryParse(state.efecty.value)!;
+      var count = 0.0;
+      for (var i = 0; i < state.accounts!.length; i++) {
+        count += double.tryParse(state.accounts![i].paid.toString())!;
+      }
+
+      emit(state.copyWith(total: count + cashValue));
+    } else if (state.efecty.value.isEmpty && state.accounts!.isNotEmpty) {
+      emit(state.copyWith(total: 0));
+      var count = 0.0;
+      for (var i = 0; i < state.accounts!.length; i++) {
+        count += double.tryParse(state.accounts![i].paid.toString())!;
+      }
+      emit(state.copyWith(total: count));
+    } else if (state.efecty.value.isNotEmpty) {
+      emit(state.copyWith(total: double.tryParse(state.efecty.value)!));
+    } else if (state.efecty.value.isEmpty && state.efecty.value.isEmpty) {
+      emit(state.copyWith(total: 0));
+    } else if (state.efecty.value.isNotEmpty && state.efecty.value.isEmpty) {
+      emit(state.copyWith(total: double.tryParse(state.efecty.value)!));
+    }
+
+    emit(state.copyWith(
+      efecty: PaymentEfecty.create(event.value),
+      formSubmissionStatus: FormSubmissionStatus.initial,
+    ));
+  }
 
   Future<void> _onPaymentTransferChanged(
     CollectionPaymentTransferChanged event,
