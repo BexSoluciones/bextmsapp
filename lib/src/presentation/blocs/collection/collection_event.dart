@@ -16,6 +16,10 @@ class CollectionNavigate extends CollectionEvent {
 
 class CollectionBack extends CollectionEvent {}
 
+class CollectionOpenModal extends CollectionEvent {}
+
+class CollectionCloseModal extends CollectionEvent {}
+
 class CollectionPaymentEfectyChanged extends CollectionEvent {
   final String value;
   CollectionPaymentEfectyChanged({required this.value});

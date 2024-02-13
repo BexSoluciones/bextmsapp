@@ -3,6 +3,7 @@ part of 'collection_bloc.dart';
 enum CollectionStatus {
   initial,
   loading,
+  waiting,
   success,
   navigate,
   back,
@@ -21,7 +22,7 @@ class CollectionState extends Equatable {
 
 
   final double? totalSummary;
-  final double? total;
+  final double total;
   final EnterpriseConfig? enterpriseConfig;
   final Work? work;
   final String? error;
@@ -35,12 +36,15 @@ class CollectionState extends Equatable {
   final List<AccountPayment>? accounts;
   final Account? account;
 
+  //FINISH TRANSACTION
+  final bool validate;
+
   final FormSubmissionStatus formSubmissionStatus;
 
   const CollectionState({
     this.status = CollectionStatus.initial,
     this.totalSummary,
-    this.total,
+    this.total = 0,
     this.enterpriseConfig,
     this.work,
     this.efecty = PaymentEfecty.empty,
@@ -49,6 +53,7 @@ class CollectionState extends Equatable {
     this.date = PaymentDate.empty,
     this.accounts,
     this.account,
+    this.validate = false,
     this.formSubmissionStatus = FormSubmissionStatus.initial,
     this.error
   });
@@ -65,6 +70,7 @@ class CollectionState extends Equatable {
     PaymentMultiTransfer? multiTransfer,
     List<AccountPayment>? accounts,
     Account? account,
+    bool? validate,
     FormSubmissionStatus? formSubmissionStatus,
     String? error
   }) =>
@@ -76,6 +82,11 @@ class CollectionState extends Equatable {
         work: work ?? this.work,
         efecty: efecty ?? this.efecty,
         transfer: transfer ?? this.transfer,
+        multiTransfer: multiTransfer ?? this.multiTransfer,
+        date: date ?? this.date,
+        accounts: accounts ?? this.accounts,
+        account: account ?? this.account,
+        validate: validate ?? this.validate,
         formSubmissionStatus: formSubmissionStatus ?? this.formSubmissionStatus,
         error: error ?? this.error,
       );
@@ -89,6 +100,11 @@ class CollectionState extends Equatable {
     work,
     efecty,
     transfer,
+    multiTransfer,
+    date,
+    accounts,
+    account,
+    validate,
     formSubmissionStatus,
     error,
   ];

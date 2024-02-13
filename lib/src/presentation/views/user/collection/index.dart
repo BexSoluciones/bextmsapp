@@ -88,7 +88,6 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
       buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
-        print(state.status);
         if (state.status == CollectionStatus.loading) {
           return const Center(child: CupertinoActivityIndicator());
         } else if (state.status == CollectionStatus.initial ||
@@ -102,41 +101,41 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   }
 
   void buildBlocListener(BuildContext context, CollectionState state) async {
-    if (state.status == CollectionStatus.success) {
-      // if (state.validate != null && state.validate == true) {
-      //   collectionBloc.add(
-      //       CollectionNavigate(route: AppRoutes.work, arguments: state.work));
-      // } else if (state.validate != null && state.validate == false) {
-      //   collectionBloc.add(
-      //       CollectionNavigate(route: AppRoutes.summary, arguments: state.work));
-      // }
-      // } else if (state is CollectionFailed && state.error != null) {
-      //   ScaffoldMessenger.of(context).removeCurrentSnackBar();
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       duration: const Duration(seconds: 1),
-      //       backgroundColor: Colors.red,
-      //       content: Text(
-      //         state.error!,
-      //         style: const TextStyle(color: Colors.white),
-      //       ),
-      //     ),
-      //   );
-      // } else if (state is CollectionWaiting) {
-      //   await showDialog(
-      //       context: context,
-      //       builder: (_) {
-      //         return MyDialog(
-      //           id: widget.arguments.work.id!,
-      //           orderNumber: widget.arguments.summary.orderNumber,
-      //           total: collectionCubit.total,
-      //           totalSummary: state.totalSummary!.toDouble(),
-      //           arguments: widget.arguments,
-      //           context: context,
-      //         );
-      //       });
-      // }
-    } else if (state.status == CollectionStatus.back) {
+    if (state.status == CollectionStatus.success &&
+        state.formSubmissionStatus == FormSubmissionStatus.success) {
+      if (state.validate == true) {
+        collectionBloc.add(
+            CollectionNavigate(route: AppRoutes.work, arguments: state.work));
+      } else if (state.validate == false) {
+        collectionBloc.add(CollectionNavigate(
+            route: AppRoutes.summary, arguments: state.work));
+      }
+    } else if ( (state.status == CollectionStatus.error || state.formSubmissionStatus == FormSubmissionStatus.failure) && state.error != null) {
+      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 1),
+          backgroundColor: Colors.red,
+          content: Text(
+            state.error!,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+      } else if (state.status == CollectionStatus.waiting) {
+        await showDialog(
+            context: context,
+            builder: (_) {
+              return MyDialog(
+                id: widget.arguments.work.id!,
+                orderNumber: widget.arguments.summary.orderNumber,
+                total: state.total,
+                totalSummary: state.totalSummary!.toDouble(),
+                arguments: widget.arguments,
+                context: context,
+              );
+            });
+      } else if (state.status == CollectionStatus.back) {
       collectionBloc.navigationService.goBack();
     }
   }
@@ -195,97 +194,95 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   }
 }
 
-// class MyDialog extends StatefulWidget {
-//   const MyDialog(
-//       {super.key,
-//       required this.id,
-//       required this.orderNumber,
-//       required this.totalSummary,
-//       required this.total,
-//       required this.arguments,
-//       required this.context});
-//
-//   final int id;
-//   final String orderNumber;
-//   final double totalSummary;
-//   final double total;
-//   final InventoryArgument arguments;
-//   final BuildContext context;
-//
-//   @override
-//   MyDialogState createState() => MyDialogState();
-// }
-//
-// class MyDialogState extends State<MyDialog> with FormatNumber {
-//   var seconds = 5;
-//   var showText = false;
-//   Timer? timer;
-//
-//   @override
-//   void setState(VoidCallback fn) {
-//     if (mounted) {
-//       super.setState(fn);
-//     }
-//   }
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     timer = Timer.periodic(
-//       const Duration(seconds: 1),
-//       (Timer timer) {
-//         if (seconds == 0) {
-//           setState(() {
-//             timer.cancel();
-//             showText = true;
-//           });
-//         } else {
-//           setState(() {
-//             seconds--;
-//             showText = false;
-//           });
-//         }
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return AlertDialog(
-//       title: const Text('Confirmar recaudo'),
-//       content: SingleChildScrollView(
-//         child: ListBody(
-//           children: <Widget>[
-//             Text(
-//                 'Valor a recaudar: \$${formatter.format(widget.totalSummary)}'),
-//             Text('Valor a guardar: por \$${formatter.format(widget.total)}'),
-//           ],
-//         ),
-//       ),
-//       actions: <Widget>[
-//         TextButton(
-//           child: const Text('Cancelar'),
-//           onPressed: () {
-//             Navigator.of(context).pop();
-//             context
-//                 .read<CollectionCubit>()
-//                 .getCollection(widget.id, widget.orderNumber);
-//           },
-//         ),
-//         TextButton(
-//           child: showText ? const Text('Si') : Text(seconds.toString()),
-//           onPressed: () {
-//             Navigator.of(context).pop();
-//             context
-//                 .read<CollectionCubit>()
-//                 .confirmTransaction(widget.arguments)
-//                 .then((value) {});
-//             context
-//                 .read<CollectionCubit>()
-//                 .getCollection(widget.id, widget.orderNumber);
-//           },
-//         ),
-//       ],
-//     );
-//   }
-// }
+class MyDialog extends StatefulWidget {
+  const MyDialog(
+      {super.key,
+      required this.id,
+      required this.orderNumber,
+      required this.totalSummary,
+      required this.total,
+      required this.arguments,
+      required this.context});
+
+  final int id;
+  final String orderNumber;
+  final double totalSummary;
+  final double total;
+  final InventoryArgument arguments;
+  final BuildContext context;
+
+  @override
+  MyDialogState createState() => MyDialogState();
+}
+
+class MyDialogState extends State<MyDialog> with FormatNumber {
+  var seconds = 5;
+  var showText = false;
+  Timer? timer;
+
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (Timer timer) {
+        if (seconds == 0) {
+          setState(() {
+            timer.cancel();
+            showText = true;
+          });
+        } else {
+          setState(() {
+            seconds--;
+            showText = false;
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Confirmar recaudo'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Text(
+                'Valor a recaudar: \$${formatter.format(widget.totalSummary)}'),
+            Text('Valor a guardar: por \$${formatter.format(widget.total)}'),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text('Cancelar'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            context.read<CollectionBloc>().add(CollectionLoading(
+                workId: widget.id, orderNumber: widget.orderNumber));
+          },
+        ),
+        TextButton(
+          child: showText ? const Text('Si') : Text(seconds.toString()),
+          onPressed: () {
+            Navigator.of(context).pop();
+            context
+                .read<CollectionBloc>()
+                .add(CollectionConfirmTransaction(arguments: widget.arguments));
+
+            context.read<CollectionBloc>().add(CollectionLoading(
+                workId: widget.id, orderNumber: widget.orderNumber));
+          },
+        ),
+      ],
+    );
+  }
+}
