@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 //blocs
-
 import '../../../../blocs/collection/collection_bloc.dart';
 import '../../../../blocs/account/account_bloc.dart';
 
@@ -37,6 +36,7 @@ class FormCollection extends StatefulWidget {
 
 class _FormCollectionState extends State<FormCollection>
     with FormatNumber, FormatDate {
+
   @override
   void setState(VoidCallback fn) {
     if (mounted) {
