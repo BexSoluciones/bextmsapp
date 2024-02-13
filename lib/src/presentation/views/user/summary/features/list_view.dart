@@ -48,6 +48,9 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
     final size = MediaQuery.of(context).size;
 
     return BlocConsumer<SummaryCubit, SummaryState>(
+      buildWhen: (current, previous) {
+        return current is SummaryChanged;
+      },
       listener: buildBlocListener,
       builder: (context, state) {
         if (state is SummaryLoading) {

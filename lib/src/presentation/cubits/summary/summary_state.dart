@@ -38,6 +38,16 @@ class SummaryLoadingMap extends SummaryState {
   const SummaryLoadingMap();
 }
 
+class SummaryChanged extends SummaryState {
+  const SummaryChanged(
+      {super.summaries,
+        super.origin,
+        super.time,
+        super.enterpriseConfig,
+        super.isArrived,
+        super.isGeoReference});
+}
+
 class SummarySuccess extends SummaryState {
   const SummarySuccess(
       {super.summaries,

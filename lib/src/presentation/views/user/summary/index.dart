@@ -82,29 +82,26 @@ class SummaryViewState extends State<SummaryView> {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        child:
-            BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
-          return Scaffold(
-              resizeToAvoidBottomInset: true, body: _buildBody(state));
-        }));
+        child: Scaffold(resizeToAvoidBottomInset: true, body: _buildBody()));
   }
 
-  Widget _buildBody(SummaryState state) {
+  Widget _buildBody() {
     return Stack(
       children: [
         CustomScrollView(
+          shrinkWrap: true,
           slivers: [
             AppBarSummary(
               arguments: widget.arguments,
               summaryCubit: summaryCubit,
             ),
             HeaderSummary(
-                arguments: widget.arguments,
-                one: one,
-                two: two,
-                three: three,
-                four: four,
-                summaries: state.summaries),
+              arguments: widget.arguments,
+              one: one,
+              two: two,
+              three: three,
+              four: four,
+            ),
             ListViewSummary(
                 summaryCubit: summaryCubit,
                 arguments: widget.arguments,

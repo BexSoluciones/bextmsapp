@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -27,9 +26,9 @@ import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/navigation.dart';
 import '../../../services/storage.dart';
+import '../../../services/logger.dart';
 
 part 'summary_state.dart';
 

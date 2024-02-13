@@ -437,6 +437,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
               accounts: null,
               account: null,
               validate: v,
+              total: 0,
               work: event.arguments.work));
         }
       }
