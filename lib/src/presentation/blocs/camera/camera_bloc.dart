@@ -55,9 +55,11 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
 
   _mapCameraInitializedToState(CameraInitialized event, emit) async {
     try {
-      _controller = await cameraUtils.getCameraController(
-          resolutionPreset, cameraLensDirection);
-      await _controller?.initialize();
+      if (_controller == null) {
+        _controller = await cameraUtils.getCameraController(
+            resolutionPreset, cameraLensDirection);
+        await _controller?.initialize();
+      }
       emit(CameraReady());
     } on CameraException catch (error) {
       _controller?.dispose();
@@ -68,8 +70,9 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     }
   }
 
+
   _mapCameraCapturedToState(CameraCaptured event, emit) async {
-    if (state is CameraReady) {
+    if (_controller != null && _controller!.value.isInitialized) {
       emit(CameraCaptureInProgress());
       try {
         final path = await cameraUtils.getPath();
@@ -87,10 +90,13 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
           await _controller?.setExposureMode(ExposureMode.auto);
 
           var photo = Photo(name: picture!.name, path: picture.path);
-          await compressAndSaveImage(photo.path);
+
+          // Imprimir el tamaño de la imagen original
+          final originalImageSize = File(picture.path).lengthSync();
+
+          final compressedImageSize = await compressAndSaveImage(photo.path);
           await databaseRepository.insertPhoto(photo);
           emit(CameraCaptureSuccess(path));
-
         }
       } on CameraException catch (error) {
         emit(CameraCaptureFailure(error: error.description!));
@@ -104,7 +110,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraGalleryToState(CameraGallery event, emit) async {
-    if (state is! CameraReady) {
+    if (_controller != null && _controller!.value.isInitialized) {
       emit(const CameraFailure(error: 'Camera is not ready'));
       return;
     }
@@ -123,9 +129,13 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
           if (fileFormat == 'jpg' || fileFormat == 'png') {
             final fileName = imageFile.uri.pathSegments.last;
             final filePathInCache = '${cacheDirectory.path}/$fileName';
-            await compressAndSaveImage(filePathInCache);
+
+            final originalImageSize = imageFile.lengthSync();
 
             await imageFile.copy(filePathInCache);
+
+            // Comprimir la imagen en la caché
+            final compressedImageSize = await compressAndSaveImage(filePathInCache);
 
             var photo = Photo(name: fileName, path: filePathInCache);
             await databaseRepository.insertPhoto(photo);
@@ -144,7 +154,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     }
   }
 
-  Future<File?> compressAndSaveImage(String imagePath) async {
+  Future<int?> compressAndSaveImage(String imagePath) async {
     try {
       final File originalImage = File(imagePath);
       img.Image image = img.decodeImage(originalImage.readAsBytesSync())!;
@@ -152,13 +162,14 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
         image = await rotateImage(image);
       }
       final File compressedImage = File(imagePath)
-        ..writeAsBytesSync(img.encodeJpg(image, quality: 80));
-      return compressedImage;
+        ..writeAsBytesSync(img.encodeJpg(image, quality:60));
+      return compressedImage.lengthSync();
     } catch (error, stackTrace) {
       helperFunctions.handleException(error, stackTrace);
       return null;
     }
   }
+
 
   Future<img.Image> rotateImage(img.Image image) async {
     return await Future.microtask(() {

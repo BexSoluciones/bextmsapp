@@ -27,10 +27,10 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    super.initState();
     WidgetsBinding.instance.addObserver(this);
     gpsBloc = BlocProvider.of<GpsBloc>(context);
     gpsBloc.add(OnStopFollowingUser());
-    super.initState();
   }
 
   @override
@@ -55,111 +55,110 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context) => BlocConsumer<CameraBloc, CameraState>(
-      listener: (_, state) {
+  Widget build(BuildContext context) {
+    return BlocConsumer<CameraBloc, CameraState>(
+      listener: (context, state) {
         if (state is CameraCaptureSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             duration: Duration(seconds: 1),
             backgroundColor: Colors.green,
-            content: Text("foto tomada exitosamente"),
+            content: Text("Foto tomada exitosamente"),
           ));
           BlocProvider.of<CameraBloc>(context).add(CameraInitialized());
           BlocProvider.of<PhotosBloc>(context).add(PhotosLoaded());
         } else if (state is CameraCaptureFailure) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             duration: const Duration(seconds: 1),
-            key: MyPhotosKeys.errorSnackBar,
             content: Text(state.error),
           ));
         }
       },
-      builder: (_, state) => PopScope(
-        canPop: false,
-        child: Scaffold(
-              key: globalKey,
-              backgroundColor: Colors.black,
-              appBar: AppBar(
-                title: const Text("Camera"),
-                leading: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new),
-                    onPressed: () {
-                      gpsBloc.add(OnStartFollowingUser());
-                      gpsBloc.goBack();
-                    }),
-              ),
-              body: state is CameraReady
-                  ? Container(
-                      key: MyPhotosKeys.cameraPreviewScreen,
-                      child: CameraPreview(
-                          BlocProvider.of<CameraBloc>(context).getController()!))
-                  : state is CameraFailure
-                      ? Error(key: MyPhotosKeys.errorScreen, message: state.error)
-                      : Container(
-                          key: MyPhotosKeys.emptyContainerScreen,
-                        ),
-              floatingActionButton: state is CameraReady
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                          const SizedBox(width: 10),
-                          FloatingActionButton(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withOpacity(0.7),
-                            heroTag: 'takePhotoBtn',
-                            child: const Icon(Icons.camera_alt),
-                            onPressed: () => BlocProvider.of<CameraBloc>(context)
-                                .add(CameraCaptured()),
-                          ),
-                          const SizedBox(width: 30),
-                          FloatingActionButton(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withOpacity(0.7),
-                            heroTag: 'GalleryPhotoBtn',
-                            child: const Icon(Icons.photo),
-                            onPressed: () => BlocProvider.of<CameraBloc>(context)
-                                .add(CameraGallery()),
-                          ),
-                          const SizedBox(width: 30),
-                          //TODO: [Heider Zapa] review if generating error
-                          FloatingActionButton(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withOpacity(0.7),
-                            heroTag: 'showPhotoBtn',
-                            onPressed: () => BlocProvider.of<CameraBloc>(context)
-                                .add(const CameraFolder(path: '')),
-                            child: FutureBuilder<int>(
-                                future: context.read<CameraBloc>().countImagesInCache(),
-                                builder: (context, snapshot) {
-                                  return B.Badge(
-                                    position:
-                                        B.BadgePosition.topEnd(top: -5, end: -5),
-                                    badgeContent: Text(
-                                        snapshot.hasData
-                                            ? snapshot.data.toString()
-                                            : '0',
-                                        style:
-                                            const TextStyle(color: Colors.white)),
-                                    child: const SizedBox(
-                                      width: 60,
-                                      height: 60,
-                                      child: Icon(Icons.folder),
-                                    ),
-                                  );
-                                }),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                        ])
-                  : const SizedBox(),
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.centerFloat,
+      builder: (context, state) {
+        return Scaffold(
+          key: globalKey,
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            title: const Text("Camera"),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new),
+              onPressed: () {
+                gpsBloc.add(OnStartFollowingUser());
+                gpsBloc.goBack();
+              },
             ),
-      ));
+          ),
+          body: _buildCameraPreview(state),
+          floatingActionButton: _buildFloatingActionButton(context, state),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        );
+      },
+    );
+  }
+  Widget _buildCameraPreview(CameraState state) {
+    if (state is CameraReady) {
+      return Container(
+        key: MyPhotosKeys.cameraPreviewScreen,
+        child: CameraPreview(
+          BlocProvider.of<CameraBloc>(context).getController()!,
+        ),
+      );
+    } else if (state is CameraFailure) {
+      return Error(
+        key: MyPhotosKeys.errorScreen,
+        message: state.error,
+      );
+    } else {
+      return Container(key: MyPhotosKeys.emptyContainerScreen);
+    }
+  }
+  Widget _buildFloatingActionButton(BuildContext context, CameraState state) {
+    if (state is CameraReady) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          const SizedBox(width: 10),
+          FloatingActionButton(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+            heroTag: 'takePhotoBtn',
+            child: const Icon(Icons.camera_alt),
+            onPressed: () => BlocProvider.of<CameraBloc>(context).add(CameraCaptured()),
+          ),
+          const SizedBox(width: 30),
+          FloatingActionButton(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+            heroTag: 'GalleryPhotoBtn',
+            child: const Icon(Icons.photo),
+            onPressed: () => BlocProvider.of<CameraBloc>(context).add(CameraGallery()),
+          ),
+          const SizedBox(width: 30),
+          FloatingActionButton(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+            heroTag: 'showPhotoBtn',
+            onPressed: () => BlocProvider.of<CameraBloc>(context).add(const CameraFolder(path: '')),
+            child: _buildBadge(context),
+          ),
+          const SizedBox(width: 10),
+        ],
+      );
+    } else {
+      return const SizedBox();
+    }
+  }
+  Widget _buildBadge(BuildContext context) {
+    return FutureBuilder<int>(
+      future: context.read<CameraBloc>().countImagesInCache(),
+      builder: (context, snapshot) {
+        final badgeContent = Text(
+          snapshot.hasData ? snapshot.data.toString() : '0',
+          style: const TextStyle(color: Colors.white),
+        );
+
+        return B.Badge(
+          position: B.BadgePosition.topEnd(top: -5, end: -5),
+          badgeContent: badgeContent,
+          child: const SizedBox(width: 60, height: 60, child: Icon(Icons.folder)),
+        );
+      },
+    );
+  }
 }
