@@ -450,43 +450,89 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     if (state.transfer.value.isNotEmpty && state.efecty.value.isNotEmpty) {
       emit(state.copyWith(
           total: double.tryParse(state.efecty.value)! +
-              double.tryParse(state.transfer.value)!));
-    } else if (state.efecty.value.isNotEmpty && state.accounts!.isNotEmpty) {
-      emit(state.copyWith(total: 0));
+              double.tryParse(state.transfer.value)!,
+          efecty: PaymentEfecty.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
+    } else if (state.efecty.value.isNotEmpty &&
+        state.accounts != null &&
+        state.accounts!.isNotEmpty) {
+      emit(state.copyWith(
+          total: 0,
+          efecty: PaymentEfecty.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
       var cashValue = double.tryParse(state.efecty.value)!;
       var count = 0.0;
       for (var i = 0; i < state.accounts!.length; i++) {
         count += double.tryParse(state.accounts![i].paid.toString())!;
       }
 
-      emit(state.copyWith(total: count + cashValue));
-    } else if (state.efecty.value.isEmpty && state.accounts!.isNotEmpty) {
+      emit(state.copyWith(
+          total: count + cashValue,
+          efecty: PaymentEfecty.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
+    } else if (state.efecty.value.isEmpty &&
+        state.accounts != null &&
+        state.accounts!.isNotEmpty) {
       emit(state.copyWith(total: 0));
       var count = 0.0;
       for (var i = 0; i < state.accounts!.length; i++) {
         count += double.tryParse(state.accounts![i].paid.toString())!;
       }
-      emit(state.copyWith(total: count));
+      emit(state.copyWith(
+          total: count,
+          efecty: PaymentEfecty.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
     } else if (state.efecty.value.isNotEmpty) {
-      emit(state.copyWith(total: double.tryParse(state.efecty.value)!));
+      emit(state.copyWith(
+          total: double.tryParse(state.efecty.value)!,
+          efecty: PaymentEfecty.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
     } else if (state.efecty.value.isEmpty && state.efecty.value.isEmpty) {
-      emit(state.copyWith(total: 0));
+      emit(state.copyWith(
+          total: 0,
+          efecty: PaymentEfecty.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
     } else if (state.efecty.value.isNotEmpty && state.efecty.value.isEmpty) {
-      emit(state.copyWith(total: double.tryParse(state.efecty.value)!));
+      emit(state.copyWith(
+          total: double.tryParse(state.efecty.value)!,
+          efecty: PaymentEfecty.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
+    } else {
+      emit(state.copyWith(
+          efecty: PaymentEfecty.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
     }
-
-    emit(state.copyWith(
-      efecty: PaymentEfecty.create(event.value),
-      formSubmissionStatus: FormSubmissionStatus.initial,
-    ));
   }
 
   Future<void> _onPaymentTransferChanged(
     CollectionPaymentTransferChanged event,
     Emitter<CollectionState> emit,
-  ) async =>
+  ) async {
+    if (state.efecty.value.isNotEmpty && state.transfer.value.isNotEmpty) {
       emit(state.copyWith(
+        total: double.tryParse(state.transfer.value)! +
+            double.tryParse(state.efecty.value)!,
         transfer: PaymentTransfer.create(event.value),
         formSubmissionStatus: FormSubmissionStatus.initial,
       ));
+    } else if (state.transfer.value.isNotEmpty) {
+      emit(state.copyWith(
+        total: double.tryParse(state.transfer.value)!,
+        transfer: PaymentTransfer.create(event.value),
+        formSubmissionStatus: FormSubmissionStatus.initial,
+      ));
+    } else if (state.efecty.value.isEmpty && state.transfer.value.isEmpty) {
+      emit(state.copyWith(
+        total: 0,
+        transfer: PaymentTransfer.create(event.value),
+        formSubmissionStatus: FormSubmissionStatus.initial,
+      ));
+    } else if (state.efecty.value.isNotEmpty && state.transfer.value.isEmpty) {
+      emit(state.copyWith(
+        total: double.tryParse(state.efecty.value)!,
+        transfer: PaymentTransfer.create(event.value),
+        formSubmissionStatus: FormSubmissionStatus.initial,
+      ));
+    }
+  }
 }

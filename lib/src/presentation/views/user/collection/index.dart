@@ -102,38 +102,43 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   }
 
   void buildBlocListener(BuildContext context, CollectionState state) async {
-    // if (state is CollectionSuccess) {
-    //   if (state.validate != null && state.validate == true) {
-    //     collectionCubit.goToWork(state.work);
-    //   } else if (state.validate != null && state.validate == false) {
-    //     collectionCubit.goToSummary(state.work);
-    //   }
-    // } else if (state is CollectionFailed && state.error != null) {
-    //   ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(
-    //       duration: const Duration(seconds: 1),
-    //       backgroundColor: Colors.red,
-    //       content: Text(
-    //         state.error!,
-    //         style: const TextStyle(color: Colors.white),
-    //       ),
-    //     ),
-    //   );
-    // } else if (state is CollectionWaiting) {
-    //   await showDialog(
-    //       context: context,
-    //       builder: (_) {
-    //         return MyDialog(
-    //           id: widget.arguments.work.id!,
-    //           orderNumber: widget.arguments.summary.orderNumber,
-    //           total: collectionCubit.total,
-    //           totalSummary: state.totalSummary!.toDouble(),
-    //           arguments: widget.arguments,
-    //           context: context,
-    //         );
-    //       });
-    // }
+    if (state.status == CollectionStatus.success) {
+      // if (state.validate != null && state.validate == true) {
+      //   collectionBloc.add(
+      //       CollectionNavigate(route: AppRoutes.work, arguments: state.work));
+      // } else if (state.validate != null && state.validate == false) {
+      //   collectionBloc.add(
+      //       CollectionNavigate(route: AppRoutes.summary, arguments: state.work));
+      // }
+      // } else if (state is CollectionFailed && state.error != null) {
+      //   ScaffoldMessenger.of(context).removeCurrentSnackBar();
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       duration: const Duration(seconds: 1),
+      //       backgroundColor: Colors.red,
+      //       content: Text(
+      //         state.error!,
+      //         style: const TextStyle(color: Colors.white),
+      //       ),
+      //     ),
+      //   );
+      // } else if (state is CollectionWaiting) {
+      //   await showDialog(
+      //       context: context,
+      //       builder: (_) {
+      //         return MyDialog(
+      //           id: widget.arguments.work.id!,
+      //           orderNumber: widget.arguments.summary.orderNumber,
+      //           total: collectionCubit.total,
+      //           totalSummary: state.totalSummary!.toDouble(),
+      //           arguments: widget.arguments,
+      //           context: context,
+      //         );
+      //       });
+      // }
+    } else if (state.status == CollectionStatus.back) {
+      collectionBloc.navigationService.goBack();
+    }
   }
 
   Widget _buildCollection(Size size, CollectionState state) {

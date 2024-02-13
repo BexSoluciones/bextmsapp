@@ -83,200 +83,119 @@ class _FormCollectionState extends State<FormCollection>
                                   ? IconButton(
                                       icon: const Icon(Icons.camera_alt,
                                           size: 32, color: kPrimaryColor),
-                                      onPressed: () => widget.collectionBloc.add(CollectionNavigate(route: AppRoutes.camera, arguments: widget.orderNumber)))
+                                      onPressed: () => widget.collectionBloc
+                                          .add(CollectionNavigate(
+                                              route: AppRoutes.camera,
+                                              arguments: widget.orderNumber)))
                                   : const SizedBox();
                             }),
                       ]),
                     ]),
-                const PaymentEfectyInputField(),
-                // TextFormField(
-                //   keyboardType: TextInputType.number,
-                //   autofocus: false,
-                //   controller: widget.collectionCubit.cashController,
-                //   onChanged: widget.collectionCubit.selectedAccounts.isNotEmpty
-                //       ? (newValue) {
-                //           if (newValue.isEmpty) {
-                //             widget.collectionCubit.selectedAccounts.clear();
-                //             widget.collectionCubit.cashController.clear();
-                //             setState(() {});
-                //           }
-                //         }
-                //       : null,
-                //   decoration: InputDecoration(
-                //     prefixText: currency,
-                //     focusedBorder: const OutlineInputBorder(
-                //       borderSide: BorderSide(color: Colors.grey, width: 2.0),
-                //     ),
-                //     enabledBorder: const OutlineInputBorder(
-                //       borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-                //     ),
-                //     errorBorder: const OutlineInputBorder(
-                //       borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-                //     ),
-                //     suffixIcon: IconButton(
-                //       onPressed: () {
-                //         if (double.tryParse(widget
-                //                 .collectionCubit.transferController.text) !=
-                //             null) {
-                //           widget.collectionCubit.total = widget
-                //                   .collectionCubit.total -
-                //               double.parse(
-                //                   widget.collectionCubit.cashController.text);
-                //         }
-                //         widget.collectionCubit.selectedAccounts.clear();
-                //         widget.collectionCubit.cashController.clear();
-                //       },
-                //       icon: const Icon(Icons.clear),
-                //     ),
-                //   ),
-                //   validator: (value) {
-                //     if (value!.startsWith('.') || value.endsWith('.')) {
-                //       return 'valor no válido';
-                //     }
-                //     if (value.contains(',')) {
-                //       return 'no debe contener comas';
-                //     }
-                //     return null;
-                //   },
-                // ),
+                PaymentEfectyInputField(),
                 const SizedBox(height: 10),
-                // BlocSelector<CollectionBloc, CollectionState, bool>(
-                //     bloc: widget.collectionCubit,
-                //     selector: (state) =>
-                //         (state is CollectionInitial ||
-                //             state is CollectionLoading ||
-                //             state is CollectionFailed) &&
-                //         state.enterpriseConfig != null &&
-                //         state.enterpriseConfig!.multipleAccounts == false,
-                //     builder: (c, x) {
-                //       return x
-                //           ? Row(
-                //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //               children: [
-                //                 const Row(children: [
-                //                   Text('TRANSFERENCIA BANCARIA',
-                //                       style: TextStyle(fontSize: 14)),
-                //                   Icon(Icons.credit_card)
-                //                 ]),
-                //                 IconButton(
-                //                     icon: const Icon(Icons.camera_alt,
-                //                         size: 32, color: kPrimaryColor),
-                //                     onPressed: () => widget.collectionCubit
-                //                         .goToCamera(widget.orderNumber)),
-                //                 BlocSelector<CollectionBloc, CollectionState,
-                //                         bool>(
-                //                     bloc: widget.collectionCubit,
-                //                     selector: (state) =>
-                //                         (state is CollectionInitial ||
-                //                             state is CollectionLoading ||
-                //                             state is CollectionFailed) &&
-                //                         state.enterpriseConfig != null &&
-                //                         state.enterpriseConfig!.codeQr != null,
-                //                     builder: (c, x) {
-                //                       return x
-                //                           ? IconButton(
-                //                               icon: const Icon(Icons.qr_code_2,
-                //                                   size: 32,
-                //                                   color: kPrimaryColor),
-                //                               onPressed: () => widget
-                //                                   .collectionCubit
-                //                                   .goToCodeQR(widget
-                //                                       .state
-                //                                       .enterpriseConfig!
-                //                                       .codeQr))
-                //                           : const SizedBox();
-                //                     }),
-                //               ],
-                //             )
-                //           : const Row(
-                //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //               children: [
-                //                 Row(children: [
-                //                   Text('TRANSFERENCIA BANCARIA',
-                //                       style: TextStyle(fontSize: 14)),
-                //                   Icon(Icons.credit_card)
-                //                 ])
-                //               ],
-                //             );
-                //     }),
-                // BlocSelector<CollectionBloc, CollectionState, bool>(
-                //     selector: (state) =>
-                //         (state is CollectionInitial ||
-                //             state is CollectionLoading ||
-                //             state is CollectionFailed) &&
-                //         state.enterpriseConfig != null &&
-                //         state.enterpriseConfig!.multipleAccounts == false,
-                //     builder: (c, x) {
-                //       return x
-                //           ? TextFormField(
-                //               keyboardType: TextInputType.number,
-                //               autofocus: false,
-                //               controller:
-                //                   widget.collectionCubit.transferController,
-                //               decoration: InputDecoration(
-                //                 prefixText: currency,
-                //                 focusedBorder: const OutlineInputBorder(
-                //                   borderSide: BorderSide(
-                //                       color: Colors.grey, width: 2.0),
-                //                 ),
-                //                 enabledBorder: const OutlineInputBorder(
-                //                   borderSide: BorderSide(
-                //                       color: kPrimaryColor, width: 2.0),
-                //                 ),
-                //                 errorBorder: const OutlineInputBorder(
-                //                   borderSide: BorderSide(
-                //                       color: kPrimaryColor, width: 2.0),
-                //                 ),
-                //                 suffixIcon: IconButton(
-                //                   onPressed: () {
-                //                     if (double.tryParse(widget.collectionCubit
-                //                             .transferController.text) !=
-                //                         null) {
-                //                       widget.collectionCubit.total -=
-                //                           double.parse(widget.collectionCubit
-                //                               .transferController.text);
-                //                     }
-                //                     widget.collectionCubit.transferController
-                //                         .clear();
-                //                   },
-                //                   icon: const Icon(Icons.clear),
-                //                 ),
-                //               ),
-                //               validator: (value) {
-                //                 if (value!.startsWith('.') ||
-                //                     value.endsWith('.')) {
-                //                   return 'valor no válido';
-                //                 }
-                //                 if (value.contains(',')) {
-                //                   return 'el valor no puede contener comas';
-                //                 }
-                //                 return null;
-                //               },
-                //             )
-                //           : DefaultButton(
-                //               widget: const Text('Cuentas Bancarias',
-                //                   style: TextStyle(
-                //                       color: Colors.white, fontSize: 20)),
-                //               press: () {
-                //                 widget.collectionCubit.dateController.text =
-                //                     date(null);
-                //                 widget.collectionCubit.selectedAccount = null;
-                //                 widget.collectionCubit.indexToEdit = null;
-                //                 widget.collectionCubit.isEditing = false;
-                //                 Future<void> future = showModalBottomSheet(
-                //                     context: context,
-                //                     isScrollControlled: true,
-                //                     builder: (c) {
-                //                       return AccountsCollection(
-                //                         orderNumber: widget.orderNumber,
-                //                         collectionCubit: widget.collectionCubit,
-                //                         state: widget.state,
-                //                       );
-                //                     });
-                //
-                //                 future.then((void value) => _closeModal(value));
-                //               });
-                //     }),
+                BlocSelector<CollectionBloc, CollectionState, bool>(
+                    bloc: widget.collectionBloc,
+                    selector: (state) =>
+                        (state.status == CollectionStatus.initial ||
+                            state.status == CollectionStatus.loading ||
+                            state.status == CollectionStatus.error) &&
+                        state.enterpriseConfig != null &&
+                        state.enterpriseConfig!.multipleAccounts == false,
+                    builder: (c, x) {
+                      return x
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Row(children: [
+                                  Text('TRANSFERENCIA BANCARIA',
+                                      style: TextStyle(fontSize: 14)),
+                                  Icon(Icons.credit_card)
+                                ]),
+                                IconButton(
+                                    icon: const Icon(Icons.camera_alt,
+                                        size: 32, color: kPrimaryColor),
+                                    onPressed: () => widget.collectionBloc.add(
+                                        CollectionNavigate(
+                                            route: AppRoutes.camera,
+                                            arguments: widget.orderNumber))),
+                                BlocSelector<CollectionBloc, CollectionState,
+                                        bool>(
+                                    bloc: widget.collectionBloc,
+                                    selector: (state) =>
+                                        (state.status ==
+                                                CollectionStatus.initial ||
+                                            state.status ==
+                                                CollectionStatus.loading ||
+                                            state.status ==
+                                                CollectionStatus.error) &&
+                                        state.enterpriseConfig != null &&
+                                        state.enterpriseConfig!.codeQr != null,
+                                    builder: (c, x) {
+                                      return x
+                                          ? IconButton(
+                                              icon: const Icon(Icons.qr_code_2,
+                                                  size: 32,
+                                                  color: kPrimaryColor),
+                                              onPressed: () => widget
+                                                  .collectionBloc
+                                                  .add(CollectionNavigate(
+                                                      route: AppRoutes.qr,
+                                                      arguments: widget
+                                                          .state
+                                                          .enterpriseConfig!
+                                                          .codeQr)))
+                                          : const SizedBox();
+                                    }),
+                              ],
+                            )
+                          : const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(children: [
+                                  Text('TRANSFERENCIA BANCARIA',
+                                      style: TextStyle(fontSize: 14)),
+                                  Icon(Icons.credit_card)
+                                ])
+                              ],
+                            );
+                    }),
+                BlocSelector<CollectionBloc, CollectionState, bool>(
+                    selector: (state) =>
+                        (state.status ==
+                            CollectionStatus.initial ||
+                            state.status ==
+                                CollectionStatus.loading ||
+                            state.status ==
+                                CollectionStatus.error) &&
+                        state.enterpriseConfig != null &&
+                        state.enterpriseConfig!.multipleAccounts == false,
+                    builder: (c, x) {
+                      return x
+                          ? PaymentTransferInputField()
+                          : DefaultButton(
+                              widget: const Text('Cuentas Bancarias',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20)),
+                              press: () {
+                                // widget.collectionCubit.dateController.text =
+                                //     date(null);
+                                // widget.collectionCubit.selectedAccount = null;
+                                // widget.collectionCubit.indexToEdit = null;
+                                // widget.collectionCubit.isEditing = false;
+                                // Future<void> future = showModalBottomSheet(
+                                //     context: context,
+                                //     isScrollControlled: true,
+                                //     builder: (c) {
+                                //       return AccountsCollection(
+                                //         orderNumber: widget.orderNumber,
+                                //         collectionCubit: widget.collectionCubit,
+                                //         state: widget.state,
+                                //       );
+                                //     });
+
+                                // future.then((void value) => _closeModal(value));
+                              });
+                    }),
                 // BlocSelector<CollectionBloc, CollectionState, bool>(
                 //     selector: (state) =>
                 //         (state is CollectionInitial ||

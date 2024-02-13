@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+//domain
+import '../../../../../domain/abstracts/format_abstract.dart';
 //blocs
 import '../../../../blocs/collection/collection_bloc.dart';
 //widgets
 import '../../../../widgets/text_input_widget.dart';
 
-class PaymentEfectyInputField extends StatelessWidget {
-  const PaymentEfectyInputField({super.key});
+class PaymentEfectyInputField extends StatelessWidget with FormatNumber {
+  PaymentEfectyInputField({super.key});
 
   @override
   Widget build(BuildContext context) =>
@@ -14,7 +16,7 @@ class PaymentEfectyInputField extends StatelessWidget {
           buildWhen: (previous, current) => current.efecty != previous.efecty,
           builder: (context, state) => textField(
                 context: context,
-                prefixText: '',
+                prefixText: currency,
                 onChanged: (efecty) => context
                     .read<CollectionBloc>()
                     .add(CollectionPaymentEfectyChanged(value: efecty)),
@@ -24,8 +26,8 @@ class PaymentEfectyInputField extends StatelessWidget {
               ));
 }
 
-class PaymentTransferInputField extends StatelessWidget {
-  const PaymentTransferInputField({super.key});
+class PaymentTransferInputField extends StatelessWidget with FormatNumber {
+  PaymentTransferInputField({super.key});
 
   @override
   Widget build(BuildContext context) =>
@@ -37,15 +39,16 @@ class PaymentTransferInputField extends StatelessWidget {
                 onChanged: (transfer) => context
                     .read<CollectionBloc>()
                     .add(CollectionPaymentTransferChanged(value: transfer)),
+                keyBoardType: TextInputType.number,
                 errorText: state.transfer.hasError
                     ? state.transfer.errorMessage
                     : null,
-                prefixText: '',
+                prefixText: currency,
               ));
 }
 
-class PaymentMultiTransferInputField extends StatelessWidget {
-  const PaymentMultiTransferInputField({super.key});
+class PaymentMultiTransferInputField extends StatelessWidget with FormatNumber {
+  PaymentMultiTransferInputField({super.key});
 
   @override
   Widget build(BuildContext context) =>
@@ -60,6 +63,6 @@ class PaymentMultiTransferInputField extends StatelessWidget {
                 errorText: state.multiTransfer.hasError
                     ? state.multiTransfer.errorMessage
                     : null,
-                prefixText: '',
+                prefixText: currency,
               ));
 }
