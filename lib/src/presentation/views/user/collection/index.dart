@@ -90,8 +90,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
       builder: (context, state) {
         if (state.status == CollectionStatus.loading) {
           return const Center(child: CupertinoActivityIndicator());
-        } else if (state.status == CollectionStatus.initial ||
-            state.status == CollectionStatus.error) {
+        } else if (state.canRenderView()) {
           return _buildCollection(size, state);
         } else {
           return const SizedBox();
@@ -101,16 +100,25 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   }
 
   void buildBlocListener(BuildContext context, CollectionState state) async {
+    print('***************');
+    print(state.status);
+
     if (state.status == CollectionStatus.success &&
         state.formSubmissionStatus == FormSubmissionStatus.success) {
+      print('**************');
+      print(state.validate);
+
       if (state.validate == true) {
         collectionBloc.add(
             CollectionNavigate(route: AppRoutes.work, arguments: state.work));
       } else if (state.validate == false) {
         collectionBloc.add(CollectionNavigate(
-            route: AppRoutes.summary, arguments: state.work));
+            route: AppRoutes.summary,
+            arguments: SummaryArgument(work: state.work!)));
       }
-    } else if ( (state.status == CollectionStatus.error || state.formSubmissionStatus == FormSubmissionStatus.failure) && state.error != null) {
+    } else if ((state.status == CollectionStatus.error ||
+            state.formSubmissionStatus == FormSubmissionStatus.failure) &&
+        state.error != null) {
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -122,20 +130,20 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
           ),
         ),
       );
-      } else if (state.status == CollectionStatus.waiting) {
-        await showDialog(
-            context: context,
-            builder: (_) {
-              return MyDialog(
-                id: widget.arguments.work.id!,
-                orderNumber: widget.arguments.summary.orderNumber,
-                total: state.total,
-                totalSummary: state.totalSummary!.toDouble(),
-                arguments: widget.arguments,
-                context: context,
-              );
-            });
-      } else if (state.status == CollectionStatus.back) {
+    } else if (state.status == CollectionStatus.waiting) {
+      await showDialog(
+          context: context,
+          builder: (_) {
+            return MyDialog(
+              id: widget.arguments.work.id!,
+              orderNumber: widget.arguments.summary.orderNumber,
+              total: state.total,
+              totalSummary: state.totalSummary!.toDouble(),
+              arguments: widget.arguments,
+              context: context,
+            );
+          });
+    } else if (state.status == CollectionStatus.back) {
       collectionBloc.navigationService.goBack();
     }
   }

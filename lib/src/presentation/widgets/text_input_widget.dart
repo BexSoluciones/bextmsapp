@@ -4,8 +4,8 @@ import '../../utils/constants/colors.dart';
 
 Widget textField({
   required BuildContext context,
-  required String prefixText,
   required Function(String) onChanged,
+  String? prefixText,
   String? errorText,
   TextInputType? keyBoardType,
 }) {

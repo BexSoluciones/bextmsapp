@@ -66,3 +66,19 @@ class PaymentMultiTransferInputField extends StatelessWidget with FormatNumber {
                 prefixText: currency,
               ));
 }
+
+class PaymentDateInputField extends StatelessWidget {
+  const PaymentDateInputField({super.key});
+
+  @override
+  Widget build(BuildContext context) =>
+      BlocBuilder<CollectionBloc, CollectionState>(
+          buildWhen: (previous, current) => current.date != previous.date,
+          builder: (context, state) => textField(
+                context: context,
+                onChanged: (transfer) => context
+                    .read<CollectionBloc>()
+                    .add(CollectionPaymentTransferChanged(value: transfer)),
+                errorText: state.date.hasError ? state.date.errorMessage : null,
+              ));
+}

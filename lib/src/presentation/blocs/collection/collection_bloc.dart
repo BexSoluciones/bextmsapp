@@ -64,6 +64,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
 
       emit(state.copyWith(
           status: CollectionStatus.initial,
+          formSubmissionStatus: FormSubmissionStatus.initial,
           totalSummary: totalSummary,
           enterpriseConfig: storageService.getObject('config') != null
               ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
@@ -80,6 +81,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     Emitter<CollectionState> emit,
   ) async {
     emit(state.copyWith(status: CollectionStatus.navigate));
+    navigationService.goTo(event.route, arguments: event.arguments);
   }
 
   Future<void> _back(

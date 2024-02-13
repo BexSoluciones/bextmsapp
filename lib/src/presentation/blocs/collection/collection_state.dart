@@ -20,7 +20,6 @@ enum FormSubmissionStatus {
 class CollectionState extends Equatable {
   final CollectionStatus status;
 
-
   final double? totalSummary;
   final double total;
   final EnterpriseConfig? enterpriseConfig;
@@ -41,39 +40,37 @@ class CollectionState extends Equatable {
 
   final FormSubmissionStatus formSubmissionStatus;
 
-  const CollectionState({
-    this.status = CollectionStatus.initial,
-    this.totalSummary,
-    this.total = 0,
-    this.enterpriseConfig,
-    this.work,
-    this.efecty = PaymentEfecty.empty,
-    this.transfer = PaymentTransfer.empty,
-    this.multiTransfer = PaymentMultiTransfer.empty,
-    this.date = PaymentDate.empty,
-    this.accounts,
-    this.account,
-    this.validate = false,
-    this.formSubmissionStatus = FormSubmissionStatus.initial,
-    this.error
-  });
+  const CollectionState(
+      {this.status = CollectionStatus.initial,
+      this.totalSummary,
+      this.total = 0,
+      this.enterpriseConfig,
+      this.work,
+      this.efecty = PaymentEfecty.empty,
+      this.transfer = PaymentTransfer.empty,
+      this.multiTransfer = PaymentMultiTransfer.empty,
+      this.date = PaymentDate.empty,
+      this.accounts,
+      this.account,
+      this.validate = false,
+      this.formSubmissionStatus = FormSubmissionStatus.initial,
+      this.error});
 
-  CollectionState copyWith({
-    CollectionStatus? status,
-    double? totalSummary,
-    double? total,
-    EnterpriseConfig? enterpriseConfig,
-    Work? work,
-    PaymentEfecty? efecty,
-    PaymentTransfer? transfer,
-    PaymentDate? date,
-    PaymentMultiTransfer? multiTransfer,
-    List<AccountPayment>? accounts,
-    Account? account,
-    bool? validate,
-    FormSubmissionStatus? formSubmissionStatus,
-    String? error
-  }) =>
+  CollectionState copyWith(
+          {CollectionStatus? status,
+          double? totalSummary,
+          double? total,
+          EnterpriseConfig? enterpriseConfig,
+          Work? work,
+          PaymentEfecty? efecty,
+          PaymentTransfer? transfer,
+          PaymentDate? date,
+          PaymentMultiTransfer? multiTransfer,
+          List<AccountPayment>? accounts,
+          Account? account,
+          bool? validate,
+          FormSubmissionStatus? formSubmissionStatus,
+          String? error}) =>
       CollectionState(
         status: status ?? this.status,
         totalSummary: totalSummary ?? this.totalSummary,
@@ -93,28 +90,34 @@ class CollectionState extends Equatable {
 
   @override
   List<Object?> get props => [
-    status,
-    totalSummary,
-    total,
-    enterpriseConfig,
-    work,
-    efecty,
-    transfer,
-    multiTransfer,
-    date,
-    accounts,
-    account,
-    validate,
-    formSubmissionStatus,
-    error,
-  ];
+        status,
+        totalSummary,
+        total,
+        enterpriseConfig,
+        work,
+        efecty,
+        transfer,
+        multiTransfer,
+        date,
+        accounts,
+        account,
+        validate,
+        formSubmissionStatus,
+        error,
+      ];
 
   bool isSubmitting() =>
       formSubmissionStatus == FormSubmissionStatus.submitting;
 
   bool isSubmissionSuccessOrFailure() =>
       formSubmissionStatus == FormSubmissionStatus.success ||
-          formSubmissionStatus == FormSubmissionStatus.failure;
+      formSubmissionStatus == FormSubmissionStatus.failure;
+
+  bool canRenderView() =>
+      status == CollectionStatus.initial ||
+      status == CollectionStatus.success ||
+      status == CollectionStatus.navigate ||
+      status == CollectionStatus.error;
 
   bool get isValid => !efecty.hasError && !transfer.hasError;
 }

@@ -72,9 +72,7 @@ class _FormCollectionState extends State<FormCollection>
                         ),
                         BlocSelector<CollectionBloc, CollectionState, bool>(
                             selector: (state) =>
-                                (state.status == CollectionStatus.initial ||
-                                    state.status == CollectionStatus.loading ||
-                                    state.status == CollectionStatus.error) &&
+                                state.canRenderView() &&
                                 state.enterpriseConfig != null &&
                                 state.enterpriseConfig!.multipleAccounts ==
                                     true,
@@ -96,9 +94,7 @@ class _FormCollectionState extends State<FormCollection>
                 BlocSelector<CollectionBloc, CollectionState, bool>(
                     bloc: widget.collectionBloc,
                     selector: (state) =>
-                        (state.status == CollectionStatus.initial ||
-                            state.status == CollectionStatus.loading ||
-                            state.status == CollectionStatus.error) &&
+                        state.canRenderView() &&
                         state.enterpriseConfig != null &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
@@ -122,12 +118,7 @@ class _FormCollectionState extends State<FormCollection>
                                         bool>(
                                     bloc: widget.collectionBloc,
                                     selector: (state) =>
-                                        (state.status ==
-                                                CollectionStatus.initial ||
-                                            state.status ==
-                                                CollectionStatus.loading ||
-                                            state.status ==
-                                                CollectionStatus.error) &&
+                                        state.canRenderView() &&
                                         state.enterpriseConfig != null &&
                                         state.enterpriseConfig!.codeQr != null,
                                     builder: (c, x) {
@@ -161,12 +152,7 @@ class _FormCollectionState extends State<FormCollection>
                     }),
                 BlocSelector<CollectionBloc, CollectionState, bool>(
                     selector: (state) =>
-                        (state.status ==
-                            CollectionStatus.initial ||
-                            state.status ==
-                                CollectionStatus.loading ||
-                            state.status ==
-                                CollectionStatus.error) &&
+                        state.canRenderView() &&
                         state.enterpriseConfig != null &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
