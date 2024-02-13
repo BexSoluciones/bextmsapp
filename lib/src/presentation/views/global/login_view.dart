@@ -45,6 +45,7 @@ class LoginViewState extends State<LoginView> {
 
   @override
   void initState() {
+    loginCubit = BlocProvider.of<LoginCubit>(context);
     rememberSession();
     super.initState();
   }
@@ -75,8 +76,6 @@ class LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-
-    loginCubit = BlocProvider.of<LoginCubit>(context);
 
     return UpgraderDialog(
       child: Scaffold(body: buildBlocConsumer(size)),

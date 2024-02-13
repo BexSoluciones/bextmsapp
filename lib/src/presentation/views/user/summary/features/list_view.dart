@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image/image.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //cubit
+import '../../../../../domain/models/summary.dart';
 import '../../../../cubits/summary/summary_cubit.dart';
 
 //domain
@@ -48,6 +50,10 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
     final size = MediaQuery.of(context).size;
 
     return BlocConsumer<SummaryCubit, SummaryState>(
+      buildWhen: (current, previous) {
+        return current.runtimeType != previous.runtimeType &&
+            (current is SummaryChanged || current is SummaryLoading);
+      },
       listener: buildBlocListener,
       builder: (context, state) {
         if (state is SummaryLoading) {
@@ -95,6 +101,16 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
         delegate: SliverChildBuilderDelegate(
           (BuildContext context, int index) {
             final summary = state.summaries[index];
+            // return BlocSelector<SummaryCubit, SummaryState, Summary>(
+            //   selector: (state) {
+            //     return state.summaries.firstWhere(
+            //       (element) => element.hasTransaction == 0,
+            //     );
+            //   },
+            //   builder: (context, x) {
+            //
+            //   },
+            // );
             if (index == 0) {
               return showCaseClientTile(context, summary);
             } else {

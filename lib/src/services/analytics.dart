@@ -5,4 +5,6 @@ class FirebaseAnalyticsService {
 
   FirebaseAnalyticsObserver appAnalyticsObserver() =>
       FirebaseAnalyticsObserver(analytics: _analytics);
+
+
 }

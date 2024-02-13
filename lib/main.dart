@@ -42,7 +42,6 @@ import 'src/presentation/cubits/inventory/inventory_cubit.dart';
 import 'src/presentation/cubits/reject/reject_cubit.dart';
 import 'src/presentation/cubits/partial/partial_cubit.dart';
 import 'src/presentation/cubits/respawn/respawn_cubit.dart';
-import 'src/presentation/cubits/collection/collection_cubit.dart';
 import 'src/presentation/cubits/database/database_cubit.dart';
 import 'src/presentation/cubits/navigation/navigation_cubit.dart';
 import 'src/presentation/cubits/query/query_cubit.dart';
@@ -59,6 +58,7 @@ import 'src/presentation/blocs/history_order/history_order_bloc.dart';
 import 'src/presentation/blocs/issues/issues_bloc.dart';
 import 'src/presentation/blocs/account/account_bloc.dart';
 import 'src/presentation/blocs/gps/gps_bloc.dart';
+import 'src/presentation/blocs/collection/collection_bloc.dart';
 
 //database
 import 'src/data/datasources/local/app_database.dart';
@@ -462,7 +462,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 locator<NavigationService>()),
           ),
           BlocProvider(
-            create: (context) => CollectionCubit(
+            create: (context) => CollectionBloc(
                 locator<DatabaseRepository>(),
                 BlocProvider.of<ProcessingQueueBloc>(context),
                 BlocProvider.of<GpsBloc>(context),

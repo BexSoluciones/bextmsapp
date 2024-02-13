@@ -1,4 +1,6 @@
+import 'package:bexdeliveries/src/presentation/cubits/summary/summary_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 //models
 import '../../../../../domain/models/arguments.dart';
@@ -8,21 +10,20 @@ import '../../../../../domain/models/summary.dart';
 import '../../../../widgets/showcase.dart';
 
 class HeaderSummary extends StatelessWidget {
-  const HeaderSummary(
-      {super.key,
-      required this.arguments,
-      required this.one,
-      required this.two,
-      required this.three,
-      required this.four,
-      required this.summaries});
+  const HeaderSummary({
+    super.key,
+    required this.arguments,
+    required this.one,
+    required this.two,
+    required this.three,
+    required this.four,
+  });
 
   final SummaryArgument arguments;
   final GlobalKey one;
   final GlobalKey two;
   final GlobalKey three;
   final GlobalKey four;
-  final List<Summary> summaries;
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +41,21 @@ class HeaderSummary extends StatelessWidget {
                 buildPhoneShowcase(arguments.work, one, context),
                 buildWhatsAppShowcase(arguments.work, two, context),
                 buildMapShowcase(context, arguments.work, three),
-                summaries.isNotEmpty
-                    ? buildPublishShowcase(context, four, summaries.first.id)
-                    : const SizedBox(),
+                BlocSelector<SummaryCubit, SummaryState, bool>(
+                    selector: (state) => state.summaries.isNotEmpty,
+                    builder: (context, x) {
+                      return x
+                          ? buildPublishShowcase(
+                              context,
+                              four,
+                              context
+                                  .read<SummaryCubit>()
+                                  .state
+                                  .summaries
+                                  .first
+                                  .id)
+                          : const SizedBox();
+                    })
               ],
             ),
           ),

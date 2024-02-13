@@ -1,12 +1,11 @@
 import 'package:bexdeliveries/src/config/size.dart';
-import 'package:bexdeliveries/src/presentation/cubits/summary/summary_cubit.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:showcaseview/showcaseview.dart';
 import 'package:vibration/vibration.dart';
 
 //cubit
-import '../../../../cubits/inventory/inventory_cubit.dart';
+import '../../../../cubits/summary/summary_cubit.dart';
 
 //models
 import '../../../../../domain/models/arguments.dart';
@@ -17,10 +16,6 @@ import '../../../../../utils/constants/nums.dart';
 
 //widgets
 import '../../../../widgets/icon_wifi_widget.dart';
-
-//services
-import '../../../../../locator.dart';
-import '../../../../../services/navigation.dart';
 
 class AppBarSummary extends StatelessWidget {
   const AppBarSummary(
@@ -55,27 +50,31 @@ class AppBarSummary extends StatelessWidget {
       actions: [
         const Padding(
           padding: EdgeInsets.all(8.0),
-          child: IconConnection(),
+          child: IconConnection(fsu: false),
         ),
-        summaryCubit.state.time != null
-            ? GestureDetector(
-                onTap: () async =>
-                    await summaryCubit.getDiffTime(arguments.work.id!),
-                child: Text('Tiempo ${summaryCubit.state.time}',
-                    style: TextStyle(
-                        fontSize: 18,
-                        color:
-                            Theme.of(context).colorScheme.secondaryContainer)))
-            : const SizedBox(),
+        BlocSelector<SummaryCubit, SummaryState, bool>(
+            selector: (state) => state.time != null,
+            builder: (context, x) {
+              return x
+                  ? GestureDetector(
+                      onTap: () async =>
+                          await summaryCubit.getDiffTime(arguments.work.id!),
+                      child: Text('Tiempo ${summaryCubit.state.time}',
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer)))
+                  : const SizedBox();
+            }),
         const SizedBox(width: 5)
       ],
       pinned: true,
       snap: false,
       floating: false,
-      expandedHeight: MediaQuery.of(context).size.height * 0.26,
+      expandedHeight: MediaQuery.of(context).size.height * 0.25,
       flexibleSpace: FlexibleSpaceBar(
           collapseMode: CollapseMode.pin,
-          centerTitle: true,
           background: SafeArea(
             child: Container(
                 constraints: BoxConstraints(
@@ -93,23 +92,6 @@ class AppBarSummary extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text.rich(
-                                    TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: 'SERVICIO: ',
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,color:Theme.of(context).colorScheme.secondaryContainer),
-                                        ),
-                                        TextSpan(
-                                            text: arguments.work.workcode,
-                                            style:  TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.normal,color:Theme.of(context).colorScheme.secondaryContainer)),
-                                      ],
-                                    ),
-                                  ),
                                   const SizedBox(height: 10),
                                   Text.rich(
                                     TextSpan(
@@ -195,15 +177,37 @@ class AppBarSummary extends StatelessWidget {
                                             ],
                                           ),
                                         )
-                                      : const SizedBox(),
+                                      : Text.rich(
+                                          TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: 'CEL: ',
+                                                style: TextStyle(
+                                                    fontSize: calculatedFon,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .secondaryContainer),
+                                              ),
+                                              TextSpan(
+                                                  text: 'No registra',
+                                                  style: TextStyle(
+                                                      fontSize: calculatedFon,
+                                                      fontWeight:
+                                                          FontWeight.normal,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .secondaryContainer)),
+                                            ],
+                                          ),
+                                        )
                                 ],
                               ),
                             )),
                       ),
                     ])),
           )),
-      title: Text(arguments.work.workcode!,
-          textAlign: TextAlign.center,
+      title: Text("SERVICIO: ${arguments.work.workcode}",
           style: TextStyle(
               fontSize: calculatedFon,
               fontWeight: FontWeight.normal,

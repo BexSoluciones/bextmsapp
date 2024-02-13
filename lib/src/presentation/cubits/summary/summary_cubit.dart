@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -27,9 +26,9 @@ import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/navigation.dart';
 import '../../../services/storage.dart';
+import '../../../services/logger.dart';
 
 part 'summary_state.dart';
 
@@ -42,7 +41,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   final LocalStorageService storageService;
 
   SummaryCubit(this.databaseRepository, this.processingQueueBloc, this.gpsBloc,
-  this.storageService, this.navigationService)
+      this.storageService, this.navigationService)
       : super(const SummaryLoading());
 
   Future<void> getAllSummariesByOrderNumber(int workId) async {
@@ -52,6 +51,14 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   Future<SummaryState> _getAllSummariesByOrderNumber(int workId) async {
     final summaries =
         await databaseRepository.getAllSummariesByOrderNumber(workId);
+
+    Future.forEach(summaries, (summary) async {
+      if (summary.expedition != null) {
+        var response = await countBox(summary.orderNumber);
+        summary.totalSummary = response[0] as int;
+        summary.totalLooseSummary = response[1] as int;
+      }
+    });
 
     var time = await databaseRepository.getDiffTime(workId);
     var isArrived =
@@ -64,6 +71,33 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         time: time,
         isArrived: isArrived,
         isGeoReference: isGeoReferenced);
+  }
+
+  Future<void> getAllSummariesByOrderNumberChanged(int workId) async {
+    emit(const SummaryLoading());
+
+    final summaries =
+        await databaseRepository.getAllSummariesByOrderNumber(workId);
+
+    Future.forEach(summaries, (summary) async {
+      if (summary.expedition != null) {
+        var response = await countBox(summary.orderNumber);
+        summary.totalSummary = response[0] as int;
+        summary.totalLooseSummary = response[1] as int;
+      }
+    });
+
+    var time = await databaseRepository.getDiffTime(workId);
+    var isArrived =
+        await databaseRepository.validateTransactionArrived(workId, 'arrived');
+    var isGeoReferenced = await databaseRepository.validateClient(workId);
+
+    emit(SummaryChanged(
+        summaries: summaries,
+        origin: state.origin,
+        time: time,
+        isArrived: isArrived,
+        isGeoReference: isGeoReferenced));
   }
 
   Future<List> countBox(String orderNumber) async {

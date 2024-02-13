@@ -213,6 +213,8 @@ class Summary {
   String? idPacking;
   String? expedition;
   String? packing;
+  int? totalSummary;
+  int? totalLooseSummary;
   Transaction? transaction;
   bool? loading = false;
   String? createdAt;

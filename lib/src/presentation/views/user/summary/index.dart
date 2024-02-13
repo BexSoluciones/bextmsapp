@@ -1,18 +1,13 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
-
-//utils
-import '../../../../utils/constants/strings.dart';
 
 //models
 import '../../../../domain/models/arguments.dart';
 
 //cubit
 import '../../../cubits/summary/summary_cubit.dart';
-
-//widgets
-import '../../../widgets/icon_wifi_widget.dart';
 
 //features
 import 'features/bottom_bar.dart';
@@ -82,49 +77,53 @@ class SummaryViewState extends State<SummaryView> {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        child:
-            BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
-          return Scaffold(
-              resizeToAvoidBottomInset: true, body: _buildBody(state));
-        }));
+        child: Scaffold(resizeToAvoidBottomInset: true, body: _buildBody()));
   }
 
-  Widget _buildBody(SummaryState state) {
-    return Stack(
-      children: [
-        CustomScrollView(
-          slivers: [
-            AppBarSummary(
+  Widget _buildBody() {
+    return SizedBox(
+      width: getFullScreenWidth(),
+      height: getFullScreenHeight(),
+      child: Stack(
+        children: [
+          SizedBox(
+            width: getFullScreenWidth(),
+            height: getFullScreenHeight()! / 1.1,
+            child: CustomScrollView(
+              slivers: [
+                AppBarSummary(
+                  arguments: widget.arguments,
+                  summaryCubit: summaryCubit,
+                ),
+                HeaderSummary(
+                  arguments: widget.arguments,
+                  one: one,
+                  two: two,
+                  three: three,
+                  four: four,
+                ),
+                ListViewSummary(
+                    summaryCubit: summaryCubit,
+                    arguments: widget.arguments,
+                    one: one,
+                    two: two,
+                    three: three,
+                    four: four,
+                    five: five),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BottomViewSummary(
               arguments: widget.arguments,
               summaryCubit: summaryCubit,
             ),
-            HeaderSummary(
-                arguments: widget.arguments,
-                one: one,
-                two: two,
-                three: three,
-                four: four,
-                summaries: state.summaries),
-            ListViewSummary(
-                summaryCubit: summaryCubit,
-                arguments: widget.arguments,
-                one: one,
-                two: two,
-                three: three,
-                four: four,
-                five: five),
-          ],
-        ),
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: BottomViewSummary(
-            arguments: widget.arguments,
-            summaryCubit: summaryCubit,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
