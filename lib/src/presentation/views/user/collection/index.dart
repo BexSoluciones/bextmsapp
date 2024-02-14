@@ -35,7 +35,7 @@ class CollectionView extends StatefulWidget {
 
 class CollectionViewState extends State<CollectionView> with FormatNumber {
   final _formKey = GlobalKey<FormState>();
-
+  bool summariesLoaded = false;
   late CollectionBloc collectionBloc;
   late SummaryCubit summaryCubit;
   late WorkCubit workCubit;
@@ -111,11 +111,12 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
       if (state.validate == true) {
         collectionBloc.add(
             CollectionNavigate(route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));
-      } else if (state.validate == false) {
+      } else if (!summariesLoaded && state.validate == false) {
         summaryCubit.getAllSummariesByOrderNumberChanged(widget.arguments.work.id!);
         collectionBloc.add(CollectionNavigate(
             route: AppRoutes.summary,
             arguments: SummaryArgument(work: state.work!)));
+        summariesLoaded = true;
       }
     } else if ((state.status == CollectionStatus.error ||
             state.formSubmissionStatus == FormSubmissionStatus.failure) &&
