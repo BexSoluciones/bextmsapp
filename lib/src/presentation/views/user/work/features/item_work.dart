@@ -18,7 +18,7 @@ import '../../../../../services/navigation.dart';
 final NavigationService _navigationService = locator<NavigationService>();
 
 class ItemWork extends StatefulWidget {
-  const ItemWork({Key? key, required this.index, required this.work}) : super(key: key);
+  const ItemWork({super.key, required this.index, required this.work});
 
   final int index;
   final Work work;
@@ -49,6 +49,9 @@ class ItemWorkState extends State<ItemWork> {
   Widget build(BuildContext context) {
     final calculatedTextScaleFactor = textScaleFactor(context);
     return BlocBuilder<WorkCubit, WorkState>(
+        buildWhen: (previous, current) {
+          return previous.works[widget.index] != current.works[widget.index];
+        },
         key: ValueKey(widget.work.id),
         builder: (context, state) {
           return Padding(

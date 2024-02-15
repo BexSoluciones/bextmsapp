@@ -39,7 +39,7 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 
 class ItemWork extends StatefulWidget {
-  const ItemWork({Key? key, required this.work}) : super(key: key);
+  const ItemWork({super.key, required this.work});
 
   final Work work;
 

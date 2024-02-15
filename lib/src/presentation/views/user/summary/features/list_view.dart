@@ -50,9 +50,6 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
     final size = MediaQuery.of(context).size;
 
     return BlocConsumer<SummaryCubit, SummaryState>(
-      buildWhen: (current, previous) {
-        return current.runtimeType != previous.runtimeType;
-      },
       listener: buildBlocListener,
       builder: (context, state) {
         if (state is SummaryLoading) {
@@ -99,40 +96,37 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
       return SliverList(
         delegate: SliverChildBuilderDelegate(
           (BuildContext context, int index) {
-            final summary = state.summaries[index];
-            // return BlocSelector<SummaryCubit, SummaryState, Summary>(
-            //   selector: (state) {
-            //     return state.summaries.firstWhere(
-            //       (element) => element.hasTransaction == 0,
-            //     );
-            //   },
-            //   builder: (context, x) {
-            //
-            //   },
-            // );
-            if (index == 0) {
-              return showCaseClientTile(context, summary);
-            } else {
-              return ItemSummary(
-                  summary: summary,
-                  arguments: widget.arguments,
-                  isArrived: state.isArrived!,
-                  onTap: () async {
-                    var transaction = Transaction(
-                      workId: widget.arguments.work.id!,
-                      summaryId: summary.id,
-                      workcode: widget.arguments.work.workcode!,
-                      orderNumber: summary.orderNumber,
-                      status: 'summary',
-                      start: now(),
-                      end: now(),
-                      latitude: null,
-                      longitude: null,
-                    );
-                    widget.summaryCubit.sendTransactionSummary(
-                        widget.arguments.work, summary, transaction);
-                  });
-            }
+            return BlocBuilder<SummaryCubit, SummaryState>(
+                buildWhen: (previous, current) {
+                  return previous.summaries[index] != current.summaries[index];
+                },
+                key: ValueKey(index),
+                builder: (context, state) {
+                  final summary = state.summaries[index];
+                  if (index == 0) {
+                    return showCaseClientTile(context, summary);
+                  } else {
+                    return ItemSummary(
+                        summary: summary,
+                        arguments: widget.arguments,
+                        isArrived: state.isArrived!,
+                        onTap: () async {
+                          var transaction = Transaction(
+                            workId: widget.arguments.work.id!,
+                            summaryId: summary.id,
+                            workcode: widget.arguments.work.workcode!,
+                            orderNumber: summary.orderNumber,
+                            status: 'summary',
+                            start: now(),
+                            end: now(),
+                            latitude: null,
+                            longitude: null,
+                          );
+                          widget.summaryCubit.sendTransactionSummary(
+                              widget.arguments.work, summary, transaction);
+                        });
+                  }
+                });
           },
           childCount: state.summaries.length,
         ),
