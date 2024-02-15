@@ -94,11 +94,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   Widget buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionBloc, CollectionState>(
       buildWhen: (previous, current) {
-        print('***previous***');
-        print(previous.status);
-        print('***current***');
-        print(current.status);
-        return previous.status != current.status;
+        return previous.toString() != current.toString();
       },
       listener: buildBlocListener,
       builder: (context, state) {
@@ -117,15 +113,18 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
     if (state.status == CollectionStatus.success &&
         state.formSubmissionStatus == FormSubmissionStatus.success) {
       if (state.validate == true) {
-        collectionBloc.add(
-            CollectionNavigate(route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));
+        collectionBloc.add(CollectionNavigate(
+            route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));
       } else if (!summariesLoaded && state.validate == false) {
-        summaryCubit.getAllSummariesByOrderNumberChanged(widget.arguments.work.id!);
+        summaryCubit
+            .getAllSummariesByOrderNumberChanged(widget.arguments.work.id!);
         collectionBloc.add(CollectionNavigate(
             route: AppRoutes.summary,
             arguments: SummaryArgument(work: state.work!)));
         summariesLoaded = true;
       }
+    } else if (state.status == CollectionStatus.back) {
+      collectionBloc.navigationService.goBack();
     } else if ((state.status == CollectionStatus.error ||
             state.formSubmissionStatus == FormSubmissionStatus.failure) &&
         state.error != null) {
@@ -153,8 +152,6 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
               context: context,
             );
           });
-    } else if (state.status == CollectionStatus.back) {
-      collectionBloc.navigationService.goBack();
     }
   }
 
