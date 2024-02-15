@@ -55,16 +55,14 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
 
   _mapCameraInitializedToState(CameraInitialized event, emit) async {
     try {
-      if (_controller == null) {
-        _controller = await cameraUtils.getCameraController(
-            resolutionPreset, cameraLensDirection);
-        await _controller?.initialize();
-      }
+      _controller = await cameraUtils.getCameraController(
+          resolutionPreset, cameraLensDirection);
+      await _controller!.initialize();
       emit(CameraReady());
     } on CameraException catch (error) {
-      _controller?.dispose();
+      _controller!.dispose();
       emit(CameraFailure(error: error.description!));
-    } catch (error, stackTrace) {
+    } catch (error,stackTrace) {
       emit(CameraFailure(error: error.toString()));
       await FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }
@@ -110,7 +108,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraGalleryToState(CameraGallery event, emit) async {
-    if (_controller != null && _controller!.value.isInitialized) {
+    if (state is! CameraReady) {
       emit(const CameraFailure(error: 'Camera is not ready'));
       return;
     }
