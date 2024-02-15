@@ -98,7 +98,9 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
           (BuildContext context, int index) {
             return BlocBuilder<SummaryCubit, SummaryState>(
                 buildWhen: (previous, current) {
-                  return previous.summaries[index] != current.summaries[index];
+                  return (current is SummarySuccess ||
+                          current is SummaryFailed) &&
+                      previous.summaries[index] != current.summaries[index];
                 },
                 key: ValueKey(index),
                 builder: (context, state) {
