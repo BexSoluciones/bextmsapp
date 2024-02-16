@@ -150,14 +150,14 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
-          if (state.total <= state.totalSummary!.toDouble()) {
+          if (state.total <= state.totalSummary!.toDouble() && state.total>0.0) {
             storageService.setBool('firmRequired', false);
             storageService.setBool('photoRequired', false);
             add(CollectionConfirmTransaction(arguments: event.arguments));
             return;
           } else {
             emit(state.copyWith(
-                status: CollectionStatus.error,
+                formSubmissionStatus: FormSubmissionStatus.failure,
                 error: 'el recaudo debe ser igual o menor al total'));
           }
         } else if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
@@ -168,8 +168,9 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
             emit(state.copyWith(status: CollectionStatus.waiting));
           } else {
             emit(state.copyWith(
-                status: CollectionStatus.error,
-                error: 'el recaudo debe ser igual o mayor al total'));
+              formSubmissionStatus: FormSubmissionStatus.failure,
+              error:  'el recaudo debe ser igual o mayor al total',
+            ));
           }
         }
       } else {
