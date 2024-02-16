@@ -10,9 +10,11 @@ Widget textField({
   String? prefixText,
   String? errorText,
   TextInputType? keyBoardType,
+  bool? showCursor
 }) {
   return TextFormField(
     initialValue: initialValue,
+    showCursor: showCursor,
     decoration: InputDecoration(
       prefixText: prefixText,
       errorText: errorText,

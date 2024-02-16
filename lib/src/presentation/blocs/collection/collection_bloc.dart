@@ -524,22 +524,12 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     Emitter<CollectionState> emit,
   ) async {
     try {
-      // var pickedDate = await showDatePicker(
-      //     context: context,
-      //     initialDate: DateTime.now(),
-      //     firstDate: DateTime(2000),
-      //     lastDate: DateTime(2101));
-      //
-      // if (pickedDate != null) {
-      //   var formattedDate = DateFormat('yyyy-MM-dd')
-      //       .format(pickedDate);
-      //
-      //   emit(state.copyWith(
-      //       date: PaymentDate.create(formattedDate),
-      //       formSubmissionStatus: FormSubmissionStatus.initial));
-      // } else {
-      //   print('Fecha no seleccionada');
-      // }
+
+      print(event.value);
+
+      emit(state.copyWith(
+          transfer: PaymentTransfer.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
     } catch (error, stackTrace) {
       helperFunctions.handleException(error, stackTrace);
     }

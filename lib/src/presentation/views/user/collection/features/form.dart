@@ -314,7 +314,7 @@ class _FormCollectionState extends State<FormCollection>
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
-                          ? const PaymentDateInputField()
+                          ? PaymentDateInputField()
                           : const SizedBox();
                     }),
                 const SizedBox(height: 30),

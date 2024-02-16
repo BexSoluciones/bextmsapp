@@ -68,15 +68,20 @@ class PaymentMultiTransferInputField extends StatelessWidget with FormatNumber {
               ));
 }
 
-class PaymentDateInputField extends StatelessWidget {
-  const PaymentDateInputField({super.key});
+class PaymentDateInputField extends StatelessWidget with FormatDate {
+  PaymentDateInputField({super.key});
 
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<CollectionBloc, CollectionState>(
-          buildWhen: (previous, current) => current.date != previous.date,
+          buildWhen: (previous, current) {
+            print(previous.date);
+            print(current.date);
+            return current.date != previous.date;
+          },
           builder: (context, state) => textField(
                 initialValue: state.date.value,
+                showCursor: false,
                 context: context,
                 onChanged: (date) => context
                     .read<CollectionBloc>()
@@ -89,7 +94,7 @@ class PaymentDateInputField extends StatelessWidget {
                           lastDate: DateTime(2101));
 
                       if (pickedDate != null && context.mounted) {
-                        var formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
+                        var formattedDate = date(pickedDate);
                         context.read<CollectionBloc>().add(CollectionPaymentDateChanged(value: formattedDate));
                       }
                 },

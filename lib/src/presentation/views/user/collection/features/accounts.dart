@@ -221,7 +221,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                 },
               ),
               const SizedBox(height: 10),
-              const PaymentDateInputField(),
+              PaymentDateInputField(),
               const SizedBox(height: 10),
               DefaultButton(
                   widget: BlocSelector<CollectionBloc, CollectionState, bool>(
