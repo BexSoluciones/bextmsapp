@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 //core
 import '../../../../core/helpers/index.dart';
 //domain
@@ -52,6 +53,10 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     on<CollectionPaymentDateChanged>(_onPaymentDateChanged);
     on<CollectionButtonPressed>(_onCollectionButtonPressed);
     on<CollectionConfirmTransaction>(_onConfirmTransaction);
+    on<CollectionCloseModal>(_onCloseModal);
+    on<CollectionAddOrUpdatePayment>(addOrUpdatePaymentWithAccount);
+    on<CollectionEditPaymentWithAccount>(editPaymentWithAccount);
+    on<CollectionError>(error);
   }
 
   Future<void> _getCollection(
@@ -67,6 +72,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
       emit(state.copyWith(
           status: CollectionStatus.initial,
           formSubmissionStatus: FormSubmissionStatus.initial,
+          date: PaymentDate.create(DateFormat('yyyy-MM-dd').format(DateTime.now())),
           totalSummary: totalSummary,
           enterpriseConfig: storageService.getObject('config') != null
               ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
@@ -116,9 +122,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
         }
 
         if (event.arguments.summary.typeOfCharge == 'CREDITO' &&
-            state.total != 0 &&
-            allowInsetsBelow == true &&
-            allowInsetsAbove == true) {
+            state.total == 0) {
           storageService.setBool('firmRequired', false);
           storageService.setBool('photoRequired', false);
           return add(CollectionConfirmTransaction(arguments: event.arguments));
@@ -183,72 +187,76 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     }
   }
 
-  // Future<void> addOrUpdatePaymentWithAccount({int? index}) async {
-  //   if (index != null) {
-  //     state.accounts![index].paid = state.multiTransfer.value;
-  //     state.accounts![index].account = state.account;
-  //     state.accounts![index].date = state.date.value;
-  //     //
-  //     // indexToEdit = null;
-  //     // isEditing = false;
-  //   } else {
-  //     if (state.multiTransfer.value.isNotEmpty) {
-  //       if (double.tryParse(state.multiTransfer.value) != null) {
-  //         var transferValue = double.parse(state.multiTransfer.value);
-  //
-  //         state.accounts!.add(AccountPayment(
-  //             paid: transferValue.toString(),
-  //             type: 'transfer',
-  //             account: state.account,
-  //             date: state.date.value));
-  //       }
-  //     }
-  //   }
-  //
-  //   double cashValue = 0.0;
-  //   if (state.efecty.value.isNotEmpty) {
-  //     cashValue = double.parse(state.efecty.value);
-  //   }
-  //
-  //   var count = 0.0;
-  //   for (var i = 0; i < state.accounts!.length; i++) {
-  //     count += double.parse(state.accounts![i].paid!);
-  //   }
-  //
-  //   emit(state.copyWith(
-  //       account: null,
-  //       date: null,
-  //       total: count + cashValue,
-  //       totalSummary: state.totalSummary,
-  //       enterpriseConfig: state.enterpriseConfig));
-  // }
-  //
-  // Future<void> editPaymentWithAccount(int index) async {
-  //   // indexToEdit = index;
-  //   // isEditing = true;
-  //
-  //   emit(state.copyWith(
-  //       totalSummary: state.totalSummary,
-  //       enterpriseConfig: state.enterpriseConfig,
-  //       date: PaymentDate.create(state.accounts![index].date!),
-  //       account: state.accounts![index].account,
-  //       multiTransfer:
-  //           PaymentMultiTransfer.create(state.accounts![index].paid!)));
-  // }
-  //
-  // void closeModal() async {
-  //   emit(state.copyWith(
-  //       totalSummary: state.totalSummary,
-  //       enterpriseConfig: state.enterpriseConfig));
-  // }
-  //
-  // void error() async {
-  //   emit(state.copyWith(
-  //       status: CollectionStatus.error,
-  //       totalSummary: state.totalSummary,
-  //       enterpriseConfig: state.enterpriseConfig,
-  //       error: 'Por favor selecciona una cuenta'));
-  // }
+  Future<void> addOrUpdatePaymentWithAccount(
+      CollectionAddOrUpdatePayment event, Emitter<CollectionState> emit) async {
+    if (event.index != null) {
+      state.accounts![event.index!].paid = state.multiTransfer.value;
+      state.accounts![event.index!].account = state.account;
+      state.accounts![event.index!].date = state.date.value;
+
+      emit(state.copyWith(
+        indexToEdit: null,
+        isEditing: false,
+      ));
+    } else {
+      if (state.multiTransfer.value.isNotEmpty) {
+        if (double.tryParse(state.multiTransfer.value) != null) {
+          var transferValue = double.parse(state.multiTransfer.value);
+
+          state.accounts!.add(AccountPayment(
+              paid: transferValue.toString(),
+              type: 'transfer',
+              account: state.account,
+              date: state.date.value));
+        }
+      }
+    }
+
+    double cashValue = 0.0;
+    if (state.efecty.value.isNotEmpty) {
+      cashValue = double.parse(state.efecty.value);
+    }
+
+    var count = 0.0;
+    for (var i = 0; i < state.accounts!.length; i++) {
+      count += double.parse(state.accounts![i].paid!);
+    }
+
+    emit(state.copyWith(
+        account: null,
+        date: null,
+        total: count + cashValue,
+        totalSummary: state.totalSummary,
+        enterpriseConfig: state.enterpriseConfig));
+  }
+
+  Future<void> editPaymentWithAccount(CollectionEditPaymentWithAccount event,
+      Emitter<CollectionState> emit) async {
+    emit(state.copyWith(
+        indexToEdit: event.index,
+        isEditing: true,
+        totalSummary: state.totalSummary,
+        enterpriseConfig: state.enterpriseConfig,
+        date: PaymentDate.create(state.accounts![event.index].date!),
+        account: state.accounts![event.index].account,
+        multiTransfer:
+            PaymentMultiTransfer.create(state.accounts![event.index].paid!)));
+  }
+
+  void _onCloseModal(
+      CollectionCloseModal event, Emitter<CollectionState> emit) async {
+    emit(state.copyWith(
+        totalSummary: state.totalSummary,
+        enterpriseConfig: state.enterpriseConfig));
+  }
+
+  void error(CollectionError event, Emitter<CollectionState> emit) async {
+    emit(state.copyWith(
+        status: CollectionStatus.error,
+        totalSummary: state.totalSummary,
+        enterpriseConfig: state.enterpriseConfig,
+        error: 'Por favor selecciona una cuenta'));
+  }
 
   Future<void> _onConfirmTransaction(
     CollectionConfirmTransaction event,

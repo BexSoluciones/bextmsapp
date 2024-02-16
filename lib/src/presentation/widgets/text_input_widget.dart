@@ -4,12 +4,15 @@ import '../../utils/constants/colors.dart';
 
 Widget textField({
   required BuildContext context,
-  required Function(String) onChanged,
+  Function(String)? onChanged,
+  Function()? onTap,
+  String? initialValue,
   String? prefixText,
   String? errorText,
   TextInputType? keyBoardType,
 }) {
-  return TextField(
+  return TextFormField(
+    initialValue: initialValue,
     decoration: InputDecoration(
       prefixText: prefixText,
       errorText: errorText,
@@ -38,6 +41,7 @@ Widget textField({
         icon: const Icon(Icons.clear),
       ),
     ),
+    onTap: onTap,
     onChanged: onChanged,
     textAlignVertical: TextAlignVertical.center,
     keyboardType: keyBoardType,

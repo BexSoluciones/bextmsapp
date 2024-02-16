@@ -34,6 +34,8 @@ class CollectionState extends Equatable {
   //ACCOUNT TRANSACTION
   final List<AccountPayment>? accounts;
   final Account? account;
+  final int? indexToEdit;
+  final bool? isEditing;
 
   //FINISH TRANSACTION
   final bool validate;
@@ -52,6 +54,8 @@ class CollectionState extends Equatable {
       this.date = PaymentDate.empty,
       this.accounts,
       this.account,
+      this.indexToEdit,
+      this.isEditing,
       this.validate = false,
       this.formSubmissionStatus = FormSubmissionStatus.initial,
       this.error});
@@ -68,6 +72,8 @@ class CollectionState extends Equatable {
           PaymentMultiTransfer? multiTransfer,
           List<AccountPayment>? accounts,
           Account? account,
+          int? indexToEdit,
+          bool? isEditing,
           bool? validate,
           FormSubmissionStatus? formSubmissionStatus,
           String? error}) =>
@@ -83,6 +89,8 @@ class CollectionState extends Equatable {
         date: date ?? this.date,
         accounts: accounts ?? this.accounts,
         account: account ?? this.account,
+        indexToEdit: indexToEdit ?? this.indexToEdit,
+        isEditing: isEditing ?? this.isEditing,
         validate: validate ?? this.validate,
         formSubmissionStatus: formSubmissionStatus ?? this.formSubmissionStatus,
         error: error ?? this.error,

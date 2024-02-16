@@ -14,6 +14,7 @@ import '../../../../../domain/abstracts/format_abstract.dart';
 //widgets
 import '../../../../widgets/default_button_widget.dart';
 import '../../../../widgets/transaction_list.dart';
+import 'form_payment.dart';
 
 class AccountsCollection extends StatefulWidget {
   final String orderNumber;
@@ -106,6 +107,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                       : const SizedBox()
                 ],
               ),
+              PaymentMultiTransferInputField(),
               // TextFormField(
               //   keyboardType: TextInputType.number,
               //   autofocus: false,
@@ -123,13 +125,6 @@ class _AccountsCollectionState extends State<AccountsCollection>
               //     ),
               //     suffixIcon: IconButton(
               //       onPressed: () {
-              //         // if (double.tryParse(widget
-              //         //         .collectionCubit.multiTransferController.text) !=
-              //         //     null) {
-              //         //   widget.collectionCubit.total -= double.parse(widget
-              //         //       .collectionCubit.multiTransferController.text);
-              //         // }
-              //         // widget.collectionCubit.multiTransferController.clear();
               //       },
               //       icon: const Icon(Icons.clear),
               //     ),
@@ -226,66 +221,29 @@ class _AccountsCollectionState extends State<AccountsCollection>
                 },
               ),
               const SizedBox(height: 10),
-              // TextField(
-              //   controller: widget.collectionCubit
-              //       .dateController, //editing controller of this TextField
-              //   autofocus: false,
-              //   decoration: const InputDecoration(
-              //     contentPadding: EdgeInsets.only(left: 15.0),
-              //     focusedBorder: OutlineInputBorder(
-              //       borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-              //     ),
-              //     enabledBorder: OutlineInputBorder(
-              //       borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-              //     ),
-              //     errorBorder: OutlineInputBorder(
-              //       borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-              //     ),
-              //   ),
-              //   readOnly: true,
-              //   onTap: () async {
-              //     var pickedDate = await showDatePicker(
-              //         context: context,
-              //         initialDate: DateTime.now(),
-              //         firstDate: DateTime(2000),
-              //         lastDate: DateTime(2101));
-              //
-              //     if (pickedDate != null) {
-              //       var formattedDate =
-              //           DateFormat('yyyy-MM-dd').format(pickedDate);
-              //       setState(() {
-              //         widget.collectionCubit.dateController.text =
-              //             formattedDate; //set output date to TextField value.
-              //       });
-              //     } else {
-              //       if (kDebugMode) {
-              //         print('Fecha no seleccionada');
-              //       }
-              //     }
-              //   },
-              // ),
+              const PaymentDateInputField(),
               const SizedBox(height: 10),
-              // DefaultButton(
-              //     widget: BlocSelector<CollectionBloc, CollectionState, bool>(
-              //       selector: (state) => state is CollectionEditingPayment,
-              //       builder: (c, x) {
-              //         return x
-              //             ? const Text('Editar',
-              //                 style:
-              //                     TextStyle(color: Colors.white, fontSize: 20))
-              //             : const Text('Agregar',
-              //                 style:
-              //                     TextStyle(color: Colors.white, fontSize: 20));
-              //       },
-              //     ),
-              //     press: () {
-              //       final form = _formKey.currentState;
-              //       if (form!.validate()) {
-              //         // widget.collectionBloc.addOrUpdatePaymentWithAccount(
-              //         //     index: widget.collectionBloc.indexToEdit);
-              //         // setState(() {});
-              //       }
-              //     }),
+              DefaultButton(
+                  widget: BlocSelector<CollectionBloc, CollectionState, bool>(
+                    selector: (state) =>
+                        state is CollectionEditPaymentWithAccount,
+                    builder: (c, x) {
+                      return x
+                          ? const Text('Editar',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20))
+                          : const Text('Agregar',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20));
+                    },
+                  ),
+                  press: () {
+                    final form = _formKey.currentState;
+                    if (form!.validate()) {
+                      widget.collectionBloc.add(CollectionAddOrUpdatePayment(
+                          index: widget.collectionBloc.state.indexToEdit));
+                    }
+                  }),
               const SizedBox(height: 10),
               Expanded(
                   child: TransactionList(

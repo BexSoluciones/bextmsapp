@@ -50,4 +50,17 @@ class CollectionConfirmTransaction extends CollectionEvent {
   CollectionConfirmTransaction({ required this.arguments });
 }
 
+class CollectionAddOrUpdatePayment extends CollectionEvent {
+  final int? index;
+  CollectionAddOrUpdatePayment({required this.index});
+}
+
+class CollectionEditPaymentWithAccount extends CollectionEvent {
+  final int index;
+  CollectionEditPaymentWithAccount({required this.index});
+}
+
+class CollectionError extends CollectionEvent {
+  CollectionError();
+}
 

@@ -49,7 +49,8 @@ class _FormCollectionState extends State<FormCollection>
     super.initState();
   }
 
-  // void _closeModal(void value) => widget.collectionBloc.add(CollectionCloseModal());
+  void _closeModal(void value) => widget.collectionBloc.add(CollectionCloseModal());
+  void _openModal() => widget.collectionBloc.add(CollectionOpenModal());
 
   @override
   Widget build(BuildContext context) {
@@ -162,23 +163,20 @@ class _FormCollectionState extends State<FormCollection>
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 20)),
                               press: () {
-                                // widget.collectionCubit.dateController.text =
-                                //     date(null);
-                                // widget.collectionCubit.selectedAccount = null;
-                                // widget.collectionCubit.indexToEdit = null;
-                                // widget.collectionCubit.isEditing = false;
-                                // Future<void> future = showModalBottomSheet(
-                                //     context: context,
-                                //     isScrollControlled: true,
-                                //     builder: (c) {
-                                //       return AccountsCollection(
-                                //         orderNumber: widget.orderNumber,
-                                //         collectionCubit: widget.collectionCubit,
-                                //         state: widget.state,
-                                //       );
-                                //     });
+                                _openModal();
 
-                                // future.then((void value) => _closeModal(value));
+                                Future<void> future = showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (c) {
+                                      return AccountsCollection(
+                                        orderNumber: widget.orderNumber,
+                                        collectionBloc: widget.collectionBloc,
+                                        state: widget.state,
+                                      );
+                                    });
+
+                                future.then((void value) => _closeModal(value));
                               });
                     }),
                 BlocSelector<CollectionBloc, CollectionState, bool>(

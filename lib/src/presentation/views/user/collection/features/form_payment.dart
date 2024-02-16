@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 //domain
 import '../../../../../domain/abstracts/format_abstract.dart';
 //blocs
@@ -75,10 +76,24 @@ class PaymentDateInputField extends StatelessWidget {
       BlocBuilder<CollectionBloc, CollectionState>(
           buildWhen: (previous, current) => current.date != previous.date,
           builder: (context, state) => textField(
+                initialValue: state.date.value,
                 context: context,
                 onChanged: (date) => context
                     .read<CollectionBloc>()
                     .add(CollectionPaymentDateChanged(value: date)),
+                onTap: () async {
+                      var pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2101));
+
+                      if (pickedDate != null && context.mounted) {
+                        var formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
+                        context.read<CollectionBloc>().add(CollectionPaymentDateChanged(value: formattedDate));
+                      }
+                },
                 errorText: state.date.hasError ? state.date.errorMessage : null,
+                keyBoardType: TextInputType.none
               ));
 }
