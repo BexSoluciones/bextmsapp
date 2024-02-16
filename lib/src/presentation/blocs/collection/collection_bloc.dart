@@ -116,10 +116,11 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
         }
 
         if (event.arguments.summary.typeOfCharge == 'CREDITO' &&
-            state.total == 0) {
+            state.total != 0 &&
+            allowInsetsBelow == true &&
+            allowInsetsAbove == true) {
           storageService.setBool('firmRequired', false);
           storageService.setBool('photoRequired', false);
-
           return add(CollectionConfirmTransaction(arguments: event.arguments));
         }
 
@@ -132,14 +133,14 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
                 CollectionConfirmTransaction(arguments: event.arguments));
           } else {
             emit(state.copyWith(
-                status: CollectionStatus.error,
-                error: 'el recaudo debe ser igual al total'));
+              formSubmissionStatus: FormSubmissionStatus.failure,
+              error: 'el recaudo debe ser igual al total',
+            ));
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove != null && allowInsetsAbove == true)) {
           storageService.setBool('firmRequired', false);
           storageService.setBool('photoRequired', false);
-
           if (state.total != 0 &&
               state.total <= state.totalSummary!.toDouble()) {
             return add(
