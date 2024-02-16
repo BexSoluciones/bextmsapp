@@ -14,6 +14,7 @@ import '../../../domain/models/transaction_summary.dart';
 import '../../../domain/models/work.dart';
 import '../../../domain/models/account.dart';
 import '../../../domain/models/enterprise_config.dart';
+import '../../../domain/models/payment_account.dart';
 import '../../../domain/models/payment_efecty.dart';
 import '../../../domain/models/payment_transfer.dart';
 import '../../../domain/models/payment_multi_transfer.dart';
@@ -51,6 +52,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     on<CollectionPaymentTransferChanged>(_onPaymentTransferChanged);
     on<CollectionPaymentMultiTransferChanged>(_onPaymentMultiTransferChanged);
     on<CollectionPaymentDateChanged>(_onPaymentDateChanged);
+    on<CollectionPaymentAccountChanged>(_onPaymentAccountChanged);
     on<CollectionButtonPressed>(_onCollectionButtonPressed);
     on<CollectionConfirmTransaction>(_onConfirmTransaction);
     on<CollectionCloseModal>(_onCloseModal);
@@ -72,7 +74,8 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
       emit(state.copyWith(
           status: CollectionStatus.initial,
           formSubmissionStatus: FormSubmissionStatus.initial,
-          date: PaymentDate.create(DateFormat('yyyy-MM-dd').format(DateTime.now())),
+          date: PaymentDate.create(
+              DateFormat('yyyy-MM-dd').format(DateTime.now())),
           totalSummary: totalSummary,
           enterpriseConfig: storageService.getObject('config') != null
               ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
@@ -154,7 +157,8 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
-          if (state.total <= state.totalSummary!.toDouble() && state.total>0.0) {
+          if (state.total <= state.totalSummary!.toDouble() &&
+              state.total > 0.0) {
             storageService.setBool('firmRequired', false);
             storageService.setBool('photoRequired', false);
             add(CollectionConfirmTransaction(arguments: event.arguments));
@@ -173,7 +177,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           } else {
             emit(state.copyWith(
               formSubmissionStatus: FormSubmissionStatus.failure,
-              error:  'el recaudo debe ser igual o mayor al total',
+              error: 'el recaudo debe ser igual o mayor al total',
             ));
           }
         }
@@ -192,7 +196,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
       CollectionAddOrUpdatePayment event, Emitter<CollectionState> emit) async {
     if (event.index != null) {
       state.accounts![event.index!].paid = state.multiTransfer.value;
-      state.accounts![event.index!].account = state.account;
+      state.accounts![event.index!].account = state.account?.value;
       state.accounts![event.index!].date = state.date.value;
 
       emit(state.copyWith(
@@ -207,7 +211,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           state.accounts!.add(AccountPayment(
               paid: transferValue.toString(),
               type: 'transfer',
-              account: state.account,
+              account: state.account?.value,
               date: state.date.value));
         }
       }
@@ -239,7 +243,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
         totalSummary: state.totalSummary,
         enterpriseConfig: state.enterpriseConfig,
         date: PaymentDate.create(state.accounts![event.index].date!),
-        account: state.accounts![event.index].account,
+        account: PaymentAccount.create(state.accounts![event.index].account),
         multiTransfer:
             PaymentMultiTransfer.create(state.accounts![event.index].paid!)));
   }
@@ -294,7 +298,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
               paid: state.transfer.value,
               accountId: state.enterpriseConfig != null &&
                       state.enterpriseConfig!.specifiedAccountTransfer == true
-                  ? state.account!.id.toString()
+                  ? state.account!.value?.id.toString()
                   : null,
               date: state.enterpriseConfig != null &&
                       state.enterpriseConfig!.specifiedAccountTransfer == true
@@ -524,11 +528,21 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     Emitter<CollectionState> emit,
   ) async {
     try {
-
-      print(event.value);
-
       emit(state.copyWith(
-          transfer: PaymentTransfer.create(event.value),
+          date: PaymentDate.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
+    }
+  }
+
+  Future<void> _onPaymentAccountChanged(
+    CollectionPaymentAccountChanged event,
+    Emitter<CollectionState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(
+          account: PaymentAccount.create(event.value),
           formSubmissionStatus: FormSubmissionStatus.initial));
     } catch (error, stackTrace) {
       helperFunctions.handleException(error, stackTrace);

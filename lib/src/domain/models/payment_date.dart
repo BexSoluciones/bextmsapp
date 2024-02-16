@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:validators/validators.dart';
 
 class PaymentDate extends Equatable {
   final String value;
@@ -12,6 +13,11 @@ class PaymentDate extends Equatable {
   });
 
   factory PaymentDate.create(String value) {
+
+    if(!isDate(value)){
+      print('no es una fecha');
+      return PaymentDate(value: value, errorMessage: 'Fecha inválida', hasError: true);
+    }
 
     return PaymentDate(value: value, errorMessage: '', hasError: false);
   }

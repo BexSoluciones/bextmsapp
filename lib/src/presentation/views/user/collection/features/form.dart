@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 //blocs
 import '../../../../blocs/collection/collection_bloc.dart';
-import '../../../../blocs/account/account_bloc.dart';
-
 //utils
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/nums.dart';
 import '../../../../../utils/constants/strings.dart';
 //domain
-import '../../../../../domain/models/account.dart';
 import '../../../../../domain/abstracts/format_abstract.dart';
 //widgets
 import '../../../../widgets/default_button_widget.dart';
@@ -227,81 +224,7 @@ class _FormCollectionState extends State<FormCollection>
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
-                          ? BlocBuilder<AccountBloc, AccountState>(
-                              builder: (context, accountBlocState) {
-                                if (accountBlocState is AccountLoadingState) {
-                                  return const CircularProgressIndicator();
-                                } else if (accountBlocState
-                                    is AccountLoadedState) {
-                                  return DropdownButtonFormField<Account>(
-                                    itemHeight: null,
-                                    isExpanded: true,
-                                    value: accountBlocState.accounts.first,
-                                    onChanged: (Account? newValue) {
-                                      // widget.collectionCubit.selectedAccount =
-                                      //     newValue;
-                                      // setState(() {});
-                                    },
-                                    decoration: const InputDecoration(
-                                      contentPadding:
-                                          EdgeInsets.symmetric(horizontal: 10),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.grey, width: 2.0),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: kPrimaryColor, width: 2.0),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: kPrimaryColor, width: 2.0),
-                                      ),
-                                      hintStyle: TextStyle(
-                                        color: Colors.orange,
-                                      ),
-                                    ),
-                                    style: const TextStyle(
-                                      // fontSize: 10,
-                                      color: kPrimaryColor,
-                                    ),
-                                    dropdownColor: Colors.white,
-                                    validator: (value) {
-                                      // if (widget
-                                      //         .collectionCubit
-                                      //         .transferController
-                                      //         .text
-                                      //         .isNotEmpty &&
-                                      //     value!.id == 0) {
-                                      //   return 'Selecciona una opción válida';
-                                      // }
-                                      return null;
-                                    },
-                                    items: accountBlocState.accounts
-                                        .map((Account value) {
-                                      return DropdownMenuItem<Account>(
-                                        value: value,
-                                        child: Text(
-                                          value.accountNumber != null
-                                              ? '${value.name} - ${value.accountNumber}'
-                                              : value.name!,
-                                          overflow: TextOverflow.visible,
-                                          style: const TextStyle(
-                                              color: Colors.black),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  );
-                                } else if (accountBlocState
-                                    is AccountErrorState) {
-                                  return Text(
-                                      'Error: ${accountBlocState.error}');
-                                } else {
-                                  return const Text(
-                                      'No se han cargado datos aún.');
-                                }
-                              },
-                            )
+                          ? const PaymentAccountsInputField()
                           : const SizedBox();
                     }),
                 const SizedBox(height: 10),

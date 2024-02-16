@@ -153,7 +153,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                           onPressed: () => widget.collectionBloc.add(
                               CollectionNavigate(
                                   route: AppRoutes.codeQr,
-                                  arguments: widget.state.account!.codeQr))),
+                                  arguments: widget.state.account!.value?.codeQr))),
                     ],
                   )
                 ],
@@ -166,7 +166,7 @@ class _AccountsCollectionState extends State<AccountsCollection>
                     return DropdownButtonFormField<Account>(
                       itemHeight: null,
                       isExpanded: true,
-                      value: widget.state.account ??
+                      value: widget.state.account?.value ??
                           accountBlocState.accounts.first,
                       onChanged: (Account? newValue) {
                         // widget.state.account = newValue;

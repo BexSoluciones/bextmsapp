@@ -40,6 +40,11 @@ class CollectionPaymentDateChanged extends CollectionEvent {
   CollectionPaymentDateChanged({required this.value});
 }
 
+class CollectionPaymentAccountChanged extends CollectionEvent {
+  final Account value;
+  CollectionPaymentAccountChanged({required this.value});
+}
+
 class CollectionButtonPressed extends CollectionEvent {
   final InventoryArgument arguments;
   CollectionButtonPressed({ required this.arguments });

@@ -6,15 +6,18 @@ Widget textField({
   required BuildContext context,
   Function(String)? onChanged,
   Function()? onTap,
+  Key? key,
   String? initialValue,
   String? prefixText,
   String? errorText,
   TextInputType? keyBoardType,
-  bool? showCursor
+  bool? readOnly
 }) {
   return TextFormField(
+    key: key,
     initialValue: initialValue,
-    showCursor: showCursor,
+    readOnly: readOnly ?? false,
+    autofocus: false,
     decoration: InputDecoration(
       prefixText: prefixText,
       errorText: errorText,

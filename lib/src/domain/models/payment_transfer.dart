@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:validators/validators.dart';
 
 class PaymentTransfer extends Equatable {
   final String value;
@@ -13,11 +12,15 @@ class PaymentTransfer extends Equatable {
   });
 
   factory PaymentTransfer.create(String value) {
-    if (isDate(value)) {
+    if (value.startsWith('.') || value.endsWith('.')) {
       return PaymentTransfer(
-          value: value, errorMessage: 'fecha no válido', hasError: true);
+          value: value, errorMessage: 'valor no válido', hasError: true);
     }
 
+    if (value.contains(',')) {
+      return PaymentTransfer(
+          value: value, errorMessage: 'no debe contener comas', hasError: true);
+    }
     return PaymentTransfer(value: value, errorMessage: '', hasError: false);
   }
 
