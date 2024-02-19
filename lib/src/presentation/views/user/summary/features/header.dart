@@ -42,7 +42,8 @@ class HeaderSummary extends StatelessWidget {
                 buildWhatsAppShowcase(arguments.work, two, context),
                 buildMapShowcase(context, arguments.work, three),
                 BlocSelector<SummaryCubit, SummaryState, bool>(
-                    selector: (state) => state.summaries.isNotEmpty,
+                    selector: (state) => (state is SummarySuccess ||
+                        state is SummaryFailed) && state.summaries.isNotEmpty,
                     builder: (context, x) {
                       return x
                           ? buildPublishShowcase(

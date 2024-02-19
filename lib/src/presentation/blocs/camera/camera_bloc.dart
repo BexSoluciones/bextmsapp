@@ -115,6 +115,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     try {
       final picker = ImagePicker();
       final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+
       if (pickedImage != null) {
         final cacheDirectory = await getTemporaryDirectory();
         final imageCount = await countImagesInCache();
