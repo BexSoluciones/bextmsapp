@@ -93,12 +93,13 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
 
   Widget buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionBloc, CollectionState>(
-      buildWhen: (previous, current) {
-        print('***********');
-        print(previous.status);
-        print(current.status);
-        return previous.toString() != current.toString();
-      },
+      // buildWhen: (previous, current) {
+      //   print('***********');
+      //   print(previous.status);
+      //   print(current.status);
+      //   return previous.toString() != current.toString();
+      // },
+      listenWhen: (previous, current) => previous.status != current.status,
       listener: buildBlocListener,
       builder: (context, state) {
         if (state.status == CollectionStatus.loading) {
@@ -106,7 +107,9 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
         } else if (state.canRenderView()) {
           return _buildCollection(size, state);
         } else {
-          return const SizedBox();
+          return Center(
+            child: Text(state.status.toString()),
+          );
         }
       },
     );
@@ -116,8 +119,8 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
     if (state.status == CollectionStatus.success &&
         state.formSubmissionStatus == FormSubmissionStatus.success) {
       if (state.isLastTransaction == true) {
-        collectionBloc
-            .add(CollectionNavigate(route: AppRoutes.home, arguments: 'collection'));
+        collectionBloc.add(
+            CollectionNavigate(route: AppRoutes.home, arguments: 'collection'));
       } else if (state.validate == true) {
         collectionBloc.add(CollectionNavigate(
             route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));

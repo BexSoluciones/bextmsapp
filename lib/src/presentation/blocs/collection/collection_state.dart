@@ -137,6 +137,7 @@ class CollectionState extends Equatable {
       status == CollectionStatus.initial ||
       status == CollectionStatus.success ||
       status == CollectionStatus.navigate ||
+      status == CollectionStatus.back ||
       status == CollectionStatus.error;
 
   bool get isValid => !efecty.hasError && !transfer.hasError;
