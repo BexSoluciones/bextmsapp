@@ -183,6 +183,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     emit(const SummaryLoading());
 
     var currentLocation = gpsBloc.state.lastKnownLocation;
+    currentLocation ??= gpsBloc.lastRecordedLocation;
 
     transaction.latitude = currentLocation!.latitude.toString();
     transaction.longitude = currentLocation.longitude.toString();
@@ -196,8 +197,6 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     final enterpriseConfig = storageService.getObject('config') != null
         ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
         : null;
-
-    logDebug(headerSummaryLogger, enterpriseConfig.toString());
 
     if (enterpriseConfig != null &&
         enterpriseConfig.fixedDeliveryDistance == true) {

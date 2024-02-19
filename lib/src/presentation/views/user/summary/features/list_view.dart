@@ -1,11 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image/image.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //cubit
-import '../../../../../domain/models/summary.dart';
 import '../../../../cubits/summary/summary_cubit.dart';
 
 //domain
@@ -100,6 +98,7 @@ class ListViewSummaryState extends State<ListViewSummary> with FormatDate {
                 buildWhen: (previous, current) {
                   return (current is SummarySuccess ||
                           current is SummaryFailed) &&
+                      previous.summaries.isNotEmpty &&
                       previous.summaries[index] != current.summaries[index];
                 },
                 key: ValueKey(index),

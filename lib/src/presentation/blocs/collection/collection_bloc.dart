@@ -46,8 +46,8 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
       this.gpsBloc, this.storageService, this.navigationService)
       : super(const CollectionState()) {
     on<CollectionLoading>(_getCollection);
-    on<CollectionNavigate>(_navigate);
-    on<CollectionBack>(_back);
+    on<CollectionNavigate>(_onNavigate);
+    on<CollectionBack>(_onBack);
     on<CollectionPaymentEfectyChanged>(_onPaymentEfectyChanged);
     on<CollectionPaymentEfectyClear>(_onPaymentEfectyClear);
     on<CollectionPaymentTransferChanged>(_onPaymentTransferChanged);
@@ -75,6 +75,9 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
       var totalSummary = await databaseRepository.getTotalSummaries(
           event.workId, event.orderNumber);
 
+      print('************');
+      print(totalSummary);
+
       emit(state.copyWith(
           status: CollectionStatus.initial,
           formSubmissionStatus: FormSubmissionStatus.initial,
@@ -92,7 +95,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     }
   }
 
-  Future<void> _navigate(
+  Future<void> _onNavigate(
     CollectionNavigate event,
     Emitter<CollectionState> emit,
   ) async {
@@ -100,7 +103,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     navigationService.goTo(event.route, arguments: event.arguments);
   }
 
-  Future<void> _back(
+  Future<void> _onBack(
     CollectionBack event,
     Emitter<CollectionState> emit,
   ) async {
@@ -154,7 +157,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           storageService.setBool('firmRequired', false);
           storageService.setBool('photoRequired', false);
           if (state.total != 0 &&
-              state.total <= state.totalSummary!.toDouble()) {
+              state.total <= state.totalSummary.toDouble()) {
             return add(
                 CollectionConfirmTransaction(arguments: event.arguments));
           } else {
@@ -162,7 +165,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           }
         } else if ((allowInsetsBelow != null && allowInsetsBelow == true) &&
             (allowInsetsAbove == null || allowInsetsAbove == false)) {
-          if (state.total <= state.totalSummary!.toDouble() &&
+          if (state.total <= state.totalSummary.toDouble() &&
               state.total > 0.0) {
             storageService.setBool('firmRequired', false);
             storageService.setBool('photoRequired', false);
@@ -175,7 +178,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           }
         } else if ((allowInsetsBelow == null || allowInsetsBelow == false) &&
             (allowInsetsAbove != null && allowInsetsAbove == true)) {
-          if (state.total >= state.totalSummary!.toDouble()) {
+          if (state.total >= state.totalSummary.toDouble()) {
             storageService.setBool('firmRequired', false);
             storageService.setBool('photoRequired', false);
             emit(state.copyWith(status: CollectionStatus.waiting));

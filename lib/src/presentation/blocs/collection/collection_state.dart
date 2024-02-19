@@ -20,7 +20,7 @@ enum FormSubmissionStatus {
 class CollectionState extends Equatable {
   final CollectionStatus status;
 
-  final double? totalSummary;
+  final double totalSummary;
   final double total;
   final EnterpriseConfig? enterpriseConfig;
   final Work? work;
@@ -47,7 +47,7 @@ class CollectionState extends Equatable {
 
   const CollectionState(
       {this.status = CollectionStatus.initial,
-      this.totalSummary,
+      this.totalSummary = 0,
       this.total = 0,
       this.enterpriseConfig,
       this.work,

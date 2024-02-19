@@ -19,15 +19,14 @@ final NavigationService _navigationService = locator<NavigationService>();
 
 class BottomBarInventory extends StatefulWidget {
   const BottomBarInventory(
-      {Key? key,
+      {super.key,
       required this.myContext,
       required this.arguments,
       required this.totalSummaries,
       required this.four,
       required this.isArrived,
       required this.isPartial,
-      required this.isRejected})
-      : super(key: key);
+      required this.isRejected});
 
   final BuildContext myContext;
   final InventoryArgument arguments;
@@ -72,7 +71,6 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
   }
 
   Widget _buildBottomBarNavigation() {
-    final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(14);
 
     return BlocBuilder<InventoryCubit, InventoryState>(
@@ -89,7 +87,6 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                   children: <Widget>[
                     const Icon(Icons.cancel_outlined, color: kPrimaryColor),
                     Text('Rechazado',
-                        textScaleFactor: calculatedTextScaleFactor,
                         style: TextStyle(fontSize: calculatedFon)),
                   ],
                 ),
@@ -105,13 +102,12 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                 arguments: widget.arguments),
             child: Padding(
               padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.01),
-              child: Column(
+              child: const Column(
                 children: <Widget>[
-                  const Icon(Icons.all_inbox_outlined, color: kPrimaryColor),
+                  Icon(Icons.all_inbox_outlined, color: kPrimaryColor),
                   Text(
                     'Parcial',
-                    textScaleFactor: calculatedTextScaleFactor,
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14),
                   ),
                 ],
               ),

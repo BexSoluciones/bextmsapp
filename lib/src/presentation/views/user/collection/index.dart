@@ -94,6 +94,9 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   Widget buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionBloc, CollectionState>(
       buildWhen: (previous, current) {
+        print('***********');
+        print(previous.status);
+        print(current.status);
         return previous.toString() != current.toString();
       },
       listener: buildBlocListener,
@@ -150,7 +153,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
               id: widget.arguments.work.id!,
               orderNumber: widget.arguments.summary.orderNumber,
               total: state.total,
-              totalSummary: state.totalSummary!.toDouble(),
+              totalSummary: state.totalSummary.toDouble(),
               arguments: widget.arguments,
               context: context,
             );
@@ -167,7 +170,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
         child: Column(children: [
           HeaderCollection(
               type: widget.arguments.summary.typeOfCharge!,
-              total: state.totalSummary ?? 0.0),
+              total: state.totalSummary),
           SizedBox(height: size.height * 0.02),
           FormCollection(
               formKey: _formKey,
