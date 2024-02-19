@@ -114,7 +114,7 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
         state.formSubmissionStatus == FormSubmissionStatus.success) {
       if (state.isLastTransaction == true) {
         collectionBloc
-            .add(CollectionNavigate(route: AppRoutes.home, arguments: null));
+            .add(CollectionNavigate(route: AppRoutes.home, arguments: 'collection'));
       } else if (state.validate == true) {
         collectionBloc.add(CollectionNavigate(
             route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));

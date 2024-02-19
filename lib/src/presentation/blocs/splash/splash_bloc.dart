@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'package:bexdeliveries/src/services/navigation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-
-//service
-import '../../../locator.dart';
-import '../../../services/storage.dart';
+//utils
 import '../../../utils/constants/strings.dart';
+//service
+import '../../../services/storage.dart';
+import '../../../services/navigation.dart';
 
 part 'splash_event.dart';
 part 'splash_state.dart';

@@ -305,7 +305,7 @@ class LoginCubit extends BaseCubit<LoginState, Login?> with FormatDate {
   }
 
   void goToHome() {
-    navigationService.replaceTo(AppRoutes.home);
+    navigationService.replaceTo(AppRoutes.home, arguments: 'login');
   }
 
   void goToCompany() {
