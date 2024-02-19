@@ -535,6 +535,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
         emit(state.copyWith(
             total: state.total - int.parse(state.efecty.value),
             efecty: PaymentEfecty.empty,
+            keyEfecty: state.keyEfecty + 1,
             formSubmissionStatus: FormSubmissionStatus.initial));
       }
     } catch (error, stackTrace) {
@@ -577,6 +578,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
         emit(state.copyWith(
             total: state.total - int.parse(state.transfer.value),
             transfer: PaymentTransfer.empty,
+            keyTransfer: state.keyTransfer + 1,
             formSubmissionStatus: FormSubmissionStatus.initial));
       }
     } catch (error, stackTrace) {

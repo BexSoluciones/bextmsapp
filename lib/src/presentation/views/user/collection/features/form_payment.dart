@@ -25,6 +25,7 @@ class PaymentEfectyInputField extends StatelessWidget with FormatNumber {
             return current.efecty != previous.efecty;
           },
           builder: (context, state) => textField(
+                key: Key("efecty_${state.keyEfecty}"),
                 initialValue: state.efecty.value,
                 context: context,
                 prefixText: currency,
@@ -49,6 +50,7 @@ class PaymentTransferInputField extends StatelessWidget with FormatNumber {
           buildWhen: (previous, current) =>
               current.transfer != previous.transfer,
           builder: (context, state) => textField(
+                key: Key(state.transfer.value),
                 initialValue: state.transfer.value,
                 context: context,
                 onChanged: (transfer) => context

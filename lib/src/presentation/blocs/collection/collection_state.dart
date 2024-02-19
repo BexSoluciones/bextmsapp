@@ -27,7 +27,9 @@ class CollectionState extends Equatable {
   final String? error;
   //NORMAL TRANSACTION
   final PaymentEfecty efecty;
+  final int keyEfecty;
   final PaymentTransfer transfer;
+  final int keyTransfer;
   final PaymentDate date;
   final PaymentMultiTransfer multiTransfer;
 
@@ -50,7 +52,9 @@ class CollectionState extends Equatable {
       this.enterpriseConfig,
       this.work,
       this.efecty = PaymentEfecty.empty,
+      this.keyEfecty = 0,
       this.transfer = PaymentTransfer.empty,
+      this.keyTransfer = 0,
       this.multiTransfer = PaymentMultiTransfer.empty,
       this.date = PaymentDate.empty,
       this.accounts,
@@ -69,7 +73,9 @@ class CollectionState extends Equatable {
           EnterpriseConfig? enterpriseConfig,
           Work? work,
           PaymentEfecty? efecty,
+          int? keyEfecty,
           PaymentTransfer? transfer,
+          int? keyTransfer,
           PaymentDate? date,
           PaymentMultiTransfer? multiTransfer,
           List<AccountPayment>? accounts,
@@ -87,7 +93,9 @@ class CollectionState extends Equatable {
         enterpriseConfig: enterpriseConfig ?? this.enterpriseConfig,
         work: work ?? this.work,
         efecty: efecty ?? this.efecty,
+        keyEfecty: keyEfecty ?? this.keyEfecty,
         transfer: transfer ?? this.transfer,
+        keyTransfer: keyTransfer ?? this.keyTransfer,
         multiTransfer: multiTransfer ?? this.multiTransfer,
         date: date ?? this.date,
         accounts: accounts ?? this.accounts,
