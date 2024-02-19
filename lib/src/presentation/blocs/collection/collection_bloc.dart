@@ -49,11 +49,12 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     on<CollectionNavigate>(_navigate);
     on<CollectionBack>(_back);
     on<CollectionPaymentEfectyChanged>(_onPaymentEfectyChanged);
+    on<CollectionPaymentEfectyClear>(_onPaymentEfectyClear);
     on<CollectionPaymentTransferChanged>(_onPaymentTransferChanged);
+    on<CollectionPaymentTransferClear>(_onPaymentTransferClear);
     on<CollectionPaymentMultiTransferChanged>(_onPaymentMultiTransferChanged);
     on<CollectionPaymentDateChanged>(_onPaymentDateChanged);
     on<CollectionPaymentAccountChanged>(_onPaymentAccountChanged);
-    on<CollectionTotalChanged>(_onTotalChanged);
     on<CollectionButtonPressed>(_onCollectionButtonPressed);
     on<CollectionConfirmTransaction>(_onConfirmTransaction);
     on<CollectionCloseModal>(_onCloseModal);
@@ -258,7 +259,6 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
       CollectionRemovePayment event, Emitter<CollectionState> emit) async {
     state.accounts?.remove(event.payment);
 
-    print(event.value);
     emit(state.copyWith(
       total: state.total - event.value,
       accounts: state.accounts,
@@ -526,6 +526,20 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     }
   }
 
+  Future<void> _onPaymentEfectyClear(
+    CollectionPaymentEfectyClear event,
+    Emitter<CollectionState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(
+          total: state.total - int.parse(state.efecty.value),
+          efecty: PaymentEfecty.empty,
+          formSubmissionStatus: FormSubmissionStatus.initial));
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
+    }
+  }
+
   Future<void> _onPaymentTransferChanged(
     CollectionPaymentTransferChanged event,
     Emitter<CollectionState> emit,
@@ -547,6 +561,20 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           state.transfer.value.isEmpty) {
         emit(state.copyWith(total: double.tryParse(state.efecty.value)!));
       }
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
+    }
+  }
+
+  Future<void> _onPaymentTransferClear(
+    CollectionPaymentTransferClear event,
+    Emitter<CollectionState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(
+          total: state.total - int.parse(state.efecty.value),
+          transfer: PaymentTransfer.empty,
+          formSubmissionStatus: FormSubmissionStatus.initial));
     } catch (error, stackTrace) {
       helperFunctions.handleException(error, stackTrace);
     }
@@ -585,19 +613,6 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     try {
       emit(state.copyWith(
           multiTransfer: PaymentMultiTransfer.create(event.value),
-          formSubmissionStatus: FormSubmissionStatus.initial));
-    } catch (error, stackTrace) {
-      helperFunctions.handleException(error, stackTrace);
-    }
-  }
-
-  Future<void> _onTotalChanged(
-      CollectionTotalChanged event,
-      Emitter<CollectionState> emit,
-      ) async {
-    try {
-      emit(state.copyWith(
-          total: event.value,
           formSubmissionStatus: FormSubmissionStatus.initial));
     } catch (error, stackTrace) {
       helperFunctions.handleException(error, stackTrace);

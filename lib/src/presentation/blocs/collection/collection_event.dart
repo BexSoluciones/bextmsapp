@@ -25,10 +25,14 @@ class CollectionPaymentEfectyChanged extends CollectionEvent {
   CollectionPaymentEfectyChanged({required this.value});
 }
 
+class CollectionPaymentEfectyClear extends CollectionEvent {}
+
 class CollectionPaymentTransferChanged extends CollectionEvent {
   final String value;
   CollectionPaymentTransferChanged({required this.value});
 }
+
+class CollectionPaymentTransferClear extends CollectionEvent {}
 
 class CollectionPaymentMultiTransferChanged extends CollectionEvent {
   final String value;
@@ -43,11 +47,6 @@ class CollectionPaymentDateChanged extends CollectionEvent {
 class CollectionPaymentAccountChanged extends CollectionEvent {
   final Account value;
   CollectionPaymentAccountChanged({required this.value});
-}
-
-class CollectionTotalChanged extends CollectionEvent {
-  final double value;
-  CollectionTotalChanged({required this.value});
 }
 
 class CollectionButtonPressed extends CollectionEvent {

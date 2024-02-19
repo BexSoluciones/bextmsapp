@@ -25,6 +25,9 @@ class PaymentEfectyInputField extends StatelessWidget with FormatNumber {
                     .read<CollectionBloc>()
                     .add(CollectionPaymentEfectyChanged(value: efecty)),
                 keyBoardType: TextInputType.number,
+                onClear: () => context
+                    .read<CollectionBloc>()
+                    .add(CollectionPaymentEfectyClear()),
                 errorText:
                     state.efecty.hasError ? state.efecty.errorMessage : null,
               ));

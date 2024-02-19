@@ -5,6 +5,7 @@ import '../../utils/constants/colors.dart';
 Widget textField({
   required BuildContext context,
   Function(String)? onChanged,
+  Function()? onClear,
   Function()? onTap,
   Key? key,
   String? initialValue,
