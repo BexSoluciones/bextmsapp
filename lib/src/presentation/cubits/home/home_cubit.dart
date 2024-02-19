@@ -337,6 +337,49 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
     }
   }
 
+  Future<void> forceLogout() async {
+    if (_isLoggingOut) return;
+    try {
+      _isLoggingOut = true;
+      emit(state.copyWith(status: HomeStatus.loading));
+
+      if (networkBloc.state is NetworkSuccess) {
+        var processingQueueWork = ProcessingQueue(
+            body: null,
+            task: 'incomplete',
+            code: 'post_logout',
+            createdAt: now(),
+            updatedAt: now());
+
+        _processingQueueBloc
+            .add(ProcessingQueueAdd(processingQueue: processingQueueWork));
+
+        await _databaseRepository.emptyWorks();
+        await _databaseRepository.emptySummaries();
+        await _databaseRepository.emptyTransactions();
+        await _databaseRepository.emptyReasons();
+        // await _databaseRepository.emptyNotes();
+        storageService.remove('user');
+        storageService.remove('token');
+        storageService.remove('can_make_history');
+
+        emit(state.copyWith(status: HomeStatus.success));
+        _isLoggingOut = false;
+        await navigationService.goTo(AppRoutes.login);
+      } else {
+        emit(state.copyWith(
+            status: HomeStatus.failure,
+            error: 'Porfavor conectate a internet para realizar esta accion'));
+        _isLoggingOut = false;
+      }
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
+      _isLoggingOut = false;
+    } finally {
+      _isLoggingOut = false;
+    }
+  }
+
   Future<void> logout() async {
     if (_isLoggingOut) return;
     try {
