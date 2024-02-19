@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 //models
 import '../../../../../domain/models/arguments.dart';
-import '../../../../../domain/models/summary.dart';
 
 //widgets
 import '../../../../widgets/showcase.dart';
@@ -48,13 +47,7 @@ class HeaderSummary extends StatelessWidget {
                       return x
                           ? buildPublishShowcase(
                               context,
-                              four,
-                              context
-                                  .read<SummaryCubit>()
-                                  .state
-                                  .summaries
-                                  .first
-                                  .id)
+                              four)
                           : const SizedBox();
                     })
               ],
