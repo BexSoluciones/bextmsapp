@@ -30,7 +30,8 @@ import 'features/search.dart';
 import 'features/sync.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  final String navigation;
+  const HomeView({super.key, required this.navigation });
 
   @override
   HomeViewState createState() => HomeViewState();

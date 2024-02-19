@@ -1,7 +1,4 @@
 //utils
-
-import 'package:bexdeliveries/src/domain/models/processing_queue.dart';
-
 import '../../../utils/constants/strings.dart';
 //router
 import '../route_type.dart';
