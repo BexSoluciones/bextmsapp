@@ -531,10 +531,12 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     Emitter<CollectionState> emit,
   ) async {
     try {
-      emit(state.copyWith(
-          total: state.total - int.parse(state.efecty.value),
-          efecty: PaymentEfecty.empty,
-          formSubmissionStatus: FormSubmissionStatus.initial));
+      if (state.efecty.value.isNotEmpty) {
+        emit(state.copyWith(
+            total: state.total - int.parse(state.efecty.value),
+            efecty: PaymentEfecty.empty,
+            formSubmissionStatus: FormSubmissionStatus.initial));
+      }
     } catch (error, stackTrace) {
       helperFunctions.handleException(error, stackTrace);
     }
@@ -571,10 +573,12 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     Emitter<CollectionState> emit,
   ) async {
     try {
-      emit(state.copyWith(
-          total: state.total - int.parse(state.efecty.value),
-          transfer: PaymentTransfer.empty,
-          formSubmissionStatus: FormSubmissionStatus.initial));
+      if (state.efecty.value.isNotEmpty) {
+        emit(state.copyWith(
+            total: state.total - int.parse(state.transfer.value),
+            transfer: PaymentTransfer.empty,
+            formSubmissionStatus: FormSubmissionStatus.initial));
+      }
     } catch (error, stackTrace) {
       helperFunctions.handleException(error, stackTrace);
     }

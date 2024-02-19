@@ -32,18 +32,7 @@ Widget textField({
         borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
       ),
       suffixIcon: IconButton(
-        onPressed: () {
-          // if (double.tryParse(widget
-          //         .collectionCubit.transferController.text) !=
-          //     null) {
-          //   widget.collectionCubit.total = widget
-          //           .collectionCubit.total -
-          //       double.parse(
-          //           widget.collectionCubit.cashController.text);
-          // }
-          // widget.collectionCubit.selectedAccounts.clear();
-          // widget.collectionCubit.cashController.clear();
-        },
+        onPressed: onClear,
         icon: const Icon(Icons.clear),
       ),
     ),
