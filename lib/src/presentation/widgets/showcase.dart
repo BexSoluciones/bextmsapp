@@ -145,18 +145,27 @@ Widget buildWhatsAppShowcase(Work work, GlobalKey two, BuildContext context) {
 }
 
 // Crear el Showcase para la opción "Publicar"
-Widget buildPublishShowcase(BuildContext context, GlobalKey four, int summaryId) {
-  return BuildShowcaseIconButton(
-    keys: four,
-    description: 'Reportar un problema',
-    iconData: Icons.warning_rounded,
-    onPressed: () {
-      final NavigationService navigationService = locator<NavigationService>();
-      final issuesBloc = BlocProvider.of<IssuesBloc>(context);
+Widget buildPublishShowcase(BuildContext context, GlobalKey four) {
+  return BlocBuilder<SummaryCubit, SummaryState>(
+    builder: (context, state) {
+      if (state is SummarySuccess && state.summaries.isNotEmpty) {
+        int summaryId = state.summaries.first.id;
+        return BuildShowcaseIconButton(
+          keys: four,
+          description: 'Reportar un problema',
+          iconData: Icons.warning_rounded,
+          onPressed: () {
+            final NavigationService navigationService = locator<NavigationService>();
+            final issuesBloc = BlocProvider.of<IssuesBloc>(context);
 
-      issuesBloc.add(GetIssuesList(
-          currentStatus: 'summary', workId: null, summaryId: summaryId));
-      navigationService.goTo(AppRoutes.issue);
+            issuesBloc.add(GetIssuesList(
+                currentStatus: 'summary', workId: null, summaryId: summaryId));
+            navigationService.goTo(AppRoutes.issue);
+          },
+        );
+      } else {
+        return const SizedBox();
+      }
     },
   );
 }
