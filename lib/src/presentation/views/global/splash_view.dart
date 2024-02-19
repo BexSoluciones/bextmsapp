@@ -44,7 +44,7 @@ class _SplashViewState extends State<SplashView> {
           child: BlocListener<SplashBloc, SplashState>(
             listener: (context, state) {
               if (state is Loaded) {
-                context.read<SplashBloc>().navigationService.goTo(state.route!);
+                context.read<SplashBloc>().navigationService.goTo(state.route!, arguments: state.arguments);
               }
             },
             child: const SplashScreenWidget(),

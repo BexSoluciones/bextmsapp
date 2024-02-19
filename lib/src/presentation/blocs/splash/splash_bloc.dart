@@ -29,7 +29,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         var company = storageService.getString('company');
 
         if (token != null) {
-          emit(const Loaded(route: AppRoutes.home));
+          emit(const Loaded(route: AppRoutes.home, arguments: 'splash'));
         } else if (company != null) {
           emit(const Loaded(route: AppRoutes.login));
         } else {
@@ -63,7 +63,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     var token = storageService.getString('token');
     var company = storageService.getString('company');
     if (token != null) {
-      yield const Loaded(route: AppRoutes.home);
+      yield const Loaded(route: AppRoutes.home, arguments: 'home');
     } else if (company != null) {
       yield const Loaded(route: AppRoutes.login);
     } else {

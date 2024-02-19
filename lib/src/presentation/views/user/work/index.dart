@@ -120,7 +120,8 @@ class WorkViewState extends State<WorkView>
                 leading: IconButton(
                   icon: Icon(Icons.arrow_back_ios_new,
                       color: Theme.of(context).colorScheme.primary),
-                  onPressed: () => workCubit.navigationService.replaceTo(AppRoutes.home),
+                  onPressed: () => workCubit.navigationService
+                      .replaceTo(AppRoutes.home, arguments: 'work'),
                 ),
                 actions: [
                   const IconConnection(),
@@ -141,7 +142,8 @@ class WorkViewState extends State<WorkView>
                           child: IconButton(
                               icon: const Icon(Icons.near_me),
                               onPressed: () async {
-                                await workCubit.navigationService.goTo(AppRoutes.navigation,
+                                await workCubit.navigationService.goTo(
+                                    AppRoutes.navigation,
                                     arguments: widget.arguments.work.workcode);
                               }))),
                   Showcase(
@@ -174,7 +176,8 @@ class WorkViewState extends State<WorkView>
                                     currentStatus: 'work',
                                     summaryId: null,
                                     workId: widget.arguments.work.id));
-                                await workCubit.navigationService.goTo(AppRoutes.issue);
+                                await workCubit.navigationService
+                                    .goTo(AppRoutes.issue);
                               }))),
                 ],
                 bottom: state.started
@@ -202,7 +205,8 @@ class WorkViewState extends State<WorkView>
                       visible: !state.started,
                       child: FloatingActionButton(
                         child: const Icon(Icons.play_arrow),
-                        onPressed: () => workCubit.navigationService.goTo(AppRoutes.confirm,
+                        onPressed: () => workCubit.navigationService.goTo(
+                            AppRoutes.confirm,
                             arguments: widget.arguments),
                       ))));
         }));
