@@ -17,7 +17,13 @@ class PaymentEfectyInputField extends StatelessWidget with FormatNumber {
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<CollectionBloc, CollectionState>(
-          buildWhen: (previous, current) => current.efecty != previous.efecty,
+          buildWhen: (previous, current) {
+            print('*************');
+            print(current.efecty);
+            print(previous.efecty);
+            print(current.efecty != previous.efecty);
+            return current.efecty != previous.efecty;
+          },
           builder: (context, state) => textField(
                 initialValue: state.efecty.value,
                 context: context,
