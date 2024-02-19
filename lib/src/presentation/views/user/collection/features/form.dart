@@ -169,7 +169,6 @@ class _FormCollectionState extends State<FormCollection>
                                       return AccountsCollection(
                                         orderNumber: widget.orderNumber,
                                         collectionBloc: widget.collectionBloc,
-                                        state: widget.state,
                                       );
                                     });
 

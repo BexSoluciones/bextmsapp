@@ -112,7 +112,10 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   void buildBlocListener(BuildContext context, CollectionState state) async {
     if (state.status == CollectionStatus.success &&
         state.formSubmissionStatus == FormSubmissionStatus.success) {
-      if (state.validate == true) {
+      if (state.isLastTransaction == true) {
+        collectionBloc
+            .add(CollectionNavigate(route: AppRoutes.home, arguments: null));
+      } else if (state.validate == true) {
         collectionBloc.add(CollectionNavigate(
             route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));
       } else if (!summariesLoaded && state.validate == false) {

@@ -11,7 +11,7 @@ class CollectionLoading extends CollectionEvent {
 class CollectionNavigate extends CollectionEvent {
   final String route;
   final dynamic arguments;
-  CollectionNavigate({ required this.route, required this.arguments });
+  CollectionNavigate({required this.route, required this.arguments});
 }
 
 class CollectionBack extends CollectionEvent {}
@@ -45,14 +45,19 @@ class CollectionPaymentAccountChanged extends CollectionEvent {
   CollectionPaymentAccountChanged({required this.value});
 }
 
+class CollectionTotalChanged extends CollectionEvent {
+  final double value;
+  CollectionTotalChanged({required this.value});
+}
+
 class CollectionButtonPressed extends CollectionEvent {
   final InventoryArgument arguments;
-  CollectionButtonPressed({ required this.arguments });
+  CollectionButtonPressed({required this.arguments});
 }
 
 class CollectionConfirmTransaction extends CollectionEvent {
   final InventoryArgument arguments;
-  CollectionConfirmTransaction({ required this.arguments });
+  CollectionConfirmTransaction({required this.arguments});
 }
 
 class CollectionAddOrUpdatePayment extends CollectionEvent {
@@ -65,7 +70,12 @@ class CollectionEditPaymentWithAccount extends CollectionEvent {
   CollectionEditPaymentWithAccount({required this.index});
 }
 
+class CollectionRemovePayment extends CollectionEvent {
+  final AccountPayment payment;
+  final double value;
+  CollectionRemovePayment({required this.payment, required this.value});
+}
+
 class CollectionError extends CollectionEvent {
   CollectionError();
 }
-

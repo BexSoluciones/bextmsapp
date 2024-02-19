@@ -298,23 +298,25 @@ class SummaryDao {
   Future<void> insertSummaries(List<Summary> summaries) async {
     final db = await _appDatabase.database;
 
-    var batch = db!.batch();
+    await db!.transaction((txn) async {
+      var batch = txn.batch();
 
-    if (summaries.isNotEmpty) {
-      await Future.forEach(summaries, (summary) async {
-        var d = await db
-            .query(tableSummaries, where: 'id = ?', whereArgs: [summary.id]);
-        var w = parseSummaries(d);
-        if (w.isEmpty) {
-          batch.insert(tableSummaries, summary.toJson());
-        } else {
-          batch.update(tableSummaries, summary.toJson(),
-              where: 'id = ?', whereArgs: [summary.id]);
-        }
-      });
-    }
+      if (summaries.isNotEmpty) {
+        await Future.forEach(summaries, (summary) async {
+          var d = await txn
+              .query(tableSummaries, where: 'id = ?', whereArgs: [summary.id]);
+          var w = parseSummaries(d);
+          if (w.isEmpty) {
+            batch.insert(tableSummaries, summary.toJson());
+          } else {
+            batch.update(tableSummaries, summary.toJson(),
+                where: 'id = ?', whereArgs: [summary.id]);
+          }
+        });
+      }
 
-    await batch.commit(noResult: true);
+      await batch.commit(noResult: true);
+    });
 
     return Future.value();
   }

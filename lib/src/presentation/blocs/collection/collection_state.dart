@@ -39,6 +39,7 @@ class CollectionState extends Equatable {
 
   //FINISH TRANSACTION
   final bool validate;
+  final bool isLastTransaction;
 
   final FormSubmissionStatus formSubmissionStatus;
 
@@ -57,6 +58,7 @@ class CollectionState extends Equatable {
       this.indexToEdit,
       this.isEditing,
       this.validate = false,
+      this.isLastTransaction = false,
       this.formSubmissionStatus = FormSubmissionStatus.initial,
       this.error});
 
@@ -75,6 +77,7 @@ class CollectionState extends Equatable {
           int? indexToEdit,
           bool? isEditing,
           bool? validate,
+          bool? isLastTransaction,
           FormSubmissionStatus? formSubmissionStatus,
           String? error}) =>
       CollectionState(
@@ -92,6 +95,7 @@ class CollectionState extends Equatable {
         indexToEdit: indexToEdit ?? this.indexToEdit,
         isEditing: isEditing ?? this.isEditing,
         validate: validate ?? this.validate,
+        isLastTransaction: isLastTransaction ?? this.isLastTransaction,
         formSubmissionStatus: formSubmissionStatus ?? this.formSubmissionStatus,
         error: error ?? this.error,
       );

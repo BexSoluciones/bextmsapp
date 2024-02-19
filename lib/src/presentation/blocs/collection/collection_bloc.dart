@@ -53,12 +53,15 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     on<CollectionPaymentMultiTransferChanged>(_onPaymentMultiTransferChanged);
     on<CollectionPaymentDateChanged>(_onPaymentDateChanged);
     on<CollectionPaymentAccountChanged>(_onPaymentAccountChanged);
+    on<CollectionTotalChanged>(_onTotalChanged);
     on<CollectionButtonPressed>(_onCollectionButtonPressed);
     on<CollectionConfirmTransaction>(_onConfirmTransaction);
     on<CollectionCloseModal>(_onCloseModal);
+    on<CollectionOpenModal>(_onOpenModal);
     on<CollectionAddOrUpdatePayment>(addOrUpdatePaymentWithAccount);
     on<CollectionEditPaymentWithAccount>(editPaymentWithAccount);
-    on<CollectionError>(error);
+    on<CollectionRemovePayment>(_onRemovePayment);
+    on<CollectionError>(_onError);
   }
 
   Future<void> _getCollection(
@@ -76,6 +79,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           formSubmissionStatus: FormSubmissionStatus.initial,
           date: PaymentDate.create(
               DateFormat('yyyy-MM-dd').format(DateTime.now())),
+          accounts: [],
           totalSummary: totalSummary,
           enterpriseConfig: storageService.getObject('config') != null
               ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
@@ -213,6 +217,8 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
               type: 'transfer',
               account: state.account?.value,
               date: state.date.value));
+
+          emit(state.copyWith(accounts: state.accounts));
         }
       }
     }
@@ -248,6 +254,19 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
             PaymentMultiTransfer.create(state.accounts![event.index].paid!)));
   }
 
+  Future<void> _onRemovePayment(
+      CollectionRemovePayment event, Emitter<CollectionState> emit) async {
+    state.accounts?.remove(event.payment);
+
+    print(event.value);
+    emit(state.copyWith(
+      total: state.total - event.value,
+      accounts: state.accounts,
+      totalSummary: state.totalSummary,
+      enterpriseConfig: state.enterpriseConfig,
+    ));
+  }
+
   void _onCloseModal(
       CollectionCloseModal event, Emitter<CollectionState> emit) async {
     emit(state.copyWith(
@@ -255,7 +274,13 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
         enterpriseConfig: state.enterpriseConfig));
   }
 
-  void error(CollectionError event, Emitter<CollectionState> emit) async {
+  void _onOpenModal(CollectionOpenModal event, Emitter<CollectionState> emit) {
+    emit(state.copyWith(
+        totalSummary: state.totalSummary,
+        enterpriseConfig: state.enterpriseConfig));
+  }
+
+  void _onError(CollectionError event, Emitter<CollectionState> emit) async {
     emit(state.copyWith(
         status: CollectionStatus.error,
         totalSummary: state.totalSummary,
@@ -424,6 +449,9 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           await helperFunctions
               .deleteFirm('firm-${event.arguments.summary.orderNumber}');
 
+          var isLastTransaction = await databaseRepository
+              .checkLastTransaction(event.arguments.work.workcode!);
+
           var v = await databaseRepository
               .validateTransaction(event.arguments.work.id!);
 
@@ -435,6 +463,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
               accounts: null,
               account: null,
               validate: v,
+              isLastTransaction: isLastTransaction,
               total: 0,
               work: event.arguments.work));
         }
@@ -556,6 +585,19 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
     try {
       emit(state.copyWith(
           multiTransfer: PaymentMultiTransfer.create(event.value),
+          formSubmissionStatus: FormSubmissionStatus.initial));
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
+    }
+  }
+
+  Future<void> _onTotalChanged(
+      CollectionTotalChanged event,
+      Emitter<CollectionState> emit,
+      ) async {
+    try {
+      emit(state.copyWith(
+          total: event.value,
           formSubmissionStatus: FormSubmissionStatus.initial));
     } catch (error, stackTrace) {
       helperFunctions.handleException(error, stackTrace);

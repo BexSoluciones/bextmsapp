@@ -55,20 +55,20 @@ class PaymentMultiTransferInputField extends StatelessWidget with FormatNumber {
   PaymentMultiTransferInputField({super.key});
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<CollectionBloc, CollectionState>(
-          buildWhen: (previous, current) =>
-              current.multiTransfer != previous.multiTransfer,
-          builder: (context, state) => textField(
-                context: context,
-                onChanged: (transfer) => context
-                    .read<CollectionBloc>()
-                    .add(CollectionPaymentTransferChanged(value: transfer)),
-                errorText: state.multiTransfer.hasError
-                    ? state.multiTransfer.errorMessage
-                    : null,
-                prefixText: currency,
-              ));
+  Widget build(BuildContext context) => BlocBuilder<CollectionBloc,
+          CollectionState>(
+      buildWhen: (previous, current) =>
+          current.multiTransfer != previous.multiTransfer,
+      builder: (context, state) => textField(
+            context: context,
+            onChanged: (multiTransfer) => context.read<CollectionBloc>().add(
+                CollectionPaymentMultiTransferChanged(value: multiTransfer)),
+            keyBoardType: TextInputType.number,
+            errorText: state.multiTransfer.hasError
+                ? state.multiTransfer.errorMessage
+                : null,
+            prefixText: currency,
+          ));
 }
 
 class PaymentAccountsInputField extends StatelessWidget {
