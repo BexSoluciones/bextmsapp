@@ -103,6 +103,7 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
     );
 
     var currentLocation = gpsBloc.state.lastKnownLocation;
+    currentLocation ??= gpsBloc.lastRecordedLocation;
 
     transaction.latitude = currentLocation!.latitude.toString();
     transaction.longitude = currentLocation.longitude.toString();
