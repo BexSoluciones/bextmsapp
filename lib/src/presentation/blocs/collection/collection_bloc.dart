@@ -344,6 +344,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
                 'No hay pagos para el recaudo que cumpla con las condiciones.'));
       } else {
         var currentLocation = gpsBloc.state.lastKnownLocation;
+        currentLocation ??= gpsBloc.lastRecordedLocation;
 
         String? firm;
         var firmApplication = await helperFunctions
