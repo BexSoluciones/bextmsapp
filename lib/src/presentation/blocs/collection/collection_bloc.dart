@@ -74,10 +74,6 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
 
       var totalSummary = await databaseRepository.getTotalSummaries(
           event.workId, event.orderNumber);
-
-      print('************');
-      print(totalSummary);
-
       emit(state.copyWith(
           status: CollectionStatus.initial,
           formSubmissionStatus: FormSubmissionStatus.initial,

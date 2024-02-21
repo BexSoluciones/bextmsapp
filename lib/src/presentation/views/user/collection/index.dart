@@ -94,12 +94,10 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   Widget buildBlocConsumer(Size size) {
     return BlocConsumer<CollectionBloc, CollectionState>(
       // buildWhen: (previous, current) {
-      //   print('***********');
-      //   print(previous.status);
-      //   print(current.status);
       //   return previous.toString() != current.toString();
       // },
-      listenWhen: (previous, current) => previous.status != current.status,
+      // listenWhen: (previous, current) =>
+      //     previous.status != current.status && current.error == null,
       listener: buildBlocListener,
       builder: (context, state) {
         if (state.status == CollectionStatus.loading) {

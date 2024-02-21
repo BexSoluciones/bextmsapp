@@ -16,6 +16,7 @@ import '../../../domain/repositories/database_repository.dart';
 
 //utils
 import '../../../utils/resources/camera.dart';
+import '../../../utils/constants/strings.dart';
 
 //services
 import '../../../services/navigation.dart';
@@ -197,9 +198,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraFolderToState(CameraFolder event, emit) {
-    emit(CameraCaptureFailure(
-        error: 'Temporalmente desabilitado'));
-    // navigationService.goTo(AppRoutes.photo, arguments: event.path);
+    navigationService.goTo(AppRoutes.photo);
     emit(CameraReady());
   }
 

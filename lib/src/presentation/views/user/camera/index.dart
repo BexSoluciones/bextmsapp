@@ -134,7 +134,7 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
           FloatingActionButton(
             backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
             heroTag: 'showPhotoBtn',
-            onPressed: () => BlocProvider.of<CameraBloc>(context).add(const CameraFolder(path: '')),
+            onPressed: () => BlocProvider.of<CameraBloc>(context).add(const CameraFolder()),
             child: _buildBadge(context),
           ),
           const SizedBox(width: 10),

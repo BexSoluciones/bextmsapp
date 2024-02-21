@@ -22,22 +22,12 @@ class PhotosBloc extends Bloc<PhotosEvent, PhotosState> {
     on<PhotosDeleted>(_mapPhotosDeletedToState);
   }
 
-  Future<void> getImageAll()async{
-    emit(PhotosLoadInProgress());
-    try {
-      final photos = await photoProvider.loadPhotos();
-      print(photos);
-      emit(PhotosLoadSuccess(photos: photos));
-    } on Exception catch (error) {
-      print(error);
-      emit(PhotosLoadFailure(error: error.toString()));
-    }
-  }
-
   _mapPhotosLoadedToState(PhotosLoaded event, emit) async {
     emit(PhotosLoadInProgress());
     try {
       final photos = await photoProvider.loadPhotos();
+      print('************');
+      print(photos.length);
       emit(PhotosLoadSuccess(photos: photos));
     } on Exception catch (error) {
       emit(PhotosLoadFailure(error: error.toString()));
