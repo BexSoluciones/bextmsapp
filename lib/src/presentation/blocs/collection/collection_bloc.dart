@@ -122,9 +122,9 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
         if (state.enterpriseConfig!.multipleAccounts == false &&
             state.enterpriseConfig!.specifiedAccountTransfer == true &&
             state.transfer.value.isNotEmpty &&
-            state.account == null) {
-          emit(state.copyWith(
-              status: CollectionStatus.error,
+            state.account == PaymentAccount.empty) {
+          return emit(state.copyWith(
+              formSubmissionStatus: FormSubmissionStatus.failure,
               error: 'Selecciona un numero de cuenta'));
         }
 

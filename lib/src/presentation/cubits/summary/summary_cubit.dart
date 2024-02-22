@@ -199,7 +199,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         : null;
 
     if (enterpriseConfig != null &&
-        enterpriseConfig.fixedDeliveryDistance == true) {
+        enterpriseConfig.requiredArrived == true) {
       var distanceInMeters = helperFunctions.calculateDistanceInMetersGeo(
           currentLocation,
           double.tryParse(work.latitude!)!,
@@ -219,8 +219,10 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
             summaries: summaries,
             origin: state.origin,
             time: state.time,
-            isArrived: true,
+            isArrived: false,
             isGeoReference: isGeoReferenced));
+
+        return;
       }
     }
 
