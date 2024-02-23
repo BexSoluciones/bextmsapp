@@ -437,10 +437,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
     await run(() async {
       try {
         emit(state.copyWith(status: HomeStatus.loading));
-
-        workmanagerService.registerPeriodicTask('task_home',
-            'get_works_completed_and_send', const Duration(minutes: 15));
-
+        workmanagerService.completeWorks(_databaseRepository, _apiRepository);
         emit(state.copyWith(status: HomeStatus.success));
       } catch (error, stackTrace) {
         helperFunctions.handleException(error, stackTrace);
