@@ -60,9 +60,23 @@ class HomeViewState extends State<HomeView>
     homeCubit.getUser();
     gpsBloc.add(OnStartFollowingUser());
 
+    if(widget.navigation == 'collection') {
+      Future.delayed(Duration.zero, () => homeCubit.schedule());
+    }
+
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
+
+  @override
+  void didChangeDependencies() {
+    if(widget.navigation == 'collection') {
+      Future.delayed(Duration.zero, () => homeCubit.schedule());
+    }
+    super.didChangeDependencies();
+  }
+
+
 
   @override
   void dispose() {

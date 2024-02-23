@@ -95,9 +95,14 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
         var validate =
             await databaseRepository.validateTransaction(arguments.work.id!);
 
+        var isLastTransaction = await databaseRepository
+            .checkLastTransaction(arguments.work.workcode!);
+
         emit(RejectSuccess(reasons: reasons));
 
-        if (validate == false) {
+        if (isLastTransaction == true) {
+          await navigationService.goTo(AppRoutes.home, arguments: 'collection');
+        } else if (validate == false) {
           await navigationService.goTo(AppRoutes.summary,
               arguments: SummaryArgument(work: arguments.work));
         } else {
