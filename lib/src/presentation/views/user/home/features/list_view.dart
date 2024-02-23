@@ -52,7 +52,6 @@ class _HomeListViewState extends State<HomeListView> {
 
   Widget buildBlocConsumer() {
     return BlocConsumer<HomeCubit, HomeState>(
-      // buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
       builder: (context, state) {
         if (state.status == HomeStatus.loading) {
