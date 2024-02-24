@@ -457,6 +457,11 @@ class AppDatabase {
     return db!.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 
+  Future<int> deleteIma(String table) async {
+    final db =  await instance.database;
+    return db!.delete(table);
+  }
+
   Future<bool> listenForTableChanges(
       String table, String column, String value) async {
     final db = await instance.database;
