@@ -347,7 +347,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
       bool isConnected = await checkConnection();
       if (isConnected) {
         return getStateOf<TransactionSummaryResponse>(
-          request: () => _apiService.product(request.transactionSummary),
+          request: () => _apiService.product(request.transactionSummary)
         );
       } else {
         final sendingData = jsonEncode(request.transactionSummary.toString());
@@ -422,12 +422,27 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }
 
   @override
-  Future<DataState<StatusResponse>> locations({
+  Future<DataState<StatusResponse>?> locations({
     required LocationsRequest request,
-  }) {
-    return getStateOf<StatusResponse>(
-      request: () => _apiService.locations(request),
-    );
+  }) async {
+    bool isConnected = await checkConnection();
+    if (isConnected) {
+      return getStateOf<StatusResponse>(
+        request: () => _apiService.locations(request),
+      );
+    } else {
+      final sendingData = jsonEncode(request);
+      workmanagerService.registerOneOffTask(
+        '1',
+        'store_locations',
+        {
+          'string': 'store_locations',
+          'array': sendingData,
+        },
+      );
+      return null;
+    }
+
   }
 
   @override

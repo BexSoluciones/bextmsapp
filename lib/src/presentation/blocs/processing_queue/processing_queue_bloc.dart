@@ -381,7 +381,7 @@ class ProcessingQueueBloc
               queue.task = 'done';
             } else {
               queue.task = 'error';
-              queue.error = response.error;
+              queue.error = response!.error;
             }
             await databaseRepository.updateProcessingQueue(queue);
           } catch (e, stackTrace) {
@@ -778,7 +778,7 @@ class ProcessingQueueBloc
             queue.task = 'done';
           } else {
             queue.task = 'error';
-            queue.error = response.error;
+            queue.error = response!.error;
           }
           await databaseRepository.updateProcessingQueue(queue);
         } catch (e, stackTrace) {

@@ -332,6 +332,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setupInteractedMessage(context);
     _fetchRemoteConfig();
     widget.databaseCubit.getDatabase();
+    // context.read<GpsBloc>().add(const GpsEnabled(isGpsEnabled: false));
+
 
     super.initState();
     WidgetsBinding.instance.addObserver(this);
