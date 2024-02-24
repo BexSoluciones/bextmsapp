@@ -182,26 +182,35 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
       BuildContext context, Work work, Transaction transaction) async {
     emit(const SummaryLoading());
 
-    var currentLocation = gpsBloc.state.lastKnownLocation;
-    currentLocation ??= gpsBloc.lastRecordedLocation;
-
-
-
-    transaction.latitude = currentLocation!.latitude.toString();
-    transaction.longitude = currentLocation.longitude.toString();
-
     final summaries =
         await databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
     var isGeoReferenced =
         await databaseRepository.validateClient(transaction.workId);
 
+    var currentLocation = gpsBloc.state.lastKnownLocation;
+    currentLocation ??= gpsBloc.lastRecordedLocation;
+
+    if (currentLocation == null) {
+      emit(SummaryFailed(
+          error:
+              'gps desabilitado o señal muy baja por favor cierre la app y vuelva a intentarlo',
+          summaries: summaries,
+          origin: state.origin,
+          time: state.time,
+          isArrived: false,
+          isGeoReference: isGeoReferenced));
+      return;
+    }
+
+    transaction.latitude = currentLocation.latitude.toString();
+    transaction.longitude = currentLocation.longitude.toString();
+
     final enterpriseConfig = storageService.getObject('config') != null
         ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
         : null;
 
-    if (enterpriseConfig != null &&
-        enterpriseConfig.requiredArrived == true) {
+    if (enterpriseConfig != null && enterpriseConfig.requiredArrived == true) {
       var distanceInMeters = helperFunctions.calculateDistanceInMetersGeo(
           currentLocation,
           double.tryParse(work.latitude!)!,
