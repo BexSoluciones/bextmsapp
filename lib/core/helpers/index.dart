@@ -252,16 +252,27 @@ class HelperFunctions with FormatDate {
     path = path.replaceFirst('app_flutter', '');
     var directory = Directory('$path/cache');
     if (directory.existsSync()) {
+      // Eliminar imágenes
       var imageList = directory
           .listSync()
-          .map((item) => item.path)
-          .where((item) => item.endsWith('.jpg') || item.endsWith('.png'))
+          .whereType<File>()
+          .where((file) =>
+      file.path.endsWith('.jpg') || file.path.endsWith('.png'))
           .toList(growable: false);
-      for (int index = 0; index < imageList.length; index++) {
-        var element = imageList[index];
-        var file = File(element);
-        await _databaseRepository.deleteAll(index + 1);
+      for (var file in imageList) {
+        await _databaseRepository.deleteAll(imageList.indexOf(file) + 1);
         await file.delete();
+      }
+      // Eliminar carpetas
+      var folderList = directory
+          .listSync()
+          .whereType<Directory>()
+          .where((folder) =>
+          RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+              .hasMatch(folder.path.split('/').last))
+          .toList(growable: false);
+      for (var folder in folderList) {
+        await folder.delete(recursive: true);
       }
     }
   }

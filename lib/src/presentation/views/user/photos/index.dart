@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -47,9 +49,15 @@ class PhotoViewState extends State<PhotoView> {
               itemCount: state.photos.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisSpacing: 10, mainAxisSpacing: 10, crossAxisCount: 2),
-              itemBuilder: (_, index) => PhotoCard(
-                    photo: state.photos[index],
-                  ));
+              itemBuilder: (_, index) {
+                final photo = state.photos[index];
+                final file = File(photo.path);
+                if (file.existsSync()) {
+                  return PhotoCard(photo: photo);
+                } else {
+                  return const SizedBox.shrink();
+                }
+              });
         } else if (state is PhotosLoadFailure) {
           return Error(key: MyPhotosKeys.errorScreen, message: state.error);
         } else {
@@ -58,15 +66,6 @@ class PhotoViewState extends State<PhotoView> {
           );
         }
       }),
-      // floatingActionButton: FloatingActionButton(
-      //   backgroundColor:
-      //       Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
-      //   onPressed: () => Navigator.pushNamed(context, AppRoutes.camera),
-      //   tooltip: 'Añadir',
-      //   child: const Icon(
-      //     Icons.add,
-      //   ),
-      // ),
     );
   }
 }

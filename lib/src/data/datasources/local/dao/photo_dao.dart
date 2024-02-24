@@ -45,7 +45,7 @@ class PhotoDao {
   }
 
   Future<int> deleteAll(int photoId){
-    return _appDatabase.delete(tablePhotos, 'id', photoId);
+    return _appDatabase.deleteIma(tablePhotos);
   }
 
   Future<void> insertPhotos(List<Photo> photos) async {
