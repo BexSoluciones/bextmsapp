@@ -28,7 +28,9 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
 
   final helperFunctions = HelperFunctions();
 
-  InventoryCubit(this.databaseRepository, this.storageService, this.navigationService) : super(const InventoryLoading());
+  InventoryCubit(
+      this.databaseRepository, this.storageService, this.navigationService)
+      : super(const InventoryState(status: InventoryStatus.loading));
 
   Future<void> getAllInventoryByOrderNumber(
       int validate, int workId, String orderNumber) async {
@@ -55,7 +57,8 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
     final isPartial = summaries.where((element) => element.minus > 0);
     final isRejected = summaries.where((element) => element.cant != 0);
 
-    return InventorySuccess(
+    return state.copyWith(
+        status: InventoryStatus.success,
         summaries: summaries,
         totalSummaries: totalSummaries,
         isArrived: isArrived,
@@ -71,7 +74,8 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
     emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
-  Future<void> minus(Summary summary, int validate, int workId, String orderNumber) async {
+  Future<void> minus(
+      Summary summary, int validate, int workId, String orderNumber) async {
     if (summary.cant > 0) {
       summary.minus++;
       summary.cant--;
@@ -126,6 +130,35 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
     }
     await databaseRepository.updateSummary(summary);
     emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
+  }
+
+  Future<void> onChangeQuantity(String? value) async {
+    if (value != null) {
+      var q = double.tryParse(value);
+      emit(state.copyWith(quantity: q));
+    }
+  }
+
+  Future<void> changeQuantity(
+      Summary summary, int validate, int workId, String orderNumber) async {
+    if (state.quantity != null &&
+        state.quantity! >= 0 &&
+        state.quantity! <
+            (double.parse(summary.amount) /
+                double.parse(summary.unitOfMeasurement))) {
+      summary.cant = state.quantity!;
+
+      summary.minus = (double.parse(summary.amount) ~/
+                  double.parse(summary.unitOfMeasurement) -
+              state.quantity!)
+          .toInt();
+
+      summary.grandTotal = summary.price *
+          summary.cant *
+          double.parse(summary.unitOfMeasurement);
+
+      emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
+    }
   }
 
   void goToPackage(PackageArgument argument) =>

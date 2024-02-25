@@ -42,10 +42,10 @@ class ListViewInventoryState extends State<ListViewInventory> {
     final size = MediaQuery.of(context).size;
 
     return BlocBuilder<InventoryCubit, InventoryState>(builder: (context, state) {
-      switch (state.runtimeType) {
-        case InventoryLoading:
+      switch (state.status) {
+        case InventoryStatus.loading:
           return const SliverToBoxAdapter(child: Center(child:CupertinoActivityIndicator()));
-        case InventorySuccess:
+        case InventoryStatus.success:
           return _buildInventory(state, size);
         default:
           return const SliverToBoxAdapter();

@@ -59,7 +59,7 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
   Widget build(BuildContext context) {
     return BlocSelector<InventoryCubit, InventoryState, bool>(
         selector: (state) {
-      return state is InventorySuccess && state.isArrived == true;
+      return state.status == InventoryStatus.success && state.isArrived == true;
     }, builder: (c, x) {
       return x
           ? _buildBottomBarNavigation()
