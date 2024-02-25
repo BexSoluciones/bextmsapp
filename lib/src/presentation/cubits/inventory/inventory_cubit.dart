@@ -156,7 +156,7 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
       summary.grandTotal = summary.price *
           summary.cant *
           double.parse(summary.unitOfMeasurement);
-
+      await databaseRepository.updateSummary(summary);
       emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
     }
   }

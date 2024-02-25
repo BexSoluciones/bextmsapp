@@ -90,48 +90,59 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
 
   changeCant() {
     return BlocBuilder<InventoryCubit, InventoryState>(
-      builder: (context, state) {
-        return AlertDialog(
-          title: const Text('Cambiar la cantidad'),
-          content: Column(mainAxisSize: MainAxisSize.min, children: [
-            Form(
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    TextFormField(
-                      initialValue: state.quantity?.toString(),
-                      decoration: const InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey, width: 2.0),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-                        ),
+        builder: (context, state) {
+      return AlertDialog(
+        title: const Text('Cambiar la cantidad'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          Form(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  TextFormField(
+                    initialValue: state.quantity?.toString(),
+                    decoration: const InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey, width: 2.0),
                       ),
-                      onChanged: (value) => inventoryCubit.onChangeQuantity(value),
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly
-                      ], // Only numbers can be entered
-                    )
-                  ],
-                ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: kPrimaryColor, width: 2.0),
+                      ),
+                    ),
+                    onChanged: (value) =>
+                        inventoryCubit.onChangeQuantity(value),
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
+                    ], // Only numbers can be entered
+                  )
+                ],
               ),
-            )
-          ]),
-          actions: [
-            TextButton(
-                child: const Text('Aceptar'),
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                }),
-          ],
-        );
-      }
-    );
+            ),
+          )
+        ]),
+        actions: [
+          TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+              }),
+          TextButton(
+              child: const Text('Aceptar'),
+              onPressed: () async {
+                inventoryCubit.changeQuantity(
+                    widget.summary,
+                    widget.arguments.summary.validate!,
+                    widget.arguments.work.id!,
+                    widget.arguments.summary.orderNumber);
+                Navigator.of(context).pop();
+              })
+        ],
+      );
+    });
   }
 
   @override
