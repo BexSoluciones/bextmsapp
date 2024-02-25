@@ -200,6 +200,26 @@ class WorkmanagerService with FormatDate {
             helperFunction.handleException(error, stackTrace);
             return Future.value(false);
           }
+        case 'transaction_product':
+          try {
+            final isConnected = await checkConnection();
+            if (isConnected) {
+              final TransactionSummary transactionJson =
+              TransactionSummary.fromJson(jsonDecode(inputData?['array']));
+              final response = await apiRepository.product(
+                  request: TransactionSummaryRequest(transactionJson));
+              if (response is DataSuccess) {
+                return Future.value(true);
+              } else {
+                return Future.value(false);
+              }
+            } else {
+              return Future.value(false);
+            }
+          } catch (error, stackTrace) {
+            helperFunction.handleException(error, stackTrace);
+            return Future.value(false);
+          }
         case 'get_works_completed_and_send':
           try {
             return completeWorks(databaseRepository, apiRepository);

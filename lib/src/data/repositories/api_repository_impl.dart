@@ -353,7 +353,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
         final sendingData = jsonEncode(request.transactionSummary.toString());
         workmanagerService.registerOneOffTask(
           '1',
-          'transaction',
+          'transaction_product',
           {
             'string': 'transaction',
             'array': sendingData,
