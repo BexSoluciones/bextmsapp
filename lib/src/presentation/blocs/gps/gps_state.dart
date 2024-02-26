@@ -12,7 +12,7 @@ class GpsState extends Equatable {
   const GpsState(
       {required this.isGpsEnabled,
       required this.isGpsPermissionGranted,
-        this.showDialog = false,
+      this.showDialog = false,
       this.followingUser = false,
       this.lastKnownLocation,
       myLocationHistory});
@@ -34,8 +34,13 @@ class GpsState extends Equatable {
           lastKnownLocation: lastKnownLocation ?? this.lastKnownLocation);
 
   @override
-  List<Object?> get props =>
-      [isGpsEnabled, isGpsPermissionGranted, followingUser, lastKnownLocation];
+  List<Object?> get props => [
+        isGpsEnabled,
+        isGpsPermissionGranted,
+        showDialog,
+        followingUser,
+        lastKnownLocation
+      ];
 
   @override
   String toString() =>
@@ -43,21 +48,27 @@ class GpsState extends Equatable {
 }
 
 class GpsInitial extends GpsState {
-  const GpsInitial({required super.isGpsEnabled, required super.isGpsPermissionGranted});
+  const GpsInitial(
+      {required super.isGpsEnabled, required super.isGpsPermissionGranted});
 }
 
 class GpsLoading extends GpsState {
-  const GpsLoading({required super.isGpsEnabled, required super.isGpsPermissionGranted});
+  const GpsLoading(
+      {required super.isGpsEnabled, required super.isGpsPermissionGranted});
 }
 
 class GpsFailed extends GpsState {
   final String error;
-  const GpsFailed({this.error = "GpsFailed", required super.isGpsEnabled, required super.isGpsPermissionGranted});
+  const GpsFailed(
+      {this.error = "GpsFailed",
+      required super.isGpsEnabled,
+      required super.isGpsPermissionGranted});
 
   @override
   List<Object> get props => [error];
 }
 
 class GpsSuccess extends GpsState {
-  const GpsSuccess({required super.isGpsEnabled, required super.isGpsPermissionGranted});
+  const GpsSuccess(
+      {required super.isGpsEnabled, required super.isGpsPermissionGranted});
 }

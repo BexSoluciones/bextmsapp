@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 //domain
 import '../../../domain/models/enterprise_config.dart';
 import '../../../domain/models/location.dart' as l;
+import '../../../domain/models/error.dart';
 import '../../../domain/models/processing_queue.dart';
 import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
@@ -44,7 +45,9 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     on<GpsAndPermissionEvent>((event, emit) => emit(state.copyWith(
         isGpsEnabled: event.isGpsEnabled,
         isGpsPermissionGranted: event.isGpsPermissionGranted)));
-    on<GpsShowDisabled>((event, emit) => emit(state.copyWith(showDialog: true)));
+    on<GpsShowDisabled>((event, emit) {
+      emit(state.copyWith(showDialog: true));
+    });
     on<OnStartFollowingUser>(startFollowingUser);
     on<OnStopFollowingUser>(stopFollowingUser);
     on<OnNewUserLocationEvent>((event, emit) {
@@ -133,16 +136,14 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
         if (!isPermissionGranted && !isLocationEnabled) {
           emit(state.copyWith(showDialog: true));
         } else {
-          positionStream =
-              Geolocator.getPositionStream(locationSettings: locationSettings)
-                  .listen((event) {
-
-            _handleUserLocation(event, enterpriseConfig);
-          });
+          positionStream = Geolocator.getPositionStream(
+                  locationSettings: locationSettings)
+              .listen((event) => _handleUserLocation(event, enterpriseConfig)
+                  .onError(
+                      (error, stackTrace) => _handleError(error, stackTrace)));
         }
       }
     } catch (e, stackTrace) {
-      print('********erros gps*********');
       await _handleError(e, stackTrace);
     }
   }
@@ -165,6 +166,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     var distances = enterpriseConfig.distance!;
     if (defaultTargetPlatform == TargetPlatform.android) {
       return AndroidSettings(
+        timeLimit: const Duration(days: 1),
         accuracy: LocationAccuracy.high,
         distanceFilter: 2,
         forceLocationManager: true,
@@ -196,7 +198,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   Future<void> _handleUserLocation(
       Position position, EnterpriseConfig enterpriseConfig) async {
     final distances = enterpriseConfig.distance!;
-    final lastKnownLocation = state.lastKnownLocation;
     final isBackgroundLocationEnabled =
         enterpriseConfig.backgroundLocation ?? false;
 
@@ -222,6 +223,11 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   }
 
   Future<void> _handleError(dynamic e, StackTrace stackTrace) async {
+    print(e);
+    await databaseRepository.insertError(Error(
+        errorMessage: e.toString(),
+        stackTrace: stackTrace.toString(),
+        createdAt: now()));
     await FirebaseCrashlytics.instance.recordError(e, stackTrace);
   }
 

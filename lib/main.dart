@@ -515,11 +515,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               listenWhen: (previous, current) =>
                   previous.isAllGranted != current.isAllGranted,
               listener: (context, state) {
-                print(state);
                 if (state.isGpsEnabled && state.showDialog == true) {
-                  print('***********');
-                  Navigator.of(context).pop();
-                } else {
+                  locator<NavigationService>().goBack();
+                } else if (state.isGpsEnabled == false) {
                   context.read<GpsBloc>().add(const GpsShowDisabled());
                   errorGpsAlertDialog(
                       onTap: () {
