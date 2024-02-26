@@ -323,8 +323,6 @@ class WorkmanagerService with FormatDate {
       DatabaseRepository databaseRepository,
       ApiRepository apiRepository,
       HelperFunctions helperFunction) async {
-    logDebug(headerDeveloperLogger, 'sending');
-    logDebug(headerDeveloperLogger, queue.code);
     queue.updatedAt = now();
 
     switch (queue.code) {
@@ -502,7 +500,7 @@ class WorkmanagerService with FormatDate {
             queue.task = 'done';
           } else {
             queue.task = 'error';
-            queue.error = response.error;
+            queue.error = response!.error;
           }
           await databaseRepository.updateProcessingQueue(queue);
         } catch (e, stackTrace) {

@@ -145,7 +145,7 @@ abstract class ApiRepository {
     required LocationsRequest request
   });
 
-  Future<DataState<StatusResponse>> reason({
+  Future<DataState<StatusResponse>?> reason({
     required ReasonMRequest request
   });
 

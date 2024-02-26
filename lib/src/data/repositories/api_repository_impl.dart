@@ -1,7 +1,6 @@
 //utils
 import 'dart:convert';
 import 'dart:io';
-import 'package:workmanager/workmanager.dart';
 
 import 'package:bexdeliveries/src/domain/models/requests/reason_m_request.dart';
 import 'package:bexdeliveries/src/domain/models/requests/routing_request.dart';
@@ -148,13 +147,10 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
         );
       } else {
         final sendingData = jsonEncode(request.toString());
-
-        await Workmanager().registerOneOffTask(
+        workmanagerService.registerOneOffTask(
           '1',
           'login',
-          backoffPolicy: BackoffPolicy.linear,
-          backoffPolicyDelay: const Duration(seconds: 20),
-          inputData: <String, dynamic>{
+          {
             'string': 'login',
             'array': sendingData,
           },
@@ -210,10 +206,25 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   @override
   Future<DataState<StatusResponse>?> status({
     required StatusRequest request,
-  }) {
-    return getStateOf<StatusResponse>(
-      request: () => _apiService.status(request.workcode, request.status),
-    );
+  }) async {
+    bool isConnected = await checkConnection();
+    if (isConnected) {
+      return getStateOf<StatusResponse>(
+        request: () => _apiService.status(request.workcode, request.status),
+      );
+    } else {
+      final sendingData = jsonEncode(request.toString());
+      workmanagerService.registerOneOffTask(
+        '2',
+        'store_work_status',
+        {
+          'string': 'store_work_status',
+          'array': sendingData,
+        },
+      );
+      return null;
+    }
+
   }
 
   @override
@@ -228,7 +239,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     } else {
       final sendingData = jsonEncode(request.transaction.toString());
       workmanagerService.registerOneOffTask(
-        '1',
+        '3',
         'transaction_start',
         {
           'string': 'transaction',
@@ -251,8 +262,8 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     } else {
       final sendingData = jsonEncode(request.transaction.toString());
       workmanagerService.registerOneOffTask(
-        '1',
-        'transaction_start',
+        '4',
+        'transaction_arrived',
         {
           'string': 'transaction',
           'array': sendingData,
@@ -274,8 +285,8 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     } else {
       final sendingData = jsonEncode(request.transaction.toString());
       workmanagerService.registerOneOffTask(
-        '1',
-        'transaction_start',
+        '5',
+        'transaction_summary',
         {
           'string': 'transaction',
           'array': sendingData,
@@ -298,7 +309,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
       } else {
         final sendingData = jsonEncode(request.transaction.toString());
         workmanagerService.registerOneOffTask(
-          '1',
+          '6',
           'transaction',
           {
             'string': 'transaction',
@@ -325,7 +336,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
       } else {
         final sendingData = jsonEncode(request.transactionSummary.toString());
         workmanagerService.registerOneOffTask(
-          '1',
+          '7',
           'transaction',
           {
             'string': 'transaction',
@@ -352,7 +363,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
       } else {
         final sendingData = jsonEncode(request.transactionSummary.toString());
         workmanagerService.registerOneOffTask(
-          '1',
+          '8',
           'transaction_product',
           {
             'string': 'transaction',
@@ -433,7 +444,7 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
     } else {
       final sendingData = jsonEncode(request);
       workmanagerService.registerOneOffTask(
-        '1',
+        '9',
         'store_locations',
         {
           'string': 'store_locations',
@@ -446,11 +457,27 @@ class ApiRepositoryImpl extends BaseApiRepository implements ApiRepository {
   }
 
   @override
-  Future<DataState<StatusResponse>> reason({
+  Future<DataState<StatusResponse>?> reason({
     required ReasonMRequest request,
-  }) {
-    return getStateOf<StatusResponse>(
-      request: () => _apiService.news(request.news),
-    );
+  }) async {
+
+    bool isConnected = await checkConnection();
+    if (isConnected) {
+      return getStateOf<StatusResponse>(
+        request: () => _apiService.news(request.news),
+      );
+    } else {
+      final sendingData = jsonEncode(request);
+      workmanagerService.registerOneOffTask(
+        '10',
+        'store_news',
+        {
+          'string': 'store_news',
+          'array': sendingData,
+        },
+      );
+      return null;
+    }
+
   }
 }
