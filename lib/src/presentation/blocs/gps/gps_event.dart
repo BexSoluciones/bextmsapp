@@ -7,20 +7,15 @@ abstract class GpsEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class GpsAndPermission extends GpsEvent {
+class GpsAndPermissionEvent extends GpsEvent {
   final bool isGpsEnabled;
   final bool isGpsPermissionGranted;
-  const GpsAndPermission(
+  const GpsAndPermissionEvent(
       {required this.isGpsEnabled, required this.isGpsPermissionGranted});
 }
 
-class GpsEnabled extends GpsEvent {
-  final bool isGpsEnabled;
-  const GpsEnabled({required this.isGpsEnabled});
-}
-
-class ShowErrorDialog extends GpsEvent {
-  const ShowErrorDialog();
+class GpsShowDisabled extends GpsEvent {
+  const GpsShowDisabled();
 }
 
 class OnNewUserLocationEvent extends GpsEvent {

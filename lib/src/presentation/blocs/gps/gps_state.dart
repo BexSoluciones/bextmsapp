@@ -3,6 +3,7 @@ part of 'gps_bloc.dart';
 class GpsState extends Equatable {
   final bool isGpsEnabled;
   final bool isGpsPermissionGranted;
+  final bool showDialog;
   final bool followingUser;
   final LatLng? lastKnownLocation;
 
@@ -11,6 +12,7 @@ class GpsState extends Equatable {
   const GpsState(
       {required this.isGpsEnabled,
       required this.isGpsPermissionGranted,
+        this.showDialog = false,
       this.followingUser = false,
       this.lastKnownLocation,
       myLocationHistory});
@@ -19,6 +21,7 @@ class GpsState extends Equatable {
     bool? isGpsEnabled,
     bool? isGpsPermissionGranted,
     bool? followingUser,
+    bool? showDialog,
     LatLng? lastKnownLocation,
     List<LatLng>? myLocationHistory,
   }) =>
@@ -26,6 +29,7 @@ class GpsState extends Equatable {
           isGpsEnabled: isGpsEnabled ?? this.isGpsEnabled,
           isGpsPermissionGranted:
               isGpsPermissionGranted ?? this.isGpsPermissionGranted,
+          showDialog: showDialog ?? this.showDialog,
           followingUser: followingUser ?? this.followingUser,
           lastKnownLocation: lastKnownLocation ?? this.lastKnownLocation);
 

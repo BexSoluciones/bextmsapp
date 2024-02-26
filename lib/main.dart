@@ -11,6 +11,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -511,20 +512,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
           return BlocListener<GpsBloc, GpsState>(
-              listenWhen: (previous, current) => previous.isGpsEnabled != current.isGpsEnabled,
+              listenWhen: (previous, current) =>
+                  previous.isAllGranted != current.isAllGranted,
               listener: (context, state) {
-                if(state.isGpsEnabled) {
-                  Navigator.of(locator<NavigationService>()
-                      .navigatorKey
-                      .currentState!
-                      .overlay!
-                      .context, rootNavigator: true).pop('dialog');
+                print(state);
+                if (state.isGpsEnabled && state.showDialog == true) {
+                  print('***********');
+                  Navigator.of(context).pop();
                 } else {
+                  context.read<GpsBloc>().add(const GpsShowDisabled());
                   errorGpsAlertDialog(
                       onTap: () {
-                        print('*********');
-                        final gpsBloc = context.read<GpsBloc>();
-                        gpsBloc.askGpsAccess();
+                        Geolocator.openLocationSettings();
                       },
                       context: locator<NavigationService>()
                           .navigatorKey
@@ -535,7 +534,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       iconData: Icons.error,
                       buttonText: 'buttonText');
                 }
-
               },
               child: GestureDetector(
                   behavior: HitTestBehavior.opaque,

@@ -4,7 +4,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -22,9 +21,6 @@ import '../../../utils/constants/strings.dart';
 import '../../../services/navigation.dart';
 import '../../../services/storage.dart';
 import '../../../services/logger.dart';
-
-//widgets
-import '../../widgets/error_alert_dialog.dart';
 
 part 'gps_event.dart';
 part 'gps_state.dart';
@@ -45,10 +41,10 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       required this.databaseRepository})
       : super(const GpsInitial(
             isGpsEnabled: false, isGpsPermissionGranted: false)) {
-    on<GpsAndPermission>((event, emit) => emit(state.copyWith(
+    on<GpsAndPermissionEvent>((event, emit) => emit(state.copyWith(
         isGpsEnabled: event.isGpsEnabled,
         isGpsPermissionGranted: event.isGpsPermissionGranted)));
-    on<ShowErrorDialog>(_showErrorDialog);
+    on<GpsShowDisabled>((event, emit) => emit(state.copyWith(showDialog: true)));
     on<OnStartFollowingUser>(startFollowingUser);
     on<OnStopFollowingUser>(stopFollowingUser);
     on<OnNewUserLocationEvent>((event, emit) {
@@ -69,7 +65,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       _isPermissionGranted(),
     ]);
 
-    add(GpsAndPermission(
+    add(GpsAndPermissionEvent(
       isGpsEnabled: gpsInitStatus[0],
       isGpsPermissionGranted: gpsInitStatus[1],
     ));
@@ -80,7 +76,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
     gpsServiceSubscription =
         Geolocator.getServiceStatusStream().listen((event) {
       final isEnabled = (event.index == 1) ? true : false;
-      add(GpsAndPermission(
+      add(GpsAndPermissionEvent(
         isGpsEnabled: isEnabled,
         isGpsPermissionGranted: state.isGpsPermissionGranted,
       ));
@@ -90,14 +86,13 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
 
   Future<void> askGpsAccess() async {
     final status = await Permission.location.request();
-
     switch (status) {
       case PermissionStatus.granted:
-        add(GpsAndPermission(
+        add(GpsAndPermissionEvent(
             isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: true));
         break;
       case PermissionStatus.denied:
-        add(GpsAndPermission(
+        add(GpsAndPermissionEvent(
             isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: false));
         openAppSettings();
         break;
@@ -106,7 +101,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       case PermissionStatus.limited:
         break;
       case PermissionStatus.permanentlyDenied:
-        add(GpsAndPermission(
+        add(GpsAndPermissionEvent(
             isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: false));
         openAppSettings();
         break;
@@ -136,16 +131,18 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
             enterpriseConfig, isPermissionGranted, isLocationEnabled);
 
         if (!isPermissionGranted && !isLocationEnabled) {
-          emit(const ShowErrorDialog());
+          emit(state.copyWith(showDialog: true));
         } else {
           positionStream =
               Geolocator.getPositionStream(locationSettings: locationSettings)
                   .listen((event) {
+
             _handleUserLocation(event, enterpriseConfig);
           });
         }
       }
     } catch (e, stackTrace) {
+      print('********erros gps*********');
       await _handleError(e, stackTrace);
     }
   }
@@ -226,20 +223,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
 
   Future<void> _handleError(dynamic e, StackTrace stackTrace) async {
     await FirebaseCrashlytics.instance.recordError(e, stackTrace);
-  }
-
-  _showErrorDialog(ShowErrorDialog event, Emitter emit) async {
-    if (state.isAllGranted) {
-      errorGpsAlertDialog(
-          onTap: () {
-            Geolocator.openLocationSettings();
-          },
-          context:
-              navigationService.navigatorKey.currentState!.overlay!.context,
-          error: 'error',
-          iconData: Icons.error,
-          buttonText: 'buttonText');
-    }
   }
 
   double calculateDistanceBetweenTwoLatLng(
