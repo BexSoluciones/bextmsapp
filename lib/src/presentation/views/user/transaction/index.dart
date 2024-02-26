@@ -33,7 +33,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
   @override
   void initState() {
     processingQueueBloc = BlocProvider.of<ProcessingQueueBloc>(context);
-
+    context.read<ProcessingQueueBloc>().add(ProcessingQueueSender());
     stream = Stream.periodic(const Duration(seconds: 1), (int count) async {
       return processingQueueBloc.countProcessingQueueIncompleteToTransactions();
     });
