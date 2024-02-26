@@ -45,8 +45,9 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
       required this.databaseRepository})
       : super(const GpsInitial(
             isGpsEnabled: false, isGpsPermissionGranted: false)) {
-    on<GpsPermissionGranted>(_requestPermissions);
-    on<GpsEnabled>(_checkGpsStatus);
+    on<GpsAndPermission>((event, emit) => emit(state.copyWith(
+        isGpsEnabled: event.isGpsEnabled,
+        isGpsPermissionGranted: event.isGpsPermissionGranted)));
     on<ShowErrorDialog>(_showErrorDialog);
     on<OnStartFollowingUser>(startFollowingUser);
     on<OnStopFollowingUser>(stopFollowingUser);
@@ -62,102 +63,61 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
 
   goBack() => navigationService.goBack();
 
-  Future<void> _requestPermissions(GpsPermissionGranted event, emit) async {
-    try {
-      final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
-      if (isLocationEnabled) {
-        emit(const GpsPermissionGranted(isGpsPermissionGranted: true));
-      } else {
-        emit(const GpsPermissionGranted(isGpsPermissionGranted: false));
-      }
-    } catch (e) {
-      emit(GpsFailed(
-          isGpsEnabled: false,
-          isGpsPermissionGranted: false,
-          error: e.toString()));
-    }
-  }
-
-  Future<bool?> _checkGpsStatus(GpsEnabled event, emit) async {
-    try {
-      final isEnable = await Geolocator.isLocationServiceEnabled();
-
-      gpsServiceSubscription =
-          Geolocator.getServiceStatusStream().listen((event) {
-            final isEnabled = (event.index == 1) ? true : false;
-            if (isEnabled == false && showingDialog == false) {
-              errorGpsAlertDialog(
-                  onTap: () {
-                    Geolocator.openLocationSettings();
-                  },
-                  context:
-                  navigationService.navigatorKey.currentState!.overlay!.context,
-                  error: 'error',
-                  iconData: Icons.error,
-                  buttonText: 'buttonText');
-              showingDialog = true;
-            } else {
-              if (showingDialog) {
-                Navigator.pop(
-                    navigationService.navigatorKey.currentState!.overlay!.context);
-                showingDialog = false;
-              }
-            }
-            add(GpsPermissionGranted(
-              isGpsPermissionGranted: state.isGpsPermissionGranted,
-            ));
-          });
-
-      return isEnable;
-    } catch (e) {
-      emit(GpsFailed(
-          isGpsEnabled: state.isGpsEnabled,
-          isGpsPermissionGranted: false,
-          error: e.toString()));
-    }
-  }
-
   Future<void> _init() async {
     final gpsInitStatus = await Future.wait([
-      _checkGpsStatus(const GpsEnabled(isGpsEnabled: false),null),
+      _checkGpsStatus(),
       _isPermissionGranted(),
     ]);
 
-    final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
-    if (isLocationEnabled) {
-      add(OnStartFollowingUser());
-    }
-    add(GpsPermissionGranted(
-      isGpsPermissionGranted: gpsInitStatus[0]!,
+    add(GpsAndPermission(
+      isGpsEnabled: gpsInitStatus[0],
+      isGpsPermissionGranted: gpsInitStatus[1],
     ));
   }
 
+  Future<bool> _checkGpsStatus() async {
+    final isEnabled = await Geolocator.isLocationServiceEnabled();
+    gpsServiceSubscription =
+        Geolocator.getServiceStatusStream().listen((event) {
+      final isEnabled = (event.index == 1) ? true : false;
+      add(GpsAndPermission(
+        isGpsEnabled: isEnabled,
+        isGpsPermissionGranted: state.isGpsPermissionGranted,
+      ));
+    });
+    return isEnabled;
+  }
 
   Future<void> askGpsAccess() async {
     final status = await Permission.location.request();
 
     switch (status) {
       case PermissionStatus.granted:
-        //TODO [Heider Zapa]
-        // add(GpsAndPermissionEvent(
-        //     isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: true));
+        add(GpsAndPermission(
+            isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: true));
         break;
       case PermissionStatus.denied:
+        add(GpsAndPermission(
+            isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: false));
+        openAppSettings();
         break;
       case PermissionStatus.restricted:
         return;
       case PermissionStatus.limited:
         break;
       case PermissionStatus.permanentlyDenied:
-        //TODO [Heider Zapa]
-        // add(GpsAndPermissionEvent(
-        //     isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: false));
+        add(GpsAndPermission(
+            isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: false));
         openAppSettings();
         break;
       case PermissionStatus.provisional:
-        // TODO: Handle this case.
         break;
     }
+  }
+
+  Future<bool> _isPermissionGranted() async {
+    final isGranted = await Permission.location.isGranted;
+    return isGranted;
   }
 
   Future<void> startFollowingUser(OnStartFollowingUser event, emit) async {
@@ -280,11 +240,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
           iconData: Icons.error,
           buttonText: 'buttonText');
     }
-  }
-
-  Future<bool> _isPermissionGranted() async {
-    final isGranted = await Permission.location.isGranted;
-    return isGranted;
   }
 
   double calculateDistanceBetweenTwoLatLng(

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/core/helpers/index.dart';
+import 'package:bexdeliveries/src/presentation/widgets/error_alert_dialog.dart';
 import 'package:cron/cron.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -229,8 +230,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final DatabaseCubit databaseCubit;
-  final Permission _permission = Permission.location;
-  bool _checkingPermission = false;
 
   _MyAppState(this.databaseCubit);
 
@@ -336,26 +335,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     widget.databaseCubit.getDatabase();
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed && !_checkingPermission) {
-      _checkingPermission = true;
-      _checkPermission(_permission).then((_) => _checkingPermission = false);
-    }
-  }
-
-  Future<void> _checkPermission(Permission permission) async {
-    final status = await permission.request();
-    if (status == PermissionStatus.granted) {
-      print('Permission granted');
-    } else if (status == PermissionStatus.denied) {
-      print('Permission denied. Show a dialog and again ask for the permission');
-    } else if (status == PermissionStatus.permanentlyDenied) {
-      print('Take the user to the settings page.');
-    }
   }
 
   @override
@@ -531,57 +510,86 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               create: (context) => CountCubit(locator<DatabaseRepository>())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
-          return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                FocusScope.of(context).requestFocus(FocusNode());
-              },
-              child: OverlaySupport(child: DynamicColorBuilder(builder:
-                  (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-                ColorScheme lightScheme;
-                ColorScheme darkScheme;
+          return BlocListener<GpsBloc, GpsState>(
+              listenWhen: (previous, current) => previous.isGpsEnabled != current.isGpsEnabled,
+              listener: (context, state) {
+                if(state.isGpsEnabled) {
+                  Navigator.of(locator<NavigationService>()
+                      .navigatorKey
+                      .currentState!
+                      .overlay!
+                      .context, rootNavigator: true).pop('dialog');
+                } else {
+                  errorGpsAlertDialog(
+                      onTap: () {
+                        print('*********');
+                        final gpsBloc = context.read<GpsBloc>();
+                        gpsBloc.askGpsAccess();
+                      },
+                      context: locator<NavigationService>()
+                          .navigatorKey
+                          .currentState!
+                          .overlay!
+                          .context,
+                      error: 'error',
+                      iconData: Icons.error,
+                      buttonText: 'buttonText');
+                }
 
-                lightScheme = lightColorScheme;
-                darkScheme = darkColorScheme;
-                return MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider<GeneralProvider>(
-                        create: (context) => GeneralProvider(),
-                      ),
-                      ChangeNotifierProvider<DownloadProvider>(
-                        create: (context) => DownloadProvider(),
-                      ),
-                    ],
-                    child: MaterialApp(
-                      debugShowCheckedModeBanner: false,
-                      title: appTitle,
-                      theme: ThemeData(
-                        useMaterial3: true,
-                        colorScheme:
-                            state.isDarkTheme ? lightScheme : darkScheme,
-                        // extensions: [lightCustomColors],
-                      ),
-                      darkTheme: ThemeData(
-                        useMaterial3: true,
-                        colorScheme:
-                            state.isDarkTheme ? lightScheme : darkScheme,
-                        // extensions: [darkCustomColors],
-                      ),
-                      themeMode: ThemeMode.system,
-                      navigatorKey: locator<NavigationService>().navigatorKey,
-                      navigatorObservers: [
-                        locator<FirebaseAnalyticsService>()
-                            .appAnalyticsObserver(),
-                      ],
-                      onUnknownRoute: (RouteSettings settings) =>
-                          MaterialPageRoute(
-                              builder: (BuildContext context) => UndefinedView(
-                                    name: settings.name,
-                                  )),
-                      initialRoute: '/splash',
-                      onGenerateRoute: Routes.onGenerateRoutes,
-                    ));
-              })));
+              },
+              child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                  },
+                  child: OverlaySupport(child: DynamicColorBuilder(builder:
+                      (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+                    ColorScheme lightScheme;
+                    ColorScheme darkScheme;
+
+                    lightScheme = lightColorScheme;
+                    darkScheme = darkColorScheme;
+                    return MultiProvider(
+                        providers: [
+                          ChangeNotifierProvider<GeneralProvider>(
+                            create: (context) => GeneralProvider(),
+                          ),
+                          ChangeNotifierProvider<DownloadProvider>(
+                            create: (context) => DownloadProvider(),
+                          ),
+                        ],
+                        child: MaterialApp(
+                          debugShowCheckedModeBanner: false,
+                          title: appTitle,
+                          theme: ThemeData(
+                            useMaterial3: true,
+                            colorScheme:
+                                state.isDarkTheme ? lightScheme : darkScheme,
+                            // extensions: [lightCustomColors],
+                          ),
+                          darkTheme: ThemeData(
+                            useMaterial3: true,
+                            colorScheme:
+                                state.isDarkTheme ? lightScheme : darkScheme,
+                            // extensions: [darkCustomColors],
+                          ),
+                          themeMode: ThemeMode.system,
+                          navigatorKey:
+                              locator<NavigationService>().navigatorKey,
+                          navigatorObservers: [
+                            locator<FirebaseAnalyticsService>()
+                                .appAnalyticsObserver(),
+                          ],
+                          onUnknownRoute: (RouteSettings settings) =>
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      UndefinedView(
+                                        name: settings.name,
+                                      )),
+                          initialRoute: '/splash',
+                          onGenerateRoute: Routes.onGenerateRoutes,
+                        ));
+                  }))));
         }));
   }
 }
