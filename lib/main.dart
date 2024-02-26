@@ -229,6 +229,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final DatabaseCubit databaseCubit;
+  final Permission _permission = Permission.location;
+  bool _checkingPermission = false;
 
   _MyAppState(this.databaseCubit);
 
@@ -332,11 +334,28 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setupInteractedMessage(context);
     _fetchRemoteConfig();
     widget.databaseCubit.getDatabase();
-    // context.read<GpsBloc>().add(const GpsEnabled(isGpsEnabled: false));
-
-
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed && !_checkingPermission) {
+      _checkingPermission = true;
+      _checkPermission(_permission).then((_) => _checkingPermission = false);
+    }
+  }
+
+  Future<void> _checkPermission(Permission permission) async {
+    final status = await permission.request();
+    if (status == PermissionStatus.granted) {
+      print('Permission granted');
+    } else if (status == PermissionStatus.denied) {
+      print('Permission denied. Show a dialog and again ask for the permission');
+    } else if (status == PermissionStatus.permanentlyDenied) {
+      print('Take the user to the settings page.');
+    }
   }
 
   @override

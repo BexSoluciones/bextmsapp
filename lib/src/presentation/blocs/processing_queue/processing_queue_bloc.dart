@@ -42,7 +42,6 @@ import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //service
-import '../../../locator.dart';
 import '../../../services/logger.dart';
 import '../../../services/storage.dart';
 
@@ -880,8 +879,8 @@ class ProcessingQueueBloc
 
             if (prediction != null) {
               var historyOrder = HistoryOrder(
-                  id: prediction?.id,
-                  workId: prediction!.workId!,
+                  id: prediction.id,
+                  workId: prediction.workId!,
                   workcode: body['workcode'],
                   zoneId: prediction.zoneId,
                   listOrder: prediction.listOrders!,
