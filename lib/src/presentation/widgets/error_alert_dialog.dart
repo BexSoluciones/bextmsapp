@@ -6,7 +6,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../utils/constants/colors.dart';
 
 errorGpsAlertDialog(
-    {required BuildContext context,
+    {required completer,
+    required BuildContext context,
     required String error,
     required IconData iconData,
     required String buttonText,
@@ -16,6 +17,9 @@ errorGpsAlertDialog(
         barrierDismissible: false,
         context: context,
         builder: (_) {
+          if (!completer.isCompleted) {
+            completer.complete(context);
+          }
           ThemeData theme = Theme.of(context);
           return PopScope(
             canPop: false,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //core
@@ -10,6 +11,7 @@ import '../../../../../core/helpers/index.dart';
 import '../../../../config/size.dart';
 
 //cubit
+import '../../../../services/navigation.dart';
 import '../../../cubits/home/home_cubit.dart';
 
 //blocs
@@ -24,6 +26,7 @@ import '../../../../services/storage.dart';
 
 //widgets
 import '../../../widgets/drawer_widget.dart';
+import '../../../widgets/error_alert_dialog.dart';
 import '../../../widgets/upgrader_widget.dart';
 import 'features/status.dart';
 import 'features/logout.dart';
@@ -33,7 +36,7 @@ import 'features/sync.dart';
 
 class HomeView extends StatefulWidget {
   final String navigation;
-  const HomeView({super.key, required this.navigation });
+  const HomeView({super.key, required this.navigation});
 
   @override
   HomeViewState createState() => HomeViewState();
@@ -62,7 +65,7 @@ class HomeViewState extends State<HomeView>
     homeCubit.getUser();
     gpsBloc.add(OnStartFollowingUser());
 
-    if(widget.navigation == 'collection') {
+    if (widget.navigation == 'collection') {
       Future.delayed(Duration.zero, () => homeCubit.schedule());
     }
 
@@ -72,13 +75,11 @@ class HomeViewState extends State<HomeView>
 
   @override
   void didChangeDependencies() {
-    if(widget.navigation == 'collection') {
+    if (widget.navigation == 'collection') {
       Future.delayed(Duration.zero, () => homeCubit.schedule());
     }
     super.didChangeDependencies();
   }
-
-
 
   @override
   void dispose() {

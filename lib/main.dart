@@ -511,29 +511,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               create: (context) => CountCubit(locator<DatabaseRepository>())),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
-          return BlocListener<GpsBloc, GpsState>(
-              listenWhen: (previous, current) =>
-                  previous.isAllGranted != current.isAllGranted,
-              listener: (context, state) {
-                if (state.isGpsEnabled && state.showDialog == true) {
-                  locator<NavigationService>().goBack();
-                } else if (state.isGpsEnabled == false) {
-                  context.read<GpsBloc>().add(const GpsShowDisabled());
-                  errorGpsAlertDialog(
-                      onTap: () {
-                        Geolocator.openLocationSettings();
-                      },
-                      context: locator<NavigationService>()
-                          .navigatorKey
-                          .currentState!
-                          .overlay!
-                          .context,
-                      error: 'error',
-                      iconData: Icons.error,
-                      buttonText: 'buttonText');
-                }
-              },
-              child: GestureDetector(
+          return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
                     FocusScope.of(context).requestFocus(FocusNode());
@@ -585,7 +563,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           initialRoute: '/splash',
                           onGenerateRoute: Routes.onGenerateRoutes,
                         ));
-                  }))));
+                  })));
         }));
   }
 }
