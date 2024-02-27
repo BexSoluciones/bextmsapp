@@ -28,7 +28,6 @@ import '../../../domain/abstracts/format_abstract.dart';
 //services
 import '../../../services/navigation.dart';
 import '../../../services/storage.dart';
-import '../../../services/logger.dart';
 
 part 'summary_state.dart';
 
@@ -180,81 +179,88 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
   Future<void> sendTransactionArrived(
       BuildContext context, Work work, Transaction transaction) async {
-    emit(const SummaryLoading());
 
-    final summaries =
-        await databaseRepository.getAllSummariesByOrderNumber(work.id!);
+    try {
+      emit(const SummaryLoading());
 
-    var isGeoReferenced =
-        await databaseRepository.validateClient(transaction.workId);
+      final summaries =
+      await databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
-    var currentLocation = gpsBloc.state.lastKnownLocation;
-    currentLocation ??= gpsBloc.lastRecordedLocation;
+      var isGeoReferenced =
+      await databaseRepository.validateClient(transaction.workId);
 
-    if (currentLocation == null) {
-      emit(SummaryFailed(
-          error:
-              'gps desabilitado o señal muy baja por favor cierre la app y vuelva a intentarlo',
-          summaries: summaries,
-          origin: state.origin,
-          time: state.time,
-          isArrived: false,
-          isGeoReference: isGeoReferenced));
-      return;
-    }
+      var currentLocation = gpsBloc.state.lastKnownLocation;
+      currentLocation ??= gpsBloc.lastRecordedLocation;
+      currentLocation ??= await gpsBloc.getCurrentLocation();
 
-    transaction.latitude = currentLocation.latitude.toString();
-    transaction.longitude = currentLocation.longitude.toString();
-
-    final enterpriseConfig = storageService.getObject('config') != null
-        ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
-        : null;
-
-    if (enterpriseConfig != null && enterpriseConfig.requiredArrived == true) {
-      var distanceInMeters = helperFunctions.calculateDistanceInMetersGeo(
-          currentLocation,
-          double.tryParse(work.latitude!)!,
-          double.tryParse(work.longitude!)!);
-
-      if (!validateDistance(
-              currentLocation,
-              double.tryParse(work.latitude!)!,
-              double.tryParse(work.longitude!)!,
-              transaction.summaryId,
-              enterpriseConfig.ratio) &&
-          context.mounted) {
-        helperFunctions.showDialogWithDistance(
-            context, distanceInMeters, enterpriseConfig.ratio!);
-
-        emit(SummarySuccess(
+      if (currentLocation == null) {
+        emit(SummaryFailed(
+            error:
+            'gps desabilitado o señal muy baja por favor cierre la app y vuelva a intentarlo',
             summaries: summaries,
             origin: state.origin,
             time: state.time,
             isArrived: false,
             isGeoReference: isGeoReferenced));
-
         return;
       }
+
+      transaction.latitude = currentLocation.latitude.toString();
+      transaction.longitude = currentLocation.longitude.toString();
+
+      final enterpriseConfig = storageService.getObject('config') != null
+          ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
+          : null;
+
+      if (enterpriseConfig != null && enterpriseConfig.requiredArrived == true) {
+        var distanceInMeters = helperFunctions.calculateDistanceInMetersGeo(
+            currentLocation,
+            double.tryParse(work.latitude!)!,
+            double.tryParse(work.longitude!)!);
+
+        if (!validateDistance(
+            currentLocation,
+            double.tryParse(work.latitude!)!,
+            double.tryParse(work.longitude!)!,
+            transaction.summaryId,
+            enterpriseConfig.ratio) &&
+            context.mounted) {
+          helperFunctions.showDialogWithDistance(
+              context, distanceInMeters, enterpriseConfig.ratio!);
+
+          emit(SummarySuccess(
+              summaries: summaries,
+              origin: state.origin,
+              time: state.time,
+              isArrived: false,
+              isGeoReference: isGeoReferenced));
+
+          return;
+        }
+      }
+
+      await databaseRepository.insertTransaction(transaction);
+
+      var processingQueue = ProcessingQueue(
+          body: jsonEncode(transaction.toJson()),
+          task: 'incomplete',
+          code: 'store_transaction_arrived',
+          createdAt: now(),
+          updatedAt: now());
+
+      processingQueueBloc
+          .add(ProcessingQueueAdd(processingQueue: processingQueue));
+
+      emit(SummarySuccess(
+          summaries: summaries,
+          origin: state.origin,
+          time: state.time,
+          isArrived: true,
+          isGeoReference: isGeoReferenced));
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
     }
 
-    await databaseRepository.insertTransaction(transaction);
-
-    var processingQueue = ProcessingQueue(
-        body: jsonEncode(transaction.toJson()),
-        task: 'incomplete',
-        code: 'store_transaction_arrived',
-        createdAt: now(),
-        updatedAt: now());
-
-    processingQueueBloc
-        .add(ProcessingQueueAdd(processingQueue: processingQueue));
-
-    emit(SummarySuccess(
-        summaries: summaries,
-        origin: state.origin,
-        time: state.time,
-        isArrived: true,
-        isGeoReference: isGeoReferenced));
   }
 
   Future<void> showMaps(

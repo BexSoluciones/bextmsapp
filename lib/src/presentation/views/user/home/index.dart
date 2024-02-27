@@ -11,7 +11,6 @@ import '../../../../../core/helpers/index.dart';
 import '../../../../config/size.dart';
 
 //cubit
-import '../../../../services/navigation.dart';
 import '../../../cubits/home/home_cubit.dart';
 
 //blocs
@@ -112,20 +111,17 @@ class HomeViewState extends State<HomeView>
   Widget build(BuildContext context) {
     final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(16);
-    return BlocListener<GpsBloc, GpsState>(
+    return BlocConsumer<GpsBloc, GpsState>(
       listener: (context, state) {
         if (state.isGpsEnabled == true && state.showDialog == true) {
-          print('hidding');
           styledDialogController.closeVisibleDialog();
         } else if (state.isGpsEnabled == false) {
           context.read<GpsBloc>().add(const GpsShowDisabled());
-
-          print('showing');
           styledDialogController.showDialogWithStyle(Status.error,
               closingFunction: () => Navigator.of(context).pop());
         }
       },
-      child: UpgraderDialog(
+      builder: (context, state) => UpgraderDialog(
           child: PopScope(
               canPop: false,
               child: Scaffold(
