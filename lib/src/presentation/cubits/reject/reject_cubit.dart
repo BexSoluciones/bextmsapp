@@ -76,6 +76,15 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
 
         var currentLocation = gpsBloc.state.lastKnownLocation;
         currentLocation ??= gpsBloc.lastRecordedLocation;
+        currentLocation ??= await gpsBloc.getCurrentLocation();
+
+        if (currentLocation == null) {
+          emit(const RejectFailed(
+            error:
+                'Error obteniendo tu ubicación, por favor revisa tu señal y intentalo de nuevo.',
+          ));
+          return;
+        }
 
         transaction.latitude = currentLocation!.latitude.toString();
         transaction.longitude = currentLocation.longitude.toString();

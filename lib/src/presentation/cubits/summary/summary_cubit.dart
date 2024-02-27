@@ -128,12 +128,27 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         work.workcode!, summary.orderNumber, 'summary');
     var isArrived = await databaseRepository.validateTransactionArrived(
         transaction.workId, 'arrived');
+    final summaries =
+        await databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
     if (isArrived && vts == false) {
       var currentLocation = gpsBloc.state.lastKnownLocation;
       currentLocation ??= gpsBloc.lastRecordedLocation;
+      currentLocation ??= await gpsBloc.getCurrentLocation();
 
-      transaction.latitude = currentLocation!.latitude.toString();
+      if (currentLocation == null) {
+        emit(SummaryFailed(
+            error:
+                'Error obteniendo tu ubicación, por favor revisa tu señal y intentalo de nuevo.',
+            summaries: summaries,
+            origin: state.origin,
+            time: state.time,
+            isArrived: false,
+            isGeoReference: state.isGeoReference));
+        return;
+      }
+
+      transaction.latitude = currentLocation.latitude.toString();
       transaction.longitude = currentLocation.longitude.toString();
 
       var id = await databaseRepository.insertTransaction(transaction);
@@ -150,9 +165,6 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
       processingQueueBloc
           .add(ProcessingQueueAdd(processingQueue: processingQueue));
     }
-
-    final summaries =
-        await databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
     emit(SummarySuccess(
         summaries: summaries,
@@ -179,15 +191,14 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
   Future<void> sendTransactionArrived(
       BuildContext context, Work work, Transaction transaction) async {
-
     try {
       emit(const SummaryLoading());
 
       final summaries =
-      await databaseRepository.getAllSummariesByOrderNumber(work.id!);
+          await databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
       var isGeoReferenced =
-      await databaseRepository.validateClient(transaction.workId);
+          await databaseRepository.validateClient(transaction.workId);
 
       var currentLocation = gpsBloc.state.lastKnownLocation;
       currentLocation ??= gpsBloc.lastRecordedLocation;
@@ -196,7 +207,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
       if (currentLocation == null) {
         emit(SummaryFailed(
             error:
-            'gps desabilitado o señal muy baja por favor cierre la app y vuelva a intentarlo',
+                'Error obteniendo tu ubicación, por favor revisa tu señal y intentalo de nuevo.',
             summaries: summaries,
             origin: state.origin,
             time: state.time,
@@ -212,18 +223,19 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
           ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
           : null;
 
-      if (enterpriseConfig != null && enterpriseConfig.requiredArrived == true) {
+      if (enterpriseConfig != null &&
+          enterpriseConfig.requiredArrived == true) {
         var distanceInMeters = helperFunctions.calculateDistanceInMetersGeo(
             currentLocation,
             double.tryParse(work.latitude!)!,
             double.tryParse(work.longitude!)!);
 
         if (!validateDistance(
-            currentLocation,
-            double.tryParse(work.latitude!)!,
-            double.tryParse(work.longitude!)!,
-            transaction.summaryId,
-            enterpriseConfig.ratio) &&
+                currentLocation,
+                double.tryParse(work.latitude!)!,
+                double.tryParse(work.longitude!)!,
+                transaction.summaryId,
+                enterpriseConfig.ratio) &&
             context.mounted) {
           helperFunctions.showDialogWithDistance(
               context, distanceInMeters, enterpriseConfig.ratio!);
@@ -260,7 +272,6 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     } catch (error, stackTrace) {
       helperFunctions.handleException(error, stackTrace);
     }
-
   }
 
   Future<void> showMaps(

@@ -341,6 +341,16 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
       } else {
         var currentLocation = gpsBloc.state.lastKnownLocation;
         currentLocation ??= gpsBloc.lastRecordedLocation;
+        currentLocation ??= await gpsBloc.getCurrentLocation();
+
+        if (currentLocation == null) {
+          emit(state.copyWith(
+              formSubmissionStatus: FormSubmissionStatus.failure,
+              error:
+                  'Error obteniendo tu ubicación, por favor revisa tu señal y intentalo de nuevo.'));
+
+          return;
+        }
 
         String? firm;
         var firmApplication = await helperFunctions
