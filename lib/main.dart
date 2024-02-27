@@ -332,28 +332,29 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
-  final styledDialogController = StyledDialogController<Status>();
-
   @override
   void initState() {
     setupInteractedMessage(context);
     _fetchRemoteConfig();
     widget.databaseCubit.getDatabase();
 
-    styledDialogController.registerDialogOf(
-        style: Status.error, builder: showErrorGpsDialog);
+    locator<StyledDialogController>()
+        .registerDialogOf(style: Status.error, builder: showErrorGpsDialog);
 
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
 
   Future<void> showErrorGpsDialog() {
+    final ctx =
+        locator<NavigationService>().navigatorKey.currentState!.context;
+
     if (Platform.isAndroid) {
       return showDialog(
           barrierDismissible: false,
-          context: context,
+          context: ctx,
           builder: (_) {
-            ThemeData theme = Theme.of(context);
+            ThemeData theme = Theme.of(ctx);
             return PopScope(
               canPop: false,
               child: Dialog(

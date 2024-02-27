@@ -48,6 +48,9 @@ Future<void> initializeDependencies() async {
   final geolocator = await GeolocatorService.getInstance();
   locator.registerSingleton<GeolocatorService>(geolocator!);
 
+  final styledDialogController = StyledDialogController<Status>();
+  locator.registerSingleton<StyledDialogController>(styledDialogController);
+
   final logger = LoggerService();
   locator.registerSingleton<LoggerService>(logger);
 

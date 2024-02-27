@@ -3,7 +3,7 @@ import 'dialog_controller.dart';
 enum Status { loading, error, success, iddle }
 
 class StyledDialogController<S> {
-  final Map<String, DialogShowHandler> _styleBuilders = {};
+  Map<String, DialogShowHandler> _styleBuilders = {};
 
   S? visibleDialogStyle;
 

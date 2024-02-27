@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:bexdeliveries/src/services/styled_dialog_controller.dart';
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //core
@@ -107,7 +106,7 @@ class HomeViewState extends State<HomeView>
     return isFirstLaunch;
   }
 
-  final styledDialogController = StyledDialogController<Status>();
+  final styledDialogController = locator<StyledDialogController>();
 
   @override
   Widget build(BuildContext context) {
@@ -116,11 +115,14 @@ class HomeViewState extends State<HomeView>
     return BlocListener<GpsBloc, GpsState>(
       listener: (context, state) {
         if (state.isGpsEnabled == true && state.showDialog == true) {
+          print('hidding');
           styledDialogController.closeVisibleDialog();
         } else if (state.isGpsEnabled == false) {
           context.read<GpsBloc>().add(const GpsShowDisabled());
+
+          print('showing');
           styledDialogController.showDialogWithStyle(Status.error,
-              closingFunction: () {});
+              closingFunction: () => Navigator.of(context).pop());
         }
       },
       child: UpgraderDialog(
