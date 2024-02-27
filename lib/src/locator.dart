@@ -1,4 +1,6 @@
+import 'package:bexdeliveries/src/services/dialog_controller.dart';
 import 'package:bexdeliveries/src/services/geolocator.dart';
+import 'package:bexdeliveries/src/services/styled_dialog_controller.dart';
 import 'package:bexdeliveries/src/services/remote_config.dart';
 import 'package:get_it/get_it.dart';
 

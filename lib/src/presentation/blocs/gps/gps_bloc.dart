@@ -223,7 +223,6 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
   }
 
   Future<void> _handleError(dynamic e, StackTrace stackTrace) async {
-    print(e);
     await databaseRepository.insertError(Error(
         errorMessage: e.toString(),
         stackTrace: stackTrace.toString(),

@@ -2,15 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:bexdeliveries/core/helpers/index.dart';
-import 'package:bexdeliveries/src/presentation/widgets/error_alert_dialog.dart';
+import 'package:bexdeliveries/src/services/styled_dialog_controller.dart';
+import 'package:bexdeliveries/src/utils/constants/colors.dart';
 import 'package:cron/cron.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -329,13 +332,128 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
+  final styledDialogController = StyledDialogController<Status>();
+
   @override
   void initState() {
     setupInteractedMessage(context);
     _fetchRemoteConfig();
     widget.databaseCubit.getDatabase();
+
+    styledDialogController.registerDialogOf(
+        style: Status.error, builder: showErrorGpsDialog);
+
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  Future<void> showErrorGpsDialog() {
+    if (Platform.isAndroid) {
+      return showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (_) {
+            ThemeData theme = Theme.of(context);
+            return PopScope(
+              canPop: false,
+              child: Dialog(
+                backgroundColor: theme.scaffoldBackgroundColor,
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        const Text(
+                          'Activa la ubicación',
+                          style: TextStyle(color: Colors.grey, fontSize: 26),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        SvgPicture.asset('assets/icons/pin.svg',
+                            height: 100, width: 100),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            textAlign: TextAlign.center,
+                            "Necesitamos saber tu ubicacion,\n activa tu GPS para continuar disfrutando de la APP.",
+                            style: TextStyle(fontWeight: FontWeight.normal),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Geolocator.openLocationSettings();
+                          },
+                          child: Container(
+                            width: 180,
+                            height: 40,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: kPrimaryColor),
+                            child: const Center(
+                              child: Text(
+                                'Activar',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                      ]),
+                ),
+              ),
+            );
+          });
+    } else {
+      return showCupertinoDialog(
+          context: context,
+          builder: (_) => CupertinoAlertDialog(
+              title: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.error,
+                      color: Colors.red.shade900,
+                      size: 40,
+                    ),
+                  ),
+                  const Text("Oh no!\n something went wrong."),
+                ],
+              ),
+              content: Column(
+                children: [
+                  const Text(
+                    textAlign: TextAlign.center,
+                    "",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    textAlign: TextAlign.center,
+                    'Necesitamos saber tu ubicacion,\n activa tu GPS para continuar disfrutando de la APP.',
+                    style: TextStyle(
+                      color: Colors.red.shade900,
+                    ),
+                  ),
+                ],
+              )));
+    }
   }
 
   @override
@@ -512,58 +630,56 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
           return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    FocusScope.of(context).requestFocus(FocusNode());
-                  },
-                  child: OverlaySupport(child: DynamicColorBuilder(builder:
-                      (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-                    ColorScheme lightScheme;
-                    ColorScheme darkScheme;
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                FocusScope.of(context).requestFocus(FocusNode());
+              },
+              child: OverlaySupport(child: DynamicColorBuilder(builder:
+                  (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+                ColorScheme lightScheme;
+                ColorScheme darkScheme;
 
-                    lightScheme = lightColorScheme;
-                    darkScheme = darkColorScheme;
-                    return MultiProvider(
-                        providers: [
-                          ChangeNotifierProvider<GeneralProvider>(
-                            create: (context) => GeneralProvider(),
-                          ),
-                          ChangeNotifierProvider<DownloadProvider>(
-                            create: (context) => DownloadProvider(),
-                          ),
-                        ],
-                        child: MaterialApp(
-                          debugShowCheckedModeBanner: false,
-                          title: appTitle,
-                          theme: ThemeData(
-                            useMaterial3: true,
-                            colorScheme:
-                                state.isDarkTheme ? lightScheme : darkScheme,
-                            // extensions: [lightCustomColors],
-                          ),
-                          darkTheme: ThemeData(
-                            useMaterial3: true,
-                            colorScheme:
-                                state.isDarkTheme ? lightScheme : darkScheme,
-                            // extensions: [darkCustomColors],
-                          ),
-                          themeMode: ThemeMode.system,
-                          navigatorKey:
-                              locator<NavigationService>().navigatorKey,
-                          navigatorObservers: [
-                            locator<FirebaseAnalyticsService>()
-                                .appAnalyticsObserver(),
-                          ],
-                          onUnknownRoute: (RouteSettings settings) =>
-                              MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      UndefinedView(
-                                        name: settings.name,
-                                      )),
-                          initialRoute: '/splash',
-                          onGenerateRoute: Routes.onGenerateRoutes,
-                        ));
-                  })));
+                lightScheme = lightColorScheme;
+                darkScheme = darkColorScheme;
+                return MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider<GeneralProvider>(
+                        create: (context) => GeneralProvider(),
+                      ),
+                      ChangeNotifierProvider<DownloadProvider>(
+                        create: (context) => DownloadProvider(),
+                      ),
+                    ],
+                    child: MaterialApp(
+                      debugShowCheckedModeBanner: false,
+                      title: appTitle,
+                      theme: ThemeData(
+                        useMaterial3: true,
+                        colorScheme:
+                            state.isDarkTheme ? lightScheme : darkScheme,
+                        // extensions: [lightCustomColors],
+                      ),
+                      darkTheme: ThemeData(
+                        useMaterial3: true,
+                        colorScheme:
+                            state.isDarkTheme ? lightScheme : darkScheme,
+                        // extensions: [darkCustomColors],
+                      ),
+                      themeMode: ThemeMode.system,
+                      navigatorKey: locator<NavigationService>().navigatorKey,
+                      navigatorObservers: [
+                        locator<FirebaseAnalyticsService>()
+                            .appAnalyticsObserver(),
+                      ],
+                      onUnknownRoute: (RouteSettings settings) =>
+                          MaterialPageRoute(
+                              builder: (BuildContext context) => UndefinedView(
+                                    name: settings.name,
+                                  )),
+                      initialRoute: '/splash',
+                      onGenerateRoute: Routes.onGenerateRoutes,
+                    ));
+              })));
         }));
   }
 }

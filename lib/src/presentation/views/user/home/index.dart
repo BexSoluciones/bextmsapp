@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bexdeliveries/src/services/styled_dialog_controller.dart';
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -106,47 +107,60 @@ class HomeViewState extends State<HomeView>
     return isFirstLaunch;
   }
 
+  final styledDialogController = StyledDialogController<Status>();
+
   @override
   Widget build(BuildContext context) {
     final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(16);
-    return UpgraderDialog(
-        child: PopScope(
-            canPop: false,
-            child: Scaffold(
-              drawer: drawer(context, homeCubit.state.user),
-              appBar: AppBar(
-                iconTheme:
-                    IconThemeData(color: Theme.of(context).colorScheme.primary),
-                actions: [
-                  StatusBar(one: one),
-                  const VerticalDivider(
-                    color: kPrimaryColor,
-                    thickness: 1.0,
+    return BlocListener<GpsBloc, GpsState>(
+      listener: (context, state) {
+        if (state.isGpsEnabled == true && state.showDialog == true) {
+          styledDialogController.closeVisibleDialog();
+        } else if (state.isGpsEnabled == false) {
+          context.read<GpsBloc>().add(const GpsShowDisabled());
+          styledDialogController.showDialogWithStyle(Status.error,
+              closingFunction: () {});
+        }
+      },
+      child: UpgraderDialog(
+          child: PopScope(
+              canPop: false,
+              child: Scaffold(
+                drawer: drawer(context, homeCubit.state.user),
+                appBar: AppBar(
+                  iconTheme: IconThemeData(
+                      color: Theme.of(context).colorScheme.primary),
+                  actions: [
+                    StatusBar(one: one),
+                    const VerticalDivider(
+                      color: kPrimaryColor,
+                      thickness: 1.0,
+                    ),
+                    SyncBar(two: two),
+                    SearchBar(three: three),
+                    LogoutBar(four: four),
+                  ],
+                  title: Text(
+                    'Servicios',
+                    textScaler: TextScaler.linear(calculatedTextScaleFactor),
+                    style: TextStyle(
+                        fontSize: calculatedFon, fontWeight: FontWeight.bold),
                   ),
-                  SyncBar(two: two),
-                  SearchBar(three: three),
-                  LogoutBar(four: four),
-                ],
-                title: Text(
-                  'Servicios',
-                  textScaler: TextScaler.linear(calculatedTextScaleFactor),
-                  style: TextStyle(
-                      fontSize: calculatedFon, fontWeight: FontWeight.bold),
+                  notificationPredicate: (ScrollNotification notification) {
+                    return notification.depth == 1;
+                  },
                 ),
-                notificationPredicate: (ScrollNotification notification) {
-                  return notification.depth == 1;
-                },
-              ),
-              body: SafeArea(
-                  child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: 20.0,
-                        left: 16.0,
-                        right: 16.0,
-                        bottom: 20.0,
-                      ),
-                      child: HomeListView(five: five))),
-            )));
+                body: SafeArea(
+                    child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: 20.0,
+                          left: 16.0,
+                          right: 16.0,
+                          bottom: 20.0,
+                        ),
+                        child: HomeListView(five: five))),
+              ))),
+    );
   }
 }
