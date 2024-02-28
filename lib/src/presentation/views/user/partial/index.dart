@@ -11,10 +11,6 @@ import '../../../../domain/models/arguments.dart';
 //utils
 import '../../../../utils/constants/nums.dart';
 
-//services
-import '../../../../locator.dart';
-import '../../../../services/navigation.dart';
-
 //features
 import 'features/header.dart';
 import 'features/reason_global_page.dart';
@@ -22,10 +18,9 @@ import 'features/reason_global_page.dart';
 //widgets
 import '../../../widgets/default_button_widget.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
 
 class PartialView extends StatefulWidget {
-  const PartialView({Key? key, required this.arguments}) : super(key: key);
+  const PartialView({super.key, required this.arguments});
 
   final InventoryArgument arguments;
 
@@ -35,6 +30,7 @@ class PartialView extends StatefulWidget {
 
 class _PartialViewState extends State<PartialView> {
   late PartialCubit partialCubit;
+
 
   @override
   void initState() {
@@ -58,7 +54,7 @@ class _PartialViewState extends State<PartialView> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new,
               color: Theme.of(context).colorScheme.secondaryContainer),
-          onPressed: () => _navigationService.goBack(),
+          onPressed: () => partialCubit.navigationService.goBack(),
         ),
       ),
       body: ListView(

@@ -13,10 +13,8 @@ import 'features/listview.dart';
 import '../../../../locator.dart';
 import '../../../../services/storage.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-
 class PackageView extends StatefulWidget {
-  const PackageView({Key? key, required this.arguments}) : super(key: key);
+  const PackageView({super.key, required this.arguments});
 
   final PackageArgument arguments;
 
@@ -27,6 +25,7 @@ class PackageView extends StatefulWidget {
 class PackageViewState extends State<PackageView> with WidgetsBindingObserver {
   final GlobalKey one = GlobalKey();
   final GlobalKey two = GlobalKey();
+  final LocalStorageService _storageService = locator<LocalStorageService>();
 
   @override
   void setState(fn) {

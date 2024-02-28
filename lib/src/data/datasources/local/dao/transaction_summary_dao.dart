@@ -15,7 +15,7 @@ class TransactionSummaryDao {
   }
 
   Future<List<TransactionSummary>> getAllTransactionSummaries() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final transactionSummaryList = await db!.query(tableTransactionSummaries);
     final transactionSummaries = parseTransactionSummaries(transactionSummaryList);
     return transactionSummaries;
@@ -30,7 +30,7 @@ class TransactionSummaryDao {
   }
 
   Future<void> insertTransactionSummarys(List<TransactionSummary> transactionSummaries) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var batch = db!.batch();
     for (var transactionSummary in transactionSummaries) {
       batch.insert(tableTransactionSummaries, transactionSummary.toJson());
@@ -40,7 +40,7 @@ class TransactionSummaryDao {
   }
 
   Future<void> emptyTransactionSummaries() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableTransactionSummaries, where: 'id > 0');
     return Future.value();
   }

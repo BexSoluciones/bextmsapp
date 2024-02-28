@@ -136,7 +136,7 @@ class _MaxBoxScreenState extends State<MaxBoxScreen> {
                 Image.asset('assets/icons/arrived.png'),
               ])));
     }else{
-      Container();
+      const SizedBox();
     }
 
     setState(() {
@@ -269,7 +269,7 @@ class _MaxBoxScreenState extends State<MaxBoxScreen> {
                       ),
                     ],
                   ))
-                  : Container(),
+                  : const SizedBox(),
             ],
           ),
         ),

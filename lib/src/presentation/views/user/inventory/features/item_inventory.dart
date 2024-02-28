@@ -1,9 +1,14 @@
 import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibration/vibration.dart';
 
+//utils
+import '../../../../../utils/constants/colors.dart';
+
 //cubit
+
 import '../../../../cubits/inventory/inventory_cubit.dart';
 
 //domain
@@ -14,13 +19,12 @@ import '../../../../../domain/models/enterprise_config.dart';
 
 class ItemInventory extends StatefulWidget {
   const ItemInventory(
-      {Key? key,
+      {super.key,
       this.enterpriseConfig,
       required this.summaries,
       required this.summary,
       required this.isArrived,
-      required this.arguments})
-      : super(key: key);
+      required this.arguments});
 
   final EnterpriseConfig? enterpriseConfig;
   final List<Summary> summaries;
@@ -60,27 +64,85 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
     }
   }
 
-  Future<void> minus() async {
-    inventoryCubit.minus(widget.summary, widget.arguments.summary.validate!,
-        widget.arguments.work.id!, widget.arguments.summary.orderNumber);
-  }
+  Future<void> minus() async => inventoryCubit.minus(
+      widget.summary,
+      widget.arguments.summary.validate!,
+      widget.arguments.work.id!,
+      widget.arguments.summary.orderNumber);
 
-  Future<void> longMinus() async {
-    inventoryCubit.longMinus(widget.summary, widget.arguments.summary.validate!,
-        widget.arguments.work.id!, widget.arguments.summary.orderNumber);
-  }
+  Future<void> longMinus() async => inventoryCubit.longMinus(
+      widget.summary,
+      widget.arguments.summary.validate!,
+      widget.arguments.work.id!,
+      widget.arguments.summary.orderNumber);
 
-  Future<void> increment() async {
-    inventoryCubit.increment(widget.summary, widget.arguments.summary.validate!,
-        widget.arguments.work.id!, widget.arguments.summary.orderNumber);
-  }
+  Future<void> increment() async => inventoryCubit.increment(
+      widget.summary,
+      widget.arguments.summary.validate!,
+      widget.arguments.work.id!,
+      widget.arguments.summary.orderNumber);
 
-  Future<void> longIncrement() async {
-    inventoryCubit.longIncrement(
-        widget.summary,
-        widget.arguments.summary.validate!,
-        widget.arguments.work.id!,
-        widget.arguments.summary.orderNumber);
+  Future<void> longIncrement() async => inventoryCubit.longIncrement(
+      widget.summary,
+      widget.arguments.summary.validate!,
+      widget.arguments.work.id!,
+      widget.arguments.summary.orderNumber);
+
+  changeCant() {
+    return BlocBuilder<InventoryCubit, InventoryState>(
+        builder: (context, state) {
+      return AlertDialog(
+        title: const Text('Cambiar la cantidad'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          Form(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  TextFormField(
+                    initialValue: state.quantity?.toString(),
+                    decoration: const InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey, width: 2.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: kPrimaryColor, width: 2.0),
+                      ),
+                    ),
+                    onChanged: (value) =>
+                        inventoryCubit.onChangeQuantity(value),
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
+                    ], // Only numbers can be entered
+                  )
+                ],
+              ),
+            ),
+          )
+        ]),
+        actions: [
+          TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+              }),
+          TextButton(
+              child: const Text('Aceptar'),
+              onPressed: () async {
+                inventoryCubit.changeQuantity(
+                    widget.summary,
+                    widget.arguments.summary.validate!,
+                    widget.arguments.work.id!,
+                    widget.arguments.summary.orderNumber);
+                Navigator.of(context).pop();
+              })
+        ],
+      );
+    });
   }
 
   @override
@@ -139,12 +201,12 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                       Text('(${widget.summary.count ?? 1})')
                                     ],
                                   )
-                                : Container(),
+                                : const SizedBox(),
                           ],
                         ),
                         widget.summary.idPacking != null &&
                                 widget.summary.packing != null
-                            ? Container()
+                            ? const SizedBox()
                             : Text(
                                 'U.M. ${double.parse(widget.summary.unitOfMeasurement).toStringAsFixed(2)} - N.M ${widget.summary.nameOfMeasurement}',
                                 style: TextStyle(color: Colors.grey[500]),
@@ -179,18 +241,23 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                                         Icons.exposure_minus_1,
                                                         color:
                                                             Colors.grey[500])))
-                                            : Container(),
+                                            : const SizedBox(),
                                         GestureDetector(
-                                            onTap: () => widget.isArrived &&
-                                                    widget.enterpriseConfig
-                                                            ?.blockPartial ==
-                                                        false
-                                                ? showDialog(
+                                            onTap: () {
+                                              if (widget.isArrived &&
+                                                  widget.enterpriseConfig
+                                                          ?.blockPartial ==
+                                                      false) {
+                                                inventoryCubit.onChangeQuantity(
+                                                    widget.summary.cant
+                                                        .toString());
+                                                showDialog(
                                                     context: context,
                                                     builder: (BuildContext
                                                             context) =>
-                                                        Container())
-                                                : null,
+                                                        changeCant());
+                                              }
+                                            },
                                             child: Text(
                                               widget.summary.cant
                                                   .toStringAsFixed(0),
@@ -217,7 +284,7 @@ class ItemInventoryState extends State<ItemInventory> with FormatNumber {
                                                         Icons.exposure_plus_1,
                                                         color:
                                                             Colors.grey[500])))
-                                            : Container()
+                                            : const SizedBox()
                                       ])),
                               Text(
                                 'TOTAL: \$${formatter.format(widget.summary.grandTotal)}',

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:bexdeliveries/src/domain/models/warehouse.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
-import 'package:location_repository/location_repository.dart';
 import 'package:routing_client_dart/routing_client_dart.dart';
 
 //core
@@ -27,13 +27,10 @@ import '../../../domain/models/work.dart';
 import '../../../domain/repositories/database_repository.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/navigation.dart';
 import '../../../services/logger.dart';
 
 part 'navigation_state.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
 
 class LayerMoodle {
   LayerMoodle(this.polygons);
@@ -41,16 +38,18 @@ class LayerMoodle {
 }
 
 class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
-  final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
+  final DatabaseRepository databaseRepository;
+  final NavigationService navigationService;
   final helperFunctions = HelperFunctions();
   final GpsBloc gpsBloc;
 
-  CurrentUserLocationEntity? currentLocation;
-
-  NavigationCubit(
-      this._databaseRepository, this._locationRepository, this.gpsBloc)
+  NavigationCubit(this.databaseRepository, this.navigationService, this.gpsBloc)
       : super(const NavigationState(status: NavigationStatus.initial), []);
+
+
+  goBack() => navigationService.goBack();
+
+  goTo(routeName, arguments) => navigationService.goTo(routeName, arguments: arguments);
 
   Future<void> getAllWorksByWorkcode(String workcode) async {
     if (isBusy) return;
@@ -89,7 +88,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
   Future<NavigationState> _getAllWorksByWorkcode(String workcode) async {
     try {
       final worksDatabase =
-          await _databaseRepository.findAllWorksByWorkcode(workcode);
+          await databaseRepository.findAllWorksByWorkcode(workcode);
 
       var currentLocation = gpsBloc.state.lastKnownLocation;
 
@@ -108,7 +107,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           } else {
             work.color = 8;
           }
-          await _databaseRepository.updateWork(work);
+          await databaseRepository.updateWork(work);
         }
 
         works.add(work);
@@ -138,8 +137,12 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           );
         }
 
-        var warehouse =
-            await _databaseRepository.findWarehouse(works.first.warehouseId!);
+        Warehouse? warehouse;
+
+        if (works.first.warehouseId != null) {
+          warehouse =
+              await databaseRepository.findWarehouse(works.first.warehouseId!);
+        }
 
         if (warehouse != null) {
           markers.add(
@@ -208,7 +211,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
         //TODO:: NOTES
         // final zoneId = works.first.zoneId;
         //
-        // var notes = await _databaseRepository.getAllNotes();
+        // var notes = await databaseRepository.getAllNotes();
         //
         // for (var note in notes) {
         //   markers.add(
@@ -243,7 +246,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
           );
 
           List<LatLng> polylinesDatabase =
-              await _databaseRepository.getPolylines(workcode);
+              await databaseRepository.getPolylines(workcode);
           var polygons = Polyline(
               color:
                   Colors.primaries[Random().nextInt(Colors.primaries.length)],
@@ -259,7 +262,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
                   strokeWidth: 2),
             ];
           } else {
-            _databaseRepository.insertPolylines(workcode, polygons.points);
+            databaseRepository.insertPolylines(workcode, polygons.points);
             polylines = [
               Polyline(
                   points: polygons.points,
@@ -309,11 +312,11 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
       var currentLocation = gpsBloc.state.lastKnownLocation;
       position = LatLng(currentLocation!.latitude, currentLocation.longitude);
     }
-    _navigationService.goTo(AppRoutes.notes, arguments: position);
+    navigationService.goTo(AppRoutes.notes, arguments: position);
   }
 
   Future<void> showNote(Note note) async {
-    _navigationService.goTo(AppRoutes.notes, arguments: note);
+    navigationService.goTo(AppRoutes.notes, arguments: note);
   }
 
   Future<void> moveController(int index, double zoom) async {
@@ -345,15 +348,15 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
 
         if (index - 1 >= 0) {
           updateWorkFutures
-              .add(_databaseRepository.updateWork(data[index - 1]));
+              .add(databaseRepository.updateWork(data[index - 1]));
         }
 
         if (index + 1 < data.length) {
           updateWorkFutures
-              .add(_databaseRepository.updateWork(data[index + 1]));
+              .add(databaseRepository.updateWork(data[index + 1]));
         }
 
-        updateWorkFutures.add(_databaseRepository.updateWork(data[index]));
+        updateWorkFutures.add(databaseRepository.updateWork(data[index]));
 
         await Future.wait(updateWorkFutures).then((value) {
           state.mapController!.move(state.kWorkList![index], zoom);
@@ -375,7 +378,7 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
     BuildContext context,
     Work work,
   ) async {
-    currentLocation ??= await _locationRepository.getCurrentLocation();
+    var currentLocation = gpsBloc.state.lastKnownLocation;
     if (context.mounted) {
       helperFunctions.showMapDirection(context, work, currentLocation!);
     }

@@ -15,7 +15,7 @@ class HistoryOrderDao {
   }
 
   Future<HistoryOrder?> getHistoryOrder(String workcode, int zoneId) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final historyList = await db!.query(tableHistoryOrders,
         where: 'workcode = ? AND zone_id = ?', whereArgs: [workcode, zoneId]);
     final histories = parseHistories(historyList);
@@ -36,7 +36,7 @@ class HistoryOrderDao {
   }
 
   Future<void> emptyHistories() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableHistoryOrders, where: 'id > 0');
     return Future.value();
   }

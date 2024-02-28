@@ -14,11 +14,10 @@ import 'item_inventory.dart';
 
 class ListViewInventory extends StatefulWidget {
   const ListViewInventory(
-      {Key? key,
+      {super.key,
         required this.arguments,
         required this.three,
-        required this.isArrived})
-      : super(key: key);
+        required this.isArrived});
 
   final InventoryArgument arguments;
   final GlobalKey three;
@@ -43,10 +42,10 @@ class ListViewInventoryState extends State<ListViewInventory> {
     final size = MediaQuery.of(context).size;
 
     return BlocBuilder<InventoryCubit, InventoryState>(builder: (context, state) {
-      switch (state.runtimeType) {
-        case InventoryLoading:
+      switch (state.status) {
+        case InventoryStatus.loading:
           return const SliverToBoxAdapter(child: Center(child:CupertinoActivityIndicator()));
-        case InventorySuccess:
+        case InventoryStatus.success:
           return _buildInventory(state, size);
         default:
           return const SliverToBoxAdapter();

@@ -49,10 +49,11 @@ class SearchHomeDelegate extends SearchDelegate<Work?> {
             ),
             child: ListView.separated(
               itemCount: _filters.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 16.0),
+              separatorBuilder: (context, index) =>
+                  const SizedBox(height: 16.0),
               itemBuilder: (context, index) {
                 final work = _filters[index];
-               return ItemWork(work: work);
+                return ItemWork(work: work);
               },
             )));
   }
@@ -79,7 +80,9 @@ class SearchHomeDelegate extends SearchDelegate<Work?> {
                   const SizedBox(height: 16.0),
               itemBuilder: (context, index) {
                 final work = _filters[index];
-                return (work.active == false || work.status != 'complete') ?  ItemWork(work: work): Container();
+                return (work.active == false || work.status != 'complete')
+                    ? ItemWork(work: work)
+                    : const SizedBox();
               },
             )));
   }

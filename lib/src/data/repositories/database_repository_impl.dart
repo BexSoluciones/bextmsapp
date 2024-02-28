@@ -46,8 +46,8 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   @override
   Future<List<Work>> findAllWorksPaginatedByWorkcode(
-      String workcode, int page) async {
-    return _appDatabase.workDao.findAllWorksPaginatedByWorkcode(workcode, page);
+      String workcode, int page, int limit) async {
+    return _appDatabase.workDao.findAllWorksPaginatedByWorkcode(workcode, page, limit);
   }
 
   @override
@@ -379,6 +379,11 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<List<ProcessingQueue>> getAllProcessingQueues(String? code, String? task) {
     return _appDatabase.processingQueueDao.getAllProcessingQueues(code, task);
+  }
+
+  @override
+  Future<ProcessingQueue> findProcessingQueue(int id) {
+    return _appDatabase.processingQueueDao.findProcessingQueue(id);
   }
 
   @override

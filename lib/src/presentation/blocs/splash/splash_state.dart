@@ -1,18 +1,18 @@
 part of 'splash_bloc.dart';
 
-abstract class SplashScreenState extends Equatable {
+abstract class SplashState extends Equatable {
   final String? route;
-
-  const SplashScreenState({this.route});
+  final dynamic arguments;
+  const SplashState({this.route, this.arguments});
 
   @override
   List<Object?> get props => [route];
 }
 
-class Initial extends SplashScreenState {}
+class Initial extends SplashState {}
 
-class Loading extends SplashScreenState {}
+class Loading extends SplashState {}
 
-class Loaded extends SplashScreenState {
-  const Loaded({super.route});
+class Loaded extends SplashState {
+  const Loaded({super.route, super.arguments});
 }

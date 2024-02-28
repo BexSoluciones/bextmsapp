@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:location_repository/location_repository.dart';
 
 //blocs
 import '../../blocs/gps/gps_bloc.dart';
@@ -20,21 +19,18 @@ import '../../../domain/abstracts/format_abstract.dart';
 import '../../../domain/repositories/database_repository.dart';
 
 //service
-import '../../../locator.dart';
 import '../../../services/navigation.dart';
 
 part 'reject_state.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-
 class RejectCubit extends Cubit<RejectState> with FormatDate {
-  final DatabaseRepository _databaseRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
+  final DatabaseRepository databaseRepository;
+  final ProcessingQueueBloc processingQueueBloc;
   final GpsBloc gpsBloc;
+  final NavigationService navigationService;
 
-  CurrentUserLocationEntity? currentLocation;
-
-  RejectCubit(this._databaseRepository, this._processingQueueBloc, this.gpsBloc)
+  RejectCubit(this.databaseRepository, this.processingQueueBloc, this.gpsBloc,
+      this.navigationService)
       : super(const RejectLoading());
 
   Future<void> getReasons() async {
@@ -42,21 +38,21 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
   }
 
   Future<RejectState> _getReasons() async {
-    final reasons = await _databaseRepository.getAllReasons();
+    final reasons = await databaseRepository.getAllReasons();
     return RejectSuccess(reasons: reasons);
   }
 
   Future<void> confirmTransaction(InventoryArgument arguments,
       String? nameReason, String? observation) async {
     emit(const RejectLoading());
-    final reasons = await _databaseRepository.getAllReasons();
+    final reasons = await databaseRepository.getAllReasons();
 
     if (nameReason == null) {
       emit(RejectFailed(
           reasons: reasons,
           error: 'El motivo de rechazo no puede estar vacio'));
     } else {
-      final reason = await _databaseRepository.findReason(nameReason);
+      final reason = await databaseRepository.findReason(nameReason);
 
       if (reason == null) {
         emit(RejectFailed(
@@ -79,11 +75,21 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
             longitude: null);
 
         var currentLocation = gpsBloc.state.lastKnownLocation;
+        currentLocation ??= gpsBloc.lastRecordedLocation;
+        currentLocation ??= await gpsBloc.getCurrentLocation();
 
-        transaction.latitude = currentLocation!.latitude.toString();
+        if (currentLocation == null) {
+          emit(const RejectFailed(
+            error:
+                'Error obteniendo tu ubicación, por favor revisa tu señal y intentalo de nuevo.',
+          ));
+          return;
+        }
+
+        transaction.latitude = currentLocation.latitude.toString();
         transaction.longitude = currentLocation.longitude.toString();
 
-        await _databaseRepository.insertTransaction(transaction);
+        await databaseRepository.insertTransaction(transaction);
 
         var processingQueue = ProcessingQueue(
             body: jsonEncode(transaction.toJson()),
@@ -92,19 +98,24 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
             createdAt: now(),
             updatedAt: now());
 
-        _processingQueueBloc
+        processingQueueBloc
             .add(ProcessingQueueAdd(processingQueue: processingQueue));
 
         var validate =
-            await _databaseRepository.validateTransaction(arguments.work.id!);
+            await databaseRepository.validateTransaction(arguments.work.id!);
+
+        var isLastTransaction = await databaseRepository
+            .checkLastTransaction(arguments.work.workcode!);
 
         emit(RejectSuccess(reasons: reasons));
 
-        if (validate == false) {
-          await _navigationService.goTo(AppRoutes.summary,
+        if (isLastTransaction == true) {
+          await navigationService.goTo(AppRoutes.home, arguments: 'collection');
+        } else if (validate == false) {
+          await navigationService.goTo(AppRoutes.summary,
               arguments: SummaryArgument(work: arguments.work));
         } else {
-          await _navigationService.goTo(AppRoutes.work,
+          await navigationService.goTo(AppRoutes.work,
               arguments: WorkArgument(work: arguments.work));
         }
       }

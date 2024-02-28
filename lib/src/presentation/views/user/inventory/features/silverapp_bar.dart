@@ -21,19 +21,17 @@ import '../../../../widgets/icon_wifi_widget.dart';
 import '../../../../../locator.dart';
 import '../../../../../services/navigation.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-
 class AppBarInventory extends StatelessWidget {
-  const AppBarInventory(
-      {Key? key,
+  AppBarInventory(
+      {super.key,
       required this.arguments,
       required this.isArrived,
-      required this.one})
-      : super(key: key);
+      required this.one});
 
   final InventoryArgument arguments;
   final bool isArrived;
   final GlobalKey one;
+  final NavigationService navigationService = locator<NavigationService>();
 
   Future<void> vibrate() async {
     var hasVibrate = await Vibration.hasVibrator();
@@ -44,7 +42,6 @@ class AppBarInventory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(16);
     return SliverAppBar(
       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -52,7 +49,7 @@ class AppBarInventory extends StatelessWidget {
           onPressed: () {
             context.read<InventoryCubit>().reset(arguments.summary.validate!,
                 arguments.work.id!, arguments.summary.orderNumber);
-            _navigationService.goTo(AppRoutes.summary,
+            navigationService.goTo(AppRoutes.summary,
                 arguments: SummaryArgument(work: arguments.work));
           },
           icon: Icon(Icons.arrow_back_ios_new,
@@ -79,7 +76,7 @@ class AppBarInventory extends StatelessWidget {
                     icon: Icon(Icons.change_circle_outlined,
                         color:
                             Theme.of(context).colorScheme.secondaryContainer)))
-            : Container(),
+            : const SizedBox(),
         const SizedBox(width: 5)
       ],
       pinned: true,
@@ -88,7 +85,6 @@ class AppBarInventory extends StatelessWidget {
       expandedHeight: MediaQuery.of(context).size.height * 0.28,
       flexibleSpace: FlexibleSpaceBar(
           collapseMode: CollapseMode.pin,
-          centerTitle: true,
           background: SafeArea(
             child: Container(
                 constraints: BoxConstraints(
@@ -240,15 +236,14 @@ class AppBarInventory extends StatelessWidget {
                                             ],
                                           ),
                                         )
-                                      : Container(),
+                                      : const SizedBox(),
                                 ],
                               ),
                             )),
                       ),
                     ])),
           )),
-      title: Text(arguments.work.workcode!,
-          textAlign: TextAlign.center,
+      title: Text("SERVICIO: ${arguments.work.workcode}",
           style: TextStyle(
               fontSize: calculatedFon,
               fontWeight: FontWeight.normal,

@@ -141,11 +141,11 @@ abstract class ApiRepository {
     required HistoryOrderUpdatedRequest request
   });
 
-  Future<DataState<StatusResponse>> locations({
+  Future<DataState<StatusResponse>?> locations({
     required LocationsRequest request
   });
 
-  Future<DataState<StatusResponse>> reason({
+  Future<DataState<StatusResponse>?> reason({
     required ReasonMRequest request
   });
 

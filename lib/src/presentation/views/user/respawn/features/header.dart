@@ -122,7 +122,7 @@ class HeaderRespawn extends StatelessWidget {
                       ],
                     ),
                   )
-                      : Container(),
+                      : const SizedBox(),
                 ],
               ),
             )),

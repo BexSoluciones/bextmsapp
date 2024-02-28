@@ -22,7 +22,7 @@ class ProcessingQueueCard extends StatelessWidget {
       ),
       child: ListTile(
         onTap: () => _navigationService.goTo(AppRoutes.processingQueueDetail,
-            arguments: processingQueue),
+            arguments: processingQueue.id),
         title: Text(
           'CODIGO: ${processingQueue.code}',
           style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
@@ -33,7 +33,7 @@ class ProcessingQueueCard extends StatelessWidget {
             Text('Tarea: ${processingQueue.task}'),
             processingQueue.error != null
                 ? Text('Error ${processingQueue.error}')
-                : Container(),
+                : const SizedBox(),
             Text('Fecha inicio ${processingQueue.createdAt}'),
             Text('Fecha fin      ${processingQueue.updatedAt}'),
           ],

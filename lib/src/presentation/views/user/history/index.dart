@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 
 //blocs
 import '../../../blocs/history_order/history_order_bloc.dart';
@@ -22,27 +21,31 @@ import '../../../../services/storage.dart';
 import '../../../widgets/default_button_widget.dart';
 import '../../../widgets/different_item.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final NavigationService _navigationService = locator<NavigationService>();
+
 
 class HistoryView extends StatefulWidget {
   const HistoryView({
-    Key? key,
+    super.key,
     required this.arguments,
-  }) : super(key: key);
+  });
 
   final HistoryArgument arguments;
+
 
   @override
   State<HistoryView> createState() => _HistoryViewState();
 }
 
-List<Work> newWorks = [];
+
 
 class _HistoryViewState extends State<HistoryView> {
   late HistoryOrderBloc historicWorkBloc;
   bool isLoadingModal = false;
   bool isLoading = false;
+  List<Work> newWorks = [];
+
+  final LocalStorageService storageService = locator<LocalStorageService>();
+  final NavigationService navigationService = locator<NavigationService>();
 
   @override
   void initState() {
@@ -72,10 +75,10 @@ class _HistoryViewState extends State<HistoryView> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Lottie.asset(
-                              'assets/animations/13357-route-finder.json',
-                              height: 180,
-                              width: 180),
+                          // Lottie.asset(
+                          //     'assets/animations/13357-route-finder.json',
+                          //     height: 180,
+                          //     width: 180),
                           Text(
                               '¿Deseas usar este histórico con probabilidad de ${widget.arguments.likelihood.toStringAsFixed(2)}%?',
                               textAlign: TextAlign.center,
@@ -103,7 +106,7 @@ class _HistoryViewState extends State<HistoryView> {
                                                 .arguments.differents[index],
                                             index: index);
                                       }))
-                              : Container(),
+                              : const SizedBox(),
                           SizedBox(height: getProportionateScreenHeight(10)),
                           BlocConsumer<HistoryOrderBloc, HistoryOrderState>(
                             listener: (context, state) {
@@ -129,13 +132,13 @@ class _HistoryViewState extends State<HistoryView> {
                                                               20),
                                                       color: Colors.white)),
                                           press: () async {
-                                            _storageService.setBool(
+                                            storageService.setBool(
                                                 '${widget.arguments.work.workcode}-usedHistoric',
                                                 true);
-                                            _storageService.setBool(
+                                            storageService.setBool(
                                                 '${widget.arguments.work.workcode}-showAgain',
                                                 true);
-                                            _storageService.setInt(
+                                            storageService.setInt(
                                                 'history-id-${widget.arguments.work.workcode}',
                                                 state.historyOrder!.id);
                                             historicWorkBloc
@@ -157,10 +160,10 @@ class _HistoryViewState extends State<HistoryView> {
                                                       20),
                                               color: Colors.white)),
                                       press: () {
-                                        _storageService.setBool(
+                                        storageService.setBool(
                                             '${widget.arguments.work.workcode}-showAgain',
                                             false);
-                                        _navigationService.goTo(AppRoutes.work,
+                                        navigationService.goTo(AppRoutes.work,
                                             arguments: WorkArgument(
                                                 work: widget.arguments.work));
                                       }),
@@ -175,10 +178,10 @@ class _HistoryViewState extends State<HistoryView> {
                                                       20),
                                               color: Colors.white)),
                                       press: () {
-                                        _storageService.setBool(
+                                        storageService.setBool(
                                             '${widget.arguments.work.workcode}-showAgain',
                                             true);
-                                        _navigationService.goTo(AppRoutes.work,
+                                        navigationService.goTo(AppRoutes.work,
                                             arguments: WorkArgument(
                                                 work: widget.arguments.work));
                                       })

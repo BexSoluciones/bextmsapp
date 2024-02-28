@@ -22,8 +22,6 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
       try {
         final response = await InternetAddress.lookup('example.com');
 
-        print(response);
-
         if (result == ConnectivityResult.none) {
           NetworkBloc().add(NetworkNotify(isConnected: false));
         } else if(response.isNotEmpty && response[0].rawAddress.isNotEmpty) {
@@ -32,7 +30,6 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
           NetworkBloc().add(NetworkNotify(isConnected: false));
         }
       } on SocketException catch (e) {
-        print(e.toString());
         NetworkBloc().add(NetworkNotify(isConnected: false));
       }
 

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,16 +15,17 @@ import '../../widgets/custom_text_widget.dart';
 import '../../../locator.dart';
 import '../../../services/navigation.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-
 class RequestPermissionView extends StatefulWidget {
-  const RequestPermissionView({Key? key}) : super(key: key);
+  const RequestPermissionView({super.key});
 
   @override
   RequestPermissionViewState createState() => RequestPermissionViewState();
 }
 
 class RequestPermissionViewState extends State<RequestPermissionView> {
+
+  final NavigationService _navigationService = locator<NavigationService>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

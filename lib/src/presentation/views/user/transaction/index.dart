@@ -1,10 +1,8 @@
 import 'dart:async';
-
 import 'package:bexdeliveries/src/utils/constants/gaps.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 
 //bloc
 import '../../../../presentation/blocs/processing_queue/processing_queue_bloc.dart';
@@ -17,7 +15,7 @@ import '../../../../domain/abstracts/format_abstract.dart';
 import '../../../widgets/default_button_widget.dart';
 
 class TransactionView extends StatefulWidget {
-  const TransactionView({Key? key}) : super(key: key);
+  const TransactionView({super.key});
 
   @override
   State<TransactionView> createState() => _TransactionViewState();
@@ -35,7 +33,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
   @override
   void initState() {
     processingQueueBloc = BlocProvider.of<ProcessingQueueBloc>(context);
-
+    context.read<ProcessingQueueBloc>().add(ProcessingQueueSender());
     stream = Stream.periodic(const Duration(seconds: 1), (int count) async {
       return processingQueueBloc.countProcessingQueueIncompleteToTransactions();
     });
@@ -83,9 +81,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
             ],
           ),
         ),
-        body: BlocBuilder<ProcessingQueueBloc, ProcessingQueueState>(
-          builder: (_, state) => _buildBlocConsumer(),
-        ));
+        body: buildBlocConsumer());
   }
 
   void buildBlocListener(
@@ -104,7 +100,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
     }
   }
 
-  Widget _buildBlocConsumer() {
+  Widget buildBlocConsumer() {
     return BlocConsumer<ProcessingQueueBloc, ProcessingQueueState>(
       buildWhen: (previous, current) => previous != current,
       listener: buildBlocListener,
@@ -167,7 +163,7 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
                                 press: () => context
                                     .read<ProcessingQueueBloc>()
                                     .add(ProcessingQueueSender()))
-                            : Container()
+                            : const SizedBox()
                       ],
                     )));
           }
@@ -208,8 +204,9 @@ class _TransactionViewState extends State<TransactionView> with FormatNumber {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         children: [
-          Lottie.asset(
-              'assets/animations/111789-file-transfers-over-cloud.json'),
+          //TODO: [Heider Zapa] change for svg
+          // Lottie.asset(
+          //     'assets/animations/111789-file-transfers-over-cloud.json'),
           Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,

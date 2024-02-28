@@ -11,6 +11,11 @@ class JustCacheStrategy extends CacheStrategy {
 
   JustCacheStrategy._internal();
   @override
-  Future<T?> applyStrategy<T>(AsyncBloc<T> asyncBloc, String key, SerializerBloc<T> serializerBloc, int ttlValue, Storage storage) async =>
+  Future<T?> applyStrategy<T>(
+          AsyncBloc<T> asyncBloc,
+          String key,
+          SerializerBloc<T> serializerBloc,
+          int ttlValue,
+          Storage storage) async =>
       await fetchCacheData(key, serializerBloc, storage, ttlValue: ttlValue);
 }

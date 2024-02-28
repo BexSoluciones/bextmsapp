@@ -19,7 +19,7 @@ class NotificationDao {
 
   //INSERT METHODS
   Future<int> insert(String table, Map<String, dynamic> row) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     try {
       return db!.insert(table, row);
     } catch (error, stackTrace) {
@@ -29,20 +29,20 @@ class NotificationDao {
   }
 
   Future<List<PushNotification>> getNotifications() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final notificationsList = await db!.query(tableNotifications);
     final notifications = parseNotifications(notificationsList);
     return notifications;
   }
 
   Future<int> updateNotification(int notificationid, String readAt) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     return db!.update(tableNotifications, {'read_at': readAt},
         where: 'id = ?', whereArgs: [notificationid]);
   }
 
   Future<int?> countAllUnreadNotifications() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     return Sqflite.firstIntValue(await db!.rawQuery(
         'SELECT COUNT(*) FROM $tableNotifications WHERE read_at IS NULL'));
   }
@@ -52,7 +52,7 @@ class NotificationDao {
   }
 
   Future<int> deleteNotificationsByDays() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var today = DateTime.now();
     var limitDaysWork = _storageService.getInt('limit_days_works') ?? 3;
     var datesToValidate = today.subtract(Duration(days: limitDaysWork));

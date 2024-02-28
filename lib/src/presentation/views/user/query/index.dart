@@ -19,7 +19,7 @@ import '../../../../domain/abstracts/format_abstract.dart';
 import './features/item.dart';
 
 class QueryView extends StatefulWidget {
-  const QueryView({Key? key}) : super(key: key);
+  const QueryView({super.key});
 
   @override
   State<QueryView> createState() => _QueryViewState();

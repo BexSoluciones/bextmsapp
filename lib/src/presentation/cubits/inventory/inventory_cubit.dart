@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -11,26 +10,27 @@ import '../../../utils/constants/strings.dart';
 
 //domain
 import '../../../domain/models/summary.dart';
+import '../../../domain/models/arguments.dart';
 import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/models/enterprise_config.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //service
-import '../../../locator.dart';
 import '../../../services/storage.dart';
 import '../../../services/navigation.dart';
 
 part 'inventory_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final NavigationService _navigationService = locator<NavigationService>();
-
 class InventoryCubit extends Cubit<InventoryState> with FormatDate {
-  final DatabaseRepository _databaseRepository;
+  final DatabaseRepository databaseRepository;
+  final LocalStorageService storageService;
+  final NavigationService navigationService;
 
   final helperFunctions = HelperFunctions();
 
-  InventoryCubit(this._databaseRepository) : super(const InventoryLoading());
+  InventoryCubit(
+      this.databaseRepository, this.storageService, this.navigationService)
+      : super(const InventoryState(status: InventoryStatus.loading));
 
   Future<void> getAllInventoryByOrderNumber(
       int validate, int workId, String orderNumber) async {
@@ -41,46 +41,51 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
       int validate, int workId, String orderNumber) async {
     var summaries = <Summary>[];
     if (validate == 1) {
-      summaries = await _databaseRepository.getAllInventoryByPackage(
+      summaries = await databaseRepository.getAllInventoryByPackage(
           workId, orderNumber);
     } else {
-      summaries = await _databaseRepository.getAllInventoryByOrderNumber(
+      summaries = await databaseRepository.getAllInventoryByOrderNumber(
           workId, orderNumber);
     }
 
     var totalSummaries =
-        await _databaseRepository.getTotalSummaries(workId, orderNumber);
+        await databaseRepository.getTotalSummaries(workId, orderNumber);
 
     final isArrived =
-        await _databaseRepository.validateTransactionArrived(workId, 'arrived');
+        await databaseRepository.validateTransactionArrived(workId, 'arrived');
 
     final isPartial = summaries.where((element) => element.minus > 0);
+
+    print(isPartial);
+
     final isRejected = summaries.where((element) => element.cant != 0);
 
-    return InventorySuccess(
+    return state.copyWith(
+        status: InventoryStatus.success,
         summaries: summaries,
         totalSummaries: totalSummaries,
         isArrived: isArrived,
         isPartial: isPartial.isNotEmpty,
         isRejected: isRejected.isEmpty,
-        enterpriseConfig: _storageService.getObject('config') != null
-            ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
+        enterpriseConfig: storageService.getObject('config') != null
+            ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
             : null);
   }
 
   Future<void> reset(int validate, int workId, String orderNumber) async {
-    await _databaseRepository.resetCantSummaries(workId, orderNumber);
+    await databaseRepository.resetCantSummaries(workId, orderNumber);
     emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
-  Future<void> minus(Summary summary, int validate, int workId, String orderNumber) async {
+  Future<void> minus(
+      Summary summary, int validate, int workId, String orderNumber) async {
     if (summary.cant > 0) {
       summary.minus++;
       summary.cant--;
       summary.grandTotal = summary.price *
           (summary.cant * double.parse(summary.unitOfMeasurement));
     }
-    await _databaseRepository.updateSummary(summary);
+    await databaseRepository.updateSummary(summary);
     emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
@@ -93,7 +98,7 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
       summary.grandTotal = summary.price *
           (summary.cant * double.parse(summary.unitOfMeasurement));
     }
-    await _databaseRepository.updateSummary(summary);
+    await databaseRepository.updateSummary(summary);
     emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
@@ -111,7 +116,7 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
       summary.grandTotal = summary.price *
           (summary.cant * double.parse(summary.unitOfMeasurement));
     }
-    await _databaseRepository.updateSummary(summary);
+    await databaseRepository.updateSummary(summary);
     emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
@@ -126,10 +131,39 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
       summary.grandTotal = summary.price *
           (summary.cant * double.parse(summary.unitOfMeasurement));
     }
-    await _databaseRepository.updateSummary(summary);
+    await databaseRepository.updateSummary(summary);
     emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
   }
 
+  Future<void> onChangeQuantity(String? value) async {
+    if (value != null) {
+      var q = double.tryParse(value);
+      emit(state.copyWith(quantity: q));
+    }
+  }
+
+  Future<void> changeQuantity(
+      Summary summary, int validate, int workId, String orderNumber) async {
+    if (state.quantity != null &&
+        state.quantity! >= 0 &&
+        state.quantity! <
+            (double.parse(summary.amount) /
+                double.parse(summary.unitOfMeasurement))) {
+      summary.cant = state.quantity!;
+
+      summary.minus = (double.parse(summary.amount) ~/
+                  double.parse(summary.unitOfMeasurement) -
+              state.quantity!)
+          .toInt();
+
+      summary.grandTotal = summary.price *
+          summary.cant *
+          double.parse(summary.unitOfMeasurement);
+      await databaseRepository.updateSummary(summary);
+      emit(await _getAllInventoryByOrderNumber(validate, workId, orderNumber));
+    }
+  }
+
   void goToPackage(PackageArgument argument) =>
-      _navigationService.goTo(AppRoutes.package, arguments: argument);
+      navigationService.goTo(AppRoutes.package, arguments: argument);
 }

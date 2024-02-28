@@ -1,24 +1,15 @@
-import 'package:bexdeliveries/src/presentation/cubits/notification/notification_cubit.dart';
-import 'package:bexdeliveries/src/presentation/widgets/notification_page.dart';
-import 'package:bexdeliveries/src/services/notifications.dart';
-import 'package:bexdeliveries/src/utils/constants/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:overlay_support/overlay_support.dart';
 
 //domain
 import '../../../../domain/models/notification.dart';
 
-//services
-import '../../../../locator.dart';
-import '../../../../services/navigation.dart';
+//cubit
+import '../../../../presentation/cubits/notification/notification_cubit.dart';
 
 //widgets
-import '../../../widgets/custom_notification_badge.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
-final NotificationService _notificationService = locator<NotificationService>();
+import '../../../../presentation/widgets/notification_page.dart';
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -37,15 +28,6 @@ class _NotificationsViewState extends State<NotificationsView> {
     super.initState();
   }
 
-  void show() {
-    showSimpleNotification(
-      const Text('Hola'),
-      leading: const Icon(Icons.notification_important_outlined),
-      subtitle: const Text('este es un mensage'),
-      background: kPrimaryColor,
-      duration: const Duration(seconds: 2),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

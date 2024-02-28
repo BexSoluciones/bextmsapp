@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/services/navigation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 //blocs
 import '../../../presentation/blocs/camera/camera_bloc.dart';
@@ -24,7 +25,8 @@ Map<String, RouteType> coreRoutes = {
   AppRoutes.camera: (context, settings) => BlocProvider(
         create: (_) => CameraBloc(
             cameraUtils: CameraUtils(),
-            databaseRepository: locator<DatabaseRepository>())
+            databaseRepository: locator<DatabaseRepository>(),
+            navigationService: locator<NavigationService>())
           ..add(CameraInitialized()),
         child: const CameraView(),
       ),

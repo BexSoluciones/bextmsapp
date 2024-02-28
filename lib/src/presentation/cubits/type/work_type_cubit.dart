@@ -8,9 +8,9 @@ import 'package:meta/meta.dart';
 part 'work_type_state.dart';
 
 class WorkTypeCubit extends BaseCubit<WorkTypeState, List<WorkTypes>?> {
-  final DatabaseRepository _databaseRepository;
+  final DatabaseRepository databaseRepository;
 
-  WorkTypeCubit(this._databaseRepository) : super(const WorkTypeCubitLoading(),[]);
+  WorkTypeCubit(this.databaseRepository) : super(const WorkTypeCubitLoading(),[]);
 
   Future<void> getWorkTypesFromWork(String workCode) async {
     if (isBusy) return;
@@ -18,7 +18,7 @@ class WorkTypeCubit extends BaseCubit<WorkTypeState, List<WorkTypes>?> {
 
     await run(() async {
       try {
-        final workTypes = await _databaseRepository.getWorkTypesFromWorkcode(workCode);
+        final workTypes = await databaseRepository.getWorkTypesFromWorkcode(workCode);
         emit(WorkTypeCubitSuccess(workTypes:workTypes));
       } catch (error, stackTrace) {
         await FirebaseCrashlytics.instance.recordError(error, stackTrace);

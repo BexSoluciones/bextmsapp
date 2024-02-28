@@ -8,13 +8,13 @@ part 'account_event.dart';
 part 'account_state.dart';
 
 class AccountBloc extends Bloc<AccountEvent, AccountState> {
-  final DatabaseRepository _databaseRepository;
+  final DatabaseRepository databaseRepository;
 
-  AccountBloc(this._databaseRepository) : super(AccountLoadingState()) {
+  AccountBloc(this.databaseRepository) : super(AccountLoadingState()) {
     on<LoadAccountListEvent>((event, emit) async {
       emit(AccountLoadingState());
       try {
-        final accounts = await _databaseRepository.getAllAccounts();
+        final accounts = await databaseRepository.getAllAccounts();
         accounts.insert(0, Account(id: 0, name: 'Selecciona una cuenta'));
         emit(AccountLoadedState(accounts));
       } catch (e, stackTrace) {

@@ -16,8 +16,7 @@ import '../../../../../utils/constants/nums.dart';
 import '../../../../widgets/default_button_widget.dart';
 
 class SummaryNavigationView extends StatefulWidget {
-  const SummaryNavigationView({Key? key, required this.arguments})
-      : super(key: key);
+  const SummaryNavigationView({super.key, required this.arguments});
 
   final SummaryNavigationArgument arguments;
 
@@ -141,7 +140,7 @@ class _SummaryNavigationViewState extends State<SummaryNavigationView> {
                                         child: Icon(
                                             Icons.arrow_circle_down_sharp)),
                                     iconEnabledColor: Colors.white, //Icon color
-                                    underline: Container(), //remove underline
+                                    underline: const SizedBox(), //remove underline
                                     isExpanded:
                                         true, //make true to make width 100%
                                   ))),

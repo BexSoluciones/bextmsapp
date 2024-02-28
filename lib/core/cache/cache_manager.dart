@@ -7,13 +7,12 @@ typedef SerializerBloc<T> = Function(dynamic);
 class CacheManager {
   final CacheStorage cacheStorage;
 
-  CacheManager(
-      this.cacheStorage,
-      );
+  CacheManager(this.cacheStorage);
 
   String? defaultSessionName;
 
-  StrategyBuilder from<T>(String key) => StrategyBuilder<T>(key, cacheStorage).withSession(defaultSessionName);
+  StrategyBuilder from<T>(String key) =>
+      StrategyBuilder<T>(key, cacheStorage).withSession(defaultSessionName);
 
   Future clear({String? prefix}) async {
     if (defaultSessionName != null && prefix != null) {
@@ -65,11 +64,13 @@ class StrategyBuilder<T> {
     return this;
   }
 
-  String buildSessionKey(String key) => _sessionName != null ? "${_sessionName}_$key" : key;
+  String buildSessionKey(String key) =>
+      _sessionName != null ? "${_sessionName}_$key" : key;
 
   Future<T?> execute() async {
     try {
-      return await _strategy.applyStrategy<T?>(_asyncBloc, buildSessionKey(_key), _serializerBloc, _ttlValue, _cacheStorage);
+      return await _strategy.applyStrategy<T?>(_asyncBloc,
+          buildSessionKey(_key), _serializerBloc, _ttlValue, _cacheStorage);
     } catch (exception) {
       rethrow;
     }

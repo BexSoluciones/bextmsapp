@@ -5,8 +5,7 @@ class CustomMaterialButton extends StatelessWidget {
   final String buttonText;
 
   const CustomMaterialButton(
-      {Key? key, required this.onButtonPressed, required this.buttonText})
-      : super(key: key);
+      {super.key, required this.onButtonPressed, required this.buttonText});
   @override
   Widget build(BuildContext context) {
     return MaterialButton(

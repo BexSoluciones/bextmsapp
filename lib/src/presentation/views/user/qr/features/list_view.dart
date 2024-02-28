@@ -45,11 +45,11 @@ class ListViewQr extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            account.code_qr != null
+                            account.codeQr != null
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: CachedNetworkImage(
-                                      imageUrl: account.code_qr!,
+                                      imageUrl: account.codeQr!,
                                       placeholder: (context, url) =>
                                           const CircularProgressIndicator(),
                                       errorWidget: (context, url, error) =>
@@ -58,7 +58,7 @@ class ListViewQr extends StatelessWidget {
                                       fit: BoxFit.cover,
                                     ),
                                   )
-                                : Container(),
+                                : const SizedBox(),
                             const SizedBox(height: 10),
                             Text(
                               'Código QR para ${account.name}',
@@ -82,7 +82,7 @@ class ListViewQr extends StatelessWidget {
                   ),
                 );
               } else {
-                return Container();
+                return const SizedBox();
               }
             },
           );

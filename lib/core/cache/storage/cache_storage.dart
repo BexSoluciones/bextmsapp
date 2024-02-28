@@ -1,16 +1,11 @@
 import 'storage.dart';
-// import 'package:hive/hive.dart';
-
-//TODO:: change to isar database
-
+//services
 import '../../../src/locator.dart';
 import '../../../src/services/storage.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class CacheStorage implements Storage {
-  static const _boxName = "cache";
-
   CacheStorage();
 
   @override

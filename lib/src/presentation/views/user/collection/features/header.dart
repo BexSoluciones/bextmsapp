@@ -12,7 +12,6 @@ class HeaderCollection extends StatelessWidget with FormatNumber {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Container(
       color: Theme.of(context).colorScheme.primary,
       child: SizedBox(

@@ -23,7 +23,7 @@ abstract class DatabaseRepository {
   //WORKS
   Future<List<Work>> getAllWorks();
   Future<List<Work>> findAllWorksByWorkcode(String workcode);
-  Future<List<Work>> findAllWorksPaginatedByWorkcode(String workcode, int page);
+  Future<List<Work>> findAllWorksPaginatedByWorkcode(String workcode, int page, int limit);
   Future<List<String>?> completeWorks();
   Future<int> countAllWorksByWorkcode(String workcode);
   Future<int> insertWork(Work work);
@@ -121,6 +121,7 @@ abstract class DatabaseRepository {
       String? code, String? task);
   Future<List<ProcessingQueue>> getAllProcessingQueuesPaginated(
       int? page, int? limit);
+  Future<ProcessingQueue> findProcessingQueue(int id);
   Stream<List<ProcessingQueue>> watchAllProcessingQueues();
   Future<List<ProcessingQueue>> getAllProcessingQueuesIncomplete();
   Future<int> countProcessingQueueIncompleteToTransactions();

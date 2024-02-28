@@ -6,5 +6,6 @@ import '../route_type.dart';
 import '../../../presentation/views/user/home/index.dart';
 
 Map<String, RouteType> homeRoutes = {
-  AppRoutes.home: (context, settings) => const HomeView()
+  AppRoutes.home: (context, settings) =>
+      HomeView(navigation: settings.arguments as String)
 };

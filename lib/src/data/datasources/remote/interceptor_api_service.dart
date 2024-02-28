@@ -1,14 +1,16 @@
 import 'dart:io';
-import 'package:bexdeliveries/src/presentation/cubits/home/home_cubit.dart';
-import 'package:bexdeliveries/src/services/logger.dart';
-import 'package:bexdeliveries/src/utils/constants/strings.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
+//core
+import '../../../../core/helpers/index.dart';
+//utils
+import '../../../utils/constants/strings.dart';
 //services
 import '../../../locator.dart';
 import '../../../services/storage.dart';
+import '../../../services/logger.dart';
 
 final LocalStorageService _storageService = locator<LocalStorageService>();
 const String appToken = 'token';
@@ -50,12 +52,9 @@ class Logging extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    logDebug(headerDeveloperLogger, 'init error');
-    logDebug(headerDeveloperLogger, err.type.toString());
-    logDebug(headerDeveloperLogger, err.error.toString());
-    logDebug(headerDeveloperLogger, err.message.toString());
     if (_shouldRetryOnHttpException(err)) {
       try {
+        final helperFunctions = HelperFunctions();
         logDebug(headerDeveloperLogger, 'retry login');
         await helperFunctions.login();
       } catch (e, stackTrace) {
