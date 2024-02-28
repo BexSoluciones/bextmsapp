@@ -140,6 +140,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           final timer0 = logTimerStart(headerHomeLogger, 'Starting...',
               level: LogLevel.info);
 
+          workmanagerService.completeWorks(_databaseRepository, _apiRepository);
+
           var currentLocation = gpsBloc.state.lastKnownLocation;
 
           final user = storageService.getObject('user') != null
