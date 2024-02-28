@@ -56,10 +56,8 @@ class ProcessingQueueDao {
 
   Future<ProcessingQueue> findProcessingQueue(int id) async {
     final db = await _appDatabase.database;
-    final processingQueueList = await db!
-        .query(tableProcessingQueues,
-        columns: ['task', 'code', 'body'],
-        where: 'id = ?', whereArgs: [id]);
+    final processingQueueList = await db!.query(tableProcessingQueues,
+        columns: ['task', 'code', 'body'], where: 'id = ?', whereArgs: [id]);
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues.first;
   }
@@ -174,15 +172,17 @@ class ProcessingQueueDao {
   Future<bool> validateIfProcessingQueueIsIncomplete() async {
     final db = await _appDatabase.database;
     final processingQueueList = await db!.query(tableProcessingQueues,
-        where:
-            'task = ? OR task = ? OR task = ? AND code != ? AND code != ? AND code != ?',
+        where: 'task = ? OR task = ? OR task = ? '
+            'AND code != ? AND code != ? AND code != ?'
+            'AND code != ?',
         whereArgs: [
           'incomplete',
           'error',
-          'processing'
-              'store_locations',
+          'processing',
+          'store_locations',
           'store_logout',
           'get_prediction',
+          'store_news'
         ]);
     final processingQueues = parseProcessingQueues(processingQueueList);
     return processingQueues.isNotEmpty;
