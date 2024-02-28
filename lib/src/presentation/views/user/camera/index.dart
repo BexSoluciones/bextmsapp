@@ -145,18 +145,22 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     }
   }
   Widget _buildBadge(BuildContext context) {
-    return FutureBuilder<int>(
-      future: context.read<CameraBloc>().countImagesInCache(),
-      builder: (context, snapshot) {
-        final badgeContent = Text(
-          snapshot.hasData ? snapshot.data.toString() : '0',
-          style: const TextStyle(color: Colors.white),
-        );
+    return BlocBuilder<PhotosBloc, PhotosState>(
+      builder: (context, state) {
+        return FutureBuilder<int>(
+          future: context.read<CameraBloc>().countImagesInCache(),
+          builder: (context, snapshot) {
+            final badgeContent = Text(
+              snapshot.hasData ? snapshot.data.toString() : '0',
+              style: const TextStyle(color: Colors.white),
+            );
 
-        return B.Badge(
-          position: B.BadgePosition.topEnd(top: -5, end: -5),
-          badgeContent: badgeContent,
-          child: const SizedBox(width: 60, height: 60, child: Icon(Icons.folder)),
+            return B.Badge(
+              position: B.BadgePosition.topEnd(top: -5, end: -5),
+              badgeContent: badgeContent,
+              child: const SizedBox(width: 60, height: 60, child: Icon(Icons.folder)),
+            );
+          },
         );
       },
     );
