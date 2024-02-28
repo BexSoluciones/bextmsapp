@@ -58,6 +58,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     try {
       _controller = await cameraUtils.getCameraController(
           resolutionPreset, cameraLensDirection);
+
       await _controller!.initialize();
       emit(CameraReady());
     } on CameraException catch (error) {
