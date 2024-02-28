@@ -6,6 +6,7 @@ import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
@@ -110,48 +111,49 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraGalleryToState(CameraGallery event, emit) async {
-    if (state is! CameraReady) {
-      emit(const CameraFailure(error: 'Camera is not ready'));
-      return;
-    }
-    try {
-      final picker = ImagePicker();
-      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    if (_controller != null && _controller!.value.isInitialized) {
+      emit(CameraCaptureInProgress());
+      try {
+        final picker = ImagePicker();
+        final pickedImage = await picker.pickImage(source: ImageSource.gallery);
 
-      if (pickedImage != null) {
-        final cacheDirectory = await getTemporaryDirectory();
-        final imageCount = await countImagesInCache();
-        if (imageCount >= 3) {
-          emit(CameraCaptureFailure(error: 'Solo se permiten 3 fotos'));
-        } else {
-          final imageFile = File(pickedImage.path);
-          final fileFormat = imageFile.path.split('.').last.toLowerCase();
-
-          if (fileFormat == 'jpg' || fileFormat == 'png') {
-            final fileName = imageFile.uri.pathSegments.last;
-            final filePathInCache = '${cacheDirectory.path}/$fileName';
-
-            final originalImageSize = imageFile.lengthSync();
-
-            await imageFile.copy(filePathInCache);
-
-            // Comprimir la imagen en la caché
-            final compressedImageSize = await compressAndSaveImage(filePathInCache);
-
-            var photo = Photo(name: fileName, path: filePathInCache);
-            await databaseRepository.insertPhoto(photo);
-            emit(CameraCaptureSuccess(filePathInCache));
+        if (pickedImage != null) {
+          final cacheDirectory = await getTemporaryDirectory();
+          final imageCount = await countImagesInCache();
+          if (imageCount >= 3) {
+            ScaffoldMessenger.of(navigationService.navigatorKey.currentState!.context).showSnackBar(const SnackBar(
+              duration: Duration(seconds: 1),
+              content: Text("Solo se permiten 3 fotos"),
+            ));
           } else {
-            emit(CameraCaptureFailure(
-                error: 'El formato de archivo no es compatible'));
+            final imageFile = File(pickedImage.path);
+            final fileFormat = imageFile.path.split('.').last.toLowerCase();
+
+            if (fileFormat == 'jpg' || fileFormat == 'png') {
+              final uniqueFileName = '${DateTime.now().millisecondsSinceEpoch}.$fileFormat';
+              final filePathInCache = '${cacheDirectory.path}/$uniqueFileName';
+              final originalImageSize = imageFile.lengthSync();
+
+              await imageFile.copy(filePathInCache);
+              final compressedImageSize = await compressAndSaveImage(filePathInCache);
+
+              var photo = Photo(name: uniqueFileName, path: filePathInCache);
+              await databaseRepository.insertPhoto(photo);
+              emit(CameraCaptureSuccess(filePathInCache));
+            } else {
+              emit(CameraCaptureFailure(
+                  error: 'El formato de archivo no es compatible'));
+            }
           }
+        } else {
+          emit(const CameraFailure(error: 'Selección de imagen cancelada'));
         }
-      } else {
-        emit(const CameraFailure(error: 'Selección de imagen cancelada'));
+      } catch (error, stackTrace) {
+        emit(CameraCaptureFailure(error: error.toString()));
+        await FirebaseCrashlytics.instance.recordError(error, stackTrace);
       }
-    } catch (error, stackTrace) {
-      emit(CameraCaptureFailure(error: error.toString()));
-      await FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    } else {
+      emit(const CameraFailure(error: 'Camera is not ready'));
     }
   }
 
