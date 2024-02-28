@@ -1,13 +1,9 @@
-import 'dart:convert';
-
-import 'package:bexdeliveries/src/presentation/cubits/login/login_cubit.dart';
-import 'package:bexdeliveries/src/services/notifications.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 
 //cubits
 import '../base/base_cubit.dart';
+import '../login/login_cubit.dart';
 
 //domains
 import '../../../domain/models/enterprise.dart';
@@ -19,27 +15,27 @@ import '../../../utils/resources/data_state.dart';
 import '../../../utils/constants/strings.dart';
 
 //service
-import '../../../locator.dart';
 import '../../../services/storage.dart';
 import '../../../services/navigation.dart';
+import '../../../services/notifications.dart';
 
 part 'initial_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final NavigationService _navigationService = locator<NavigationService>();
-final NotificationService _notificationService = locator<NotificationService>();
-
 class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
-  final ApiRepository _apiRepository;
+  final ApiRepository apiRepository;
+  final LocalStorageService storageService;
+  final NavigationService navigationService;
+  final NotificationService notificationService;
 
-  InitialCubit(this._apiRepository)
+
+  InitialCubit(this.apiRepository, this.storageService, this.navigationService, this.notificationService)
       : super(
             InitialSuccess(
-                enterprise: _storageService.getObject('enterprise') != null
+                enterprise: storageService.getObject('enterprise') != null
                     ? Enterprise.fromMap(
-                        _storageService.getObject('enterprise')!)
+                        storageService.getObject('enterprise')!)
                     : null,
-                token: _notificationService.token),
+                token: notificationService.token),
             null);
 
   Future<void> getEnterprise(
@@ -49,27 +45,27 @@ class InitialCubit extends BaseCubit<InitialState, Enterprise?> {
     await run(() async {
       emit(const InitialLoading());
 
-      _storageService.setString('company', companyNameController.text);
+      storageService.setString('company', companyNameController.text);
 
-      final response = await _apiRepository.getEnterprise(
+      final response = await apiRepository.getEnterprise(
         request: EnterpriseRequest(companyNameController.text),
       );
 
       if (response is DataSuccess) {
         final enterprise = response.data!.enterprise;
-        _storageService.setObject('enterprise', enterprise.toMap());
+        storageService.setObject('enterprise', enterprise.toMap());
         loginCubit.updateEnterpriseState(enterprise);
 
-        var token = _notificationService.token;
+        var token = notificationService.token;
         emit(InitialSuccess(enterprise: enterprise, token: token));
       } else if (response is DataFailed) {
-        _storageService.setString('company', null);
+        storageService.setString('company', null);
         emit(InitialFailed(error: response.error));
       }
     });
   }
 
   void goToLogin() {
-    _navigationService.replaceTo(AppRoutes.login);
+    navigationService.replaceTo(AppRoutes.login);
   }
 }

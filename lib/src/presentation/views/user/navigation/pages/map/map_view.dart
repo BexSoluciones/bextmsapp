@@ -5,14 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:provider/provider.dart';
+// import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+// import 'package:latlong2/latlong.dart';
+// import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 //utils
 import '../../../../../../utils/constants/strings.dart';
 //blocs
-import '../../../../../blocs/location/location_bloc.dart';
+import '../../../../../blocs/gps/gps_bloc.dart';
 import '../../../../../blocs/network/network_bloc.dart';
 //cubit
 import '../../../../../cubits/navigation/navigation_cubit.dart';
@@ -22,15 +22,8 @@ import '../../../../../providers/general_provider.dart';
 import '../../../../../../domain/models/arguments.dart';
 import '../../../../../../domain/models/enterprise_config.dart';
 //widgets
-import '../../../../../widgets/loading_indicator_widget.dart';
-import '../../../../../widgets/lottie_widget.dart';
+import '../../../../../widgets/icon_svg_widget.dart';
 import '../../features/carousel_card.dart';
-//services
-import '../../../../../../locator.dart';
-import '../../../../../../services/navigation.dart';
-import 'build_attribution.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
 
 class LayerMoodle {
   LayerMoodle(this.polygons);
@@ -54,7 +47,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   late NavigationCubit navigationCubit;
-  late LocationBloc locationBloc;
+  late GpsBloc gpsBloc;
   late NetworkBloc networkCubit;
 
   // Create your stream
@@ -81,8 +74,8 @@ class _MapPageState extends State<MapPage> {
 
   @override
   void didChangeDependencies() {
-    locationBloc = BlocProvider.of<LocationBloc>(context);
-    locationBloc.add(GetLocation());
+    gpsBloc = BlocProvider.of<GpsBloc>(context);
+    gpsBloc.add(OnStopFollowingUser());
 
     navigationCubit = BlocProvider.of<NavigationCubit>(context);
     navigationCubit.getAllWorksByWorkcode(widget.workcode);
@@ -101,35 +94,38 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-
-    return Scaffold(
-        appBar: buildAppBar,
-        body: BlocBuilder<NavigationCubit, NavigationState>(
-          builder: (context, navigationState) {
-            if (navigationState.status == NavigationStatus.loading) {
-              return const Center(child: CupertinoActivityIndicator());
-            } else if (navigationState.status == NavigationStatus.success ||
-                navigationState.status == NavigationStatus.failure) {
-              return _buildBody(size, navigationState);
-            } else {
-              return const SizedBox();
-            }
-          },
-        ),
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'btn1',
-          onPressed: () async {
-            await navigationCubit.getCurrentPosition(zoom);
-          },
-          child: const Icon(Icons.my_location),
-        ));
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+          appBar: buildAppBar,
+          body: BlocBuilder<NavigationCubit, NavigationState>(
+            builder: (context, navigationState) {
+              if (navigationState.status == NavigationStatus.loading) {
+                return const Center(child: CupertinoActivityIndicator());
+              } else if (navigationState.status == NavigationStatus.success ||
+                  navigationState.status == NavigationStatus.failure) {
+                return _buildBody(size, navigationState);
+              } else {
+                return const SizedBox();
+              }
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            heroTag: 'btn1',
+            onPressed: () async {
+              await navigationCubit.getCurrentPosition(zoom);
+            },
+            child: const Icon(Icons.my_location),
+          )),
+    );
   }
 
   AppBar get buildAppBar => AppBar(
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new),
             onPressed: () {
-              _navigationService.goBack();
+              gpsBloc.add(OnStartFollowingUser());
+              navigationCubit.goBack();
             }),
         title: BlocSelector<NavigationCubit, NavigationState, bool>(
           selector: (state) => state.status == NavigationStatus.success,
@@ -167,8 +163,8 @@ class _MapPageState extends State<MapPage> {
                         onPressed: () {
                           var work = navigationState
                               .works![navigationState.pageIndex ?? 0];
-                          _navigationService.goTo(AppRoutes.summaryNavigation,
-                              arguments: SummaryNavigationArgument(work: work));
+                          navigationCubit.goTo(AppRoutes.summaryNavigation,
+                              SummaryNavigationArgument(work: work));
                         }));
               } else {
                 // Handle other states or return an empty widget
@@ -269,9 +265,9 @@ class _MapPageState extends State<MapPage> {
                       },
                       onTap: (position, location) async {
                         try {
-                          var position =
-                              LatLng(location.latitude, location.longitude);
-                          await navigationCubit.createNote(position);
+                          // var position =
+                          //     LatLng(location.latitude, location.longitude);
+                          // await navigationCubit.createNote(position);
                         } catch (e) {
                           if (kDebugMode) {
                             print(e);
@@ -315,9 +311,9 @@ class _MapPageState extends State<MapPage> {
                     ),
                   ],
                 ))
-            : const LottieWidget(
-                path: 'assets/animations/58404-geo-location-icon.json',
-                message: 'No hay clientes con geolocalización.'),
+            : const SvgWidget(
+                path: 'assets/icons/pin.svg',
+                messages: ['No hay clientes con geolocalización.']),
         state.carouselData != null &&
                 state.carouselData!.isNotEmpty &&
                 state.works != null &&
@@ -344,7 +340,7 @@ class _MapPageState extends State<MapPage> {
                   },
                 ),
               )
-            : Container(),
+            : const SizedBox(),
       ],
     );
   }

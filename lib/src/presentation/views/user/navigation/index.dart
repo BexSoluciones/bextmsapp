@@ -1,9 +1,9 @@
 import 'dart:async';
+import 'package:bexdeliveries/src/presentation/widgets/icon_svg_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:badges/badges.dart';
@@ -13,7 +13,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../blocs/network/network_bloc.dart';
 
 //providers
-
 
 //domain
 import '../../../../domain/models/enterprise_config.dart';
@@ -33,7 +32,7 @@ import '../../../../services/storage.dart';
 final LocalStorageService _storageService = locator<LocalStorageService>();
 
 class NavigationView extends StatefulWidget {
-  const NavigationView({Key? key, required this.workcode}) : super(key: key);
+  const NavigationView({super.key, required this.workcode});
   final String workcode;
 
   @override
@@ -183,19 +182,12 @@ class _NavigationScreenState extends State<NavigationView> {
         body: BlocBuilder<NetworkBloc, NetworkState>(
             builder: (context, networkState) {
           if (networkState is NetworkFailure) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Lottie.asset('assets/animations/1611-online-offline.json',
-                      height: 180, width: 180),
-                  const Text('No tienes conexión o tu conexión es lenta.'),
-                  const Text(
-                      'Actualmente los mapas no funcionan sin internet 😔.',
-                      textAlign: TextAlign.center)
-                ],
-              ),
-            );
+            return const SvgWidget(
+                path: 'assets/animations/offline.svg',
+                messages: [
+                  'No tienes conexión o tu conexión es lenta.',
+                  'Actualmente los mapas no funcionan sin internet 😔.'
+                ]);
           } else if (networkState is NetworkSuccess) {
             return _buildBody();
           } else {

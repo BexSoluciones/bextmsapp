@@ -25,7 +25,7 @@ class SummaryDao {
   }
 
   Future<List<Summary>> getAllSummariesByOrderNumber(int workId) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var summaryList = await db!.rawQuery(''' 
             SELECT $tableSummaries.*, SUM($tableSummaries.${SummaryFields.grandTotalCopy}) as ${SummaryFields.grandTotalCopy},
             COUNT($tableSummaries.${SummaryFields.coditem}) AS count,
@@ -41,32 +41,35 @@ class SummaryDao {
             GROUP BY $tableSummaries.${SummaryFields.orderNumber}
             ORDER BY $tableSummaries.${SummaryFields.id} DESC
           ''');
+    _appDatabase.close();
     return parseSummaries(summaryList);
   }
 
   Future<List<Summary>> getAllSummariesByWorkcode(
       int workId, String customer) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final summaryList = await db!.query(tableSummaries,
         where: 'work_id = $workId', groupBy: SummaryFields.orderNumber);
+    _appDatabase.close();
     return parseSummaries(summaryList);
   }
 
   Future<List<Summary>> getAllInventoryByOrderNumber(
       int workId, String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var summaryList = await db!.rawQuery('''
       SELECT $tableSummaries.*
       FROM $tableSummaries
       WHERE $tableSummaries.${SummaryFields.workId} = $workId 
       AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
     ''');
+    _appDatabase.close();
     return parseSummaries(summaryList);
   }
 
   Future<List<Summary>> getAllInventoryByPackage(
       int workId, String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var summaryList = await db!.rawQuery('''
       SELECT $tableSummaries.*,
@@ -77,12 +80,13 @@ class SummaryDao {
       AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
       GROUP BY $tableSummaries.${SummaryFields.idPacking}, $tableSummaries.${SummaryFields.packing}
     ''');
+    _appDatabase.close();
     return parseSummaries(summaryList);
   }
 
   Future<List<Summary>> watchAllItemsPackage(
       String orderNumber, String packing, String idPacking) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var summaryList = await db!.rawQuery('''
       SELECT * FROM $tableSummaries 
@@ -90,13 +94,13 @@ class SummaryDao {
       AND packing="$packing" 
       AND id_packing="$idPacking"
     ''');
-
+    _appDatabase.close();
     return parseSummaries(summaryList);
   }
 
   Future<List<Summary>> getAllSummariesByOrderNumberMoved(
       int workId, String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var summaryList = await db!.rawQuery('''
             SELECT $tableSummaries.*
             FROM $tableSummaries
@@ -104,12 +108,13 @@ class SummaryDao {
             AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
             AND $tableSummaries.${SummaryFields.minus} != 0
             ''');
+    _appDatabase.close();
     return parseSummaries(summaryList);
   }
 
   Future<List<Summary>> getAllPackageByOrderNumber(
       int workId, String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var summaryList = await db!.rawQuery('''
             SELECT $tableSummaries.*,
             SUM($tableSummaries.${SummaryFields.grandTotal}) as ${SummaryFields.grandTotal},
@@ -119,12 +124,13 @@ class SummaryDao {
             AND $tableSummaries.${SummaryFields.orderNumber} = "$orderNumber"
             GROUP BY $tableSummaries.${SummaryFields.idPacking}, $tableSummaries.${SummaryFields.packing}
             ''');
+    _appDatabase.close();
     return parseSummaries(summaryList);
   }
 
   Future<List<SummaryReport>> getSummaryReportsWithReasonOrRedelivery(
       String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final summaryList = await db!.rawQuery('''
       SELECT  $tableSummaries.* ,
       CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
@@ -137,14 +143,14 @@ class SummaryDao {
       GROUP BY summaries.name_item
      ORDER BY summaries.id ASC;
     ''');
-
+    _appDatabase.close();
     final parsedSummaries = parseSummariesReport(summaryList);
     return parsedSummaries;
   }
 
   Future<List<SummaryReport>> getSummaryReportsWithReturnOrRedelivery(
       String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final summaryList = await db!.rawQuery('''
       SELECT  $tableSummaries.* ,
       CASE WHEN transactions.reason = '' OR transactions.reason IS NULL
@@ -157,14 +163,14 @@ class SummaryDao {
       GROUP BY summaries.name_item
       ORDER BY summaries.id ASC;
     ''');
-
+    _appDatabase.close();
     final parsedSummaries = parseSummariesReport(summaryList);
     return parsedSummaries;
   }
 
   Future<List<SummaryReport>> getSummaryReportsWithDelivery(
       String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final summaryList = await db!.rawQuery('''
       SELECT $tableSummaries.*, COALESCE(MAX($tableTransactions.${TransactionFields.reason}), 'ENTREGADO') AS reason
       FROM $tableSummaries
@@ -173,14 +179,14 @@ class SummaryDao {
       GROUP BY $tableSummaries.${SummaryFields.id}
       ORDER BY ${SummaryFields.id} ASC
     ''', [orderNumber]);
-
+    _appDatabase.close();
     final parsedSummaries = parseSummariesReport(summaryList);
     return parsedSummaries;
   }
 
   Future<double> countTotalRespawnWorksByWorkcode(
       String workcode, String reason) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var summaryList = await db!.rawQuery('''
       SELECT $tableSummaries.*, SUM($tableSummaries.${SummaryFields.grandTotal}) as ${SummaryFields.grandTotal}, COUNT($tableSummaries.${SummaryFields.coditem}) AS count 
@@ -198,11 +204,12 @@ class SummaryDao {
     for (var value in summaries) {
       sum += value.grandTotal;
     }
+    _appDatabase.close();
     return sum;
   }
 
   Future<bool> resetCantSummaries(int workId, String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final summaryList = await db!.rawQuery(''' 
        SELECT $tableSummaries.*
@@ -223,12 +230,12 @@ class SummaryDao {
 
       await updateSummary(summary);
     }
-
+    _appDatabase.close();
     return true;
   }
 
   Future<double> getTotalSummaries(int workId, String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final summaryList = await db!.rawQuery('''
         SELECT $tableSummaries.*
@@ -243,12 +250,12 @@ class SummaryDao {
       var summary = Summary.fromJson(element);
       sum += summary.grandTotal;
     }
-
+    _appDatabase.close();
     return double.parse(sum.toStringAsFixed(2));
   }
 
   Future<int> getTotalPackageSummaries(String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final summaryList = await db!.rawQuery('''
       SELECT COUNT(DISTINCT id_packing) AS total_columns
@@ -259,12 +266,12 @@ class SummaryDao {
     final totalPackage = summaryList.isNotEmpty
         ? int.parse(summaryList[0]['total_columns'].toString())
         : 0;
-
+    _appDatabase.close();
     return totalPackage;
   }
 
   Future<int> getTotalPackageSummariesLoose(String orderNumber) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final summaryList = await db!.rawQuery('''
       SELECT COUNT(order_number) AS loose
@@ -275,6 +282,7 @@ class SummaryDao {
     final totalLoose = summaryList.isNotEmpty
         ? int.parse(summaryList[0]['loose'].toString())
         : 0;
+    _appDatabase.close();
     return totalLoose;
   }
 
@@ -288,31 +296,33 @@ class SummaryDao {
   }
 
   Future<void> insertSummaries(List<Summary> summaries) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
-    var batch = db!.batch();
+    await db!.transaction((txn) async {
+      var batch = txn.batch();
 
-    if (summaries.isNotEmpty) {
-      await Future.forEach(summaries, (summary) async {
-        var d = await db
-            .query(tableSummaries, where: 'id = ?', whereArgs: [summary.id]);
-        var w = parseSummaries(d);
-        if (w.isEmpty) {
-          batch.insert(tableSummaries, summary.toJson());
-        } else {
-          batch.update(tableSummaries, summary.toJson(),
-              where: 'id = ?', whereArgs: [summary.id]);
-        }
-      });
-    }
+      if (summaries.isNotEmpty) {
+        await Future.forEach(summaries, (summary) async {
+          var d = await txn
+              .query(tableSummaries, where: 'id = ?', whereArgs: [summary.id]);
+          var w = parseSummaries(d);
+          if (w.isEmpty) {
+            batch.insert(tableSummaries, summary.toJson());
+          } else {
+            batch.update(tableSummaries, summary.toJson(),
+                where: 'id = ?', whereArgs: [summary.id]);
+          }
+        });
+      }
 
-    await batch.commit(noResult: true);
+      await batch.commit(noResult: true);
+    });
 
     return Future.value();
   }
 
   Future<int> deleteSummariesByWorkcode(String workcode) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     return db!.rawDelete('''
       DELETE FROM summaries WHERE id IN (
         SELECT summaries.id FROM summaries INNER JOIN works ON works.id = summaries.work_id
@@ -322,7 +332,7 @@ class SummaryDao {
   }
 
   Future<void> emptySummaries() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableSummaries, where: 'id > 0');
     return Future.value();
   }

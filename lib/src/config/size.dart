@@ -7,7 +7,7 @@ class SizeConfig {
   static double? screenWidth;
   static double? screenHeight;
   static double? defaultSize;
-  static double? textScaleFactor;
+  static TextScaler? textScaler;
   static Orientation? orientation;
 
   void init(BuildContext context) {
@@ -15,7 +15,7 @@ class SizeConfig {
     screenWidth = _mediaQueryData!.size.width;
     screenHeight = _mediaQueryData!.size.height;
     orientation = _mediaQueryData!.orientation;
-    textScaleFactor = _mediaQueryData!.textScaleFactor;
+    textScaler = _mediaQueryData!.textScaler;
   }
 }
 
@@ -47,8 +47,8 @@ double? getFullScreenWidth() {
   return SizeConfig.screenWidth;
 }
 
-double? getTextScaleFactor() {
-  return SizeConfig.textScaleFactor;
+TextScaler? getTextScaleFactor() {
+  return SizeConfig.textScaler;
 }
 
 double textScaleFactor(BuildContext context, {double maxTextScaleFactor = 2}) {

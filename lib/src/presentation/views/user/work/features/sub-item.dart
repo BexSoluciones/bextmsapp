@@ -15,8 +15,11 @@ import '../../../../../services/navigation.dart';
 final NavigationService _navigationService = locator<NavigationService>();
 
 class SubItemWork extends StatefulWidget {
-  const SubItemWork({Key? key, required this.index, required this.work, required this.enabled})
-      : super(key: key);
+  const SubItemWork(
+      {super.key,
+      required this.index,
+      required this.work,
+      required this.enabled});
 
   final int index;
   final Work work;

@@ -1,38 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:location/location.dart';
-import 'package:lottie/lottie.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
 //core
 import '../../../../core/helpers/index.dart';
-
 //models
 import '../../../domain/models/enterprise.dart';
-
 //cubit
 import '../../cubits/login/login_cubit.dart';
-
 //blocs
 import '../../blocs/network/network_bloc.dart';
-
 //utils
 import '../../../utils/constants/colors.dart';
 import '../../../utils/extensions/app_theme.dart';
-
-//service
-import '../../../locator.dart';
-import '../../../services/storage.dart';
+import '../../../utils/constants/keys.dart';
 
 //widgets
 import '../../widgets/default_button_widget.dart';
+import '../../widgets/icon_svg_widget.dart';
+import '../../widgets/upgrader_widget.dart';
 
 part '../../widgets/form_login_widget.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-
 class LoginView extends StatefulWidget {
-  const LoginView({Key? key}) : super(key: key);
+  const LoginView({super.key});
 
   @override
   LoginViewState createState() => LoginViewState();
@@ -54,16 +45,14 @@ class LoginViewState extends State<LoginView> {
 
   @override
   void initState() {
+    loginCubit = BlocProvider.of<LoginCubit>(context);
     rememberSession();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      helperFunctions.versionCheck(context);
-    });
     super.initState();
   }
 
   void rememberSession() {
-    var usernameStorage = _storageService.getString('username');
-    var passwordStorage = _storageService.getString('password');
+    var usernameStorage = loginCubit.storageService.getString('username');
+    var passwordStorage = loginCubit.storageService.getString('password');
 
     if (usernameStorage != null) {
       setState(() {
@@ -88,12 +77,8 @@ class LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
 
-    loginCubit = BlocProvider.of<LoginCubit>(context);
-
-    return Scaffold(
-      body: BlocBuilder<LoginCubit, LoginState>(
-        builder: (context, state) => buildBlocConsumer(size),
-      ),
+    return UpgraderDialog(
+      child: Scaffold(body: buildBlocConsumer(size)),
     );
   }
 
@@ -105,18 +90,12 @@ class LoginViewState extends State<LoginView> {
           child: BlocBuilder<NetworkBloc, NetworkState>(
               builder: (context, networkState) {
             if (networkState is NetworkFailure) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Lottie.asset('assets/animations/1611-online-offline.json',
-                        height: 180, width: 180),
-                    const Text('No tienes conexión o tu conexión es lenta.')
-                  ],
-                ),
-              );
+              return const SvgWidget(
+                  path: 'assets/icons/offline.svg',
+                  messages: ['No tiene conexión o tu conexión es lenta.']);
             } else if (networkState is NetworkSuccess) {
               return Scaffold(
+                key: MyLoginKeys.loginScreen,
                 body: SingleChildScrollView(
                   child: Container(
                     height: MediaQuery.of(context).size.height,
@@ -137,7 +116,7 @@ class LoginViewState extends State<LoginView> {
                         ),
                         Container(
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle, // Forma circular
+                              shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.3),
@@ -196,7 +175,8 @@ class LoginViewState extends State<LoginView> {
                                     ? state.enterprise!.name!
                                     : 'demo',
                                 maxLines: 2,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
                               ),
                               const Text(
                                 'bexsoluciones.com',
@@ -218,7 +198,7 @@ class LoginViewState extends State<LoginView> {
                             child: TextButton(
                                 onPressed: () {
                                   setState(() {
-                                    context.read<LoginCubit>().goToCompany();
+                                    loginCubit.goToCompany();
                                   });
                                 },
                                 child: Text(
@@ -235,14 +215,11 @@ class LoginViewState extends State<LoginView> {
               );
             } else {
               return const Center(
+                key: MyLoginKeys.emptyContainerScreen,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('Algo ocurrió mientras cargaba la información'),
-                    IconButton(
-                      icon: Icon(Icons.refresh),
-                      onPressed: null,
-                    )
                   ],
                 ),
               );

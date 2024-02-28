@@ -14,12 +14,11 @@ import '../../../domain/abstracts/format_abstract.dart';
 
 part 'transaction_state.dart';
 
-final helperFunctions = HelperFunctions();
-
 class TransactionCubit extends BaseCubit<TransactionState, String?> with FormatDate {
-  final DatabaseRepository _databaseRepository;
+  final DatabaseRepository databaseRepository;
+  final helperFunctions = HelperFunctions();
 
-  TransactionCubit(this._databaseRepository)
+  TransactionCubit(this.databaseRepository)
       : super(const TransactionLoading(), null);
 
   Future<void> getAllTransactions() async {
@@ -27,7 +26,7 @@ class TransactionCubit extends BaseCubit<TransactionState, String?> with FormatD
   }
 
   Future<TransactionState> _getAllTransactions() async {
-    final transactions = await _databaseRepository.getAllTransactions();
+    final transactions = await databaseRepository.getAllTransactions();
     return TransactionSuccess(transactions: transactions);
   }
 

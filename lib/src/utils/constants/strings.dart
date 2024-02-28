@@ -79,7 +79,6 @@ const showCases = [
   {'/navigation': true},
   {'/summary': true},
   {'/summary-geo-reference': true},
-
 ];
 
 const String buttonTextDefault = "Permitir";

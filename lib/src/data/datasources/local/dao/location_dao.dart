@@ -15,21 +15,21 @@ class LocationDao with FormatDate {
   }
 
   Future<List<Location>> getAllLocations() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final locationList = await db!.query(tableLocations);
     final locations = parseLocations(locationList);
     return locations;
   }
 
   Stream<List<Location>> watchAllLocations() async* {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final locationList = await db!.query(tableLocations);
     final locations = parseLocations(locationList);
     yield locations;
   }
 
   Future<Location?> getLastLocation() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final locationList =
         await db!.rawQuery('SELECT * FROM locations ORDER BY id desc LIMIT 1');
@@ -53,13 +53,13 @@ class LocationDao with FormatDate {
   }
 
   Future<void> emptyLocations() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableLocations);
     return Future.value();
   }
 
   Future<String> getLocationsToSend() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final List<Map<String, dynamic>> results = await db!.query(
       tableLocations,
       where: 'send = 0',
@@ -74,7 +74,7 @@ class LocationDao with FormatDate {
   }
 
   Future<bool> countLocationsManager() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var result = await db?.rawQuery('''
       SELECT COUNT(*) FROM $tableLocations WHERE send = 0
@@ -92,12 +92,12 @@ class LocationDao with FormatDate {
   }
 
   Future<int?> updateLocationsManager() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     return await db?.update(tableLocations, {'send': 1}, where: 'send = 0');
   }
 
   Future<int> deleteLocationsByDays() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var today = DateTime.now();
     var limitDaysWork = _storageService.getInt('limit_days_works') ?? 0;
     var datesToValidate = today.subtract(Duration(days: limitDaysWork));

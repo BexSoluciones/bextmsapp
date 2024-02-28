@@ -1,30 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 //blocs
-import '../../../../blocs/account/account_bloc.dart';
-//cubits
-import '../../../../cubits/collection/collection_cubit.dart';
+import '../../../../blocs/collection/collection_bloc.dart';
 //utils
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/nums.dart';
+import '../../../../../utils/constants/strings.dart';
 //domain
-import '../../../../../domain/models/account.dart';
 import '../../../../../domain/abstracts/format_abstract.dart';
 //widgets
 import '../../../../widgets/default_button_widget.dart';
-import '../features/accounts.dart';
+//features
+import 'form_payment.dart';
+import 'accounts.dart';
 
 class FormCollection extends StatefulWidget {
   final GlobalKey formKey;
   final String orderNumber;
-  final CollectionCubit collectionCubit;
+  final CollectionBloc collectionBloc;
   final CollectionState state;
 
   const FormCollection(
       {super.key,
       required this.formKey,
-      required this.collectionCubit,
+      required this.collectionBloc,
       required this.state,
       required this.orderNumber});
 
@@ -34,6 +33,7 @@ class FormCollection extends StatefulWidget {
 
 class _FormCollectionState extends State<FormCollection>
     with FormatNumber, FormatDate {
+
   @override
   void setState(VoidCallback fn) {
     if (mounted) {
@@ -46,7 +46,8 @@ class _FormCollectionState extends State<FormCollection>
     super.initState();
   }
 
-  void _closeModal(void value) => widget.collectionCubit.closeModal();
+  void _closeModal(void value) => widget.collectionBloc.add(CollectionCloseModal());
+  void _openModal() => widget.collectionBloc.add(CollectionOpenModal());
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +67,9 @@ class _FormCollectionState extends State<FormCollection>
                         SizedBox(
                           width: MediaQuery.of(context).size.width / 2,
                         ),
-                        BlocSelector<CollectionCubit, CollectionState, bool>(
+                        BlocSelector<CollectionBloc, CollectionState, bool>(
                             selector: (state) =>
-                                (state is CollectionInitial ||
-                                    state is CollectionLoading ||
-                                    state is CollectionFailed) &&
+                                state.canRenderView() &&
                                 state.enterpriseConfig != null &&
                                 state.enterpriseConfig!.multipleAccounts ==
                                     true,
@@ -79,69 +78,20 @@ class _FormCollectionState extends State<FormCollection>
                                   ? IconButton(
                                       icon: const Icon(Icons.camera_alt,
                                           size: 32, color: kPrimaryColor),
-                                      onPressed: () => widget.collectionCubit
-                                          .goToCamera(widget.orderNumber))
-                                  : Container();
+                                      onPressed: () => widget.collectionBloc
+                                          .add(CollectionNavigate(
+                                              route: AppRoutes.camera,
+                                              arguments: widget.orderNumber)))
+                                  : const SizedBox();
                             }),
                       ]),
                     ]),
-                TextFormField(
-                  keyboardType: TextInputType.number,
-                  autofocus: false,
-                  controller: widget.collectionCubit.cashController,
-                  onChanged: widget.collectionCubit.selectedAccounts.isNotEmpty
-                      ? (newValue) {
-                          if (newValue.isEmpty) {
-                            widget.collectionCubit.selectedAccounts.clear();
-                            widget.collectionCubit.cashController.clear();
-                            setState(() {});
-                          }
-                        }
-                      : null,
-                  decoration: InputDecoration(
-                    prefixText: currency,
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey, width: 2.0),
-                    ),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-                    ),
-                    errorBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: kPrimaryColor, width: 2.0),
-                    ),
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        if (double.tryParse(widget
-                                .collectionCubit.transferController.text) !=
-                            null) {
-                          widget.collectionCubit.total = widget
-                                  .collectionCubit.total -
-                              double.parse(
-                                  widget.collectionCubit.cashController.text);
-                        }
-                        widget.collectionCubit.selectedAccounts.clear();
-                        widget.collectionCubit.cashController.clear();
-                      },
-                      icon: const Icon(Icons.clear),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value!.startsWith('.') || value.endsWith('.')) {
-                      return 'valor no válido';
-                    }
-                    if (value.contains(',')) {
-                      return 'no debe contener comas';
-                    }
-                    return null;
-                  },
-                ),
+                PaymentEfectyInputField(),
                 const SizedBox(height: 10),
-                BlocSelector<CollectionCubit, CollectionState, bool>(
-                    bloc: widget.collectionCubit,
+                BlocSelector<CollectionBloc, CollectionState, bool>(
+                    bloc: widget.collectionBloc,
                     selector: (state) =>
-                        (state is CollectionInitial ||
-                            state is CollectionLoading ||
-                            state is CollectionFailed) &&
+                        state.canRenderView() &&
                         state.enterpriseConfig != null &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
@@ -157,15 +107,15 @@ class _FormCollectionState extends State<FormCollection>
                                 IconButton(
                                     icon: const Icon(Icons.camera_alt,
                                         size: 32, color: kPrimaryColor),
-                                    onPressed: () => widget.collectionCubit
-                                        .goToCamera(widget.orderNumber)),
-                                BlocSelector<CollectionCubit, CollectionState,
+                                    onPressed: () => widget.collectionBloc.add(
+                                        CollectionNavigate(
+                                            route: AppRoutes.camera,
+                                            arguments: widget.orderNumber))),
+                                BlocSelector<CollectionBloc, CollectionState,
                                         bool>(
-                                    bloc: widget.collectionCubit,
+                                    bloc: widget.collectionBloc,
                                     selector: (state) =>
-                                        (state is CollectionInitial ||
-                                            state is CollectionLoading ||
-                                            state is CollectionFailed) &&
+                                        state.canRenderView() &&
                                         state.enterpriseConfig != null &&
                                         state.enterpriseConfig!.codeQr != null,
                                     builder: (c, x) {
@@ -175,12 +125,14 @@ class _FormCollectionState extends State<FormCollection>
                                                   size: 32,
                                                   color: kPrimaryColor),
                                               onPressed: () => widget
-                                                  .collectionCubit
-                                                  .goToCodeQR(widget
-                                                      .state
-                                                      .enterpriseConfig!
-                                                      .codeQr))
-                                          : Container();
+                                                  .collectionBloc
+                                                  .add(CollectionNavigate(
+                                                      route: AppRoutes.qr,
+                                                      arguments: widget
+                                                          .state
+                                                          .enterpriseConfig!
+                                                          .codeQr)))
+                                          : const SizedBox();
                                     }),
                               ],
                             )
@@ -195,89 +147,37 @@ class _FormCollectionState extends State<FormCollection>
                               ],
                             );
                     }),
-                BlocSelector<CollectionCubit, CollectionState, bool>(
+                BlocSelector<CollectionBloc, CollectionState, bool>(
                     selector: (state) =>
-                        (state is CollectionInitial ||
-                            state is CollectionLoading ||
-                            state is CollectionFailed) &&
+                        state.canRenderView() &&
                         state.enterpriseConfig != null &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
-                          ? TextFormField(
-                              keyboardType: TextInputType.number,
-                              autofocus: false,
-                              controller:
-                                  widget.collectionCubit.transferController,
-                              decoration: InputDecoration(
-                                prefixText: currency,
-                                focusedBorder: const OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.grey, width: 2.0),
-                                ),
-                                enabledBorder: const OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: kPrimaryColor, width: 2.0),
-                                ),
-                                errorBorder: const OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: kPrimaryColor, width: 2.0),
-                                ),
-                                suffixIcon: IconButton(
-                                  onPressed: () {
-                                    if (double.tryParse(widget.collectionCubit
-                                            .transferController.text) !=
-                                        null) {
-                                      widget.collectionCubit.total -=
-                                          double.parse(widget.collectionCubit
-                                              .transferController.text);
-                                    }
-                                    widget.collectionCubit.transferController
-                                        .clear();
-                                  },
-                                  icon: const Icon(Icons.clear),
-                                ),
-                              ),
-                              validator: (value) {
-                                if (value!.startsWith('.') ||
-                                    value.endsWith('.')) {
-                                  return 'valor no válido';
-                                }
-                                if (value.contains(',')) {
-                                  return 'el valor no puede contener comas';
-                                }
-                                return null;
-                              },
-                            )
+                          ? PaymentTransferInputField()
                           : DefaultButton(
                               widget: const Text('Cuentas Bancarias',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 20)),
                               press: () {
-                                widget.collectionCubit.dateController.text =
-                                    date(null);
-                                widget.collectionCubit.selectedAccount = null;
-                                widget.collectionCubit.indexToEdit = null;
-                                widget.collectionCubit.isEditing = false;
+                                _openModal();
+
                                 Future<void> future = showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,
                                     builder: (c) {
                                       return AccountsCollection(
                                         orderNumber: widget.orderNumber,
-                                        collectionCubit: widget.collectionCubit,
-                                        state: widget.state,
+                                        collectionBloc: widget.collectionBloc,
                                       );
                                     });
 
                                 future.then((void value) => _closeModal(value));
                               });
                     }),
-                BlocSelector<CollectionCubit, CollectionState, bool>(
+                BlocSelector<CollectionBloc, CollectionState, bool>(
                     selector: (state) =>
-                        (state is CollectionInitial ||
-                            state is CollectionLoading ||
-                            state is CollectionFailed) &&
+                        state.canRenderView() &&
                         state.enterpriseConfig != null &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
@@ -297,171 +197,54 @@ class _FormCollectionState extends State<FormCollection>
                                     IconButton(
                                       icon: const Icon(Icons.qr_code_2),
                                       onPressed: () {
-                                        if (widget.collectionCubit
-                                                .selectedAccount !=
-                                            null) {
-                                          widget.collectionCubit.goToCodeQR(
-                                              widget.collectionCubit
-                                                  .selectedAccount!.code_qr);
-                                        } else {
-                                          widget.collectionCubit.error();
-                                        }
+                                        // if (widget.collectionCubit
+                                        //         .selectedAccount !=
+                                        //     null) {
+                                        //   widget.collectionCubit.goToCodeQR(
+                                        //       widget.collectionCubit
+                                        //           .selectedAccount!.codeQr);
+                                        // } else {
+                                        //   widget.collectionCubit.error();
+                                        // }
                                       },
                                     ),
                                   ],
                                 )
                               ],
                             )
-                          : Container();
+                          : const SizedBox();
                     }),
-                BlocSelector<CollectionCubit, CollectionState, bool>(
+                BlocSelector<CollectionBloc, CollectionState, bool>(
                     selector: (state) =>
-                        (state is CollectionInitial ||
-                            state is CollectionLoading ||
-                            state is CollectionFailed) &&
+                        state.canRenderView() &&
                         state.enterpriseConfig != null &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
-                          ? BlocBuilder<AccountBloc, AccountState>(
-                              builder: (context, accountBlocState) {
-                                if (accountBlocState is AccountLoadingState) {
-                                  return const CircularProgressIndicator();
-                                } else if (accountBlocState
-                                    is AccountLoadedState) {
-                                  return DropdownButtonFormField<Account>(
-                                    itemHeight: null,
-                                    isExpanded: true,
-                                    value: accountBlocState.accounts.first,
-                                    onChanged: (Account? newValue) {
-                                      widget.collectionCubit.selectedAccount =
-                                          newValue;
-                                      setState(() {});
-                                    },
-                                    decoration: const InputDecoration(
-                                      contentPadding:
-                                          EdgeInsets.symmetric(horizontal: 10),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.grey, width: 2.0),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: kPrimaryColor, width: 2.0),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: kPrimaryColor, width: 2.0),
-                                      ),
-                                      hintStyle: TextStyle(
-                                        color: Colors.orange,
-                                      ),
-                                    ),
-                                    style: const TextStyle(
-                                      // fontSize: 10,
-                                      color: kPrimaryColor,
-                                    ),
-                                    dropdownColor: Colors.white,
-                                    validator: (value) {
-                                      if (widget
-                                              .collectionCubit
-                                              .transferController
-                                              .text
-                                              .isNotEmpty &&
-                                          value!.id == 0) {
-                                        return 'Selecciona una opción válida';
-                                      }
-                                      return null;
-                                    },
-                                    items: accountBlocState.accounts
-                                        .map((Account value) {
-                                      return DropdownMenuItem<Account>(
-                                        value: value,
-                                        child: Text(
-                                          value.accountNumber != null
-                                              ? '${value.name} - ${value.accountNumber}'
-                                              : value.name!,
-                                          overflow: TextOverflow.visible,
-                                          style: const TextStyle(
-                                              color: Colors.black),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  );
-                                } else if (accountBlocState
-                                    is AccountErrorState) {
-                                  return Text(
-                                      'Error: ${accountBlocState.error}');
-                                } else {
-                                  return const Text(
-                                      'No se han cargado datos aún.');
-                                }
-                              },
-                            )
-                          : Container();
+                          ? const PaymentAccountsInputField()
+                          : const SizedBox();
                     }),
                 const SizedBox(height: 10),
-                BlocSelector<CollectionCubit, CollectionState, bool>(
+                BlocSelector<CollectionBloc, CollectionState, bool>(
                     selector: (state) =>
-                        (state is CollectionInitial ||
-                            state is CollectionLoading ||
-                            state is CollectionFailed) &&
+                        state.canRenderView() &&
                         state.enterpriseConfig != null &&
                         state.enterpriseConfig!.specifiedAccountTransfer ==
                             true &&
                         state.enterpriseConfig!.multipleAccounts == false,
                     builder: (c, x) {
                       return x
-                          ? TextField(
-                              controller: widget.collectionCubit
-                                  .dateController, //editing controller of this TextField
-                              autofocus: false,
-                              decoration: const InputDecoration(
-                                contentPadding: EdgeInsets.only(left: 15.0),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: kPrimaryColor, width: 2.0),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: kPrimaryColor, width: 2.0),
-                                ),
-                                errorBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: kPrimaryColor, width: 2.0),
-                                ),
-                              ),
-                              readOnly: true,
-                              onTap: () async {
-                                var pickedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2101));
-
-                                if (pickedDate != null) {
-                                  var formattedDate = DateFormat('yyyy-MM-dd')
-                                      .format(pickedDate);
-                                  setState(() {
-                                    widget.collectionCubit.dateController.text =
-                                        formattedDate; //set output date to TextField value.
-                                  });
-                                } else {
-                                  print('Fecha no seleccionada');
-                                }
-                              },
-                            )
-                          : Container();
+                          ? PaymentDateInputField()
+                          : const SizedBox();
                     }),
                 const SizedBox(height: 30),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Total:', style: TextStyle(fontSize: 20)),
-                      Text(
-                          '\$${formatter.format(widget.collectionCubit.total)}',
+                      Text('\$${formatter.format(widget.state.total)}',
                           style: const TextStyle(fontSize: 20)),
                     ]),
               ],

@@ -1,8 +1,8 @@
-
-import 'package:bexdeliveries/src/domain/models/work.dart';
+import 'package:bexdeliveries/src/services/dialog_controller.dart';
+import 'package:bexdeliveries/src/services/geolocator.dart';
+import 'package:bexdeliveries/src/services/styled_dialog_controller.dart';
 import 'package:bexdeliveries/src/services/remote_config.dart';
 import 'package:get_it/get_it.dart';
-import 'package:location_repository/location_repository.dart';
 
 //cache
 import '../core/cache/cache_manager.dart';
@@ -45,6 +45,12 @@ Future<void> initializeDependencies() async {
   final workmanager = await WorkmanagerService.getInstance();
   locator.registerSingleton<WorkmanagerService>(workmanager!);
 
+  final geolocator = await GeolocatorService.getInstance();
+  locator.registerSingleton<GeolocatorService>(geolocator!);
+
+  final styledDialogController = StyledDialogController<Status>();
+  locator.registerSingleton<StyledDialogController>(styledDialogController);
+
   final logger = LoggerService();
   locator.registerSingleton<LoggerService>(logger);
 
@@ -64,9 +70,5 @@ Future<void> initializeDependencies() async {
 
   locator.registerSingleton<DatabaseRepository>(
     DatabaseRepositoryImpl(locator<AppDatabase>()),
-  );
-
-  locator.registerSingleton<LocationRepository>(
-    LocationRepository(),
   );
 }

@@ -5,15 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/helpers/index.dart';
 
 //bloc
+import '../../../config/size.dart';
 import '../../blocs/splash/splash_bloc.dart';
 import '../../widgets/splash_widget.dart';
 
 //services
 import '../../../locator.dart';
 import '../../../services/navigation.dart';
-
-
-final NavigationService _navigationService = locator<NavigationService>();
+import '../../../services/storage.dart';
 
 // This the widget where the BLoC states and events are handled.
 class SplashView extends StatefulWidget {
@@ -28,27 +27,30 @@ class _SplashViewState extends State<SplashView> {
 
   @override
   void initState() {
-    Future.delayed(Duration.zero, () => helperFunctions.versionCheck(context));
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return Scaffold(
-          body: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: BlocProvider(
-              create: (_) => SplashScreenBloc(),
-              child: BlocListener<SplashScreenBloc, SplashScreenState>(
-                listener: (context, state) {
-                  if (state is Loaded) {
-                    _navigationService.goTo(state.route!);
-                  }
-                },
-                child: const SplashScreenWidget(),
-              ),
-            ),
+      body: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        child: BlocProvider(
+          create: (_) => SplashBloc(
+              storageService: locator<LocalStorageService>(),
+              navigationService: locator<NavigationService>()),
+          child: BlocListener<SplashBloc, SplashState>(
+            listener: (context, state) {
+              if (state is Loaded) {
+                context.read<SplashBloc>().navigationService.goTo(state.route!, arguments: state.arguments);
+              }
+            },
+            child: const SplashScreenWidget(),
           ),
-        );
+        ),
+      ),
+    );
   }
 }

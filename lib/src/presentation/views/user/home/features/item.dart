@@ -39,7 +39,7 @@ final LocalStorageService _storageService = locator<LocalStorageService>();
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 
 class ItemWork extends StatefulWidget {
-  const ItemWork({Key? key, required this.work}) : super(key: key);
+  const ItemWork({super.key, required this.work});
 
   final Work work;
 
@@ -102,7 +102,7 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                                   title: 'Guardar historico',
                                   message:
                                       '¿Está seguro que desea guardar el historico?',
-                                  cancelButtom: false,
+                                  cancelButton: false,
                                   buttonText: 'Aceptar',
                                   onConfirm: () =>
                                       _handleNavigation(widget.work, context)));
@@ -190,8 +190,8 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
                               color: Colors.deepOrange,
                               Icons.swipe_left_outlined),
                         ))
-                      : Container(),
-                  Container(),
+                      : const SizedBox(),
+                  const SizedBox(),
                 ],
               ),
             ),

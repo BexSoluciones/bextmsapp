@@ -2,7 +2,6 @@ import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 
 //utils
 import '../../../../../utils/constants/nums.dart';
@@ -20,8 +19,7 @@ import '../../../../../utils/extensions/scroll_controller_extension.dart';
 import 'sub-item.dart';
 
 class NotVisitedViewWork extends StatefulWidget {
-  const NotVisitedViewWork({Key? key, required this.workcode})
-      : super(key: key);
+  const NotVisitedViewWork({super.key, required this.workcode});
 
   final String workcode;
 
@@ -102,21 +100,18 @@ class NotVisitedViewWorkState extends State<NotVisitedViewWork> {
       List<Work> works, ScrollController scrollController, bool isStarted) {
     if (works.isEmpty) {
       return const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('No tienes clientes por visitar.')
-          ],
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [Text('No tienes clientes por visitar.')],
       );
     } else {
       return ListView.builder(
-        controller: scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: works.length,
-        itemBuilder: (context, index) {
-          final work = works[index];
-          return SubItemWork(index: index, work: work, enabled: isStarted);
-        },
-      );
+          controller: scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemCount: works.length,
+          itemBuilder: (context, index) {
+            final work = works[index];
+            return SubItemWork(index: index, work: work, enabled: isStarted);
+          });
     }
   }
 }

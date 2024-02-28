@@ -1,14 +1,12 @@
+import 'package:bexdeliveries/src/presentation/widgets/icon_svg_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
-
-//core
-import '../../../../core/helpers/index.dart';
 
 //utils
 import '../../../utils/constants/nums.dart';
 import '../../../utils/constants/gaps.dart';
+import '../../../utils/constants/keys.dart';
 
 //cubits
 import '../../cubits/initial/initial_cubit.dart';
@@ -22,7 +20,7 @@ import '../../widgets/default_button_widget.dart';
 import '../../widgets/version_widget.dart';
 
 class InitialView extends StatefulWidget {
-  const InitialView({Key? key}) : super(key: key);
+  const InitialView({super.key});
 
   @override
   InitialViewState createState() => InitialViewState();
@@ -33,16 +31,12 @@ class InitialViewState extends State<InitialView> {
   late LoginCubit loginCubit;
   bool isLoading = false;
   bool showSuffix = true;
-  final helperFunctions = HelperFunctions();
   final FocusNode _focus = FocusNode();
   final TextEditingController companyNameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      helperFunctions.versionCheck(context);
-    });
     _focus.addListener(_onFocusChange);
   }
 
@@ -104,32 +98,30 @@ class InitialViewState extends State<InitialView> {
                     builder: (context, networkState) {
                   switch (networkState.runtimeType) {
                     case NetworkInitial:
-                      return const Center(child: CupertinoActivityIndicator());
+                      return const Center(
+                          child: CupertinoActivityIndicator(
+                              key: MyInitialKeys.loadingScreen));
                     case NetworkFailure:
                       return _buildNetworkFailed();
                     case NetworkSuccess:
                       return _buildBodyNetworkSuccess(size, state);
                     default:
-                      return const SizedBox();
+                      return const SizedBox(
+                          key: MyInitialKeys.emptyContainerScreen);
                   }
                 }))));
   }
 
   Widget _buildNetworkFailed() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Lottie.asset('assets/animations/1611-online-offline.json',
-              height: 180, width: 180),
-          const Text('No tiene conexión o tu conexión es lenta.')
-        ],
-      ),
-    );
+    return const SvgWidget(
+        key: MyInitialKeys.errorScreen,
+        path: 'assets/icons/offline.svg',
+        messages: ['No tiene conexión o tu conexión es lenta.']);
   }
 
   Widget _buildBodyNetworkSuccess(Size size, InitialState state) {
     return ListView(
+      key: MyInitialKeys.initialScreen,
       children: [
         Padding(
             padding: const EdgeInsets.all(60),
@@ -145,6 +137,7 @@ class InitialViewState extends State<InitialView> {
         gapH4,
         if (state.error != null)
           Padding(
+              key: MyInitialKeys.errorSnackBar,
               padding: const EdgeInsets.only(
                   left: kDefaultPadding, right: kDefaultPadding),
               child: Text(state.error!, textAlign: TextAlign.center)),
@@ -166,7 +159,8 @@ class InitialViewState extends State<InitialView> {
                               fontSize: 16,
                               fontWeight: FontWeight.normal)),
                   press: () async {
-                    initialCubit.getEnterprise(companyNameController, loginCubit);
+                    initialCubit.getEnterprise(
+                        companyNameController, loginCubit);
                   }),
             ),
             gapH12,
@@ -177,26 +171,21 @@ class InitialViewState extends State<InitialView> {
     );
   }
 
-  MediaQuery buildCompanyField() {
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaleFactor: 0.80 * MediaQuery.textScaleFactorOf(context),
-      ),
-      child: TextField(
-        controller: companyNameController,
-        focusNode: _focus,
-        keyboardType: TextInputType.multiline,
-        maxLines: null,
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(),
-          suffixIcon: SizedBox(
-            child: Center(
-              widthFactor: 1.1,
-              child: Text('@bexsoluciones.com', style: TextStyle(fontSize: 16)),
-            ),
+  Widget buildCompanyField() {
+    return TextField(
+      controller: companyNameController,
+      focusNode: _focus,
+      keyboardType: TextInputType.multiline,
+      maxLines: null,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        suffixIcon: SizedBox(
+          child: Center(
+            widthFactor: 1.1,
+            child: Text('@bexsoluciones.com', style: TextStyle(fontSize: 16)),
           ),
-          floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
       ),
     );
   }

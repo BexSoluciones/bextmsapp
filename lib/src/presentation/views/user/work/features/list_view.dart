@@ -1,7 +1,7 @@
 import 'package:bexdeliveries/src/config/size.dart';
+import 'package:bexdeliveries/src/presentation/widgets/icon_svg_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 //cubit
@@ -13,9 +13,6 @@ import '../../../../../utils/constants/nums.dart';
 
 //features
 import 'item_work.dart';
-
-//widgets
-import '../../../../widgets/skeleton_loader_widget.dart';
 
 //extensions
 import '../../../../../utils/extensions/scroll_controller_extension.dart';
@@ -65,7 +62,9 @@ class ListViewWorkState extends State<ListViewWork> {
     return BlocBuilder<WorkCubit, WorkState>(builder: (context, state) {
       switch (state.runtimeType) {
         case WorkLoading:
-          return const SkeletonLoading(cant: 10);
+          return const Center(
+            child: CupertinoActivityIndicator(),
+          );
         case WorkSuccess:
           return _buildWork(scrollController, widget.workcode, state.works,
               state.noMoreData, calculatedTextScaleFactor, calculatedFon);
@@ -115,14 +114,12 @@ class ListViewWorkState extends State<ListViewWork> {
   Widget buildStaticBody(works) {
     if (works.isEmpty) {
       return SliverToBoxAdapter(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Lottie.asset('assets/animations/36499-page-not-found.json'),
-            Text('No hay clients asociadas a este servicio ${widget.workcode}.')
-          ],
-        ),
-      );
+          child: SvgWidget(
+        path: 'assets/icons/not-results.svg',
+        messages: [
+          'No hay clients asociadas a este servicio ${widget.workcode}.'
+        ],
+      ));
     } else {
       return SliverList(
         delegate: SliverChildBuilderDelegate(

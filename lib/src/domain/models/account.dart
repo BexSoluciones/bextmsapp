@@ -8,7 +8,7 @@ class AccountFields {
     name,
     bankId,
     accountNumber,
-    code_qr,
+    codeQr,
     createdAt,
   ];
 
@@ -18,41 +18,38 @@ class AccountFields {
   static const String name = 'name';
   static const String bankId = 'bank_id';
   static const String accountNumber = 'account_number';
-  static const String code_qr = 'code_qr';
+  static const String codeQr = 'code_qr';
   static const String createdAt = 'created_at';
 }
 
 class Account {
   Account(
       {this.id,
-        this.idAccount,
         this.accountId,
         this.name,
         this.bankId,
         this.accountNumber,
-        this.code_qr,
+        this.codeQr,
         this.createdAt,
       });
 
   Account.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    idAccount = json['id_account'];
     accountId = json['account_id'];
     name = json['name'];
     bankId = json['bank_id'];
     accountNumber = json['account_number'];
-    code_qr = json['code_qr'];
+    codeQr = json['code_qr'];
     createdAt = json['created_at'];
   }
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
     data['name'] = name;
-    data['id_account'] = id;
     data['account_id'] = accountId;
     data['bank_id'] = bankId;
     data['account_number'] = accountNumber;
-    data['code_qr'] = code_qr;
+    data['code_qr'] = codeQr;
     data['created_at'] = createdAt;
     return data;
   }
@@ -63,7 +60,7 @@ class Account {
   String? name;
   int? bankId;
   int? accountNumber;
-  String? code_qr;
+  String? codeQr;
   String? createdAt;
 }
 

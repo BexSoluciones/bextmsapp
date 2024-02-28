@@ -17,18 +17,17 @@ import '../../../domain/repositories/database_repository.dart';
 import '../base/base_cubit.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/storage.dart';
 
 part 'database_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-
 class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
-  final ApiRepository _apiRepository;
-  final DatabaseRepository _databaseRepository;
+  final ApiRepository apiRepository;
+  final DatabaseRepository databaseRepository;
+  final LocalStorageService storageService;
 
-  DatabaseCubit(this._apiRepository, this._databaseRepository)
+  DatabaseCubit(
+      this.apiRepository, this.databaseRepository, this.storageService)
       : super(const DatabaseLoading(), null);
 
   Timer? _timer;
@@ -61,7 +60,7 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
   }
 
   Future<void> sendDatabase(String dbPath, String tableName) async {
-    final response = await _apiRepository.database(
+    final response = await apiRepository.database(
       request: DatabaseRequest(path: dbPath, tableName: tableName),
     );
 
@@ -73,7 +72,7 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
   }
 
   Future<DatabaseState> _getDatabase() async {
-    var company = _storageService.getString('company');
+    var company = storageService.getString('company');
     if (company != null) {
       var dir = await getApplicationDocumentsDirectory();
       var dbPath = '${dir.path}/$company.db';
@@ -161,7 +160,7 @@ class DatabaseCubit extends BaseCubit<DatabaseState, String?> {
     if (isBusy) return;
 
     await run(() async {
-      Database? database = await _databaseRepository.get();
+      Database? database = await databaseRepository.get();
       SnackBar? snackbar;
 
       final script = await database!

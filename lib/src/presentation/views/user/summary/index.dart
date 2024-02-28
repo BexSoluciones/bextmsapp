@@ -1,9 +1,7 @@
+import 'package:bexdeliveries/src/config/size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
-
-//utils
-import '../../../../utils/constants/strings.dart';
 
 //models
 import '../../../../domain/models/arguments.dart';
@@ -11,23 +9,14 @@ import '../../../../domain/models/arguments.dart';
 //cubit
 import '../../../cubits/summary/summary_cubit.dart';
 
-//widgets
-import '../../../widgets/icon_wifi_widget.dart';
-
-//services
-import '../../../../locator.dart';
-import '../../../../services/storage.dart';
-import '../../../../services/navigation.dart';
-
 //features
+import 'features/bottom_bar.dart';
 import 'features/header.dart';
 import 'features/list_view.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
+import 'features/sliver-app_bar.dart';
 
 class SummaryView extends StatefulWidget {
-  const SummaryView({Key? key, required this.arguments}) : super(key: key);
+  const SummaryView({super.key, required this.arguments});
 
   final SummaryArgument arguments;
 
@@ -72,9 +61,9 @@ class SummaryViewState extends State<SummaryView> {
   }
 
   Future<bool?> _isFirstLaunch() async {
-    var isFirstLaunch = _storageService.getBool('summary-is-init');
+    var isFirstLaunch = summaryCubit.storageService.getBool('summary-is-init');
     if (isFirstLaunch == null || isFirstLaunch == false) {
-      _storageService.setBool('summary-is-init', true);
+      summaryCubit.storageService.setBool('summary-is-init', true);
     }
     return isFirstLaunch;
   }
@@ -88,70 +77,53 @@ class SummaryViewState extends State<SummaryView> {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        child:
-            BlocBuilder<SummaryCubit, SummaryState>(builder: (context, state) {
-          return Scaffold(
-              resizeToAvoidBottomInset: true,
-              appBar: AppBar(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                leading: IconButton(
-                    onPressed: () {
-                      if (widget.arguments.origin != null &&
-                          widget.arguments.origin == 'navigation') {
-                        _navigationService.goBack();
-                      } else {
-                        _navigationService.goTo(AppRoutes.work,
-                            arguments:
-                                WorkArgument(work: widget.arguments.work));
-                      }
-                    },
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        color:
-                            Theme.of(context).colorScheme.secondaryContainer)),
-                actions: [
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: IconConnection(),
-                  ),
-                  state.time != null
-                      ? GestureDetector(
-                          onTap: () async => await summaryCubit
-                              .getDiffTime(widget.arguments.work.id!),
-                          child: Text('Tiempo ${state.time}',
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .secondaryContainer)))
-                      : Container(),
-                ],
-                shadowColor: Theme.of(context).colorScheme.shadow,
-                notificationPredicate: (ScrollNotification notification) {
-                  return notification.depth == 1;
-                },
-              ),
-              body: _buildBody());
-        }));
+        child: Scaffold(resizeToAvoidBottomInset: true, body: _buildBody()));
   }
 
   Widget _buildBody() {
-    return SafeArea(
-        child: Center(
-      child: ListView(
+    return SizedBox(
+      width: getFullScreenWidth(),
+      height: getFullScreenHeight(),
+      child: Stack(
         children: [
-          Container(
-              color: Theme.of(context).colorScheme.primary,
-              child: HeaderSummary(arguments: widget.arguments)),
-          ListViewSummary(
-              summaryCubit: summaryCubit,
+          SizedBox(
+            width: getFullScreenWidth(),
+            height: getFullScreenHeight()! / 1.1,
+            child: CustomScrollView(
+              slivers: [
+                AppBarSummary(
+                  arguments: widget.arguments,
+                  summaryCubit: summaryCubit,
+                ),
+                HeaderSummary(
+                  arguments: widget.arguments,
+                  one: one,
+                  two: two,
+                  three: three,
+                  four: four,
+                ),
+                ListViewSummary(
+                    summaryCubit: summaryCubit,
+                    arguments: widget.arguments,
+                    one: one,
+                    two: two,
+                    three: three,
+                    four: four,
+                    five: five),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BottomViewSummary(
               arguments: widget.arguments,
-              one: one,
-              two: two,
-              three: three,
-              four: four,
-              five: five)
+              summaryCubit: summaryCubit,
+            ),
+          ),
         ],
       ),
-    ));
+    );
   }
 }

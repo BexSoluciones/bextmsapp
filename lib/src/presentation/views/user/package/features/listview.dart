@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:lottie/lottie.dart';
 
 //domain
 import '../../../../../domain/models/summary.dart';
@@ -16,8 +15,7 @@ import '../../../../../locator.dart';
 final DatabaseRepository databaseRepository = locator<DatabaseRepository>();
 
 class ListViewPackage extends StatefulWidget {
-  const ListViewPackage({Key? key, required this.arguments, required this.two})
-      : super(key: key);
+  const ListViewPackage({super.key, required this.arguments, required this.two});
 
   final PackageArgument arguments;
   final GlobalKey two;
@@ -43,15 +41,10 @@ class ListViewPackageState extends State<ListViewPackage> {
             widget.arguments.summary.idPacking!),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData == false) {
-            return SliverToBoxAdapter(
+            return const SliverToBoxAdapter(
                 child: Center(
-                    child: Lottie.asset(
-              'assets/animations/36499-page-not-found.json',
-            )));
+                    child: Text('No se encontro información')));
           } else {
-
-            print(snapshot.data.length);
-
             return SliverList(
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {

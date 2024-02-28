@@ -13,7 +13,7 @@ class CameraStopped extends CameraEvent{}
 
 class CameraCaptured extends CameraEvent{}
 
-class CameraGallery extends CameraEvent{}
+class CameraGallery extends CameraEvent {}
 
 class CameraTrim extends CameraEvent{}
 
@@ -23,6 +23,5 @@ class CameraChange extends CameraEvent {
 }
 
 class CameraFolder extends CameraEvent {
-  final String path;
-  const CameraFolder({ required this.path });
+  const CameraFolder();
 }

@@ -1,5 +1,3 @@
-import 'package:bexdeliveries/src/utils/constants/colors.dart';
-import 'package:flutter/cupertino.dart' hide Table;
 import 'package:flutter/material.dart' hide Table;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -10,7 +8,7 @@ import '../../../../domain/models/table.dart';
 import '../../../cubits/database/database_cubit.dart';
 
 class DatabaseView extends StatefulWidget {
-  const DatabaseView({Key? key}) : super(key: key);
+  const DatabaseView({super.key});
 
   @override
   State<DatabaseView> createState() => DatabaseViewState();
@@ -34,7 +32,9 @@ class DatabaseViewState extends State<DatabaseView> {
 
     return BlocConsumer<DatabaseCubit, DatabaseState>(
       listener: (context, state) {
-        isLoading = state is DatabaseLoading;
+        if(state is DatabaseLoading) {
+          isLoading = true;
+        }
 
         if (state is DatabaseInitial) {
           databaseCubit.getDatabase();

@@ -15,14 +15,11 @@ import '../../domain/repositories/database_repository.dart';
 import '../../locator.dart';
 import '../../utils/constants/colors.dart';
 
-final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
-final ProcessingQueueBloc _processingQueueBloc = locator<ProcessingQueueBloc>();
-
 class BuildNotificationCard extends StatefulWidget {
   const BuildNotificationCard({
-    Key? key,
+    super.key,
     required this.notification,
-  }) : super(key: key);
+  });
 
   final notificationModel.PushNotification notification;
 
@@ -34,6 +31,10 @@ class _BuildNotificationCardState extends State<BuildNotificationCard>
     with AutomaticKeepAliveClientMixin, FormatDate {
   late DateTime? dateParse;
   late bool updateStatus;
+
+  final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
+  final ProcessingQueueBloc _processingQueueBloc =
+      locator<ProcessingQueueBloc>();
 
   @override
   void initState() {

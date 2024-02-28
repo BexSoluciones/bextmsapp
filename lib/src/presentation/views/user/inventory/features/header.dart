@@ -8,11 +8,10 @@ import '../../../../../domain/abstracts/format_abstract.dart';
 
 class HeaderInventory extends StatelessWidget with FormatNumber {
   HeaderInventory(
-      {Key? key,
+      {super.key,
       required this.arguments,
       required this.totalSummaries,
-      required this.two})
-      : super(key: key);
+      required this.two});
 
   final InventoryArgument arguments;
   final double? totalSummaries;
@@ -20,27 +19,29 @@ class HeaderInventory extends StatelessWidget with FormatNumber {
 
   @override
   Widget build(BuildContext context) {
-    final calculatedTextScaleFactor = textScaleFactor(context);
     final calculatedFon = getProportionateScreenHeight(16);
     return SliverPersistentHeader(
         pinned: true,
         delegate: _SliverAppBarDelegate(
           child: PreferredSize(
               preferredSize: const Size.fromHeight(50.0),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 12.0, horizontal: 8.0),
-                child: Showcase(
-                    key: two,
-                    disableMovingAnimation: true,
-                    description: 'Este es el total que debes recaudar 😁',
-                    child: Center(
-                      child: Text(
-                          'TOTAL A RECAUDAR: \$${formatter.format(totalSummaries ?? 0.0)}',
-                          textAlign: TextAlign.start,
-                          textScaleFactor: calculatedTextScaleFactor,
-                          style:  TextStyle(
-                              fontSize: calculatedFon, fontWeight: FontWeight.bold)),
+              child: Container(
+                color: Theme.of(context).colorScheme.background,
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12.0, horizontal: 8.0),
+                    child: Showcase(
+                      key: two,
+                      disableMovingAnimation: true,
+                      description: 'Este es el total que debes recaudar 😁',
+                      child: Center(
+                        child: Text(
+                            'TOTAL A RECAUDAR: \$${formatter.format(totalSummaries ?? 0.0)}',
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                                fontSize: calculatedFon,
+                                fontWeight: FontWeight.bold)),
+                      ),
                     )),
               )),
         ));

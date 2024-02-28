@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
-import 'package:location_repository/location_repository.dart';
 import 'package:equatable/equatable.dart';
 
 //core
@@ -14,7 +13,7 @@ import '../base/base_cubit.dart';
 
 //blocs
 import '../../blocs/processing_queue/processing_queue_bloc.dart';
-import 'package:bexdeliveries/src/presentation/blocs/network/network_bloc.dart';
+import '../../blocs/network/network_bloc.dart';
 import '../../blocs/gps/gps_bloc.dart';
 
 //utils
@@ -46,7 +45,6 @@ import '../../../domain/models/responses/enterprise_config_response.dart';
 import '../../../domain/models/responses/reason_response.dart';
 
 //service
-import '../../../locator.dart';
 import '../../../services/storage.dart';
 import '../../../services/navigation.dart';
 import '../../../services/logger.dart';
@@ -54,25 +52,31 @@ import '../../../services/workmanager.dart';
 
 part 'home_state.dart';
 
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final NavigationService _navigationService = locator<NavigationService>();
-final WorkmanagerService workmanagerService = locator<WorkmanagerService>();
-final helperFunctions = HelperFunctions();
-
 class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   final ApiRepository _apiRepository;
   final DatabaseRepository _databaseRepository;
   final ProcessingQueueBloc _processingQueueBloc;
   final GpsBloc gpsBloc;
   final NetworkBloc networkBloc;
+  final LocalStorageService storageService;
+  final NavigationService navigationService;
+  final WorkmanagerService workmanagerService;
+  final helperFunctions = HelperFunctions();
+
   bool _isLoggingOut = false;
   bool _isSyncing = false;
 
   StreamSubscription? locationSubscription;
-  CurrentUserLocationEntity? currentLocation;
 
-  HomeCubit(this._databaseRepository, this._apiRepository,
-      this._processingQueueBloc, this.gpsBloc, this.networkBloc)
+  HomeCubit(
+      this._databaseRepository,
+      this._apiRepository,
+      this._processingQueueBloc,
+      this.gpsBloc,
+      this.networkBloc,
+      this.storageService,
+      this.navigationService,
+      this.workmanagerService)
       : super(const HomeState(status: HomeStatus.initial), null);
 
   Future<void> getAllWorks() async {
@@ -80,8 +84,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   }
 
   void getUser() {
-    final user = _storageService.getObject('user') != null
-        ? User.fromJson(_storageService.getObject('user')!)
+    final user = storageService.getObject('user') != null
+        ? User.fromJson(storageService.getObject('user')!)
         : null;
     updateUser(user);
   }
@@ -102,8 +106,8 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       i++;
     }
 
-    final user = _storageService.getObject('user') != null
-        ? User.fromJson(_storageService.getObject('user')!)
+    final user = storageService.getObject('user') != null
+        ? User.fromJson(storageService.getObject('user')!)
         : null;
 
     return HomeState(status: HomeStatus.success, works: works, user: user);
@@ -136,10 +140,12 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           final timer0 = logTimerStart(headerHomeLogger, 'Starting...',
               level: LogLevel.info);
 
+          workmanagerService.completeWorks(_databaseRepository, _apiRepository);
+
           var currentLocation = gpsBloc.state.lastKnownLocation;
 
-          final user = _storageService.getObject('user') != null
-              ? User.fromJson(_storageService.getObject('user')!)
+          final user = storageService.getObject('user') != null
+              ? User.fromJson(storageService.getObject('user')!)
               : null;
 
           final results = await Future.wait([
@@ -151,11 +157,10 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           if (results.isNotEmpty) {
             if (results[0] is DataSuccess) {
               var data = results[0].data as EnterpriseConfigResponse;
-              _storageService.setObject(
-                  'config', data.enterpriseConfig.toMap());
-              _storageService.setBool(
+              storageService.setObject('config', data.enterpriseConfig.toMap());
+              storageService.setBool(
                   'can_make_history', data.enterpriseConfig.canMakeHistory);
-              _storageService.setInt(
+              storageService.setInt(
                   'limit_days_works', data.enterpriseConfig.limitDaysWorks);
               if (data.enterpriseConfig.specifiedAccountTransfer == true) {
                 var response =
@@ -174,18 +179,18 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           }
 
           final response = await _apiRepository.login(
-            request: LoginRequest(_storageService.getString('username')!,
-                _storageService.getString('password')!),
+            request: LoginRequest(storageService.getString('username')!,
+                storageService.getString('password')!),
           );
 
           if (response is DataSuccess) {
             final login = response!.data!.login;
             var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
             var version = yaml['version'];
-            _storageService.setString('token', response.data!.login.token);
-            _storageService.setObject(
+            storageService.setString('token', response.data!.login.token);
+            storageService.setObject(
                 'user', response.data!.login.user!.toJson());
-            _storageService.setInt('user_id', response.data!.login.user!.id);
+            storageService.setInt('user_id', response.data!.login.user!.id);
 
             var device = await helperFunctions.getDevice();
 
@@ -231,9 +236,9 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                       .where((element) => element.transaction != null);
 
                   if (found.isNotEmpty) {
-                    _storageService.setBool('${work.workcode}-started', true);
-                    _storageService.setBool('${work..workcode}-confirm', true);
-                    _storageService.setBool('${work.workcode}-blocked', false);
+                    storageService.setBool('${work.workcode}-started', true);
+                    storageService.setBool('${work..workcode}-confirm', true);
+                    storageService.setBool('${work.workcode}-blocked', false);
                   }
                 }
               });
@@ -244,7 +249,9 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
               for (var w in worksF.keys) {
                 var wn = responseWorks.data!.works
                     .where((element) => element.workcode == w);
-                warehouses.add(wn.first.warehouse!);
+                if (wn.first.warehouse != null) {
+                  warehouses.add(wn.first.warehouse!);
+                }
               }
               final distinct = warehouses.unique((x) => x.id);
               await _databaseRepository.insertWarehouses(distinct);
@@ -273,7 +280,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
                       ProcessingQueueAdd(processingQueue: processingQueueWork));
 
                   if (worksF.first.zoneId != null &&
-                      _storageService.getBool('can_make_history') == true) {
+                      storageService.getBool('can_make_history') == true) {
                     var processingQueueHistoric = ProcessingQueue(
                         body: jsonEncode({
                           'zone_id': worksF.first.zoneId!,
@@ -313,7 +320,9 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
             }
           } else if (response is DataFailed) {
             emit(state.copyWith(
-                status: HomeStatus.failure, error: response!.error, user: user));
+                status: HomeStatus.failure,
+                error: response!.error,
+                user: user));
           }
         } else {
           emit(state.copyWith(
@@ -323,10 +332,52 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
         }
       });
     } catch (e, stackTrace) {
-      print("Error during sync: $e");
-      print(stackTrace);
+      helperFunctions.handleException(e, stackTrace);
     } finally {
       _isSyncing = false;
+    }
+  }
+
+  Future<void> forceLogout() async {
+    if (_isLoggingOut) return;
+    try {
+      _isLoggingOut = true;
+      emit(state.copyWith(status: HomeStatus.loading));
+
+      if (networkBloc.state is NetworkSuccess) {
+        var processingQueueWork = ProcessingQueue(
+            body: null,
+            task: 'incomplete',
+            code: 'post_logout',
+            createdAt: now(),
+            updatedAt: now());
+
+        _processingQueueBloc
+            .add(ProcessingQueueAdd(processingQueue: processingQueueWork));
+
+        await _databaseRepository.emptyWorks();
+        await _databaseRepository.emptySummaries();
+        await _databaseRepository.emptyTransactions();
+        await _databaseRepository.emptyReasons();
+        // await _databaseRepository.emptyNotes();
+        storageService.remove('user');
+        storageService.remove('token');
+        storageService.remove('can_make_history');
+
+        emit(state.copyWith(status: HomeStatus.success));
+        _isLoggingOut = false;
+        await navigationService.goTo(AppRoutes.login);
+      } else {
+        emit(state.copyWith(
+            status: HomeStatus.failure,
+            error: 'Porfavor conectate a internet para realizar esta accion'));
+        _isLoggingOut = false;
+      }
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
+      _isLoggingOut = false;
+    } finally {
+      _isLoggingOut = false;
     }
   }
 
@@ -339,7 +390,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       if (networkBloc.state is NetworkSuccess) {
         var vpq =
             await _databaseRepository.validateIfProcessingQueueIsIncomplete();
-        if (vpq) {
+        if (!vpq) {
           emit(state.copyWith(
               status: HomeStatus.failure,
               error:
@@ -360,13 +411,13 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
           await _databaseRepository.emptyTransactions();
           await _databaseRepository.emptyReasons();
           // await _databaseRepository.emptyNotes();
-          _storageService.remove('user');
-          _storageService.remove('token');
-          _storageService.remove('can_make_history');
+          storageService.remove('user');
+          storageService.remove('token');
+          storageService.remove('can_make_history');
 
           emit(state.copyWith(status: HomeStatus.success));
           _isLoggingOut = false;
-          await _navigationService.goTo(AppRoutes.login);
+          await navigationService.goTo(AppRoutes.login);
         }
       } else {
         emit(state.copyWith(
@@ -383,25 +434,15 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
   }
 
   Future<void> schedule() async {
-
-    print(isBusy);
-
     if (isBusy) return;
     await run(() async {
       try {
         emit(state.copyWith(status: HomeStatus.loading));
-
-        var id = DateTime.now().second.toString();
-
-        workmanagerService.registerPeriodicTask(
-            'task_home', 'get_works_completed_and_send',
-            const Duration(minutes: 15));
-
+        workmanagerService.completeWorks(_databaseRepository, _apiRepository);
         emit(state.copyWith(status: HomeStatus.success));
       } catch (error, stackTrace) {
         helperFunctions.handleException(error, stackTrace);
       }
     });
   }
-
 }

@@ -5,12 +5,11 @@ import '../../utils/extensions/app_theme.dart';
 
 class DefaultButton extends StatelessWidget {
   const DefaultButton(
-      {Key? key,
+      {super.key,
       required this.widget,
       required this.press,
       this.color,
-      this.login})
-      : super(key: key);
+      this.login});
   final Widget widget;
   final Color? color;
   final bool? login;

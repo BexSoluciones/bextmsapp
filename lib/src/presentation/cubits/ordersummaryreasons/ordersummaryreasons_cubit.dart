@@ -10,20 +10,20 @@ part 'ordersummaryreasons_state.dart';
 
 class OrdersummaryreasonsCubit
     extends BaseCubit<OrdersummaryreasonsState, List<Summary>?> {
-  final DatabaseRepository _databaseRepository;
-  OrdersummaryreasonsCubit(this._databaseRepository)
+  final DatabaseRepository databaseRepository;
+  OrdersummaryreasonsCubit(this.databaseRepository)
       : super(const OrdersummaryreasonsLoading(), []);
 
   Future<void> OrdenSummary(String orderNumber) async {
     if (isBusy) return;
     await run(() async {
       try {
-        final summaryRespawn = await _databaseRepository
+        final summaryRespawn = await databaseRepository
             .getSummaryReportsWithReasonOrRedelivery(orderNumber);
-        final summaryReject = await _databaseRepository
+        final summaryReject = await databaseRepository
             .getSummaryReportsWithReturnOrRedelivery(orderNumber);
-        final sumarryDelivery = await _databaseRepository
-            .getSummaryReportsWithDelivery(orderNumber);
+        final sumarryDelivery =
+            await databaseRepository.getSummaryReportsWithDelivery(orderNumber);
         emit(OrdersummaryreasonsSuccess(
             summariesRespawn: summaryRespawn,
             summariesRejects: summaryReject,

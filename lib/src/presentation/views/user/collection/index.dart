@@ -1,16 +1,20 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-//blocs
-import '../../../blocs/account/account_bloc.dart';
+//cubits
+import '../../../cubits/summary/summary_cubit.dart';
+import '../../../cubits/work/work_cubit.dart';
 
-//cubit
-import '../../../cubits/collection/collection_cubit.dart';
+//blocs
+import '../../../blocs/collection/collection_bloc.dart';
+import '../../../blocs/account/account_bloc.dart';
 
 //utils
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/nums.dart';
+import '../../../../utils/constants/strings.dart';
 
 //domain
 import '../../../../domain/models/arguments.dart';
@@ -23,7 +27,7 @@ import './features/form.dart';
 import './features/header.dart';
 
 class CollectionView extends StatefulWidget {
-  const CollectionView({Key? key, required this.arguments}) : super(key: key);
+  const CollectionView({super.key, required this.arguments});
 
   final InventoryArgument arguments;
 
@@ -33,8 +37,11 @@ class CollectionView extends StatefulWidget {
 
 class CollectionViewState extends State<CollectionView> with FormatNumber {
   final _formKey = GlobalKey<FormState>();
-
-  late CollectionCubit collectionCubit;
+  bool summariesLoaded = false;
+  late CollectionBloc collectionBloc;
+  late SummaryCubit summaryCubit;
+  late WorkCubit workCubit;
+  late FocusScopeNode currentFocus;
 
   @override
   void setState(VoidCallback fn) {
@@ -46,63 +53,88 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
   @override
   void initState() {
     super.initState();
+
     context.read<AccountBloc>().add(LoadAccountListEvent());
-    collectionCubit = BlocProvider.of<CollectionCubit>(context);
+    collectionBloc = BlocProvider.of<CollectionBloc>(context);
+    summaryCubit = BlocProvider.of<SummaryCubit>(context);
+    workCubit = BlocProvider.of<WorkCubit>(context);
 
-    collectionCubit.initState();
+    collectionBloc.add(CollectionLoading(
+        workId: widget.arguments.work.id!,
+        orderNumber: widget.arguments.summary.orderNumber));
+  }
 
-    collectionCubit.getCollection(
-        widget.arguments.work.id!, widget.arguments.summary.orderNumber);
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      collectionCubit.cashController.addListener(() {
-        collectionCubit.listenForCash();
-        setState(() {});
-      });
-      collectionCubit.transferController.addListener(() {
-        if (!collectionCubit.isEditing) {
-          collectionCubit.listenForTransfer();
-          setState(() {});
-        }
-      });
-    });
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void unFocus() {
+    currentFocus = FocusScope.of(context);
+    if (!currentFocus.hasPrimaryFocus) {
+      currentFocus.unfocus();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    FocusScopeNode currentFocus;
+    return Scaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new),
+            onPressed: () => collectionBloc.add(CollectionBack()),
+          ),
+        ),
+        body: GestureDetector(onTap: unFocus, child: buildBlocConsumer(size)));
+  }
 
-    void unfocus() {
-      currentFocus = FocusScope.of(context);
-      if (!currentFocus.hasPrimaryFocus) {
-        currentFocus.unfocus();
-      }
-    }
-
-    return GestureDetector(
-        onTap: unfocus,
-        child: Scaffold(
-            resizeToAvoidBottomInset: true,
-            appBar: AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new),
-                onPressed: () => context.read<CollectionCubit>().goBack(),
-              ),
-            ),
-            body: BlocBuilder<CollectionCubit, CollectionState>(
-              builder: (_, state) => _buildBlocConsumer(size),
-            )));
+  Widget buildBlocConsumer(Size size) {
+    return BlocConsumer<CollectionBloc, CollectionState>(
+      // buildWhen: (previous, current) {
+      //   return previous.toString() != current.toString();
+      // },
+      // listenWhen: (previous, current) =>
+      //     previous.status != current.status && current.error == null,
+      listener: buildBlocListener,
+      builder: (context, state) {
+        if (state.status == CollectionStatus.loading) {
+          return const Center(child: CupertinoActivityIndicator());
+        } else if (state.canRenderView()) {
+          return _buildCollection(size, state);
+        } else {
+          return Center(
+            child: Text(state.status.toString()),
+          );
+        }
+      },
+    );
   }
 
   void buildBlocListener(BuildContext context, CollectionState state) async {
-    if (state is CollectionSuccess) {
-      if (state.validate != null && state.validate == true) {
-        collectionCubit.goToWork(state.work);
-      } else if (state.validate != null && state.validate == false) {
-        collectionCubit.goToSummary(state.work);
+    if (state.status == CollectionStatus.success &&
+        state.formSubmissionStatus == FormSubmissionStatus.success) {
+      if (state.isLastTransaction == true) {
+        collectionBloc.add(
+            CollectionNavigate(route: AppRoutes.home, arguments: 'collection'));
+      } else if (state.validate == true) {
+        collectionBloc.add(CollectionNavigate(
+            route: AppRoutes.work, arguments: WorkArgument(work: state.work!)));
+      } else if (!summariesLoaded && state.validate == false) {
+        summaryCubit
+            .getAllSummariesByOrderNumberChanged(widget.arguments.work.id!);
+        collectionBloc.add(CollectionNavigate(
+            route: AppRoutes.summary,
+            arguments: SummaryArgument(work: state.work!)));
+        summariesLoaded = true;
       }
-    } else if (state is CollectionFailed && state.error != null) {
+    } else if (state.status == CollectionStatus.back) {
+      collectionBloc.navigationService.goBack();
+    } else if ((state.status == CollectionStatus.error ||
+            state.formSubmissionStatus == FormSubmissionStatus.failure) &&
+        state.error != null) {
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -114,39 +146,20 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
           ),
         ),
       );
-    } else if (state is CollectionWaiting) {
+    } else if (state.status == CollectionStatus.waiting) {
       await showDialog(
           context: context,
           builder: (_) {
             return MyDialog(
               id: widget.arguments.work.id!,
               orderNumber: widget.arguments.summary.orderNumber,
-              total: collectionCubit.total,
-              totalSummary: state.totalSummary!.toDouble(),
+              total: state.total,
+              totalSummary: state.totalSummary.toDouble(),
               arguments: widget.arguments,
               context: context,
             );
           });
     }
-  }
-
-  Widget _buildBlocConsumer(Size size) {
-    return BlocConsumer<CollectionCubit, CollectionState>(
-      buildWhen: (previous, current) => previous != current,
-      listener: buildBlocListener,
-      builder: (context, state) {
-        if (state is CollectionLoading ||
-            state is CollectionInitial ||
-            state is CollectionModalClosed ||
-            state is CollectionFailed) {
-          return _buildCollection(size, state);
-        } else if (state is CollectionSuccess) {
-          return _buildSuccessTransaction(size);
-        } else {
-          return const SizedBox();
-        }
-      },
-    );
   }
 
   Widget _buildCollection(Size size, CollectionState state) {
@@ -158,11 +171,11 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
         child: Column(children: [
           HeaderCollection(
               type: widget.arguments.summary.typeOfCharge!,
-              total: state.totalSummary ?? 0.0),
+              total: state.totalSummary),
           SizedBox(height: size.height * 0.02),
           FormCollection(
               formKey: _formKey,
-              collectionCubit: collectionCubit,
+              collectionBloc: collectionBloc,
               state: state,
               orderNumber: widget.arguments.summary.orderNumber),
           Padding(
@@ -170,12 +183,13 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
                   left: kDefaultPadding, right: kDefaultPadding),
               child: DefaultButton(
                   widget: const Icon(Icons.edit, color: Colors.white),
-                  press: () => context
-                      .read<CollectionCubit>()
-                      .goToFirm(widget.arguments.summary.orderNumber))),
+                  press: () => collectionBloc.add(CollectionNavigate(
+                      route: AppRoutes.firm,
+                      arguments: widget.arguments.summary.orderNumber)))),
           SizedBox(height: size.height * 0.05),
-          BlocSelector<CollectionCubit, CollectionState, bool>(
-              selector: (state) => state is CollectionLoading,
+          BlocSelector<CollectionBloc, CollectionState, bool>(
+              selector: (state) =>
+                  state.formSubmissionStatus == FormSubmissionStatus.submitting,
               builder: (BuildContext c, x) {
                 return x
                     ? const CircularProgressIndicator(
@@ -190,47 +204,27 @@ class CollectionViewState extends State<CollectionView> with FormatNumber {
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 20)),
                             press: () async {
-                              final form = _formKey.currentState;
-                              if (form!.validate()) {
-                                collectionCubit.validate(widget.arguments);
-                              }
+                              state.isSubmitting() || !state.isValid
+                                  ? null
+                                  : collectionBloc.add(CollectionButtonPressed(
+                                      arguments: widget.arguments));
                             }));
               })
         ]),
       ),
     ));
   }
-
-  Widget _buildSuccessTransaction(Size size) {
-    return SafeArea(
-      child: SizedBox(
-        height: size.height,
-        width: size.width,
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(Icons.check, size: 50, color: Colors.green),
-              Text('Transación exitosa.')
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class MyDialog extends StatefulWidget {
   const MyDialog(
-      {Key? key,
+      {super.key,
       required this.id,
       required this.orderNumber,
       required this.totalSummary,
       required this.total,
       required this.arguments,
-      required this.context})
-      : super(key: key);
+      required this.context});
 
   final int id;
   final String orderNumber;
@@ -240,10 +234,10 @@ class MyDialog extends StatefulWidget {
   final BuildContext context;
 
   @override
-  _MyDialogState createState() => _MyDialogState();
+  MyDialogState createState() => MyDialogState();
 }
 
-class _MyDialogState extends State<MyDialog> with FormatNumber {
+class MyDialogState extends State<MyDialog> with FormatNumber {
   var seconds = 5;
   var showText = false;
   Timer? timer;
@@ -294,9 +288,8 @@ class _MyDialogState extends State<MyDialog> with FormatNumber {
           child: const Text('Cancelar'),
           onPressed: () {
             Navigator.of(context).pop();
-            context
-                .read<CollectionCubit>()
-                .getCollection(widget.id, widget.orderNumber);
+            context.read<CollectionBloc>().add(CollectionLoading(
+                workId: widget.id, orderNumber: widget.orderNumber));
           },
         ),
         TextButton(
@@ -304,12 +297,11 @@ class _MyDialogState extends State<MyDialog> with FormatNumber {
           onPressed: () {
             Navigator.of(context).pop();
             context
-                .read<CollectionCubit>()
-                .confirmTransaction(widget.arguments)
-                .then((value) {});
-            context
-                .read<CollectionCubit>()
-                .getCollection(widget.id, widget.orderNumber);
+                .read<CollectionBloc>()
+                .add(CollectionConfirmTransaction(arguments: widget.arguments));
+
+            context.read<CollectionBloc>().add(CollectionLoading(
+                workId: widget.id, orderNumber: widget.orderNumber));
           },
         ),
       ],

@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bexdeliveries/src/services/logger.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 //core
@@ -28,26 +26,21 @@ import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/navigation.dart';
 import '../../../services/storage.dart';
 
 part 'summary_state.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
-
 class SummaryCubit extends Cubit<SummaryState> with FormatDate {
-  final DatabaseRepository _databaseRepository;
-  final LocationRepository _locationRepository;
-  final ProcessingQueueBloc _processingQueueBloc;
+  final DatabaseRepository databaseRepository;
+  final ProcessingQueueBloc processingQueueBloc;
   final helperFunctions = HelperFunctions();
   final GpsBloc gpsBloc;
+  final NavigationService navigationService;
+  final LocalStorageService storageService;
 
-  CurrentUserLocationEntity? currentLocation;
-
-  SummaryCubit(this._databaseRepository, this._locationRepository,
-      this._processingQueueBloc, this.gpsBloc)
+  SummaryCubit(this.databaseRepository, this.processingQueueBloc, this.gpsBloc,
+      this.storageService, this.navigationService)
       : super(const SummaryLoading());
 
   Future<void> getAllSummariesByOrderNumber(int workId) async {
@@ -55,13 +48,23 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   }
 
   Future<SummaryState> _getAllSummariesByOrderNumber(int workId) async {
-    final summaries =
-        await _databaseRepository.getAllSummariesByOrderNumber(workId);
+    emit(const SummaryLoading());
 
-    var time = await _databaseRepository.getDiffTime(workId);
+    final summaries =
+        await databaseRepository.getAllSummariesByOrderNumber(workId);
+
+    Future.forEach(summaries, (summary) async {
+      if (summary.expedition != null) {
+        var response = await countBox(summary.orderNumber);
+        summary.totalSummary = response[0] as int;
+        summary.totalLooseSummary = response[1] as int;
+      }
+    });
+
+    var time = await databaseRepository.getDiffTime(workId);
     var isArrived =
-        await _databaseRepository.validateTransactionArrived(workId, 'arrived');
-    var isGeoReferenced = await _databaseRepository.validateClient(workId);
+        await databaseRepository.validateTransactionArrived(workId, 'arrived');
+    var isGeoReferenced = await databaseRepository.validateClient(workId);
 
     return SummarySuccess(
         summaries: summaries,
@@ -71,17 +74,44 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         isGeoReference: isGeoReferenced);
   }
 
+  Future<void> getAllSummariesByOrderNumberChanged(int workId) async {
+    emit(const SummaryLoading());
+
+    final summaries =
+        await databaseRepository.getAllSummariesByOrderNumber(workId);
+
+    Future.forEach(summaries, (summary) async {
+      if (summary.expedition != null) {
+        var response = await countBox(summary.orderNumber);
+        summary.totalSummary = response[0] as int;
+        summary.totalLooseSummary = response[1] as int;
+      }
+    });
+
+    var time = await databaseRepository.getDiffTime(workId);
+    var isArrived =
+        await databaseRepository.validateTransactionArrived(workId, 'arrived');
+    var isGeoReferenced = await databaseRepository.validateClient(workId);
+
+    emit(SummaryChanged(
+        summaries: summaries,
+        origin: state.origin,
+        time: time,
+        isArrived: isArrived,
+        isGeoReference: isGeoReferenced));
+  }
+
   Future<List> countBox(String orderNumber) async {
     final summaryFutures = await Future.wait([
-      _databaseRepository.getTotalPackageSummaries(orderNumber),
-      _databaseRepository.getTotalPackageSummariesLoose(orderNumber),
+      databaseRepository.getTotalPackageSummaries(orderNumber),
+      databaseRepository.getTotalPackageSummariesLoose(orderNumber),
     ]);
 
     return summaryFutures;
   }
 
   Future<void> getDiffTime(int workId) async {
-    var time = await _databaseRepository.getDiffTime(workId);
+    var time = await databaseRepository.getDiffTime(workId);
     emit(SummarySuccess(
         summaries: state.summaries,
         origin: state.origin,
@@ -94,18 +124,34 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
       Work work, Summary summary, Transaction transaction) async {
     emit(const SummaryLoading());
 
-    var vts = await _databaseRepository.validateTransactionSummary(
+    var vts = await databaseRepository.validateTransactionSummary(
         work.workcode!, summary.orderNumber, 'summary');
-    var isArrived = await _databaseRepository.validateTransactionArrived(
+    var isArrived = await databaseRepository.validateTransactionArrived(
         transaction.workId, 'arrived');
+    final summaries =
+        await databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
     if (isArrived && vts == false) {
       var currentLocation = gpsBloc.state.lastKnownLocation;
+      currentLocation ??= gpsBloc.lastRecordedLocation;
+      currentLocation ??= await gpsBloc.getCurrentLocation();
 
-      transaction.latitude = currentLocation!.latitude.toString();
+      if (currentLocation == null) {
+        emit(SummaryFailed(
+            error:
+                'Error obteniendo tu ubicación, por favor revisa tu señal y intentalo de nuevo.',
+            summaries: summaries,
+            origin: state.origin,
+            time: state.time,
+            isArrived: false,
+            isGeoReference: state.isGeoReference));
+        return;
+      }
+
+      transaction.latitude = currentLocation.latitude.toString();
       transaction.longitude = currentLocation.longitude.toString();
 
-      var id = await _databaseRepository.insertTransaction(transaction);
+      var id = await databaseRepository.insertTransaction(transaction);
 
       var processingQueue = ProcessingQueue(
           body: jsonEncode(transaction.toJson()),
@@ -116,12 +162,9 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
           createdAt: now(),
           updatedAt: now());
 
-      _processingQueueBloc
+      processingQueueBloc
           .add(ProcessingQueueAdd(processingQueue: processingQueue));
     }
-
-    final summaries =
-        await _databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
     emit(SummarySuccess(
         summaries: summaries,
@@ -130,15 +173,15 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         isArrived: isArrived,
         isGeoReference: state.isGeoReference));
 
-    _navigationService.goTo(AppRoutes.inventory,
+    navigationService.goTo(AppRoutes.inventory,
         arguments: InventoryArgument(
             work: work, summary: summary, summaries: summaries));
   }
 
   bool validateDistance(
       currentLocation, double lat, double log, summaryId, int? ratio) {
-    if (_storageService.getBool('$summaryId-distance_ignore') != null &&
-        _storageService.getBool('$summaryId-distance_ignore') == true) {
+    if (storageService.getBool('$summaryId-distance_ignore') != null &&
+        storageService.getBool('$summaryId-distance_ignore') == true) {
       return true;
     } else {
       return helperFunctions.isWithinRadiusGeo(
@@ -148,69 +191,87 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
   Future<void> sendTransactionArrived(
       BuildContext context, Work work, Transaction transaction) async {
-    emit(const SummaryLoading());
+    try {
+      emit(const SummaryLoading());
 
-    var currentLocation = gpsBloc.state.lastKnownLocation;
+      final summaries =
+          await databaseRepository.getAllSummariesByOrderNumber(work.id!);
 
-    transaction.latitude = currentLocation!.latitude.toString();
-    transaction.longitude = currentLocation.longitude.toString();
+      var isGeoReferenced =
+          await databaseRepository.validateClient(transaction.workId);
 
-    final summaries =
-        await _databaseRepository.getAllSummariesByOrderNumber(work.id!);
+      var currentLocation = gpsBloc.state.lastKnownLocation;
+      currentLocation ??= gpsBloc.lastRecordedLocation;
+      currentLocation ??= await gpsBloc.getCurrentLocation();
 
-    var isGeoReferenced =
-        await _databaseRepository.validateClient(transaction.workId);
-
-    final enterpriseConfig = _storageService.getObject('config') != null
-        ? EnterpriseConfig.fromMap(_storageService.getObject('config')!)
-        : null;
-
-    logDebug(headerSummaryLogger, enterpriseConfig.toString());
-
-    if (enterpriseConfig != null &&
-        enterpriseConfig.fixedDeliveryDistance == true) {
-      var distanceInMeters = helperFunctions.calculateDistanceInMetersGeo(
-          currentLocation,
-          double.tryParse(work.latitude!)!,
-          double.tryParse(work.longitude!)!);
-
-      if (!validateDistance(
-              currentLocation,
-              double.tryParse(work.latitude!)!,
-              double.tryParse(work.longitude!)!,
-              transaction.summaryId,
-              enterpriseConfig.ratio) &&
-          context.mounted) {
-        helperFunctions.showDialogWithDistance(
-            context, distanceInMeters, enterpriseConfig.ratio!);
-
-        emit(SummarySuccess(
+      if (currentLocation == null) {
+        emit(SummaryFailed(
+            error:
+                'Error obteniendo tu ubicación, por favor revisa tu señal y intentalo de nuevo.',
             summaries: summaries,
             origin: state.origin,
             time: state.time,
-            isArrived: true,
+            isArrived: false,
             isGeoReference: isGeoReferenced));
+        return;
       }
+
+      transaction.latitude = currentLocation.latitude.toString();
+      transaction.longitude = currentLocation.longitude.toString();
+
+      final enterpriseConfig = storageService.getObject('config') != null
+          ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
+          : null;
+
+      if (enterpriseConfig != null &&
+          enterpriseConfig.requiredArrived == true) {
+        var distanceInMeters = helperFunctions.calculateDistanceInMetersGeo(
+            currentLocation,
+            double.tryParse(work.latitude!)!,
+            double.tryParse(work.longitude!)!);
+
+        if (!validateDistance(
+                currentLocation,
+                double.tryParse(work.latitude!)!,
+                double.tryParse(work.longitude!)!,
+                transaction.summaryId,
+                enterpriseConfig.ratio) &&
+            context.mounted) {
+          helperFunctions.showDialogWithDistance(
+              context, distanceInMeters, enterpriseConfig.ratio!);
+
+          emit(SummarySuccess(
+              summaries: summaries,
+              origin: state.origin,
+              time: state.time,
+              isArrived: false,
+              isGeoReference: isGeoReferenced));
+
+          return;
+        }
+      }
+
+      await databaseRepository.insertTransaction(transaction);
+
+      var processingQueue = ProcessingQueue(
+          body: jsonEncode(transaction.toJson()),
+          task: 'incomplete',
+          code: 'store_transaction_arrived',
+          createdAt: now(),
+          updatedAt: now());
+
+      processingQueueBloc
+          .add(ProcessingQueueAdd(processingQueue: processingQueue));
+
+      emit(SummarySuccess(
+          summaries: summaries,
+          origin: state.origin,
+          time: state.time,
+          isArrived: true,
+          isGeoReference: isGeoReferenced));
+    } catch (error, stackTrace) {
+      helperFunctions.handleException(error, stackTrace);
     }
-
-    await _databaseRepository.insertTransaction(transaction);
-
-    var processingQueue = ProcessingQueue(
-        body: jsonEncode(transaction.toJson()),
-        task: 'incomplete',
-        code: 'store_transaction_arrived',
-        createdAt: now(),
-        updatedAt: now());
-
-    _processingQueueBloc
-        .add(ProcessingQueueAdd(processingQueue: processingQueue));
-
-    emit(SummarySuccess(
-        summaries: summaries,
-        origin: state.origin,
-        time: state.time,
-        isArrived: true,
-        isGeoReference: isGeoReferenced));
   }
 
   Future<void> showMaps(
@@ -218,20 +279,20 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
       SummaryNavigationArgument arguments,
       DirectionsMode directionsMode) async {
     emit(const SummaryLoadingMap());
-    currentLocation ??= await _locationRepository.getCurrentLocation();
+    var currentLocation = gpsBloc.state.lastKnownLocation;
     if (context.mounted) {
       helperFunctions.showMapDirection(
           context, arguments.work, currentLocation!);
     }
 
-    final summaries = await _databaseRepository
+    final summaries = await databaseRepository
         .getAllSummariesByOrderNumber(arguments.work.id!);
 
-    var isArrived = await _databaseRepository.validateTransactionArrived(
+    var isArrived = await databaseRepository.validateTransactionArrived(
         arguments.work.id!, 'arrived');
 
     var isGeoReferenced =
-        await _databaseRepository.validateClient(arguments.work.id!);
+        await databaseRepository.validateClient(arguments.work.id!);
 
     emit(SummarySuccess(
         summaries: summaries,
@@ -242,13 +303,12 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
   }
 
   Future<void> error(int id, String error) async {
-    final summaries =
-        await _databaseRepository.getAllSummariesByOrderNumber(id);
+    final summaries = await databaseRepository.getAllSummariesByOrderNumber(id);
 
     var isArrived =
-        await _databaseRepository.validateTransactionArrived(id, 'arrived');
+        await databaseRepository.validateTransactionArrived(id, 'arrived');
 
-    var isGeoReferenced = await _databaseRepository.validateClient(id);
+    var isGeoReferenced = await databaseRepository.validateClient(id);
 
     emit(SummaryFailed(
         error: error,

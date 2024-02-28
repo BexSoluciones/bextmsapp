@@ -4,13 +4,13 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 //domain
 import '../../../domain/models/enterprise_config.dart';
 import '../../../domain/models/location.dart' as l;
+import '../../../domain/models/error.dart';
 import '../../../domain/models/processing_queue.dart';
 import '../../../domain/repositories/database_repository.dart';
 import '../../../domain/abstracts/format_abstract.dart';
@@ -19,209 +19,85 @@ import '../../../domain/abstracts/format_abstract.dart';
 import '../../../utils/constants/strings.dart';
 
 //services
-import '../../../locator.dart';
 import '../../../services/navigation.dart';
 import '../../../services/storage.dart';
 import '../../../services/logger.dart';
 
-//widgets
-import '../../widgets/error_alert_dialog.dart';
-
 part 'gps_event.dart';
 part 'gps_state.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-final LocalStorageService _storageService = locator<LocalStorageService>();
-final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
-
-LatLng? lastRecordedLocation;
-
 class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
+  final NavigationService navigationService;
+  final LocalStorageService storageService;
+  final DatabaseRepository databaseRepository;
+
   StreamSubscription? gpsServiceSubscription;
   StreamSubscription? positionStream;
-
+  LatLng? lastRecordedLocation;
   bool showingDialog = false;
 
-  GpsBloc()
-      : super(const GpsState(
+  GpsBloc(
+      {required this.navigationService,
+      required this.storageService,
+      required this.databaseRepository})
+      : super(const GpsInitial(
             isGpsEnabled: false, isGpsPermissionGranted: false)) {
     on<GpsAndPermissionEvent>((event, emit) => emit(state.copyWith(
         isGpsEnabled: event.isGpsEnabled,
         isGpsPermissionGranted: event.isGpsPermissionGranted)));
-    on<ShowErrorDialog>(_showErrorDialog);
-
-    on<OnStartFollowingUser>(
-        (event, emit) => emit(state.copyWith(followingUser: true)));
-    on<OnStopFollowingUser>(
-        (event, emit) => emit(state.copyWith(followingUser: false)));
+    on<GpsShowDisabled>((event, emit) {
+      emit(state.copyWith(showDialog: true));
+    });
+    on<OnStartFollowingUser>(startFollowingUser);
+    on<OnStopFollowingUser>(stopFollowingUser);
     on<OnNewUserLocationEvent>((event, emit) {
-      //('location', event.currentPosition);
-      emit(state.copyWith(
+      final updatedState = state.copyWith(
         lastKnownLocation: event.newLocation,
-        myLocationHistory: [...state.myLocationHistory, event.newLocation],
-      ));
+        isGpsEnabled: true,
+      );
+      emit(updatedState);
     });
     _init();
   }
 
-  Stream<List<l.Location>> get locations {
-    return _databaseRepository.watchAllLocations();
-  }
-
-  Future<void> startFollowingUser() async {
-    add(OnStartFollowingUser());
-    final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
-
-    final isPermissionGranted = await _isPermissionGranted();
-    if (!isPermissionGranted) {
-      await askGpsAccess();
-    }
-
-    try {
-      EnterpriseConfig? enterpriseConfig;
-      var storedConfig = _storageService.getObject('config');
-      if (storedConfig != null) {
-        enterpriseConfig = EnterpriseConfig.fromMap(storedConfig);
-      }
-
-      if (enterpriseConfig != null) {
-        var distances = enterpriseConfig.distance!;
-        final locationSettings = LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: enterpriseConfig.distance!,
-        );
-
-        if (!isPermissionGranted && !isLocationEnabled) {
-          errorGpsAlertDialog(
-              onTap: () {
-                Geolocator.openLocationSettings();
-              },
-              context: _navigationService
-                  .navigatorKey.currentState!.overlay!.context,
-              error: 'error',
-              iconData: Icons.error,
-              buttonText: 'buttonText');
-        } else {
-          positionStream =
-              Geolocator.getPositionStream(locationSettings: locationSettings)
-                  .listen((event) {
-            final position = event;
-            if (enterpriseConfig != null &&
-                enterpriseConfig.backgroundLocation!) {
-              if (lastRecordedLocation != null) {
-                final distance = Geolocator.distanceBetween(
-                  lastRecordedLocation!.latitude,
-                  lastRecordedLocation!.longitude,
-                  position.latitude,
-                  position.longitude,
-                );
-                if (distance >= distances) {
-                  lastRecordedLocation =
-                      LatLng(position.latitude, position.longitude);
-                  saveLocation('location', position, 0);
-                }
-              } else {
-                lastRecordedLocation =
-                    LatLng(position.latitude, position.longitude);
-                saveLocation('location', position, 1);
-              }
-            }
-
-            add(OnNewUserLocationEvent(
-                position, LatLng(position.latitude, position.longitude)));
-          });
-        }
-      }
-    } catch (e, stackTrace) {
-      await FirebaseCrashlytics.instance.recordError(e, stackTrace);
-    }
-  }
-
-  Future getCurrentPosition() async {
-    try {
-      final position = await Geolocator.getCurrentPosition();
-      add(OnNewUserLocationEvent(
-          position, LatLng(position.latitude, position.longitude)));
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error getCurrentPosition: GPS:${e.toString()}');
-      }
-    }
-  }
-
-  void stopFollowingUser() {
-    add(OnStopFollowingUser());
-    positionStream?.cancel();
-  }
+  goBack() => navigationService.goBack();
 
   Future<void> _init() async {
     final gpsInitStatus = await Future.wait([
       _checkGpsStatus(),
       _isPermissionGranted(),
     ]);
-    final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
-    if (isLocationEnabled) {
-      startFollowingUser();
-    }
+
     add(GpsAndPermissionEvent(
       isGpsEnabled: gpsInitStatus[0],
       isGpsPermissionGranted: gpsInitStatus[1],
     ));
   }
 
-  _showErrorDialog(ShowErrorDialog event, Emitter emit) async {
-    if (state.isAllGranted) {
-      errorGpsAlertDialog(
-          onTap: () {
-            Geolocator.openLocationSettings();
-          },
-          context:
-              _navigationService.navigatorKey.currentState!.overlay!.context,
-          error: 'error',
-          iconData: Icons.error,
-          buttonText: 'buttonText');
-    }
-  }
-
-  Future<bool> _isPermissionGranted() async {
-    final isGranted = await Permission.location.isGranted;
-    return isGranted;
-  }
-
   Future<bool> _checkGpsStatus() async {
-    final isEnable = await Geolocator.isLocationServiceEnabled();
-
+    final isEnabled = await Geolocator.isLocationServiceEnabled();
     gpsServiceSubscription =
         Geolocator.getServiceStatusStream().listen((event) {
       final isEnabled = (event.index == 1) ? true : false;
-      if (isEnabled == false && showingDialog == false) {
-        add(const ShowErrorDialog());
-        showingDialog = true;
-      } else {
-        if (showingDialog) {
-          Navigator.pop(
-              _navigationService.navigatorKey.currentState!.overlay!.context);
-          showingDialog = false;
-        }
-      }
       add(GpsAndPermissionEvent(
         isGpsEnabled: isEnabled,
         isGpsPermissionGranted: state.isGpsPermissionGranted,
       ));
     });
-
-    return isEnable;
+    return isEnabled;
   }
 
   Future<void> askGpsAccess() async {
     final status = await Permission.location.request();
-
     switch (status) {
       case PermissionStatus.granted:
         add(GpsAndPermissionEvent(
             isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: true));
         break;
       case PermissionStatus.denied:
+        add(GpsAndPermissionEvent(
+            isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: false));
+        openAppSettings();
         break;
       case PermissionStatus.restricted:
         return;
@@ -233,9 +109,160 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
         openAppSettings();
         break;
       case PermissionStatus.provisional:
-        // TODO: Handle this case.
         break;
     }
+  }
+
+  Future<bool> _isPermissionGranted() async {
+    final isGranted = await Permission.location.isGranted;
+    return isGranted;
+  }
+
+  Future<void> startFollowingUser(OnStartFollowingUser event, emit) async {
+    try {
+      final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
+      final isPermissionGranted = await _isPermissionGranted();
+
+      if (!isPermissionGranted) {
+        await askGpsAccess();
+      }
+
+      EnterpriseConfig? enterpriseConfig = _getEnterpriseConfigFromStorage();
+
+      if (enterpriseConfig != null) {
+        LocationSettings locationSettings = _getLocationSettings(
+            enterpriseConfig, isPermissionGranted, isLocationEnabled);
+
+        if (!isPermissionGranted && !isLocationEnabled) {
+          emit(state.copyWith(showDialog: true));
+        } else {
+          positionStream = Geolocator.getPositionStream(
+                  locationSettings: locationSettings)
+              .listen((event) => _handleUserLocation(event, enterpriseConfig)
+                  .onError(
+                      (error, stackTrace) => _handleError(error, stackTrace)));
+        }
+      }
+    } catch (e, stackTrace) {
+      await _handleError(e, stackTrace);
+    }
+  }
+
+  Future<void> stopFollowingUser(OnStopFollowingUser event, emit) async {
+    try {
+      positionStream?.cancel();
+    } catch (e, stackTrace) {
+      await _handleError(e, stackTrace);
+    }
+  }
+
+  Future<LatLng?> getCurrentLocation() async {
+    try {
+      bool serviceEnabled;
+      LocationPermission permission;
+
+      // Test if location services are enabled.
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return Future.error('Location services are disabled.');
+      }
+
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          return Future.error('Location permissions are denied');
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        // Permissions are denied forever, handle appropriately.
+        return Future.error(
+            'Location permissions are permanently denied, we cannot request permissions.');
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+
+      return LatLng(position.latitude, position.longitude);
+    } catch (error, stackTrace) {
+      _handleError(error, stackTrace);
+      return null;
+    }
+
+  }
+
+  EnterpriseConfig? _getEnterpriseConfigFromStorage() {
+    var storedConfig = storageService.getObject('config');
+    return storedConfig != null ? EnterpriseConfig.fromMap(storedConfig) : null;
+  }
+
+  LocationSettings _getLocationSettings(EnterpriseConfig enterpriseConfig,
+      bool isPermissionGranted, bool isLocationEnabled) {
+    var distances = enterpriseConfig.distance!;
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return AndroidSettings(
+        timeLimit: const Duration(days: 1),
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 2,
+        forceLocationManager: true,
+        intervalDuration: const Duration(seconds: 10),
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationText:
+              "Servicio de ubicación en segundo plano en ejecución",
+          notificationTitle: "Bexdeliveries",
+          enableWakeLock: true,
+        ),
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
+      return AppleSettings(
+        accuracy: LocationAccuracy.high,
+        activityType: ActivityType.fitness,
+        distanceFilter: distances,
+        pauseLocationUpdatesAutomatically: true,
+        showBackgroundLocationIndicator: false,
+      );
+    } else {
+      return const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 100,
+      );
+    }
+  }
+
+  Future<void> _handleUserLocation(
+      Position position, EnterpriseConfig enterpriseConfig) async {
+    final distances = enterpriseConfig.distance!;
+    final isBackgroundLocationEnabled =
+        enterpriseConfig.backgroundLocation ?? false;
+
+    if (isBackgroundLocationEnabled && lastRecordedLocation != null) {
+      final distance = Geolocator.distanceBetween(
+        lastRecordedLocation!.latitude,
+        lastRecordedLocation!.longitude,
+        position.latitude,
+        position.longitude,
+      );
+
+      if (distance >= distances) {
+        lastRecordedLocation = LatLng(position.latitude, position.longitude);
+        await saveLocation('location', position, 0);
+      }
+    } else {
+      lastRecordedLocation = LatLng(position.latitude, position.longitude);
+      await saveLocation('location', position, 1);
+    }
+
+    add(OnNewUserLocationEvent(
+        position, LatLng(position.latitude, position.longitude)));
+  }
+
+  Future<void> _handleError(dynamic e, StackTrace stackTrace) async {
+    await databaseRepository.insertError(Error(
+        errorMessage: e.toString(),
+        stackTrace: stackTrace.toString(),
+        createdAt: now()));
+    await FirebaseCrashlytics.instance.recordError(e, stackTrace);
   }
 
   double calculateDistanceBetweenTwoLatLng(
@@ -262,8 +289,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
 
   Future<void> saveLocation(String type, Position position, int send) async {
     try {
-      var lastLocation = await _databaseRepository.getLastLocation();
-
+      var lastLocation = await databaseRepository.getLastLocation();
       var location = l.Location(
           latitude: position.latitude,
           longitude: position.longitude,
@@ -273,7 +299,7 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
           isMock: position.isMocked,
           speed: position.speed,
           speedAccuracy: position.speedAccuracy,
-          userId: _storageService.getInt('user_id') ?? 0,
+          userId: storageService.getInt('user_id') ?? 0,
           time: DateTime.now(),
           send: 0);
 
@@ -293,41 +319,30 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
         var speed = ((distance / seconds) * 18) / 5;
         if (diff == true) {
           if (speed < 10) {
-            _storageService.setBool('is_walking', true);
+            storageService.setBool('is_walking', true);
           } else if (speed > 10) {
-            _storageService.setBool('is_walking', false);
+            storageService.setBool('is_walking', false);
           }
 
-          await _databaseRepository.insertLocation(location);
+          await databaseRepository.insertLocation(location);
         } else {
           logDebugFine(headerDeveloperLogger, 'no se ha movido');
         }
       } else {
-        await _databaseRepository.insertLocation(location);
+        await databaseRepository.insertLocation(location);
       }
 
-      var count = await _databaseRepository.countLocationsManager();
-      if (count && send == 0) {
+      var count = await databaseRepository.countLocationsManager();
+      if (count) {
         var processingQueue = ProcessingQueue(
-            body: await _databaseRepository.getLocationsToSend(),
+            body: await databaseRepository.getLocationsToSend(),
             task: 'incomplete',
             code: 'store_locations',
             createdAt: now(),
             updatedAt: now());
 
-        await _databaseRepository.insertProcessingQueue(processingQueue);
-        await _databaseRepository.updateLocationsManager();
-      } else {
-        await _databaseRepository.insertLocation(location);
-        var processingQueue = ProcessingQueue(
-            body: await _databaseRepository.getLocationsToSend(),
-            task: 'incomplete',
-            code: 'store_locations',
-            createdAt: now(),
-            updatedAt: now());
-
-        await _databaseRepository.insertProcessingQueue(processingQueue);
-        await _databaseRepository.updateLocationsManager();
+        await databaseRepository.insertProcessingQueue(processingQueue);
+        await databaseRepository.updateLocationsManager();
       }
     } catch (e, stackTrace) {
       await FirebaseCrashlytics.instance.recordError(e, stackTrace);

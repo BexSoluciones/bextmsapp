@@ -19,14 +19,13 @@ final NavigationService _navigationService = locator<NavigationService>();
 
 class TouchControl extends StatefulWidget {
   const TouchControl(
-      {Key? key,
+      {super.key,
       required this.width,
       required this.height,
       required this.orderNumber,
       this.onChanged,
       this.xPos = 0.0,
-      this.yPos = 0.0})
-      : super(key: key);
+      this.yPos = 0.0});
 
   @override
   TouchControlState createState() => TouchControlState();

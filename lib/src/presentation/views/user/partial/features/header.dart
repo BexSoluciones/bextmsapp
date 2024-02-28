@@ -151,7 +151,7 @@ class HeaderPartial extends StatelessWidget {
                             ],
                           ),
                         )
-                      : Container(),
+                      : const SizedBox(),
                 ],
               ),
             )),

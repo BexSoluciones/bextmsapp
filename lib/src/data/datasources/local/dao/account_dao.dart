@@ -15,14 +15,14 @@ class AccountDao {
   }
 
   Future<List<Account>> getAllAccounts() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final accountList = await db!.query(tableAccount);
     final accounts = parseAccounts(accountList);
     return accounts;
   }
 
   Stream<List<Account>> watchAllAccounts() async* {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final accountList = await db!.query(tableAccount);
     final accounts = parseAccounts(accountList);
     yield accounts;
@@ -33,7 +33,7 @@ class AccountDao {
   }
 
   Future<void> insertAccounts(List<Account> accounts) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var batch = db!.batch();
     if (accounts.isNotEmpty) {
       await Future.forEach(accounts, (account) async {
@@ -56,7 +56,7 @@ class AccountDao {
   }
 
   Future<void> emptyAccounts() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableAccount);
     return Future.value();
   }

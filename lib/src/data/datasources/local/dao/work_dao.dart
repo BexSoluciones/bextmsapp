@@ -15,7 +15,7 @@ class WorkDao {
   }
 
   Future<List<Work>> getAllWorks() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final workList = await db!.rawQuery('''
         SELECT works.id, works.workcode, works.latitude, works.longitude,
@@ -33,11 +33,12 @@ class WorkDao {
         )  
         GROUP BY $tableWorks.${WorkFields.workcode}
     ''');
+    _appDatabase.close();
     return parseWorks(workList);
   }
 
   Future<List<Work>> findAllWorksByWorkcode(String workcode) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final workList = await db!.rawQuery('''
         SELECT $tableWorks.*, 
         COUNT(DISTINCT $tableSummaries.${SummaryFields.orderNumber}) as count,
@@ -55,20 +56,22 @@ class WorkDao {
         ORDER BY $tableWorks.${WorkFields.order} ASC
      ''');
     //LIMIT $limit
+    _appDatabase.close();
     final works = parseWorks(workList);
     return works;
   }
 
   Future<int> countAllWorksByWorkcode(String workcode) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final workList = await db!.rawQuery(
         '''SELECT * FROM $tableWorks WHERE ${WorkFields.workcode} = "$workcode" ''');
+    _appDatabase.close();
     return workList.length;
   }
 
   Future<List<Work>> findAllWorksPaginatedByWorkcode(
-      String workcode, int page) async {
-    final db = await _appDatabase.streamDatabase;
+      String workcode, int page, int limit) async {
+    final db = await _appDatabase.database;
     final workList = await db!.rawQuery('''
         SELECT $tableWorks.*, 
         COUNT(DISTINCT $tableSummaries.${SummaryFields.orderNumber}) as count,
@@ -84,16 +87,15 @@ class WorkDao {
         WHERE $tableWorks.${WorkFields.workcode} = "$workcode" AND $tableWorks.${WorkFields.status} != 'complete'
         GROUP BY $tableWorks.${WorkFields.numberCustomer}, $tableWorks.${WorkFields.codePlace}
         ORDER BY $tableWorks.${WorkFields.order} ASC
-        LIMIT $page, 10
-        
+        LIMIT $page, $limit
      ''');
-    //LIMIT $limit
+    _appDatabase.close();
     final works = parseWorks(workList);
     return works;
   }
 
   Future<List<String>?> completeWorks() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     final workList = await db!.rawQuery('''
         SELECT $tableWorks.${WorkFields.workcode} 
@@ -102,8 +104,6 @@ class WorkDao {
      ''');
 
     var works = parseWorks(workList);
-
-    logDebug(headerDeveloperLogger, works.length.toString());
 
     if (works.isNotEmpty) {
       var workcodes = <String>[];
@@ -134,6 +134,7 @@ class WorkDao {
         }
       }
 
+      _appDatabase.close();
       return workcodes;
     } else {
       return null;
@@ -149,13 +150,13 @@ class WorkDao {
   }
 
   Future<int> updateStatusWork(String workcode, String status) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     return db!.update(tableWorks, {'status': status},
         where: 'workcode = ?', whereArgs: [workcode]);
   }
 
   Future<void> insertWorks(List<Work> works) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
 
     var batch = db!.batch();
 
@@ -179,7 +180,7 @@ class WorkDao {
   }
 
   Future<int> insertPolylines(String workcode, List<LatLng> data) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var batch = db!.batch();
     var existingData = await db
         .query('polylines', where: 'workcode = ?', whereArgs: [workcode]);
@@ -201,7 +202,7 @@ class WorkDao {
   }
 
   Future<List<LatLng>> getPolylines(String workcode) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     var existingData = await db!
         .query('polylines', where: 'workcode = ?', whereArgs: [workcode]);
 
@@ -222,12 +223,12 @@ class WorkDao {
   }
 
   Future<int> deleteWorksByWorkcode(String workcode) async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     return db!.delete(tableWorks, where: 'workcode = ?', whereArgs: [workcode]);
   }
 
   Future<void> emptyWorks() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableWorks, where: 'id > 0');
     return Future.value();
   }

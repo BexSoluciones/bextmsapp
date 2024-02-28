@@ -1,14 +1,12 @@
 import 'dart:convert';
-import 'package:bexdeliveries/src/domain/models/payment.dart';
-import 'package:bexdeliveries/src/services/logger.dart';
-import 'package:bexdeliveries/src/utils/constants/strings.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
-import 'package:sqflite_migration/sqflite_migration.dart';
-import 'package:sqlbrite/sqlbrite.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:synchronized/synchronized.dart';
+// import 'package:sqflite_migration/sqflite_migration.dart';
 
 //models
 import '../../../domain/models/work.dart';
@@ -33,6 +31,7 @@ import '../../../domain/models/transaction_validate.dart';
 import '../../../domain/models/note.dart';
 import '../../../domain/models/error.dart';
 import '../../../domain/abstracts/format_abstract.dart';
+import '../../../domain/models/payment.dart';
 
 //services
 import '../../../locator.dart';
@@ -57,10 +56,6 @@ part '../local/dao/note_dao.dart';
 part '../local/dao/error_dao.dart';
 
 class AppDatabase {
-  static BriteDatabase? _streamDatabase;
-
-  // make this a singleton class
-  // ignore: sort_constructors_first
   AppDatabase._privateConstructor();
   static final AppDatabase instance = AppDatabase._privateConstructor();
   static var lock = Lock();
@@ -254,6 +249,8 @@ class AppDatabase {
         ${ProcessingQueueFields.task} TEXT DEFAULT NULL,
         ${ProcessingQueueFields.code} TEXT DEFAULT NULL,
         ${ProcessingQueueFields.error} TEXT DEFAULT NULL,
+        ${ProcessingQueueFields.relation} INTEGER DEFAULT NULL,
+        ${ProcessingQueueFields.relationId} INTEGER DEFAULT NULL,
         ${ProcessingQueueFields.createdAt} TEXT DEFAULT NULL,
         ${ProcessingQueueFields.updatedAt} TEXT DEFAULT NULL
       )
@@ -312,14 +309,48 @@ class AppDatabase {
     '''
        CREATE TABLE IF NOT EXISTS $tableAccount (
         ${AccountFields.id} INTEGER PRIMARY KEY,
-        ${AccountFields.idAccount} INTEGER NOT NULL ,
         ${AccountFields.accountId} INTEGER DEFAULT NULL,
         ${AccountFields.name} TEXT DEFAULT NULL,
         ${AccountFields.bankId} INTEGER DEFAULT NULL,
         ${AccountFields.accountNumber} INTEGER DEFAULT NULL,
-        ${AccountFields.code_qr} TEXT DEFAULT NULL,
+        ${AccountFields.codeQr} TEXT DEFAULT NULL,
         ${AccountFields.createdAt} TEXT DEFAULT NULL
       )
+    ''',
+    '''
+      CREATE INDEX IF NOT EXISTS workcode_index ON $tableWorks(${WorkFields.workcode})
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tablePhotos (
+        ${PhotoFields.id} INTEGER PRIMARY KEY,
+        ${PhotoFields.name} TEXT DEFAULT NULL,
+        ${PhotoFields.path} TEXT DEFAULT NULL
+      )
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS polylines (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        workcode TEXT,
+        polylines TEXT
+      )
+    ''',
+    '''
+      CREATE TABLE IF NOT EXISTS $tableNotes (
+        ${NoteFields.id} INTEGER PRIMARY KEY,
+        ${NoteFields.latitude} TEXT DEFAULT NULL,
+        ${NoteFields.longitude} TEXT DEFAULT NULL,
+        ${NoteFields.observation} TEXT DEFAULT NULL,
+        ${NoteFields.images} TEXT DEFAULT NULL,
+        ${NoteFields.zoneId} INTEGER DEFAULT NULL
+      )
+    ''',
+    '''
+    CREATE TABLE IF NOT EXISTS $tableErrors (
+      ${ErrorFields.id} INTEGER PRIMARY KEY,
+      ${ErrorFields.errorMessage} TEXT DEFAULT NULL,
+      ${ErrorFields.stackTrace}  TEXT DEFAULT NULL,
+      ${ErrorFields.createdAt} TEXT DEFAULT NULL
+     )
     '''
   ];
 
@@ -369,10 +400,27 @@ class AppDatabase {
 
   Future<Database> _initDatabase(databaseName) async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
-    final config = MigrationConfig(
-        initializationScript: initialScript, migrationScripts: migrations);
     final path = join(documentsDirectory.path, databaseName);
-    return await openDatabaseWithMigration(path, config);
+    return await openDatabase(path, version: 2,
+        onCreate: (database, version) async {
+      try {
+        for (var migrate in initialScript) {
+          await database.execute(migrate);
+        }
+      } catch (error, stackTrace) {
+        await FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      }
+    }, onUpgrade: (database, oldVersion, newVersion) async {
+      try {
+        for (int i = oldVersion + 1; i <= newVersion; i++) {
+          for (var migrate in migrations) {
+            await database.execute(migrate);
+          }
+        }
+      } catch (error, stackTrace) {
+        await FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      }
+    });
   }
 
   Future<Database?> get database async {
@@ -384,39 +432,39 @@ class AppDatabase {
           dbName = 'default';
         }
         _database = await _initDatabase('$dbName.db');
-        _streamDatabase = BriteDatabase(_database!);
       }
     });
     return _database;
   }
 
-  Future<BriteDatabase?> get streamDatabase async {
-    await database;
-    return _streamDatabase;
-  }
-
   //INSERT METHODS
   Future<int> insert(String table, Map<String, dynamic> row) async {
-    final db = await instance.streamDatabase;
-    return db!.insert(table, row);
+    final db = await instance.database;
+    return await db!.transaction((txn) => txn.insert(table, row));
   }
 
   //UPDATE METHODS
   Future<int> update(
       String table, Map<String, dynamic> value, String columnId, int id) async {
-    final db = await instance.streamDatabase;
-    return db!.update(table, value, where: '$columnId = ?', whereArgs: [id]);
+    final db = await instance.database;
+    return await db!.transaction((txn) =>
+        txn.update(table, value, where: '$columnId = ?', whereArgs: [id]));
   }
 
   // //DELETE METHODS
   Future<int> delete(String table, String columnId, int id) async {
-    final db = await instance.streamDatabase;
+    final db = await instance.database;
     return db!.delete(table, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteIma(String table) async {
+    final db =  await instance.database;
+    return db!.delete(table);
   }
 
   Future<bool> listenForTableChanges(
       String table, String column, String value) async {
-    final db = await instance.streamDatabase;
+    final db = await instance.database;
 
     var result = await db!
         .query(table, where: '$column = ?', whereArgs: [value], limit: 1);
@@ -454,8 +502,8 @@ class AppDatabase {
 
   ErrorDao get errorDao => ErrorDao(instance);
 
-  void close() {
+  void close() async {
     _database = null;
-    _streamDatabase!.close();
+    _database?.close();
   }
 }

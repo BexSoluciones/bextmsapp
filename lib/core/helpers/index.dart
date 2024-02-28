@@ -2,21 +2,19 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:core' hide Error;
+import 'package:bexdeliveries/src/presentation/blocs/gps/gps_bloc.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location_repository/location_repository.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
-import 'package:location/location.dart' as loc;
-import 'package:yaml/yaml.dart';
 
 //blocs
 import '../../src/domain/models/requests/login_request.dart';
@@ -40,7 +38,6 @@ import '../../src/utils/resources/data_state.dart';
 //widgets
 import '../../src/presentation/widgets/show_map_direction_widget.dart';
 import '../../src/presentation/widgets/custom_dialog.dart';
-import '../../src/presentation/widgets/update_dialog_widget.dart';
 
 //locator
 import '../../src/locator.dart';
@@ -51,12 +48,9 @@ import '../../src/services/logger.dart';
 final DatabaseRepository _databaseRepository = locator<DatabaseRepository>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
 final NavigationService _navigationService = locator<NavigationService>();
-final LocationRepository _locationRepository = locator<LocationRepository>();
 final ApiRepository _apiRepository = locator<ApiRepository>();
 
 class HelperFunctions with FormatDate {
-  loc.Location location = loc.Location();
-
   Future<bool> checkConnection() async {
     try {
       final result = await InternetAddress.lookup('example.com');
@@ -114,52 +108,6 @@ class HelperFunctions with FormatDate {
       _storageService.setString('token', login.token);
     } else {
       logDebug(headerDeveloperLogger, response!.error!);
-    }
-  }
-
-  Future<FirebaseRemoteConfig> setupRemoteConfig() async {
-    final remoteConfig = FirebaseRemoteConfig.instance;
-
-    RemoteConfigValue(null, ValueSource.valueStatic);
-    return remoteConfig;
-  }
-
-  void versionCheck(context) async {
-    final isConnected = await checkConnection();
-    if (isConnected) {
-      var yaml = loadYaml(await rootBundle.loadString('pubspec.yaml'));
-      var currentVersion = double.parse(
-          yaml['version'].trim().replaceAll('.', '').split('+')[0]);
-
-      //Get Latest version info from firebase config
-      final remoteConfig = await setupRemoteConfig();
-
-      try {
-        // Using default duration to force fetching from remote server.
-        await remoteConfig.setConfigSettings(RemoteConfigSettings(
-          fetchTimeout: const Duration(seconds: 0),
-          minimumFetchInterval: Duration.zero,
-        ));
-        await remoteConfig.fetchAndActivate();
-
-        var force = remoteConfig.getBool('force_activate');
-        var forceUpdate = remoteConfig.getBool('force_update');
-        var message = remoteConfig.getString('message');
-
-        var newVersion = double.parse(remoteConfig
-            .getString('force_update_current_version')
-            .trim()
-            .replaceAll('.', ''));
-
-        if (force && newVersion > currentVersion) {
-          await UpdateDialog(skipUpdate: forceUpdate, message: message)
-              .showVersionDialog(context);
-        }
-      } on PlatformException catch (exception, stackTrace) {
-        await handleException(exception, stackTrace);
-      } catch (exception, stackTrace) {
-        await handleException(exception, stackTrace);
-      }
     }
   }
 
@@ -304,16 +252,27 @@ class HelperFunctions with FormatDate {
     path = path.replaceFirst('app_flutter', '');
     var directory = Directory('$path/cache');
     if (directory.existsSync()) {
+      // Eliminar imágenes
       var imageList = directory
           .listSync()
-          .map((item) => item.path)
-          .where((item) => item.endsWith('.jpg') || item.endsWith('.png'))
+          .whereType<File>()
+          .where((file) =>
+      file.path.endsWith('.jpg') || file.path.endsWith('.png'))
           .toList(growable: false);
-      for (int index = 0; index < imageList.length; index++) {
-        var element = imageList[index];
-        var file = File(element);
-        await _databaseRepository.deleteAll(index + 1);
+      for (var file in imageList) {
+        await _databaseRepository.deleteAll(imageList.indexOf(file) + 1);
         await file.delete();
+      }
+      // Eliminar carpetas
+      var folderList = directory
+          .listSync()
+          .whereType<Directory>()
+          .where((folder) =>
+          RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+              .hasMatch(folder.path.split('/').last))
+          .toList(growable: false);
+      for (var folder in folderList) {
+        await folder.delete(recursive: true);
       }
     }
   }
@@ -380,10 +339,11 @@ class HelperFunctions with FormatDate {
   }
 
   Future<Widget?> showMapDirection(BuildContext context, Work work,
-      CurrentUserLocationEntity? location) async {
+      LatLng? location) async {
     final availableMaps = await MapLauncher.installedMaps;
 
-    location ??= await _locationRepository.getCurrentLocation();
+    // TODO [Andres Cardenas] get one location ///TEST
+    if(context.mounted) location ??= context.read<GpsBloc>().state.lastKnownLocation;
 
     if (availableMaps.length == 1) {
       await availableMaps.first.showDirections(
@@ -392,7 +352,7 @@ class HelperFunctions with FormatDate {
           double.parse(work.longitude!),
         ),
         destinationTitle: work.customer,
-        origin: Coords(location.latitude, location.longitude),
+        origin: Coords(location!.latitude, location.longitude),
         originTitle: 'Origen',
         waypoints: null,
         directionsMode: DirectionsMode.driving,
@@ -422,46 +382,47 @@ class HelperFunctions with FormatDate {
     }
   }
 
-  Future<void> initLocationService() async {
-    final bool serviceEnabled = await checkAndEnableLocationService();
-    if (!serviceEnabled) {
-      await location.enableBackgroundMode(enable: false);
-      return;
-    }
+   Future<void> initLocationService() async {
+     final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+     if (!serviceEnabled) {
+       return;
+     }
 
-    final loc.PermissionStatus permissionStatus =
-        await checkAndRequestLocationPermission();
-    if (permissionStatus != loc.PermissionStatus.granted) {
-      await location.enableBackgroundMode(enable: false);
-      return;
-    }
+     LocationPermission permission = await Geolocator.checkPermission();
+     if (permission == LocationPermission.denied) {
+       permission = await Geolocator.requestPermission();
+       if (permission == LocationPermission.denied) {
+         return Future.error('Location permissions are denied');
+       }
+     }
 
-    location.changeNotificationOptions(
-        iconName: '@mipmap/ic_launcher',
-        title: 'Servicio de ubicación en segundo plano en ejecución',
-        onTapBringToFront: false);
+     if (permission == LocationPermission.deniedForever) {
+       return Future.error(
+           'Location permissions are permanently denied, we cannot request permissions.');
+     }
+   }
 
-    await location.enableBackgroundMode(enable: true);
-  }
+   Future<bool> checkAndEnableLocationService() async {
+     final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+     if (!serviceEnabled) {
+       final bool requestedService = await Geolocator.openLocationSettings();
+       if (!requestedService) {
+         return false;
+       }
+     }
+     return true;
+   }
 
-  Future<bool> checkAndEnableLocationService() async {
-    final bool serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      final bool requestedService = await location.requestService();
-      if (!requestedService) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  Future<loc.PermissionStatus> checkAndRequestLocationPermission() async {
-    loc.PermissionStatus permissionStatus = await location.hasPermission();
-    if (permissionStatus == loc.PermissionStatus.denied) {
-      permissionStatus = await location.requestPermission();
-    }
-    return permissionStatus;
-  }
+   Future<LocationPermission> checkAndRequestLocationPermission() async {
+     LocationPermission permission = await Geolocator.checkPermission();
+     if (permission == LocationPermission.denied) {
+       permission = await Geolocator.requestPermission();
+       if (permission == LocationPermission.denied) {
+         return Future.error('Location permissions are denied');
+       }
+     }
+     return permission;
+   }
 
   Future<bool> deleteWorks(Work work) async {
     var dob = DateTime.parse(work.date!);

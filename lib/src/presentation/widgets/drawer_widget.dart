@@ -22,8 +22,6 @@ final NavigationService _navigationService = locator<NavigationService>();
 final LocalStorageService _storageService = locator<LocalStorageService>();
 
 Drawer drawer(BuildContext context, User? user) {
-  bool isTheme = context.read<ThemeBloc>().state.isDarkTheme;
-
   var issuesBloc = context.read<IssuesBloc>();
 
   return Drawer(
@@ -39,13 +37,20 @@ Drawer drawer(BuildContext context, User? user) {
             // textScaleFactor: textScaleFactor(context)
           ),
           otherAccountsPictures: [
-            IconButton(
-                icon: Icon(isTheme ? Icons.wb_sunny : Icons.nightlight_round,
-                    color: Colors.white),
-                onPressed: () {
-                  isTheme = !isTheme;
-                  BlocProvider.of<ThemeBloc>(context).add(ChangeTheme());
-                })
+            BlocBuilder<ThemeBloc, ThemeState>(
+              builder: (context, state) {
+                return IconButton(
+                  icon: Icon(
+                      state.isDarkTheme
+                          ? Icons.wb_sunny
+                          : Icons.nightlight_round,
+                      color: Colors.white),
+                  onPressed: () {
+                    BlocProvider.of<ThemeBloc>(context).add(ChangeTheme());
+                  },
+                );
+              },
+            )
           ],
           currentAccountPicture: CircleAvatar(
             backgroundColor: Theme.of(context).colorScheme.secondaryContainer,

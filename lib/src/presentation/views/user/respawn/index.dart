@@ -14,18 +14,12 @@ import '../../../../domain/models/arguments.dart';
 //widgets
 import '../../../widgets/default_button_widget.dart';
 
-//services
-import '../../../../locator.dart';
-import '../../../../services/navigation.dart';
-
 //features
 import 'features/header.dart';
 import 'features/reason_global_page.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-
 class RespawnView extends StatefulWidget {
-  const RespawnView({Key? key, required this.arguments}) : super(key: key);
+  const RespawnView({super.key, required this.arguments});
 
   final InventoryArgument arguments;
 
@@ -59,8 +53,9 @@ class _RespawnViewState extends State<RespawnView> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new,color:Theme.of(context).colorScheme.secondaryContainer),
-          onPressed: () => _navigationService.goBack(),
+          icon: Icon(Icons.arrow_back_ios_new,
+              color: Theme.of(context).colorScheme.secondaryContainer),
+          onPressed: () => respawnCubit.navigationService.goBack(),
         ),
       ),
       body: ListView(
@@ -68,7 +63,9 @@ class _RespawnViewState extends State<RespawnView> {
           SizedBox(
             height: size.height * 0.25,
             width: size.width,
-            child: Container(color:Theme.of(context).colorScheme.primary,child: HeaderRespawn(arguments: widget.arguments)),
+            child: Container(
+                color: Theme.of(context).colorScheme.primary,
+                child: HeaderRespawn(arguments: widget.arguments)),
           ),
           BlocBuilder<RespawnCubit, RespawnState>(builder: (context, state) {
             switch (state.runtimeType) {
@@ -118,7 +115,7 @@ class _RespawnViewState extends State<RespawnView> {
                     setState: setState,
                     typeAheadController: reasonController,
                   )
-                : Container(),
+                : const SizedBox(),
             const Spacer(),
             if (state.error != null)
               Text(state.error!,

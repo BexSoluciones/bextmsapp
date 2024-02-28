@@ -15,6 +15,11 @@ class ProcessingQueueCancel extends ProcessingQueueEvent {}
 
 class ProcessingQueueAll extends ProcessingQueueEvent {}
 
+class ProcessingQueueOne extends ProcessingQueueEvent {
+  final int id;
+  ProcessingQueueOne({ required this.id });
+}
+
 class ProcessingQueueSearchFilter extends ProcessingQueueEvent {
   final String? value;
   ProcessingQueueSearchFilter({ required this.value });

@@ -194,7 +194,7 @@ class _FillIssueViewState extends State<FillIssueView> {
                                             'Novedad reportada con exito !!',
                                         onConfirm: () => Navigator.pop(context),
                                         buttonText: 'Aceptar',
-                                        cancelButtom: false,
+                                        cancelButton: false,
                                       ));
                             }
                           } else {

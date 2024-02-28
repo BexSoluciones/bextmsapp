@@ -12,5 +12,11 @@ class JustAsyncStrategy extends CacheStrategy {
   JustAsyncStrategy._internal();
 
   @override
-  Future<T?> applyStrategy<T>(AsyncBloc<T> asyncBloc, String key, SerializerBloc<T> serializerBloc, int ttlValue, Storage storage) async => await invokeAsync(asyncBloc, key, storage);
+  Future<T?> applyStrategy<T>(
+          AsyncBloc<T> asyncBloc,
+          String key,
+          SerializerBloc<T> serializerBloc,
+          int ttlValue,
+          Storage storage) async =>
+      await invokeAsync(asyncBloc, key, storage);
 }

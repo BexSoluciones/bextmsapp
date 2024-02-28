@@ -3,51 +3,74 @@ part of 'gps_bloc.dart';
 class GpsState extends Equatable {
   final bool isGpsEnabled;
   final bool isGpsPermissionGranted;
-
-  //PROPERTIES TO CONTROLL USER GPS ACTION
+  final bool showDialog;
   final bool followingUser;
   final LatLng? lastKnownLocation;
-  final List<LatLng> myLocationHistory;
 
   bool get isAllGranted => isGpsEnabled && isGpsPermissionGranted;
 
   const GpsState(
       {required this.isGpsEnabled,
-        required this.isGpsPermissionGranted,
-        //PROPERTIES TO CONTROL USER GPS ACTION
-        this.followingUser = false,
-        this.lastKnownLocation,
-        myLocationHistory})
-      : myLocationHistory = myLocationHistory ?? const [];
+      required this.isGpsPermissionGranted,
+      this.showDialog = false,
+      this.followingUser = false,
+      this.lastKnownLocation,
+      myLocationHistory});
 
   GpsState copyWith({
     bool? isGpsEnabled,
     bool? isGpsPermissionGranted,
     bool? followingUser,
+    bool? showDialog,
     LatLng? lastKnownLocation,
     List<LatLng>? myLocationHistory,
   }) =>
       GpsState(
           isGpsEnabled: isGpsEnabled ?? this.isGpsEnabled,
           isGpsPermissionGranted:
-          isGpsPermissionGranted ?? this.isGpsPermissionGranted,
-
-          //PROPERTIES TO CONTROLL USER GPS ACTION
-
+              isGpsPermissionGranted ?? this.isGpsPermissionGranted,
+          showDialog: showDialog ?? this.showDialog,
           followingUser: followingUser ?? this.followingUser,
-          lastKnownLocation: lastKnownLocation ?? this.lastKnownLocation,
-          myLocationHistory: myLocationHistory ?? this.myLocationHistory);
+          lastKnownLocation: lastKnownLocation ?? this.lastKnownLocation);
 
   @override
   List<Object?> get props => [
-    isGpsEnabled,
-    isGpsPermissionGranted,
-    followingUser,
-    myLocationHistory,
-    lastKnownLocation
-  ];
+        isGpsEnabled,
+        isGpsPermissionGranted,
+        showDialog,
+        followingUser,
+        lastKnownLocation
+      ];
 
   @override
   String toString() =>
-      '{ isGpsEnabled: $isGpsEnabled, isGpsPermissionGranted: $isGpsPermissionGranted }';
+      '{ isGpsEnabled: $isGpsEnabled, '
+          'isGpsPermissionGranted: $isGpsPermissionGranted, '
+          'showDialog: $showDialog }';
+}
+
+class GpsInitial extends GpsState {
+  const GpsInitial(
+      {required super.isGpsEnabled, required super.isGpsPermissionGranted});
+}
+
+class GpsLoading extends GpsState {
+  const GpsLoading(
+      {required super.isGpsEnabled, required super.isGpsPermissionGranted});
+}
+
+class GpsFailed extends GpsState {
+  final String error;
+  const GpsFailed(
+      {this.error = "GpsFailed",
+      required super.isGpsEnabled,
+      required super.isGpsPermissionGranted});
+
+  @override
+  List<Object> get props => [error];
+}
+
+class GpsSuccess extends GpsState {
+  const GpsSuccess(
+      {required super.isGpsEnabled, required super.isGpsPermissionGranted});
 }

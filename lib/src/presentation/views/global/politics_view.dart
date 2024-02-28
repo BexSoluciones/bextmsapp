@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 //cubit
@@ -10,17 +11,8 @@ import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/nums.dart';
 import '../../../utils/constants/gaps.dart';
 
-// animation
-import 'package:lottie/lottie.dart';
-
-//services
-import '../../../locator.dart';
-import '../../../services/navigation.dart';
-
 //widgets
 import '../../widgets/default_button_widget.dart';
-
-final NavigationService _navigationService = locator<NavigationService>();
 
 class PoliticsView extends StatefulWidget {
   const PoliticsView({super.key});
@@ -35,6 +27,7 @@ class PoliticsViewState extends State<PoliticsView> {
 
   @override
   void initState() {
+    politicsCubit = BlocProvider.of<PoliticsCubit>(context);
     super.initState();
   }
 
@@ -46,7 +39,7 @@ class PoliticsViewState extends State<PoliticsView> {
       body: BlocConsumer<PoliticsCubit, PoliticsState>(
         listener: (context, state) {
           if (state is PoliticsSuccess) {
-            _navigationService.goTo(state.route!);
+            politicsCubit.navigationService.goTo(state.route!);
           }
         },
         builder: (context, state) => SingleChildScrollView(
@@ -58,8 +51,7 @@ class PoliticsViewState extends State<PoliticsView> {
                   padding: const EdgeInsets.all(kDefaultPadding),
                   child: ListView(children: [
                     gapH12,
-                    Lottie.asset('assets/animations/47956-area-map.json',
-                        height: 300, width: 300),
+                    SvgPicture.asset('assets/icons/map.svg', height: 180, width: 180),
                     gapH12,
                     const Text(
                         'Tu ubicación actual se mostrará en el mapa y se usará para rutas, búsquedas de sitios y estimaciones del tiempo de entrega de tus pedidos.',
@@ -113,6 +105,6 @@ class PoliticsViewState extends State<PoliticsView> {
   }
 
   void _dispatchEvent(BuildContext context) {
-    BlocProvider.of<PoliticsCubit>(context).goTo();
+    politicsCubit.goTo();
   }
 }

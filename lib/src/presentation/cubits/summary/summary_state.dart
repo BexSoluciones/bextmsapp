@@ -1,5 +1,6 @@
 part of 'summary_cubit.dart';
 
+
 abstract class SummaryState extends Equatable {
   final List<Summary> summaries;
   final String? origin;
@@ -22,7 +23,6 @@ abstract class SummaryState extends Equatable {
   List<Object?> get props => [
         summaries,
         origin,
-        time,
         isArrived,
         isGeoReference,
         error,
@@ -36,6 +36,16 @@ class SummaryLoading extends SummaryState {
 
 class SummaryLoadingMap extends SummaryState {
   const SummaryLoadingMap();
+}
+
+class SummaryChanged extends SummaryState {
+  const SummaryChanged(
+      {super.summaries,
+        super.origin,
+        super.time,
+        super.enterpriseConfig,
+        super.isArrived,
+        super.isGeoReference});
 }
 
 class SummarySuccess extends SummaryState {

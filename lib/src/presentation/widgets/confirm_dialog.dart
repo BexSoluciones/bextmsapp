@@ -4,15 +4,16 @@ import 'circular_progress.dart';
 
 class CustomConfirmDialog extends StatefulWidget {
   CustomConfirmDialog(
-      {required this.title,
-        required this.message,
-        required this.onConfirm,
-        required this.cancelButtom,
-        required this.buttonText});
+      {super.key,
+      required this.title,
+      required this.message,
+      required this.onConfirm,
+      required this.cancelButton,
+      required this.buttonText});
   final String title;
   final String message;
   final Function onConfirm;
-  final bool? cancelButtom;
+  final bool? cancelButton;
   final String buttonText;
 
   @override
@@ -52,13 +53,13 @@ class _CustomConfirmDialogState extends State<CustomConfirmDialog> {
                 //crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  (widget.cancelButtom == true)
+                  (widget.cancelButton == true)
                       ? TextButton(
-                    onPressed: () =>
-                    saving ? null : Navigator.of(context).pop(),
-                    child: const Text('Cancelar'),
-                  )
-                      : Container(),
+                          onPressed: () =>
+                              saving ? null : Navigator.of(context).pop(),
+                          child: const Text('Cancelar'),
+                        )
+                      : const SizedBox(),
                   const SizedBox(width: 10),
                   Visibility(
                     visible: !saving,
@@ -75,7 +76,7 @@ class _CustomConfirmDialogState extends State<CustomConfirmDialog> {
                   ),
                   Visibility(
                     visible: saving,
-                    child: MyCircularProgressIndicator(),
+                    child: const MyCircularProgressIndicator(),
                   ),
                 ],
               ),

@@ -62,7 +62,7 @@ class ShapeControllerPopup extends StatelessWidget {
               );
             },
             separatorBuilder: (context, i) =>
-                i == regionShapes.length - 2 ? const Divider() : Container(),
+                i == regionShapes.length - 2 ? const Divider() : const SizedBox(),
           ),
         ),
       );

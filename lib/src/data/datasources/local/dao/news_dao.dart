@@ -15,14 +15,14 @@ class NewsDao {
   }
 
   Future<List<News>> getAllNews() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final newsList = await db!.query(tableNews);
     final news = parseNews(newsList);
     return news;
   }
 
   Stream<List<News>> watchAllNews() async* {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     final newsList = await db!.query(tableNews);
     final news = parseNews(newsList);
     yield news;
@@ -38,7 +38,7 @@ class NewsDao {
   }
 
   Future<void> emptyNews() async {
-    final db = await _appDatabase.streamDatabase;
+    final db = await _appDatabase.database;
     await db!.delete(tableNews);
     return Future.value();
   }
