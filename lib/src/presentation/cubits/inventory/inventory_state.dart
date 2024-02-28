@@ -53,8 +53,14 @@ class InventoryState extends Equatable {
           summaries: summaries ?? this.summaries,
           totalSummaries: totalSummaries ?? this.totalSummaries,
           isArrived: isArrived ?? this.isArrived,
+          isPartial: isPartial ?? this.isPartial,
           isRejected: isRejected ?? this.isRejected,
           quantity: quantity ?? this.quantity,
           enterpriseConfig: enterpriseConfig ?? this.enterpriseConfig,
           error: error ?? this.error);
+
+  @override
+  String toString() => '{ isArrived: $isArrived, '
+      'isPartial: $isPartial, '
+      'isRejected: $isRejected }';
 }

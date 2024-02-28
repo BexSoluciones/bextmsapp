@@ -86,7 +86,7 @@ class RejectCubit extends Cubit<RejectState> with FormatDate {
           return;
         }
 
-        transaction.latitude = currentLocation!.latitude.toString();
+        transaction.latitude = currentLocation.latitude.toString();
         transaction.longitude = currentLocation.longitude.toString();
 
         await databaseRepository.insertTransaction(transaction);

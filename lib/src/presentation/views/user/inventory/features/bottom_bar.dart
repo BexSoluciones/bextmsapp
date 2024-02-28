@@ -1,5 +1,5 @@
 import 'package:bexdeliveries/src/config/size.dart';
-import 'package:bexdeliveries/src/presentation/cubits/inventory/inventory_cubit.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -7,34 +7,29 @@ import 'package:showcaseview/showcaseview.dart';
 //models
 import '../../../../../domain/models/arguments.dart';
 
+//cubit
+import '../../../../cubits/inventory/inventory_cubit.dart';
+
 //utils
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/strings.dart';
 
 //services
-import '../../../../../locator.dart';
 import '../../../../../services/navigation.dart';
 
-final NavigationService _navigationService = locator<NavigationService>();
-
 class BottomBarInventory extends StatefulWidget {
-  const BottomBarInventory(
-      {super.key,
-      required this.myContext,
-      required this.arguments,
-      required this.totalSummaries,
-      required this.four,
-      required this.isArrived,
-      required this.isPartial,
-      required this.isRejected});
+  const BottomBarInventory({
+    super.key,
+    required this.myContext,
+    required this.arguments,
+    required this.totalSummaries,
+    required this.four,
+  });
 
   final BuildContext myContext;
   final InventoryArgument arguments;
   final double? totalSummaries;
   final GlobalKey four;
-  final bool isArrived;
-  final bool isPartial;
-  final bool isRejected;
 
   @override
   BottomBarInventoryState createState() => BottomBarInventoryState();
@@ -57,12 +52,14 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
 
   @override
   Widget build(BuildContext context) {
+    final navigationService = context.read<InventoryCubit>().navigationService;
+
     return BlocSelector<InventoryCubit, InventoryState, bool>(
         selector: (state) {
       return state.status == InventoryStatus.success && state.isArrived == true;
     }, builder: (c, x) {
       return x
-          ? _buildBottomBarNavigation()
+          ? _buildBottomBarNavigation(navigationService)
           : SizedBox(
               height: 0,
               width: MediaQuery.of(context).size.width,
@@ -70,16 +67,18 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
     });
   }
 
-  Widget _buildBottomBarNavigation() {
+  Widget _buildBottomBarNavigation(navigationService) {
     final calculatedFon = getProportionateScreenHeight(14);
 
     return BlocBuilder<InventoryCubit, InventoryState>(
         builder: (BuildContext context, InventoryState state) {
-      if (widget.isRejected) {
+      print(state);
+
+      if (state.isRejected == true) {
         return SizedBox(
             height: 65,
             child: InkWell(
-              onTap: () => _navigationService.goTo(AppRoutes.reject,
+              onTap: () => navigationService.goTo(AppRoutes.reject,
                   arguments: widget.arguments),
               child: Padding(
                 padding: const EdgeInsets.only(top: 8.0),
@@ -92,13 +91,13 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
                 ),
               ),
             ));
-      } else if (widget.isPartial) {
+      } else if (state.isPartial == true) {
         return SizedBox(
           height: hasNavigationBar()
               ? MediaQuery.of(context).size.height * 0.1
               : MediaQuery.of(context).size.height * 0.06,
           child: InkWell(
-            onTap: () => _navigationService.goTo(AppRoutes.partial,
+            onTap: () => navigationService.goTo(AppRoutes.partial,
                 arguments: widget.arguments),
             child: Padding(
               padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.01),
@@ -131,15 +130,15 @@ class BottomBarInventoryState extends State<BottomBarInventory> {
 
                   switch (currentIndex) {
                     case 0:
-                      _navigationService.goTo(AppRoutes.collection,
+                      navigationService.goTo(AppRoutes.collection,
                           arguments: widget.arguments);
                       break;
                     case 1:
-                      _navigationService.goTo(AppRoutes.reject,
+                      navigationService.goTo(AppRoutes.reject,
                           arguments: widget.arguments);
                       break;
                     case 2:
-                      _navigationService.goTo(AppRoutes.respawn,
+                      navigationService.goTo(AppRoutes.respawn,
                           arguments: widget.arguments);
                       break;
                   }
