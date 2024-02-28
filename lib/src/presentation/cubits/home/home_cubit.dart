@@ -332,8 +332,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
         }
       });
     } catch (e, stackTrace) {
-      print("Error during sync: $e");
-      print(stackTrace);
+      helperFunctions.handleException(e, stackTrace);
     } finally {
       _isSyncing = false;
     }
@@ -391,7 +390,7 @@ class HomeCubit extends BaseCubit<HomeState, String?> with FormatDate {
       if (networkBloc.state is NetworkSuccess) {
         var vpq =
             await _databaseRepository.validateIfProcessingQueueIsIncomplete();
-        if (vpq) {
+        if (!vpq) {
           emit(state.copyWith(
               status: HomeStatus.failure,
               error:

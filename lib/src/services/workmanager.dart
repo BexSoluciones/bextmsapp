@@ -261,8 +261,6 @@ class WorkmanagerService with FormatDate {
     final isConnected = await checkConnection();
     if (isConnected) {
       var queues = await databaseRepository.validateIfProcessingQueueIsIncomplete();
-      print('***************');
-      print(queues);
       if (queues) {
         var works = await databaseRepository.completeWorks();
         if (works != null && works.isNotEmpty) {

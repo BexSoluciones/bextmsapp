@@ -184,8 +184,7 @@ class ProcessingQueueDao {
           'get_prediction',
           'store_news'
         ]);
-    final processingQueues = parseProcessingQueues(processingQueueList);
-    return processingQueues.isNotEmpty;
+    return processingQueueList.isEmpty;
   }
 
   Future<int> insertProcessingQueue(ProcessingQueue processingQueue) {

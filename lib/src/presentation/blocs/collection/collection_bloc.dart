@@ -395,7 +395,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
               delivery: totalSummary.toString(),
               start: now(),
               end: null,
-              latitude: currentLocation!.latitude.toString(),
+              latitude: currentLocation.latitude.toString(),
               longitude: currentLocation.longitude.toString());
 
           var id = await databaseRepository.insertTransaction(transaction);
