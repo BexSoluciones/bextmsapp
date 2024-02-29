@@ -125,6 +125,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
               content: Text("Solo se permiten 3 fotos"),
             ));
           } else {
+            emit(CameraCaptureInProgress());
             final imageFile = File(pickedImage.path);
             final fileFormat = imageFile.path.split('.').last.toLowerCase();
 

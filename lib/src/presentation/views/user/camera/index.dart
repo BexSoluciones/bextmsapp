@@ -74,23 +74,29 @@ class CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         }
       },
       builder: (context, state) {
-        return Scaffold(
-          key: globalKey,
-          backgroundColor: Colors.black,
-          appBar: AppBar(
-            title: const Text("Camera"),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new),
-              onPressed: () {
-                gpsBloc.add(OnStartFollowingUser());
-                gpsBloc.goBack();
-              },
+        if (state is CameraCaptureInProgress) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }else{
+          return Scaffold(
+            key: globalKey,
+            backgroundColor: Colors.black,
+            appBar: AppBar(
+              title: const Text("Camera"),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: () {
+                  gpsBloc.add(OnStartFollowingUser());
+                  gpsBloc.goBack();
+                },
+              ),
             ),
-          ),
-          body: _buildCameraPreview(state),
-          floatingActionButton: _buildFloatingActionButton(context, state),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        );
+            body: _buildCameraPreview(state),
+            floatingActionButton: _buildFloatingActionButton(context, state),
+            floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          );
+        }
       },
     );
   }
