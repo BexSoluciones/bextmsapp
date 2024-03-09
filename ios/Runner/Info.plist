@@ -38,8 +38,6 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
-	<key>MGLMapboxAccessToken</key>
-	<string>sk.eyJ1IjoiaGVpZGVlcjE2MzIiLCJhIjoiY2t6aDA2aW5oMDdoeTJvbDNvYnFxazltYyJ9.9FaTf9jXlafYGps8THc2QQ</string>
 	<key>NSCameraUsageDescription</key>
 	<string>El acceso a la cámara es necesario para revisar el pedido y también para la foto de perfil.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
