@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'package:bexdeliveries/src/presentation/blocs/processing_queue/processing_queue_bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:in_app_update/in_app_update.dart';
 
 //config
 import '../../../../../config/size.dart';
@@ -15,7 +17,6 @@ import '../../../../blocs/history_order/history_order_bloc.dart';
 //models
 import '../../../../../domain/models/work.dart';
 import '../../../../../domain/models/arguments.dart';
-import '../../../../../domain/models/history_order.dart';
 import '../../../../../domain/models/processing_queue.dart';
 import '../../../../../domain/repositories/database_repository.dart';
 import '../../../../../domain/abstracts/format_abstract.dart';
@@ -51,6 +52,7 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
   late HistoryOrderBloc historyOrderBloc;
   static final FirebaseMessaging _firebaseMessaging =
       FirebaseMessaging.instance;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   bool isLoading = true;
   bool success = false;
   var connectivity = Connectivity();
@@ -65,7 +67,9 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
 
   @override
   void initState() {
+    checkForUpdate();
     historyOrderBloc = BlocProvider.of<HistoryOrderBloc>(context);
+    context.read<ProcessingQueueBloc>().add(ProcessingQueueSender());
     final pushNotificationService = PushNotificationService(_firebaseMessaging);
     pushNotificationService.initialise();
     super.initState();
@@ -74,6 +78,32 @@ class _ItemWorkState extends State<ItemWork> with FormatDate {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  Future<void> checkForUpdate() async {
+    InAppUpdate.checkForUpdate().then((info) {
+      setState(() {
+        if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+          update();
+        }
+      });
+    }).catchError((e) {
+      showSnack(e.toString());
+    });
+  }
+  void update() async {
+    print('Updating');
+    await InAppUpdate.startFlexibleUpdate();
+    InAppUpdate.completeFlexibleUpdate().then((_) {}).catchError((e) {
+      showSnack(e.toString());
+      print(e.toString());
+    });
+  }
+  void showSnack(String text) {
+    if (_scaffoldKey.currentContext != null) {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!)
+          .showSnackBar(SnackBar(content: Text(text)));
+    }
   }
 
   @override

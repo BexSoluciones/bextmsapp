@@ -2,12 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>FLTEnableImpeller</key>
-    <true/>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.bexsoluciones.locationtasks</string>
+	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>CFBundleAllowMixedLocalizations</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>CFBundleDisplayName</key>
-	<string>Bexdeliveries</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +19,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>bexdeliveries</string>
+	<string>bexdeliveriesapp</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -24,7 +28,46 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>googlechromes</string>
+		<string>comgooglemaps</string>
+		<string>waze</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>MGLMapboxAccessToken</key>
+	<string>sk.eyJ1IjoiaGVpZGVlcjE2MzIiLCJhIjoiY2t6aDA2aW5oMDdoeTJvbDNvYnFxazltYyJ9.9FaTf9jXlafYGps8THc2QQ</string>
+	<key>NSCameraUsageDescription</key>
+	<string>El acceso a la cámara es necesario para revisar el pedido y también para la foto de perfil.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Esta aplicación solicita acceso a su ubicación para brindarle servicios basados en geolocalización. Usamos su ubicación para brindarle recomendaciones personalizadas, como lugares cercanos, rutas e indicaciones precisas, notificaciones relacionadas con la ubicación y otras características relacionadas con la ubicación. Garantizamos que la información de su ubicación se utiliza exclusivamente dentro de la aplicación y no se comparte con terceros sin su consentimiento explícito. Su privacidad es nuestra prioridad, y puede administrar y revocar el acceso a la ubicación en cualquier momento en la configuración de la aplicación.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Necesitamos acceso a su ubicación para proporcionar servicios de entrega precisos para la entrega de mercancías.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>YourPurposeKey</key>
+		<string>La aplicación bexsoluciones bexdeliveries requiere acceso temporal a la ubicación precisa del dispositivo. Esta información es necesaria para brindar una experiencia de usuario personalizada, como ofrecer recomendaciones basadas en la ubicación actual o mostrar la ruta más cercana a un destino específico. Es importante tener en cuenta que el acceso a la ubicación precisa solo se solicita de forma temporal y solo se utilizará mientras la aplicación esté en uso. No se recopilará ni almacenará la ubicación de ningún dispositivo sin el consentimiento explícito del usuario. Garantizamos la privacidad y seguridad de los datos del usuario y cumplimos con todas las políticas y regulaciones aplicables.</string>
+	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Bex Deliveries recopila datos de tu ubicación para habilitar el seguimiento continuo de los transportadores en la entrega de clientes y mejorar los tiempo de entrega incluso cuando la aplicación esta cerrada o no esta en uso.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Esta aplicación requiere acceso a datos de movimiento para brindarle una mejor experiencia de entrega de productos. Usamos la información de movimiento para optimizar las rutas de entrega, estimar los tiempos de entrega con mayor precisión y garantizar un servicio eficiente y oportuno.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Se requiere acceso a las fotos para revisar el pedido, así como para establecer una imagen de perfil.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Se requiere acceso a las fotos para revisar el pedido, así como para establecer una imagen de perfil.</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>location</string>
+		<string>processing</string>
+	</array>
+	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -45,9 +88,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<key>io.flutter.embedded_views_preview</key>
 	<true/>
 </dict>
 </plist>

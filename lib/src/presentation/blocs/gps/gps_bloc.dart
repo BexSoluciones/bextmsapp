@@ -198,12 +198,12 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> with FormatDate {
 
   LocationSettings _getLocationSettings(EnterpriseConfig enterpriseConfig,
       bool isPermissionGranted, bool isLocationEnabled) {
-    var distances = enterpriseConfig.distance!;
+    var distances = enterpriseConfig.distance ?? 20;
     if (defaultTargetPlatform == TargetPlatform.android) {
       return AndroidSettings(
         timeLimit: const Duration(days: 1),
         accuracy: LocationAccuracy.high,
-        distanceFilter: 2,
+        distanceFilter: distances,
         forceLocationManager: true,
         intervalDuration: const Duration(seconds: 10),
         foregroundNotificationConfig: const ForegroundNotificationConfig(
