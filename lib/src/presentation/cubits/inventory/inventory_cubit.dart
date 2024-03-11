@@ -56,8 +56,6 @@ class InventoryCubit extends Cubit<InventoryState> with FormatDate {
 
     final isPartial = summaries.where((element) => element.minus > 0);
 
-    print(isPartial);
-
     final isRejected = summaries.where((element) => element.cant != 0);
 
     return state.copyWith(

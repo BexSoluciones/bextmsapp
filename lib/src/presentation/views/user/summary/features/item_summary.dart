@@ -74,7 +74,7 @@ class ItemSummary extends StatelessWidget with FormatNumber {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Items: ${summary.expedition != null ? (summary.totalSummary! + summary.totalLooseSummary!) : summary.count.toString()}',
+                        'Items: ${summary.expedition != null ? (summary.totalSummary ?? 0) : summary.count.toString()}',
                         textScaler:
                             TextScaler.linear(calculatedTextScaleFactor),
                         style: TextStyle(
