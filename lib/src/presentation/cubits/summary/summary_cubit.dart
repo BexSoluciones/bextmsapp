@@ -56,8 +56,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     Future.forEach(summaries, (summary) async {
       if (summary.expedition != null) {
         var response = await countBox(summary.orderNumber);
-        summary.totalSummary = response[0] as int;
-        summary.totalLooseSummary = response[1] as int;
+        summary.totalSummary = response[0] + response[1];
       }
     });
 
@@ -83,8 +82,7 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
     Future.forEach(summaries, (summary) async {
       if (summary.expedition != null) {
         var response = await countBox(summary.orderNumber);
-        summary.totalSummary = response[0] as int;
-        summary.totalLooseSummary = response[1] as int;
+        summary.totalSummary = response[0] + response[1];
       }
     });
 
@@ -130,6 +128,13 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
         transaction.workId, 'arrived');
     final summaries =
         await databaseRepository.getAllSummariesByOrderNumber(work.id!);
+
+    Future.forEach(summaries, (summary) async {
+      if (summary.expedition != null) {
+        var response = await countBox(summary.orderNumber);
+        summary.totalSummary = response[0] + response[1];
+      }
+    });
 
     if (isArrived && vts == false) {
       var currentLocation = gpsBloc.state.lastKnownLocation;
@@ -196,6 +201,14 @@ class SummaryCubit extends Cubit<SummaryState> with FormatDate {
 
       final summaries =
           await databaseRepository.getAllSummariesByOrderNumber(work.id!);
+
+      Future.forEach(summaries, (summary) async {
+        if (summary.expedition != null) {
+          var response = await countBox(summary.orderNumber);
+          summary.totalSummary = response[0] as int;
+          summary.totalLooseSummary = response[1] as int;
+        }
+      });
 
       var isGeoReferenced =
           await databaseRepository.validateClient(transaction.workId);

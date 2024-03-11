@@ -82,7 +82,7 @@ class LocationDao with FormatDate {
 
     if (result != null && result.isNotEmpty) {
       var count = Sqflite.firstIntValue(result)!;
-      if (count >= 7) {
+      if (count >= 3) {
         return true;
       }
       return false;
