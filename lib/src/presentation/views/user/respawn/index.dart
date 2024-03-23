@@ -19,10 +19,10 @@ import 'features/header.dart';
 import 'features/reason_global_page.dart';
 
 class RespawnView extends StatefulWidget {
-  const RespawnView({super.key, required this.arguments});
+  const RespawnView({super.key, required this.arguments, required this.reasonSelected});
 
   final InventoryArgument arguments;
-
+  final bool reasonSelected;
   @override
   State<RespawnView> createState() => _RespawnViewState();
 }
@@ -37,6 +37,9 @@ class _RespawnViewState extends State<RespawnView> {
   void initState() {
     respawnCubit = BlocProvider.of<RespawnCubit>(context);
     respawnCubit.getReasons();
+    if(widget.reasonSelected){
+      reasonController.text = '';
+    }
     super.initState();
   }
 
@@ -108,12 +111,14 @@ class _RespawnViewState extends State<RespawnView> {
                 ),
               ),
             ),
+            const SizedBox(height: 100.0),
             state.enterpriseConfig?.hadReasonRespawn == true
                 ? ReasonsGlobal(
                     reasons: state.reasons!,
                     context: context,
                     setState: setState,
                     typeAheadController: reasonController,
+                    arguments:widget.arguments
                   )
                 : const SizedBox(),
             const Spacer(),
@@ -126,7 +131,7 @@ class _RespawnViewState extends State<RespawnView> {
                     style: TextStyle(color: Colors.white, fontSize: 20)),
                 press: () {
                   BlocProvider.of<RespawnCubit>(context).confirmTransaction(
-                      widget.arguments, reasonController.text, null);
+                      widget.arguments, reasonController.text, '');
                 })
           ],
         ),

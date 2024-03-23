@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:flutter/material.dart';
 
 //domain
@@ -19,12 +20,14 @@ class RefusedOrder extends StatefulWidget {
         required this.reasons,
         required this.controllerMotiveItem,
         required this.callback,
+        required this.arguments,
         this.action});
 
   final List<Reason> reasons;
   final TextEditingController controllerMotiveItem;
   final String? action;
   final VoidCallback callback;
+  final InventoryArgument arguments;
 
   @override
   State<RefusedOrder> createState() => RefusedOrderState();
@@ -72,6 +75,7 @@ class RefusedOrderState extends State<RefusedOrder> {
               reasons: _reasonsList,
               reasonController: widget.controllerMotiveItem,
               action: widget.action,
+              arguments:widget.arguments,
               callback: widget.callback),
         ],
       ),

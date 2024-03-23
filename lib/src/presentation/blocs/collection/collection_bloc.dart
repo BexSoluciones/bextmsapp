@@ -457,8 +457,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState>
           await helperFunctions
               .deleteImages(event.arguments.summary.orderNumber);
           await helperFunctions
-              .deleteFirm('firm-${event.arguments.summary.orderNumber}');
-
+              .deleteFirmById('firm-${event.arguments.summary.orderNumber}');
           var isLastTransaction = await databaseRepository
               .checkLastTransaction(event.arguments.work.workcode!);
 

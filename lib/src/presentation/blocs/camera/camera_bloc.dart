@@ -92,7 +92,6 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
 
           var photo = Photo(name: picture!.name, path: picture.path);
 
-          // Imprimir el tamaño de la imagen original
           final originalImageSize = File(picture.path).lengthSync();
 
           final compressedImageSize = await compressAndSaveImage(photo.path);
@@ -210,13 +209,18 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   }
 
   _mapCameraStoppedToState(CameraStopped event, emit) {
+    if (_controller?.value.isRecordingVideo ?? false) {
+      _controller?.stopVideoRecording();
+    }
     _controller?.dispose();
     emit(CameraInitial());
   }
 
   @override
   Future<void> close() {
-    _controller?.dispose();
+    if (state is! CameraInitial) {
+      _controller?.dispose();
+    }
     return super.close();
   }
 }

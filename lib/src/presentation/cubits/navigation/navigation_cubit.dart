@@ -101,8 +101,10 @@ class NavigationCubit extends BaseCubit<NavigationState, List<Work>> {
       var carouselData = <Map>[];
 
       return await Future.forEach(worksDatabase, (work) async {
+
         if (work.latitude != null && work.longitude != null) {
-          if (work.hasCompleted != null && work.hasCompleted == 1) {
+          var transaction = await databaseRepository.validateTransaction(work.id!);
+          if (transaction == false) {
             work.color = 5;
           } else {
             work.color = 8;

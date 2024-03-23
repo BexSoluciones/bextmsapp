@@ -51,7 +51,9 @@ class AppRoutes {
   static const collection = '/collection';
   static const partial = '/partial';
   static const reject = '/reject';
+  static const rejectMotive = '/rejectMotive';
   static const respawn = '/respawn';
+  static const respawnMotive = '/respawnMotive';
   //DRAWER ROUTES
   static const notifications = '/notifications';
   static const transaction = '/transaction';

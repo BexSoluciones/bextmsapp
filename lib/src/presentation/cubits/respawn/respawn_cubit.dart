@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bexdeliveries/core/helpers/index.dart';
 import 'package:bexdeliveries/src/domain/models/enterprise_config.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -29,6 +30,7 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
   final DatabaseRepository databaseRepository;
   final ProcessingQueueBloc processingQueueBloc;
   final GpsBloc gpsBloc;
+  final helperFunctions = HelperFunctions();
   final NavigationService navigationService;
   final LocalStorageService storageService;
 
@@ -55,15 +57,17 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
   }
 
   Future<void> confirmTransaction(InventoryArgument arguments,
-      String? nameReason, String? observation) async {
+      String? nameReason, String observation) async {
     emit(const RespawnLoading());
-
+    final rea = await databaseRepository.findReason(nameReason.toString());
     var enterpriseConfig = storageService.getObject('config') != null
         ? EnterpriseConfig.fromMap(storageService.getObject('config')!)
         : null;
 
     List<Reason> reasons = [];
     Reason? reason;
+    String  firm = '';
+    var imagesServer = <String>[];
 
     if (enterpriseConfig != null && enterpriseConfig.hadReasonRespawn == true) {
       reasons = await databaseRepository.getAllReasons();
@@ -87,6 +91,51 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
       }
     }
 
+    var firmApplication = await helperFunctions
+        .getFirm('firm-${arguments.summary.orderNumber}');
+    if (firmApplication != null) {
+      var base64Firm = firmApplication.readAsBytesSync();
+      firm = base64Encode(base64Firm);
+    }
+    var images = await helperFunctions
+        .getImages(arguments.summary.orderNumber);
+
+
+    if (rea!.photo == 1 && images.isEmpty) {
+      emit(RespawnFailed(
+        reasons: reasons,
+        error:
+        'La foto es obligatoria.',
+      ));
+      return;
+    }
+    if(rea.firm == 1 && firm == '') {
+      emit( RespawnFailed(
+        reasons: reasons,
+        error:
+        'La firma es obligatoria.',
+      ));
+      return;
+    }
+    if(rea.observation == 1 && observation ==''){
+      emit( RespawnFailed(
+        reasons: reasons,
+        error:
+        'La observacion es obligatoria.',
+      ));
+      return;
+    }
+
+    if (images.isNotEmpty) {
+      for (var element in images) {
+        List<int> imageBytes = element.readAsBytesSync();
+        var base64Image = base64Encode(imageBytes);
+        imagesServer.add(base64Image);
+      }
+    }
+
+
+
     var transaction = Transaction(
       workId: arguments.work.id!,
       summaryId: arguments.summary.id,
@@ -95,6 +144,8 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
       operativeCenter: arguments.summary.operativeCenter,
       delivery: arguments.total.toString(),
       status: 'respawn',
+      firm: firm,
+      images: imagesServer.isNotEmpty ? imagesServer : null,
       codmotvis: reason?.codmotvis,
       reason: reason?.nommotvis,
       observation: observation,
@@ -132,6 +183,10 @@ class RespawnCubit extends Cubit<RespawnState> with FormatDate {
 
     var validate =
         await databaseRepository.validateTransaction(arguments.work.id!);
+    await helperFunctions
+        .deleteImages(arguments.summary.orderNumber);
+    await helperFunctions
+        .deleteFirmById('');
 
     var isLastTransaction =
         await databaseRepository.checkLastTransaction(arguments.work.workcode!);

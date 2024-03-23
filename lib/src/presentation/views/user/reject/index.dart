@@ -19,9 +19,10 @@ import 'features/header.dart';
 import 'features/reason_global_page.dart';
 
 class RejectView extends StatefulWidget {
-  const RejectView({super.key, required this.arguments});
+  const RejectView({super.key, required this.arguments, required this.reasonSelected});
 
   final InventoryArgument arguments;
+  final bool reasonSelected;
 
   @override
   State<RejectView> createState() => _RejectViewState();
@@ -37,6 +38,9 @@ class _RejectViewState extends State<RejectView> {
   void initState() {
     rejectCubit = BlocProvider.of<RejectCubit>(context);
     rejectCubit.getReasons();
+    if(widget.reasonSelected){
+      reasonController.text = '';
+    }
     super.initState();
   }
 
@@ -113,6 +117,7 @@ class _RejectViewState extends State<RejectView> {
               reasons: state.reasons,
               context: context,
               setState: setState,
+              arguments:widget.arguments,
               typeAheadController: reasonController,
             ),
             const Spacer(),
@@ -125,7 +130,7 @@ class _RejectViewState extends State<RejectView> {
                     style: TextStyle(color: Colors.white, fontSize: 20)),
                 press: () {
                   BlocProvider.of<RejectCubit>(context).confirmTransaction(
-                      widget.arguments, reasonController.text, null);
+                      widget.arguments, reasonController.text, '');
                 })
           ],
         ),

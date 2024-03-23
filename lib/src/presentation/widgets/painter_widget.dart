@@ -163,10 +163,13 @@ class TouchControlState extends State<TouchControl> {
 
   Future<void> generateImage() async {
     final recorder = PictureRecorder();
-    final canvas = Canvas(recorder,
-        Rect.fromPoints(const Offset(0.0, 0.0), Offset(widget.height, widget.width)));
-
-    var offsetPoints = <Offset>[];
+    final canvas = Canvas(
+      recorder,
+      Rect.fromPoints(
+        const Offset(0.0, 0.0),
+        Offset(widget.width, widget.height - 220),
+      ),
+    );
 
     final paint = Paint()
       ..color = Colors.black
@@ -179,23 +182,23 @@ class TouchControlState extends State<TouchControl> {
       if (_points[i] != null && _points[i + 1] != null) {
         canvas.drawLine(_points[i]!.points, _points[i + 1]!.points, paint);
       } else if (_points[i] != null && _points[i + 1] == null) {
-        offsetPoints.clear();
-        offsetPoints.add(_points[i]!.points);
-        offsetPoints.add(
-            Offset(_points[i]!.points.dx + 0.1, _points[i]!.points.dy + 0.1));
-        canvas.drawPoints(PointMode.points, offsetPoints, paint);
+        // Draw the last point if it exists
+        canvas.drawPoints(PointMode.points, [_points[i]!.points], paint);
       }
     }
 
     final picture = recorder.endRecording();
     final img = await picture.toImage(
-        widget.width.toInt(), (widget.height - 220).toInt());
+      widget.width.toInt(),
+      (widget.height - 220).toInt(),
+    );
     final pngBytes = await img.toByteData(format: ImageByteFormat.png);
 
     setState(() {
       imgBytes = pngBytes;
     });
   }
+
 
   void saveImageFirm() async {
     await generateImage().then((_) {

@@ -135,7 +135,7 @@ class LoginViewState extends State<LoginView> {
                                   height: 100.0,
                                   imageUrl: state.enterprise != null &&
                                           state.enterprise!.logo != null
-                                      ? 'https://bexdeliveries.com/${state.enterprise!.logo}'
+                                      ? '${state.enterprise!.logo}'
                                       : '',
                                   placeholder: (context, url) =>
                                       const CircularProgressIndicator(),

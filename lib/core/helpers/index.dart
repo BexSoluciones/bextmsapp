@@ -277,7 +277,7 @@ class HelperFunctions with FormatDate {
     }
   }
 
-  Future<void> deleteFirm(folder) async {
+  /*Future<void> deleteFirm(folder) async {
     var path = await _localPath;
 
     var directory = Directory('$path/$folder');
@@ -286,13 +286,23 @@ class HelperFunctions with FormatDate {
       var imageList = directory
           .listSync()
           .map((item) => item.path)
-          .where((item) => item.endsWith('.jpg'))
+          .where((item) => item.endsWith('.png'))
           .toList(growable: false);
 
       imageList.map((element) async {
         var file = File(element);
         await file.delete();
       });
+    }
+  }*/
+
+  Future<void> deleteFirmById(String id) async {
+    var path = await _externalPath;
+    var directory = Directory(path);
+    if (directory.existsSync()) {
+      await directory.delete(recursive: true);
+    } else {
+      print('El directorio no existe.');
     }
   }
 
@@ -333,7 +343,6 @@ class HelperFunctions with FormatDate {
     var directory = await getExternalStorageDirectory();
     var path = directory!.path;
     await Directory('$path/$folder').create(recursive: true);
-
     File('$path/$folder/$fileName.png')
         .writeAsBytesSync(image.buffer.asInt8List());
   }

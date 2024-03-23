@@ -1,3 +1,4 @@
+import 'package:bexdeliveries/src/domain/models/arguments.dart';
 import 'package:flutter/material.dart';
 
 //domain
@@ -12,11 +13,13 @@ class ReasonsGlobal extends StatefulWidget {
       required this.reasons,
       required this.context,
       required this.setState,
+        required this.arguments,
       required this.typeAheadController});
 
   final List<Reason> reasons;
   final dynamic context, setState;
   final TextEditingController typeAheadController;
+  final InventoryArgument arguments;
 
   @override
   State<ReasonsGlobal> createState() => _ReasonsGlobalState();
@@ -58,6 +61,7 @@ class _ReasonsGlobalState extends State<ReasonsGlobal> {
                   child: RefusedOrder(
                     reasons: widget.reasons,
                     controllerMotiveItem: widget.typeAheadController,
+                    arguments: widget.arguments,
                     action: 'rechazado',
                     callback: reload,
                   ),

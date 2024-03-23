@@ -126,6 +126,7 @@ class _MapPageState extends State<MapPage> {
             onPressed: () {
               gpsBloc.add(OnStartFollowingUser());
               navigationCubit.goBack();
+              setState(() {});
             }),
         title: BlocSelector<NavigationCubit, NavigationState, bool>(
           selector: (state) => state.status == NavigationStatus.success,
@@ -190,7 +191,7 @@ class _MapPageState extends State<MapPage> {
                               size,
                               state,
                               true,
-                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.webp',
                               null,
                               null);
                         case NetworkFailure:
@@ -198,7 +199,7 @@ class _MapPageState extends State<MapPage> {
                               size,
                               state,
                               true,
-                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.webp',
                               null,
                               null);
                         case NetworkSuccess:
@@ -206,7 +207,7 @@ class _MapPageState extends State<MapPage> {
                               size,
                               state,
                               false,
-                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                              'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.webp',
                               null,
                               null);
                         default:

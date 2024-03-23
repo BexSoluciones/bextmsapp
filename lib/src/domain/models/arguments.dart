@@ -30,6 +30,7 @@ class InventoryArgument {
     this.total,
     this.summaries,
     this.r,
+    this.reason
   });
 
   final Work work;
@@ -37,6 +38,7 @@ class InventoryArgument {
   double? total;
   List<Summary>? summaries;
   List<dynamic>? r;
+  String? reason;
 }
 
 class PackageArgument {
